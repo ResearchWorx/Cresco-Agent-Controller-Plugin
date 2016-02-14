@@ -101,6 +101,7 @@ public class PluginEngine {
     	    String s = bufferRead.readLine();
     	    
     		Map<String,String> bmap = dc.getDiscoveryMap(Integer.parseInt(s));
+    		System.out.println(bmap.size());
     		for (Map.Entry<String, String> entry : bmap.entrySet())
     		{
     		    System.out.println(entry.getKey() + "/" + entry.getValue());

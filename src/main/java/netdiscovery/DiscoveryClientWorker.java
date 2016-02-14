@@ -18,7 +18,6 @@ import java.util.TimerTask;
 
 import com.google.gson.Gson;
 
-import netbenchmark.NetBenchClient;
 import shared.MsgEvent;
 
 public class DiscoveryClientWorker 
@@ -47,7 +46,6 @@ class StopListnerTask extends TimerTask {
 
 	public Map<String,String> getDiscoveryMap()
 	{
-		NetBenchClient nbc = new NetBenchClient();
 		Map<String,String> dhm = null;
 		try
 		{
@@ -59,12 +57,13 @@ class StopListnerTask extends TimerTask {
 				String agentpath = me.getMsgRegion() + "_" + me.getMsgAgent();
 				String ippath = me.getParam("clientip") + "_" + me.getParam("serverip");
 				//Benchmark connection here.. will have to do self-terminating code at some point
+				/*
 				String netBenchResult = nbc.benchmarkThroughput(me.getParam("serverip"),"benchmark-throughput",3,1);
 		    	if(netBenchResult != null)
 		    	{
 		    		ippath = ippath + "_" + netBenchResult;
 		    	}
-				
+				*/
 				//
 				if(!tmphm.containsKey(agentpath))
 				{
