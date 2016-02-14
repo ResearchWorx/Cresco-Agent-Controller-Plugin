@@ -63,7 +63,9 @@ public class PluginEngine {
     public static void main(String[] args) throws Exception 
     {
     	ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger)LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
-    	rootLogger.setLevel(Level.toLevel("debug"));
+    	//rootLogger.setLevel(Level.toLevel("debug"));
+    	//rootLogger.setLevel(Level.toLevel("none"));
+    	rootLogger.setLevel(Level.OFF);
 
     	broker = new ActiveBroker(args[0]);
     	//tcp://localhost:32010
@@ -72,7 +74,8 @@ public class PluginEngine {
     	
     	Thread pt = new Thread(new ActiveProducer(args[2],"tcp://localhost:32010"));
     	pt.start();
-    	
+    	while(true)
+    	{
     	try{
     		System.out.println("Enter Broker IP:");
     	    BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
@@ -84,6 +87,6 @@ public class PluginEngine {
     	{
     		e.printStackTrace();
     	}
-    	
+    	}
     }  
 }
