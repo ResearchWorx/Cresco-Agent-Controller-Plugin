@@ -7,15 +7,15 @@ import plugincore.PluginEngine;
 
 public class DiscoveryClient 
 {
-	private int discoveryTimeout;
+	//private int discoveryTimeout;
 	public DiscoveryClient()
 	{
 		//discoveryTimeout = Integer.parseInt(PluginEngine.config.getParam("discoverytimeout")); 
 		//System.out.println("DiscoveryClient : discoveryTimeout = " + discoveryTimeout);
-		discoveryTimeout = 1000;
+		//discoveryTimeout = 1000;
 	}
 	
-	public Map<String,String> getDiscoveryMap()
+	public Map<String,String> getDiscoveryMap(int discoveryTimeout)
 	{
 		Map<String,String> disMap = null;
 		

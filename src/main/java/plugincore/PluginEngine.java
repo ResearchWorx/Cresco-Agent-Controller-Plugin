@@ -12,6 +12,8 @@ import ActiveMQ.ActiveBroker;
 import ActiveMQ.ActiveConsumer;
 import ActiveMQ.ActiveProducer;
 import ch.qos.logback.classic.Level;
+import netdiscovery.DiscoveryClient;
+import netdiscovery.DiscoveryEngine;
 import shared.MsgEvent;
 
 import javax.jms.*;
@@ -23,6 +25,7 @@ import java.io.InputStreamReader;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.URI;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class PluginEngine {
@@ -35,6 +38,8 @@ public class PluginEngine {
 	public static String region = "reg";
 	public static String agent = "agent";
 	public static String plugin = "pl";
+	
+	public static DiscoveryClient dc;
 	
 	public String getName()
 	{
@@ -74,6 +79,40 @@ public class PluginEngine {
     	
     	Thread pt = new Thread(new ActiveProducer(args[2],"tcp://localhost:32010"));
     	pt.start();
+    	
+    	
+    	//Start network discovery engine
+    	Thread de = new Thread(new DiscoveryEngine());
+    	de.start();
+    	while(!DiscoveryActive)
+        {
+        	//System.out.println("Wating on Discovery Server to start...");
+        	Thread.sleep(1000);
+        }
+        System.out.println("DiscoveryEngine Started..");
+		
+        dc = new DiscoveryClient();
+        
+        while(true)
+    	{
+    	try{
+    		System.out.println("Broker Search:");
+    		BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
+    	    String s = bufferRead.readLine();
+    	    
+    		Map<String,String> bmap = dc.getDiscoveryMap(Integer.parseInt(s));
+    		for (Map.Entry<String, String> entry : bmap.entrySet())
+    		{
+    		    System.out.println(entry.getKey() + "/" + entry.getValue());
+    		}
+    	}
+    	catch(Exception e)
+    	{
+    		e.printStackTrace();
+    	}
+    	}
+        
+    	/*
     	while(true)
     	{
     	try{
@@ -88,5 +127,6 @@ public class PluginEngine {
     		e.printStackTrace();
     	}
     	}
+    	*/
     }  
 }
