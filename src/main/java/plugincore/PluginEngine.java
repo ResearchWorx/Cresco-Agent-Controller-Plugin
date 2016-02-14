@@ -5,9 +5,11 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.broker.TransportConnector;
 import org.apache.activemq.broker.region.*;
+import org.apache.commons.configuration.SubnodeConfiguration;
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Level;
+import shared.MsgEvent;
 
 import javax.jms.*;
 import javax.jms.Queue;
@@ -16,9 +18,42 @@ import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.URI;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class PluginEngine {
-    public static void main(String[] args) throws Exception {
+    
+	public static boolean clientDiscoveryActive = false;
+	public static boolean DiscoveryActive = false;
+	public static boolean isActive = false;
+	public static boolean NetBenchEngineActive = false;
+	
+	public static String region = "reg";
+	public static String agent = "agent";
+	public static String plugin = "pl";
+	
+	public String getName()
+	{
+		return "Name";
+				
+	}
+	public String getVersion()
+	{
+		return "Name";
+				
+	}
+	public void msgIn(MsgEvent command)
+	{
+		
+	}
+	public void shutdown()
+	{
+		
+	}
+	public boolean initialize(ConcurrentLinkedQueue<MsgEvent> msgOutQueue,ConcurrentLinkedQueue<MsgEvent> msgInQueue, SubnodeConfiguration configObj, String region,String agent, String plugin)  
+	{
+		return true;
+	}
+	public static void main(String[] args) throws Exception {
     	
     	ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger)LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
     	rootLogger.setLevel(Level.toLevel("debug"));
