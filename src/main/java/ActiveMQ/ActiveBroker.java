@@ -56,7 +56,7 @@ return connector;
 				//connector.
 				// = new NetworkConnector();
 				TransportConnector connector = new TransportConnector();
-				connector.setUri(new URI("tcp://localhost:32010"));
+				connector.setUri(new URI("tcp://0.0.0.0:32010"));
 				//connector.setDiscoveryUri(new URI("multicast://default?group=test"));
 				broker.addConnector(connector);
 				//broker.addNetworkConnector(new URI("multicast://default?group=test"));
@@ -76,7 +76,7 @@ return connector;
 	{
 		try
 		{
-			NetworkConnector bridge = broker.addNetworkConnector(new URI("static://" + URI + ":32010"));
+			NetworkConnector bridge = broker.addNetworkConnector(new URI("static:tcp://" + URI + ":32010"));
 			
 			//TransportConnector connector = new TransportConnector();
 			//connector.setUri(new URI(URI));
