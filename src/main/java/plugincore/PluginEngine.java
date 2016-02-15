@@ -32,7 +32,7 @@ public class PluginEngine {
     
 	public static boolean clientDiscoveryActive = false;
 	public static boolean DiscoveryActive = false;
-	public static boolean isActive = false;
+	public static boolean isActive = true;
 	public static boolean NetBenchEngineActive = false;
 	
 	public static String region = "reg";
