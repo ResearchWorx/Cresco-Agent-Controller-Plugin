@@ -26,7 +26,7 @@ public class DiscoveryClientIPv6
 				System.out.println("DiscoveryClientIPv6 : Discovery already underway : waiting..");
 				Thread.sleep(2500);
 			}
-			PluginEngine.clientDiscoveryActive = true;
+			PluginEngine.clientDiscoveryActiveIPv6 = true;
 			DiscoveryClientWorkerIPv6 dcw = new DiscoveryClientWorkerIPv6(discoveryTimeout);
 			disMap = dcw.getDiscoveryMap();
 		}

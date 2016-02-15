@@ -75,7 +75,6 @@ public class PluginEngine {
     	Thread pt = new Thread(new ActiveProducer(args[2],"tcp://localhost:32010"));
     	pt.start();
     	
-    	/*
     	//Start IPv4 network discovery engine
     	Thread de = new Thread(new DiscoveryEngine());
     	de.start();
@@ -85,7 +84,7 @@ public class PluginEngine {
         	Thread.sleep(1000);
         }
         System.out.println("IPv4 DiscoveryEngine Started..");
-		*/
+		
         
         //Start IPv6 network discovery engine
     	Thread dev6 = new Thread(new DiscoveryEngineIPv6());
@@ -107,10 +106,18 @@ public class PluginEngine {
     		System.out.println("Broker Search:");
     		BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
     	    String s = bufferRead.readLine();
-    	    
-    		Map<String,String> bmap = dcv6.getDiscoveryMap(Integer.parseInt(s));
-    		System.out.println(bmap.size());
-    		for (Map.Entry<String, String> entry : bmap.entrySet())
+    	    String str[] = s.split(" ");
+    	    Map<String,String> bmap = null;
+    		if(str[0].equals("6"))
+    		{
+    			bmap = dcv6.getDiscoveryMap(Integer.parseInt(str[1]));
+    		}
+    		else if(str[0].equals("4"))
+    		{
+    			bmap = dc.getDiscoveryMap(Integer.parseInt(str[1]));
+    		}
+    			
+    	    for (Map.Entry<String, String> entry : bmap.entrySet())
     		{
     		    System.out.println(entry.getKey() + "/" + entry.getValue());
     		}

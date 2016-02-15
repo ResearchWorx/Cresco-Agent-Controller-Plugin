@@ -150,7 +150,7 @@ class StopListnerTask extends TimerTask {
 	         {
 	          try {
 	        	  
-	        	  if(interfaceAddress.getAddress() instanceof Inet6Address)
+	        	  if((interfaceAddress.getAddress() instanceof Inet6Address) && !interfaceAddress.getAddress().isLinkLocalAddress())
 	              {  
 	        		  
 	        		 //c = new MulticastSocket(null);
@@ -175,7 +175,7 @@ class StopListnerTask extends TimerTask {
 	      	    //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, GROUP, PORT);
 	      	    c.send(sendPacket);
 	      	    //System.out.println(getClass().getName() + ">>> Request packet sent to: 255.255.255.255 (DEFAULT)");
-	      	   
+	      	   /*
 	      	  System.out.println("prebind0 " + interfaceAddress.getAddress());
         	  System.out.println("locallink " + interfaceAddress.getAddress().isLinkLocalAddress());
     		  System.out.println("global " + interfaceAddress.getAddress().isMCGlobal());
@@ -185,7 +185,7 @@ class StopListnerTask extends TimerTask {
     		  System.out.println("site " + interfaceAddress.getAddress().isSiteLocalAddress());
     		  System.out.println("any " + interfaceAddress.getAddress().isAnyLocalAddress());
     		  System.out.println("loop " + interfaceAddress.getAddress().isLoopbackAddress());
-    		  
+    		  */
 	      	  
     		  
 	      	  while(!c.isClosed())
