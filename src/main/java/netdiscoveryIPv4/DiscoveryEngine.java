@@ -33,6 +33,7 @@ public class DiscoveryEngine implements Runnable
 	      //socket = new DatagramSocket(32005, InetAddress.getByName("0.0.0.0"));
 	      socket = new DatagramSocket(32005, Inet4Address.getByName("0.0.0.0"));
 		  socket.setBroadcast(true);
+		  socket.setReuseAddress(true);
 	      
 	        
 	      PluginEngine.DiscoveryActive = true;
