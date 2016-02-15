@@ -5,7 +5,12 @@ import java.net.DatagramSocket;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.InterfaceAddress;
 import java.net.MulticastSocket;
+import java.net.NetworkInterface;
+import java.net.SocketAddress;
+import java.util.Enumeration;
 
 import plugincore.PluginEngine;
 
@@ -35,10 +40,45 @@ public class DiscoveryEngineIPv6 implements Runnable
 	      //socket = new DatagramSocket(32005, InetAddress.getByName("0.0.0.0"));
 	      //socket = new DatagramSocket(32005, Inet4Address.getByName("0.0.0.0"));
 		  //socket.setBroadcast(true);
-	    Inet6Address group = (Inet6Address) Inet6Address.getByName("ff05::1:c");
-	       socket = new MulticastSocket(32005);
-	       //socket.connect(group, 32005);
-	       socket.joinGroup(group);
+	    //Inet6Address group = (Inet6Address) Inet6Address.getByName("ff05::1:c");
+	       //socket = new MulticastSocket(32005);
+	    	socket = new MulticastSocket(null);
+		       
+	    	//socket.connect(group, 32005);
+	       Enumeration interfaces = NetworkInterface.getNetworkInterfaces();
+	 	  while (interfaces.hasMoreElements()) {
+	 	    NetworkInterface networkInterface = (NetworkInterface) interfaces.nextElement();
+
+	 	    if (networkInterface.isLoopback() || !networkInterface.isUp()) {
+	 	      continue; // Don't want to broadcast to the loopback interface
+	 	    }
+	 	    
+	 	    if(networkInterface.supportsMulticast())
+	 	    {
+	 	    	boolean isIPv6 = false;
+	 	    
+	 	    	 for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) 
+	 	    	 {
+	 	        	  if(interfaceAddress.getAddress() instanceof Inet6Address)
+	 	              {
+	 	        		  isIPv6 = true;
+	 	              }
+	 	             
+	 	         }
+	 	    	if(isIPv6)
+	 	    	{
+	 	        SocketAddress sa = new InetSocketAddress(Inet6Address.getByName("ff05::1:c"),32005);
+		        	 
+	 	    	socket.joinGroup(sa, networkInterface);
+	 	    		//socket.joinGroup(group,networkInterface);
+	 		       
+	 		       //System.out.println("INTERFACE= " + socket.getInterface().getHostAddress());
+	 		       
+	 	    	}
+	 	    }
+	 	  }
+	    
+	 
 	       
 	        
 	      PluginEngine.DiscoveryActiveIPv6 = true;

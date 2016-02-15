@@ -75,7 +75,7 @@ public class PluginEngine {
     	Thread pt = new Thread(new ActiveProducer(args[2],"tcp://localhost:32010"));
     	pt.start();
     	
-    	
+    	/*
     	//Start IPv4 network discovery engine
     	Thread de = new Thread(new DiscoveryEngine());
     	de.start();
@@ -85,7 +85,8 @@ public class PluginEngine {
         	Thread.sleep(1000);
         }
         System.out.println("IPv4 DiscoveryEngine Started..");
-		
+		*/
+        
         //Start IPv6 network discovery engine
     	Thread dev6 = new Thread(new DiscoveryEngineIPv6());
     	dev6.start();

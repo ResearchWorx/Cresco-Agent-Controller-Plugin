@@ -8,6 +8,7 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.InterfaceAddress;
+import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.net.SocketAddress;
 import java.net.SocketException;
@@ -28,6 +29,7 @@ import shared.MsgEvent;
 public class DiscoveryClientWorkerIPv6 
 {
 private DatagramSocket c;
+//private MulticastSocket c;
 private Gson gson;
 public Timer timer;
 public int discoveryTimeout;
@@ -151,6 +153,7 @@ class StopListnerTask extends TimerTask {
 	        	  if(interfaceAddress.getAddress() instanceof Inet6Address)
 	              {  
 	        		  
+	        		 //c = new MulticastSocket(null);
 	        		 c = new DatagramSocket(null);
 	        		 c.setReuseAddress(true);
 	        		  //System.out.println("prebind1");
