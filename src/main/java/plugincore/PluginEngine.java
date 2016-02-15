@@ -10,6 +10,8 @@ import ActiveMQ.ActiveProducer;
 import ch.qos.logback.classic.Level;
 import netdiscoveryIPv4.DiscoveryClient;
 import netdiscoveryIPv4.DiscoveryEngine;
+import netdiscoveryIPv6.DiscoveryClientIPv6;
+import netdiscoveryIPv6.DiscoveryEngineIPv6;
 import shared.MsgEvent;
 
 
@@ -21,15 +23,18 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class PluginEngine {
     
 	public static boolean clientDiscoveryActive = false;
+	public static boolean clientDiscoveryActiveIPv6 = false;
 	public static boolean DiscoveryActive = false;
+	public static boolean DiscoveryActiveIPv6 = false;
+	
 	public static boolean isActive = true;
-	public static boolean NetBenchEngineActive = false;
 	
 	public static String region = "reg";
 	public static String agent = "agent";
 	public static String plugin = "pl";
 	
 	public static DiscoveryClient dc;
+	public static DiscoveryClientIPv6 dcv6;
 	
 	public String getName()
 	{
@@ -71,7 +76,7 @@ public class PluginEngine {
     	pt.start();
     	
     	
-    	//Start network discovery engine
+    	//Start IPv4 network discovery engine
     	Thread de = new Thread(new DiscoveryEngine());
     	de.start();
     	while(!DiscoveryActive)
@@ -79,10 +84,43 @@ public class PluginEngine {
         	//System.out.println("Wating on Discovery Server to start...");
         	Thread.sleep(1000);
         }
-        System.out.println("DiscoveryEngine Started..");
+        System.out.println("IPv4 DiscoveryEngine Started..");
 		
-        dc = new DiscoveryClient();
+        //Start IPv6 network discovery engine
+    	Thread dev6 = new Thread(new DiscoveryEngineIPv6());
+    	dev6.start();
+    	while(!DiscoveryActiveIPv6)
+        {
+        	//System.out.println("Wating on Discovery Server to start...");
+        	Thread.sleep(1000);
+        }
+        System.out.println("IPv6 DiscoveryEngine Started..");
+		
         
+        dc = new DiscoveryClient();
+        dcv6 = new DiscoveryClientIPv6();
+        
+        while(true)
+    	{
+    	try{
+    		System.out.println("Broker Search:");
+    		BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
+    	    String s = bufferRead.readLine();
+    	    
+    		Map<String,String> bmap = dcv6.getDiscoveryMap(Integer.parseInt(s));
+    		System.out.println(bmap.size());
+    		for (Map.Entry<String, String> entry : bmap.entrySet())
+    		{
+    		    System.out.println(entry.getKey() + "/" + entry.getValue());
+    		}
+    	}
+    	catch(Exception e)
+    	{
+    		e.printStackTrace();
+    	}
+    	}
+        
+        /*
         while(true)
     	{
     	try{
@@ -102,6 +140,7 @@ public class PluginEngine {
     		e.printStackTrace();
     	}
     	}
+        */
         
     	/*
     	while(true)
