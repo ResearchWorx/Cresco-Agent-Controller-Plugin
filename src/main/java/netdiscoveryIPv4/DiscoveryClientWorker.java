@@ -3,6 +3,7 @@ package netdiscoveryIPv4;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
@@ -154,7 +155,10 @@ class StopListnerTask extends TimerTask {
 	      if (broadcast == null) {
 	        continue;
 	      }
-
+	      if(interfaceAddress.getAddress() instanceof Inet6Address)
+          {
+	    	  continue;
+          }
 	      // Send the broadcast package!
 	      try {
 	        DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, broadcast, 32005);

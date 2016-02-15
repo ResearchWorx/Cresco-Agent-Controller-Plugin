@@ -3,11 +3,8 @@ package netdiscoveryIPv4;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.Inet4Address;
-import java.net.Inet6Address;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.InterfaceAddress;
-import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.net.SocketAddress;
 import java.util.Enumeration;
@@ -44,7 +41,7 @@ public class DiscoveryEngine implements Runnable
 		  Enumeration interfaces = NetworkInterface.getNetworkInterfaces();
 	 	  while (interfaces.hasMoreElements()) {
 	 	    NetworkInterface networkInterface = (NetworkInterface) interfaces.nextElement();
-	 	   
+	 	   new Thread(new DiscoveryEngineWorkerIPv4(networkInterface)).start();
 	 	  }
 	        
 	      PluginEngine.DiscoveryActive = true;
@@ -90,12 +87,14 @@ public class DiscoveryEngine implements Runnable
 		  	 	    	 {
 		  	 	        	  if(interfaceAddress.getAddress() instanceof Inet4Address)
 		  	 	              {
-		  	 	        		SocketAddress sa = new InetSocketAddress(interfaceAddress.getAddress().getHostAddress(),32005);
-					        	 socket.bind(sa);
-			 	        		 
+		  	 	        		SocketAddress sa = new InetSocketAddress(interfaceAddress.getBroadcast(),32005);
+		  	 	        		 socket = new DatagramSocket(null);
+		  	 	        		 socket.bind(sa);
+					        	 socket.setBroadcast(true);
+			 	        		 System.out.println(interfaceAddress.getAddress().getHostAddress());
 					        	 while (PluginEngine.isActive) 
 					   	      {
-					   	    	  System.out.println(getClass().getName() + ">>>Ready to receive broadcast packets!");
+					   	    	  //System.out.println(getClass().getName() + ">>>Ready to receive broadcast packets!");
 					   		        
 					   	        //Receive a packet
 					   	        byte[] recvBuf = new byte[15000];

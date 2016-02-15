@@ -198,7 +198,7 @@ class StopListnerTask extends TimerTask {
 	    			  c.receive(receivePacket);
 
 	    			  //We have a response
-	    			  //System.out.println(getClass().getName() + ">>> Broadcast response from server: " + receivePacket.getAddress().getHostAddress());
+	    			  System.out.println(getClass().getName() + ">>> Broadcast response from server: " + receivePacket.getAddress().getHostAddress());
 
 	    			  //Check if the message is correct
 	    			  //System.out.println(new String(receivePacket.getData()));
