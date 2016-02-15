@@ -20,7 +20,10 @@ import java.io.InputStreamReader;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.net.InterfaceAddress;
+import java.net.NetworkInterface;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -150,28 +153,56 @@ public class PluginEngine {
     	}
        
     }
-    public static void processPeer(String peer)
+    public static List<String> localAddresses()
     {
+    	List<String> localAddressList = new ArrayList<String>();
     	try
     	{
-    		System.out.println("ProcessPeer: " + peer);
-    		InetAddress peerAddress = InetAddress.getByName(peer);
-    		boolean isReachable = false;
+    	Enumeration inter = NetworkInterface.getNetworkInterfaces();
+		  while (inter.hasMoreElements()) 
+		  {
+		    NetworkInterface networkInter = (NetworkInterface) inter.nextElement();
+		    for (InterfaceAddress interfaceAddress : networkInter.getInterfaceAddresses()) 
+		    {
+		    	String localAddress = interfaceAddress.getAddress().getHostAddress();
+		    	localAddressList.add(localAddress);
+		    
+		    }
+		  }
+    	}
+    	catch(Exception ex)
+    	{
+    		System.out.println("PluginEngine : localAddresses Error " + ex.toString());
+    	}
+    	return localAddressList;
+    }
+    public static void processPeer(String peer)
+    {
+    	  
+    	try
+    	{
+    		if(!localAddresses().contains(peer))
+    		{
+    			System.out.println("ProcessPeer: " + peer);
+    			InetAddress peerAddress = InetAddress.getByName(peer);
+    			boolean isReachable = false;
     		
-    		if(peerAddress instanceof Inet6Address)
-    		{
-    			isReachable = dcv6.isReachable(peer);
-    			
-    		}
-    		else if(peerAddress instanceof Inet4Address)
-    		{
-    			isReachable = dc.isReachable(peer);
-    		}
+    			if(peerAddress instanceof Inet6Address)
+    			{
+    				isReachable = dcv6.isReachable(peer);
+    			}
+    			else if(peerAddress instanceof Inet4Address)
+    			{
+    				isReachable = dc.isReachable(peer);
+    			}
     		
-    		if(isReachable)
-    		{
-    			System.out.println("ProcessPeer: " + peer + " is reachable");
-    			peerList.add(peer);
+    			if(isReachable)
+    			{
+    				System.out.println("ProcessPeer: " + peer + " is reachable");
+    				System.out.println("adding network connect for peer: " + peer);
+    				broker.AddNetworkConnector(peer);
+    				peerList.add(peer);
+    			}
     		}
     	}
     	catch(Exception ex)

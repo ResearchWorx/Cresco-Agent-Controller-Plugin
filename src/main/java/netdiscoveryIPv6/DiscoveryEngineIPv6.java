@@ -134,7 +134,11 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 		          //Send a response
 		  	 		          DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, packet.getAddress(), packet.getPort());
 		  	 		          socket.send(sendPacket);
-
+		  	 		          
+		  	 		          // process peer
+		  	 		          PluginEngine.processPeer(packet.getAddress().getHostAddress());
+		  	 		          // process peer
+		  	 		          
 		  	 		          //System.out.println(getClass().getName() + ">>>Sent packet to: " + sendPacket.getAddress().getHostAddress());
 		  	 		        }
 		  	 		      }
