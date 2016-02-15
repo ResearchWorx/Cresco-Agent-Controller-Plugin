@@ -17,6 +17,11 @@ import shared.MsgEvent;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -35,6 +40,8 @@ public class PluginEngine {
 	
 	public static DiscoveryClient dc;
 	public static DiscoveryClientIPv6 dcv6;
+	
+	public static List<String> peerList;
 	
 	public String getName()
 	{
@@ -62,6 +69,8 @@ public class PluginEngine {
 	public static ActiveBroker broker;
     public static void main(String[] args) throws Exception 
     {
+    	peerList = new ArrayList<String>();
+    	
     	ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger)LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
     	//rootLogger.setLevel(Level.toLevel("debug"));
     	//rootLogger.setLevel(Level.toLevel("none"));
@@ -117,54 +126,57 @@ public class PluginEngine {
     			bmap = dc.getDiscoveryMap(Integer.parseInt(str[1]));
     		}
     			
-    	    for (Map.Entry<String, String> entry : bmap.entrySet())
-    		{
-    		    System.out.println(entry.getKey() + "/" + entry.getValue());
-    		}
-    	}
-    	catch(Exception e)
-    	{
-    		e.printStackTrace();
-    	}
-    	}
-        
-        /*
-        while(true)
-    	{
-    	try{
-    		System.out.println("Broker Search:");
-    		BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
-    	    String s = bufferRead.readLine();
-    	    
-    		Map<String,String> bmap = dc.getDiscoveryMap(Integer.parseInt(s));
-    		System.out.println(bmap.size());
     		for (Map.Entry<String, String> entry : bmap.entrySet())
     		{
-    		    System.out.println(entry.getKey() + "/" + entry.getValue());
+    		    //System.out.println(entry.getKey() + "/" + entry.getValue());
+    		    String[] str2 = entry.getValue().split(",");
+    		
+    		    for(int i = 1; i < str2.length; i++)
+    		    {
+    		    	String[] str3 = str2[i].split("_");
+    		    	if(!peerList.contains(str3[1]))
+    		    	{
+    		    		processPeer(str3[1]);
+    		    	}
+    		    }
+    		    
     		}
+    	    
     	}
     	catch(Exception e)
     	{
     		e.printStackTrace();
     	}
     	}
-        */
-        
-    	/*
-    	while(true)
+       
+    }
+    public static void processPeer(String peer)
+    {
+    	try
     	{
-    	try{
-    		System.out.println("Enter Broker IP:");
-    	    BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
-    	    String s = bufferRead.readLine();
-    	    broker.AddNetworkConnector(s);
-    	    System.out.println(s);
+    		System.out.println("ProcessPeer: " + peer);
+    		InetAddress peerAddress = InetAddress.getByName(peer);
+    		boolean isReachable = false;
+    		
+    		if(peerAddress instanceof Inet6Address)
+    		{
+    			isReachable = dcv6.isReachable(peer);
+    			
+    		}
+    		else if(peerAddress instanceof Inet4Address)
+    		{
+    			isReachable = dc.isReachable(peer);
+    		}
+    		
+    		if(isReachable)
+    		{
+    			System.out.println("ProcessPeer: " + peer + " is reachable");
+    			peerList.add(peer);
+    		}
     	}
-    	catch(IOException e)
+    	catch(Exception ex)
     	{
-    		e.printStackTrace();
+    		System.out.println(ex.toString());
     	}
-    	}
-    	*/
-    }  
+    }
 }

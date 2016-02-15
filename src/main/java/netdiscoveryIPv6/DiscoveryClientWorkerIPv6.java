@@ -131,10 +131,25 @@ class StopListnerTask extends TimerTask {
 	public List<MsgEvent> discover()
 	{
 		List<MsgEvent> discoveryList = null;
+		List<String> localAddressList = new ArrayList<String>();
 	// Find the server using UDP broadcast
 	try {
 		discoveryList = new ArrayList<MsgEvent>();
-		  
+		
+		Enumeration inter = NetworkInterface.getNetworkInterfaces();
+		  while (inter.hasMoreElements()) {
+		    NetworkInterface networkInter = (NetworkInterface) inter.nextElement();
+		    for (InterfaceAddress interfaceAddress : networkInter.getInterfaceAddresses()) {
+		    {
+		    	String localAddress = interfaceAddress.getAddress().getHostAddress();
+		    	if(!localAddressList.contains(localAddress))
+		    	{
+		    		localAddressList.add(localAddress);
+		    	}
+		    }
+		  }
+		  }
+		
 	  // Broadcast the message over all the network interfaces
 	  Enumeration interfaces = NetworkInterface.getNetworkInterfaces();
 	  while (interfaces.hasMoreElements()) {
@@ -215,7 +230,11 @@ class StopListnerTask extends TimerTask {
 	    		  					//System.out.println("SAME HOST");
 	    		  					//System.out.println(me.getParamsString() + receivePacket.getAddress().getHostAddress());
 	    		  					me.setParam("serverip", receivePacket.getAddress().getHostAddress());
-	    		  					discoveryList.add(me);
+	    		  					if(!localAddressList.contains(me.getParam("serverip")))
+	    		  			    	{
+	    		  						discoveryList.add(me);
+	    		  			    	}
+	    		  					
 	    		  				}
 	    		  			}
 	    		  		}
