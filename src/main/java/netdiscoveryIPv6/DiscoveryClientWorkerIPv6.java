@@ -168,7 +168,7 @@ class StopListnerTask extends TimerTask {
 		        	 byte[] sendData = "DISCOVER_FUIFSERVER_REQUEST".getBytes();
 	          
 	      	    //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet4Address.getByName("255.255.255.255"), 32005);
-	      	    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName("FF05::2"), 32005);
+	      	    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName("ff05::1:c"), 32005);
 	      	    //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, GROUP, PORT);
 	      	    c.send(sendPacket);
 	      	    //System.out.println(getClass().getName() + ">>> Request packet sent to: 255.255.255.255 (DEFAULT)");

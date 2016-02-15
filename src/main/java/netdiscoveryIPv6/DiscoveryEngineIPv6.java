@@ -35,7 +35,7 @@ public class DiscoveryEngineIPv6 implements Runnable
 	      //socket = new DatagramSocket(32005, InetAddress.getByName("0.0.0.0"));
 	      //socket = new DatagramSocket(32005, Inet4Address.getByName("0.0.0.0"));
 		  //socket.setBroadcast(true);
-	    Inet6Address group = (Inet6Address) Inet6Address.getByName("FF05::2");
+	    Inet6Address group = (Inet6Address) Inet6Address.getByName("ff05::1:c");
 	       socket = new MulticastSocket(32005);
 	       //socket.connect(group, 32005);
 	       socket.joinGroup(group);
