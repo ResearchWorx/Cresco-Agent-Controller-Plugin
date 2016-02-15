@@ -129,19 +129,22 @@ class StopListnerTask extends TimerTask {
 		discoveryList = new ArrayList<MsgEvent>();
 	  //Open a random port to send the package
 	  c = new DatagramSocket();
-	  c.setBroadcast(true);
+	  //c.setBroadcast(true);
 
 	  byte[] sendData = "DISCOVER_FUIFSERVER_REQUEST".getBytes();
 
 	  //Try the 255.255.255.255 first
 	  try {
 	    //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet4Address.getByName("255.255.255.255"), 32005);
-	    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName("FF7E:230::1234"), 32005);
+	    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName("ff02::1"), 32005);
 	    //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, GROUP, PORT);
 	    c.send(sendPacket);
 	    //System.out.println(getClass().getName() + ">>> Request packet sent to: 255.255.255.255 (DEFAULT)");
-	  } catch (Exception e) {
-	  }
+	  } 
+	  catch (Exception e) 
+	  {
+		  System.out.println("DiscoveryClientWorkerIPv6 : getDiscoveryMap Error : " + e.toString());
+	  }	
 
 	  /*
 	  // Broadcast the message over all the network interfaces
