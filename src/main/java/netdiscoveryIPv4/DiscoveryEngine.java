@@ -66,6 +66,8 @@ public class DiscoveryEngine implements Runnable
 	  {
 		  private NetworkInterface networkInterface;
 		  private DatagramSocket socket;
+		  private DatagramSocket sendsocket;
+		  
 		    public DiscoveryEngineWorkerIPv4(NetworkInterface networkInterface)
 		    {
 		    	
@@ -75,6 +77,7 @@ public class DiscoveryEngine implements Runnable
 		    public void shutdown()
 			{
 				socket.close();
+				sendsocket.close();
 			}
 		    public void run() 
 		    {
@@ -87,11 +90,16 @@ public class DiscoveryEngine implements Runnable
 		  	 	    	 {
 		  	 	        	  if(interfaceAddress.getAddress() instanceof Inet4Address)
 		  	 	              {
-		  	 	        		SocketAddress sa = new InetSocketAddress(interfaceAddress.getBroadcast(),32005);
+		  	 	        		 SocketAddress sa = new InetSocketAddress(interfaceAddress.getBroadcast(),32005);
+		  	 	        		 SocketAddress ssa = new InetSocketAddress(interfaceAddress.getAddress(),32005);
 		  	 	        		 socket = new DatagramSocket(null);
 		  	 	        		 socket.bind(sa);
 					        	 socket.setBroadcast(true);
-			 	        		 System.out.println(interfaceAddress.getAddress().getHostAddress());
+			 	        		 
+					        	 sendsocket = new DatagramSocket(null);
+		  	 	        		 sendsocket.bind(ssa);
+					        	 
+					        	 //System.out.println(interfaceAddress.getAddress().getHostAddress());
 					        	 while (PluginEngine.isActive) 
 					   	      {
 					   	    	  //System.out.println(getClass().getName() + ">>>Ready to receive broadcast packets!");
@@ -102,8 +110,8 @@ public class DiscoveryEngine implements Runnable
 					   	        socket.receive(packet);
 
 					   	        //Packet received
-					   	        System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
-					   	        System.out.println(getClass().getName() + ">>>Packet received; data: " + new String(packet.getData()));
+					   	        //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
+					   	        //System.out.println(getClass().getName() + ">>>Packet received; data: " + new String(packet.getData()));
 
 					   	        //See if the packet holds the right command (message)
 					   	        String message = new String(packet.getData()).trim();
@@ -114,16 +122,14 @@ public class DiscoveryEngine implements Runnable
 					   	          //MsgEventType msgType, String msgRegion, String msgAgent, String msgPlugin, String msgBody
 					   	          MsgEvent me = new MsgEvent(MsgEventType.DISCOVER,PluginEngine.region,PluginEngine.agent,PluginEngine.plugin,"Broadcast discovery response.");
 					   	          me.setParam("clientip", packet.getAddress().getHostAddress());
-
-					   	      	// convert java object to JSON format,
+					   	       // convert java object to JSON format,
 					   	      	// and returned as JSON formatted string
 					   	      	  String json = gson.toJson(me);
 					   	          //byte[] sendData = "DISCOVER_FUIFSERVER_RESPONSE".getBytes();
 					   	          byte[] sendData = json.getBytes();
 					   	          //Send a response
 					   	          DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, packet.getAddress(), packet.getPort());
-					   	          socket.send(sendPacket);
-
+					   	          sendsocket.send(sendPacket);
 					   	          //System.out.println(getClass().getName() + ">>>Sent packet to: " + sendPacket.getAddress().getHostAddress());
 					   	        }
 					   	      }
@@ -136,7 +142,7 @@ public class DiscoveryEngine implements Runnable
 		    	}
 		    	catch(Exception ex)
 		    	{
-		    		System.out.println("DiscoveryEngineIPv6 : DiscoveryEngineWorkerIPv6 : Run Error " + ex.toString());
+		    		System.out.println("DiscoveryEngineIPv4 : DiscoveryEngineWorkerIPv4 : Run Error " + ex.toString());
 		    	}
 		    }
 	  }

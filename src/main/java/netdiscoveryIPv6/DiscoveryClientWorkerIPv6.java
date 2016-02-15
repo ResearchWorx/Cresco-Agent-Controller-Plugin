@@ -155,7 +155,7 @@ class StopListnerTask extends TimerTask {
 	        		  
 	        		 //c = new MulticastSocket(null);
 	        		 c = new DatagramSocket(null);
-	        		 c.setReuseAddress(true);
+	        		 //c.setReuseAddress(true);
 	        		  //System.out.println("prebind1");
 		        		
 		        	 SocketAddress sa = new InetSocketAddress(interfaceAddress.getAddress(),0);
@@ -198,7 +198,7 @@ class StopListnerTask extends TimerTask {
 	    			  c.receive(receivePacket);
 
 	    			  //We have a response
-	    			  System.out.println(getClass().getName() + ">>> Broadcast response from server: " + receivePacket.getAddress().getHostAddress());
+	    			  //System.out.println(getClass().getName() + ">>> Broadcast response from server: " + receivePacket.getAddress().getHostAddress());
 
 	    			  //Check if the message is correct
 	    			  //System.out.println(new String(receivePacket.getData()));
