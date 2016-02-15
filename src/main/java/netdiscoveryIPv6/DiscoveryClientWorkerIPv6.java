@@ -1,5 +1,6 @@
 package netdiscoveryIPv6;
 
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.Inet4Address;
@@ -149,26 +150,12 @@ class StopListnerTask extends TimerTask {
 	        	  
 	        	  if(interfaceAddress.getAddress() instanceof Inet6Address)
 	              {  
-	        		  System.out.println("prebind0 " + interfaceAddress.getAddress());
-		        	  System.out.println("locallink " + interfaceAddress.getAddress().isLinkLocalAddress());
-	        		  System.out.println("global " + interfaceAddress.getAddress().isMCGlobal());
-	        		  System.out.println("linklocal " + interfaceAddress.getAddress().isMCLinkLocal());
-	        		  System.out.println("isNodelocal " + interfaceAddress.getAddress().isMCNodeLocal());
-	        		  System.out.println("multicast " + interfaceAddress.getAddress().isMulticastAddress());
-	        		  System.out.println("site " + interfaceAddress.getAddress().isSiteLocalAddress());
-	        		  System.out.println("any " + interfaceAddress.getAddress().isAnyLocalAddress());
-	        		  System.out.println("loop " + interfaceAddress.getAddress().isLoopbackAddress());
-	        		  
-	        		  
-	        		  
-	        		  
-	        		  
 	        		  
 	        		 c = new DatagramSocket(null);
 	        		 c.setReuseAddress(true);
 	        		  //System.out.println("prebind1");
 		        		
-		        	 SocketAddress sa = new InetSocketAddress(interfaceAddress.getAddress(),32007);
+		        	 SocketAddress sa = new InetSocketAddress(interfaceAddress.getAddress(),0);
 		        	  //System.out.println("prebind2");
 		        		
 		        	 c.bind(sa);
@@ -181,16 +168,26 @@ class StopListnerTask extends TimerTask {
 		        	 byte[] sendData = "DISCOVER_FUIFSERVER_REQUEST".getBytes();
 	          
 	      	    //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet4Address.getByName("255.255.255.255"), 32005);
-	      	    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName("ff02::1"), 32005);
+	      	    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName("FF05::2"), 32005);
 	      	    //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, GROUP, PORT);
 	      	    c.send(sendPacket);
 	      	    //System.out.println(getClass().getName() + ">>> Request packet sent to: 255.255.255.255 (DEFAULT)");
-	      	  System.out.print("CODY ENTERING WHILE0");
+	      	   
+	      	  System.out.println("prebind0 " + interfaceAddress.getAddress());
+        	  System.out.println("locallink " + interfaceAddress.getAddress().isLinkLocalAddress());
+    		  System.out.println("global " + interfaceAddress.getAddress().isMCGlobal());
+    		  System.out.println("linklocal " + interfaceAddress.getAddress().isMCLinkLocal());
+    		  System.out.println("isNodelocal " + interfaceAddress.getAddress().isMCNodeLocal());
+    		  System.out.println("multicast " + interfaceAddress.getAddress().isMulticastAddress());
+    		  System.out.println("site " + interfaceAddress.getAddress().isSiteLocalAddress());
+    		  System.out.println("any " + interfaceAddress.getAddress().isAnyLocalAddress());
+    		  System.out.println("loop " + interfaceAddress.getAddress().isLoopbackAddress());
+    		  
+	      	  
     		  
 	      	  while(!c.isClosed())
 	    	  {
-	      		System.out.print("CODY ENTERING WHILE1");
-	    		  
+	      		  
 	      		  try
 	    		  {
 	    			  byte[] recvBuf = new byte[15000];
@@ -227,7 +224,7 @@ class StopListnerTask extends TimerTask {
 	    		  	catch(SocketException ex)
 	    		  	{
 	    		  		//eat message.. this should happen
-	    		  		System.out.println("should eat exception");
+	    		  		//System.out.println("should eat exception");
 	    		  	}
 	    		    catch(Exception ex)
 	    		  	{
@@ -238,7 +235,12 @@ class StopListnerTask extends TimerTask {
 	    		  //Close the port!
 	              
 	              }
-	      	  } 
+	      	  }
+	          catch (IOException ie)
+	          {
+	        	  //eat exception
+	        	  //System.out.println("DiscoveryClientWorkerIPv6 : getDiscoveryMap IO Error : " + ie.toString());
+	          }
 	      	  catch (Exception e) 
 	      	  {
 	      		  System.out.println("DiscoveryClientWorkerIPv6 : getDiscoveryMap Error : " + e.toString());
