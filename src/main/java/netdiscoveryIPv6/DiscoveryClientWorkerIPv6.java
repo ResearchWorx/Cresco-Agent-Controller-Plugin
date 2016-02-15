@@ -5,8 +5,10 @@ import java.net.DatagramSocket;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
+import java.net.SocketAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -27,13 +29,15 @@ public class DiscoveryClientWorkerIPv6
 private DatagramSocket c;
 private Gson gson;
 public Timer timer;
+public int discoveryTimeout;
 
 	public DiscoveryClientWorkerIPv6(int discoveryTimeout)
 	{
 		gson = new Gson();
-		timer = new Timer();
+		//timer = new Timer();
 	    //timer.scheduleAtFixedRate(new StopListnerTask(), 1000, discoveryTimeout);
-	    timer.schedule(new StopListnerTask(), discoveryTimeout);
+		this.discoveryTimeout = discoveryTimeout;
+	    
 	}
 	
 class StopListnerTask extends TimerTask {
@@ -127,26 +131,7 @@ class StopListnerTask extends TimerTask {
 	// Find the server using UDP broadcast
 	try {
 		discoveryList = new ArrayList<MsgEvent>();
-	  //Open a random port to send the package
-	  c = new DatagramSocket();
-	  //c.setBroadcast(true);
-
-	  byte[] sendData = "DISCOVER_FUIFSERVER_REQUEST".getBytes();
-
-	  //Try the 255.255.255.255 first
-	  try {
-	    //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet4Address.getByName("255.255.255.255"), 32005);
-	    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName("ff02::1"), 32005);
-	    //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, GROUP, PORT);
-	    c.send(sendPacket);
-	    //System.out.println(getClass().getName() + ">>> Request packet sent to: 255.255.255.255 (DEFAULT)");
-	  } 
-	  catch (Exception e) 
-	  {
-		  System.out.println("DiscoveryClientWorkerIPv6 : getDiscoveryMap Error : " + e.toString());
-	  }	
-
-	  /*
+		  
 	  // Broadcast the message over all the network interfaces
 	  Enumeration interfaces = NetworkInterface.getNetworkInterfaces();
 	  while (interfaces.hasMoreElements()) {
@@ -155,75 +140,123 @@ class StopListnerTask extends TimerTask {
 	    if (networkInterface.isLoopback() || !networkInterface.isUp()) {
 	      continue; // Don't want to broadcast to the loopback interface
 	    }
+	    
+	    if(networkInterface.supportsMulticast())
+	    {
+	    	 for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
+	         {
+	          try {
+	        	  
+	        	  if(interfaceAddress.getAddress() instanceof Inet6Address)
+	              {  
+	        		  System.out.println("prebind0 " + interfaceAddress.getAddress());
+		        	  System.out.println("locallink " + interfaceAddress.getAddress().isLinkLocalAddress());
+	        		  System.out.println("global " + interfaceAddress.getAddress().isMCGlobal());
+	        		  System.out.println("linklocal " + interfaceAddress.getAddress().isMCLinkLocal());
+	        		  System.out.println("isNodelocal " + interfaceAddress.getAddress().isMCNodeLocal());
+	        		  System.out.println("multicast " + interfaceAddress.getAddress().isMulticastAddress());
+	        		  System.out.println("site " + interfaceAddress.getAddress().isSiteLocalAddress());
+	        		  System.out.println("any " + interfaceAddress.getAddress().isAnyLocalAddress());
+	        		  System.out.println("loop " + interfaceAddress.getAddress().isLoopbackAddress());
+	        		  
+	        		  
+	        		  
+	        		  
+	        		  
+	        		  
+	        		 c = new DatagramSocket(null);
+	        		 c.setReuseAddress(true);
+	        		  //System.out.println("prebind1");
+		        		
+		        	 SocketAddress sa = new InetSocketAddress(interfaceAddress.getAddress(),32007);
+		        	  //System.out.println("prebind2");
+		        		
+		        	 c.bind(sa);
+		        	  //System.out.println("prebind3");
+		        		
+		        	 //start timer to clost discovery
+		        	  timer = new Timer();
+		        	  timer.schedule(new StopListnerTask(), discoveryTimeout);
+		        	 
+		        	 byte[] sendData = "DISCOVER_FUIFSERVER_REQUEST".getBytes();
+	          
+	      	    //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet4Address.getByName("255.255.255.255"), 32005);
+	      	    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName("ff02::1"), 32005);
+	      	    //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, GROUP, PORT);
+	      	    c.send(sendPacket);
+	      	    //System.out.println(getClass().getName() + ">>> Request packet sent to: 255.255.255.255 (DEFAULT)");
+	      	  System.out.print("CODY ENTERING WHILE0");
+    		  
+	      	  while(!c.isClosed())
+	    	  {
+	      		System.out.print("CODY ENTERING WHILE1");
+	    		  
+	      		  try
+	    		  {
+	    			  byte[] recvBuf = new byte[15000];
+	    			  DatagramPacket receivePacket = new DatagramPacket(recvBuf, recvBuf.length);
+	    			  c.receive(receivePacket);
 
-	    for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
-	      InetAddress broadcast = interfaceAddress.getBroadcast();
-	      if (broadcast == null) {
-	        continue;
-	      }
+	    			  //We have a response
+	    			  //System.out.println(getClass().getName() + ">>> Broadcast response from server: " + receivePacket.getAddress().getHostAddress());
 
-	      // Send the broadcast package!
-	      try {
-	        DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, broadcast, 32005);
-	        c.send(sendPacket);
-	      } catch (Exception e) {
-	      }
-
-	      //System.out.println(getClass().getName() + ">>> Request packet sent to: " + broadcast.getHostAddress() + "; Interface: " + networkInterface.getDisplayName());
+	    			  //Check if the message is correct
+	    			  //System.out.println(new String(receivePacket.getData()));
+	    	  
+	    			  String json = new String(receivePacket.getData()).trim();
+	    			  //String response = "region=region0,agent=agent0,recaddr=" + packet.getAddress().getHostAddress();
+	    		  		try
+	    		  		{
+	    		  			MsgEvent me = gson.fromJson(json, MsgEvent.class);
+	    		  			if(me != null)
+	    		  			{
+	    		  				if(!me.getParam("clientip").equals(receivePacket.getAddress().getHostAddress()))
+	    		  				{
+	    		  					//System.out.println("SAME HOST");
+	    		  					//System.out.println(me.getParamsString() + receivePacket.getAddress().getHostAddress());
+	    		  					me.setParam("serverip", receivePacket.getAddress().getHostAddress());
+	    		  					discoveryList.add(me);
+	    		  				}
+	    		  			}
+	    		  		}
+	    		  		catch(Exception ex)
+	    		  		{
+	    		  			System.out.println("in loop 0" + ex.toString());
+	    		  		}
+	    		  	}
+	    		  	catch(SocketException ex)
+	    		  	{
+	    		  		//eat message.. this should happen
+	    		  		System.out.println("should eat exception");
+	    		  	}
+	    		    catch(Exception ex)
+	    		  	{
+	    		  		System.out.println("in loop 1" + ex.toString());
+	    		  	}
+	    		  
+	    	  	}
+	    		  //Close the port!
+	              
+	              }
+	      	  } 
+	      	  catch (Exception e) 
+	      	  {
+	      		  System.out.println("DiscoveryClientWorkerIPv6 : getDiscoveryMap Error : " + e.toString());
+	      	  }	
+	         
+	         }
 	    }
-	  }
-      */
-	  //System.out.println(getClass().getName() + ">>> Done looping over all network interfaces. Now waiting for a reply!");
+	    
+	    
+	    	    
+	    }
+      
 
 	  //Wait for a response
-	  while(!c.isClosed())
-	  {
-		  try
-		  {
-			  byte[] recvBuf = new byte[15000];
-			  DatagramPacket receivePacket = new DatagramPacket(recvBuf, recvBuf.length);
-			  c.receive(receivePacket);
-
-			  //We have a response
-			  //System.out.println(getClass().getName() + ">>> Broadcast response from server: " + receivePacket.getAddress().getHostAddress());
-
-			  //Check if the message is correct
-			  //System.out.println(new String(receivePacket.getData()));
 	  
-			  String json = new String(receivePacket.getData()).trim();
-			  //String response = "region=region0,agent=agent0,recaddr=" + packet.getAddress().getHostAddress();
-		  		try
-		  		{
-		  			MsgEvent me = gson.fromJson(json, MsgEvent.class);
-		  			if(me != null)
-		  			{
-		  				if(!me.getParam("clientip").equals(receivePacket.getAddress().getHostAddress()))
-		  				{
-		  					//System.out.println("SAME HOST");
-		  					//System.out.println(me.getParamsString() + receivePacket.getAddress().getHostAddress());
-		  					me.setParam("serverip", receivePacket.getAddress().getHostAddress());
-		  					discoveryList.add(me);
-		  				}
-		  			}
-		  		}
-		  		catch(Exception ex)
-		  		{
-		  			System.out.println("in loop 0" + ex.toString());
-		  		}
-		  	}
-		  	catch(SocketException ex)
-		  	{
-		  		//eat message.. this should happen
-		  	}
-		    catch(Exception ex)
-		  	{
-		  		System.out.println("in loop 1" + ex.toString());
-		  	}
-		  
-	  	}
-		  //Close the port!
 	  //c.close();
 	  //System.out.println("CODY : Dicsicer Client Worker Engned!");
+	  }
 	} 
 	catch (Exception ex) 
 	{
