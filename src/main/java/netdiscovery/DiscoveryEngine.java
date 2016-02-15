@@ -2,6 +2,7 @@ package netdiscovery;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 
 import plugincore.PluginEngine;
@@ -25,11 +26,13 @@ public class DiscoveryEngine implements Runnable
 	{
 		socket.close();
 	}
+	
 	  public void run() {
 	    try {
 	      //Keep a socket open to listen to all the UDP trafic that is destined for this port
-	      socket = new DatagramSocket(32005, InetAddress.getByName("0.0.0.0"));
-	      socket.setBroadcast(true);
+	      //socket = new DatagramSocket(32005, InetAddress.getByName("0.0.0.0"));
+	      socket = new DatagramSocket(32005, Inet4Address.getByName("0.0.0.0"));
+		  socket.setBroadcast(true);
 	      
 	        
 	      PluginEngine.DiscoveryActive = true;
