@@ -1,10 +1,6 @@
 package plugincore;
 
 
-import org.apache.activemq.ActiveMQConnectionFactory;
-import org.apache.activemq.broker.BrokerService;
-import org.apache.activemq.broker.TransportConnector;
-import org.apache.activemq.broker.region.*;
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.slf4j.LoggerFactory;
 
@@ -12,19 +8,13 @@ import ActiveMQ.ActiveBroker;
 import ActiveMQ.ActiveConsumer;
 import ActiveMQ.ActiveProducer;
 import ch.qos.logback.classic.Level;
-import netdiscovery.DiscoveryClient;
-import netdiscovery.DiscoveryEngine;
+import netdiscoveryIPv4.DiscoveryClient;
+import netdiscoveryIPv4.DiscoveryEngine;
 import shared.MsgEvent;
 
-import javax.jms.*;
-import javax.jms.Queue;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.DatagramSocket;
-import java.net.ServerSocket;
-import java.net.URI;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 

@@ -1,4 +1,4 @@
-package netdiscovery;
+package netdiscoveryIPv4;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
