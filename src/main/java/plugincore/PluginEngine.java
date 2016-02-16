@@ -77,7 +77,7 @@ public class PluginEngine {
     	ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger)LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
     	//rootLogger.setLevel(Level.toLevel("debug"));
     	//rootLogger.setLevel(Level.toLevel("none"));
-    	rootLogger.setLevel(Level.DEBUG);
+    	rootLogger.setLevel(Level.WARN);
 
     	broker = new ActiveBroker(args[0]);
     	//tcp://localhost:32010
