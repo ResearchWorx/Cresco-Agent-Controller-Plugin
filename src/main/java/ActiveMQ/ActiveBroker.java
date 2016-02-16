@@ -55,11 +55,15 @@ return connector;
 				//NetworkConnector connector = bridge
 				//connector.
 				// = new NetworkConnector();
-				TransportConnector connector = new TransportConnector();
-				//connector.setUri(new URI("tcp://0.0.0.0:32010")); //all ipv4 addresses
-				connector.setUri(new URI("tcp://[::]:32010"));
+				//TransportConnector connectorIPv4 = new TransportConnector();
+				TransportConnector connectorIPv6 = new TransportConnector();
+				
+				//connectorIPv4.setUri(new URI("tcp://0.0.0.0:32010")); //all ipv4 addresses
+				connectorIPv6.setUri(new URI("tcp://[::]:32010"));
 				//connector.setDiscoveryUri(new URI("multicast://default?group=test"));
-				broker.addConnector(connector);
+				//broker.addConnector(connectorIPv4);
+				broker.addConnector(connectorIPv6);
+				
 				//broker.addNetworkConnector(new URI("multicast://default?group=test"));
 				//NetworkConnector bridge = broker.addNetworkConnector(new URI("static://" + remoteIP + ":32010"));
 				//bridge.setUserName(userName);
@@ -79,7 +83,6 @@ return connector;
 		{
 			
 			NetworkConnector bridge = broker.addNetworkConnector(new URI("static:tcp://[" + URI + "]:32010"));
-			
 			//TransportConnector connector = new TransportConnector();
 			//connector.setUri(new URI(URI));
 			//connector.setDiscoveryUri(new URI("multicast://default?group=test"));

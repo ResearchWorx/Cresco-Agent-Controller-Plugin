@@ -77,14 +77,17 @@ public class PluginEngine {
     	ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger)LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
     	//rootLogger.setLevel(Level.toLevel("debug"));
     	//rootLogger.setLevel(Level.toLevel("none"));
-    	rootLogger.setLevel(Level.WARN);
+    	rootLogger.setLevel(Level.DEBUG);
 
     	broker = new ActiveBroker(args[0]);
     	//tcp://localhost:32010
+    	//::1
     	Thread ct = new Thread(new ActiveConsumer(args[1],"tcp://localhost:32010"));
+    	//Thread ct = new Thread(new ActiveConsumer(args[1],"tcp://[::1]:32010"));
     	ct.start();
     	
     	Thread pt = new Thread(new ActiveProducer(args[2],"tcp://localhost:32010"));
+    	//Thread pt = new Thread(new ActiveProducer(args[2],"tcp://[::1]:32010"));
     	pt.start();
     	
     	//Start IPv4 network discovery engine
