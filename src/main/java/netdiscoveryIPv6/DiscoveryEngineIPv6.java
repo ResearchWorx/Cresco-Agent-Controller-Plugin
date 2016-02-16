@@ -79,8 +79,9 @@ public class DiscoveryEngineIPv6 implements Runnable
 		    {
 		    	try
 		    	{
-		    		if (!networkInterface.isLoopback() && networkInterface.isUp() && networkInterface.supportsMulticast())
+		    		if (!networkInterface.isLoopback() && networkInterface.isUp() && networkInterface.supportsMulticast()  && !networkInterface.isPointToPoint() && !networkInterface.isVirtual())
 		    		{
+		    			System.out.println("Trying interface: " + networkInterface.getDisplayName());
 		    			boolean isIPv6Bound = false;
 			  	 	    
 		  	 	    	 for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) 
