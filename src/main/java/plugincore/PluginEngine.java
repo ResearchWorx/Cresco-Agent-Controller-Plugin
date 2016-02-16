@@ -24,8 +24,10 @@ import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class PluginEngine {
@@ -40,11 +42,15 @@ public class PluginEngine {
 	public static String region = "reg";
 	public static String agent = "agent";
 	public static String plugin = "pl";
+	public static String agentpath;
+	
+	public static ConcurrentHashMap<String,String> abhm;
+	public static ConcurrentHashMap<String,String> pbhm;
 	
 	public static DiscoveryClient dc;
 	public static DiscoveryClientIPv6 dcv6;
 	
-	public static List<String> peerList;
+	//public static List<String> peerList;
 	
 	public String getName()
 	{
@@ -72,23 +78,31 @@ public class PluginEngine {
 	public static ActiveBroker broker;
     public static void main(String[] args) throws Exception 
     {
-    	peerList = new ArrayList<String>();
+    	region = args[0];
+    	agent = args[1];
+    	agentpath = region + "_" + agent;
+    	
+    	//peerList = new ArrayList<String>();
+    	abhm = new ConcurrentHashMap<String,String>(); 
+    	pbhm = new ConcurrentHashMap<String,String>(); 
     	
     	ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger)LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
     	//rootLogger.setLevel(Level.toLevel("debug"));
     	//rootLogger.setLevel(Level.toLevel("none"));
     	rootLogger.setLevel(Level.WARN);
 
-    	broker = new ActiveBroker(args[0]);
-    	//tcp://localhost:32010
-    	//::1
-    	Thread ct = new Thread(new ActiveConsumer(args[1],"tcp://localhost:32010"));
+    	broker = new ActiveBroker(agentpath);
+    	
+    	
+    	Thread ct = new Thread(new ActiveConsumer(agentpath,"tcp://localhost:32010"));
     	//Thread ct = new Thread(new ActiveConsumer(args[1],"tcp://[::1]:32010"));
     	ct.start();
     	
-    	Thread pt = new Thread(new ActiveProducer(args[2],"tcp://localhost:32010"));
+    	
+    	Thread pt = new Thread(new ActiveProducer(args[2] + "_" + args[3],"tcp://localhost:32010"));
     	//Thread pt = new Thread(new ActiveProducer(args[2],"tcp://[::1]:32010"));
     	pt.start();
+    	
     	
     	//Start IPv4 network discovery engine
     	Thread de = new Thread(new DiscoveryEngine());
@@ -115,6 +129,40 @@ public class PluginEngine {
         dc = new DiscoveryClient();
         dcv6 = new DiscoveryClientIPv6();
         
+        try{
+        	boolean foundNeighbor = false;
+        	
+        	System.out.println("Broker Search IPv6:");
+    		if(processPeerMap(dcv6.getDiscoveryMap(2000)))
+    		{
+    			//Add all IPv6 Addresses
+    			foundNeighbor = true;
+    		}
+    		
+    		System.out.println("Broker Search IPv4:");
+    		if(processPeerMap(dc.getDiscoveryMap(2000)))
+    		{
+    			foundNeighbor = true;
+    			//Add all IPv6 Addresses
+    		}
+    		
+    		if(foundNeighbor)
+      		{
+      			System.out.println("Neighbor Exists");
+      		}
+    		
+    		if(!foundNeighbor)
+      		{
+      			System.out.println("Better start something Brah");
+      		}
+    	}
+    	catch(Exception e)
+    	{
+    		e.printStackTrace();
+    	}
+        
+        
+        /*
         while(true)
     	{
     	try{
@@ -131,31 +179,50 @@ public class PluginEngine {
     		{
     			bmap = dc.getDiscoveryMap(Integer.parseInt(str[1]));
     		}
-    			
-    		for (Map.Entry<String, String> entry : bmap.entrySet())
-    		{
-    		    //System.out.println(entry.getKey() + "/" + entry.getValue());
-    		    String[] str2 = entry.getValue().split(",");
     		
-    		    for(int i = 1; i < str2.length; i++)
-    		    {
-    		    	String[] str3 = str2[i].split("_");
-    		    	if(!peerList.contains(str3[1]))
-    		    	{
-    		    		processPeer(str3[1]);
-    		    	}
+    		if(!bmap.isEmpty())
+    		{
+    			String[] discoveredAgents = bmap.get("discoveredagents").split(",");
+    			for(String discoveredAgent : discoveredAgents)
+    			{
+    				String[] agentNetwork = bmap.get(discoveredAgent).split("_");
+    				processPeer(agentNetwork[1]);
     		    }
-    		    
-    		}
-    	    
+    		}	
     	}
     	catch(Exception e)
     	{
     		e.printStackTrace();
     	}
     	}
+        */
+        
+        //end
        
     }
+    
+    public static boolean processPeerMap(Map<String,String> bmap)
+    {
+    	boolean foundNeighbor = false;
+    	if(!bmap.isEmpty())
+		{
+  			String[] discoveredAgents = bmap.get("discoveredagents").split(",");
+			for(String discoveredAgent : discoveredAgents)
+			{
+				String[] agentNetworks = bmap.get(discoveredAgent).split(",");
+				for(String agentNetwork : agentNetworks)
+				{
+					String[] agentNetworkHosts = agentNetwork.split("_");
+					if(processPeer(agentNetworkHosts[1],discoveredAgent))
+					{
+						foundNeighbor = true;
+					}
+				}
+		    }
+		}
+    	return foundNeighbor;
+    }
+    
     public static List<String> localAddresses()
     {
     	List<String> localAddressList = new ArrayList<String>();
@@ -179,12 +246,13 @@ public class PluginEngine {
     	}
     	return localAddressList;
     }
-    public static void processPeer(String peer)
+    public static boolean processPeer(String peer,String agentpath)
     {
-    	  
+    	boolean isPeer = false;
+    	boolean isIPv6 = false;
     	try
     	{
-    		if(!localAddresses().contains(peer))
+    		if((!localAddresses().contains(peer) && (!abhm.containsKey(peer))) && (!pbhm.containsKey(agentpath)))
     		{
     			System.out.println("ProcessPeer: " + peer);
     			InetAddress peerAddress = InetAddress.getByName(peer);
@@ -193,6 +261,7 @@ public class PluginEngine {
     			if(peerAddress instanceof Inet6Address)
     			{
     				isReachable = dcv6.isReachable(peer);
+    				isIPv6 = true;
     			}
     			else if(peerAddress instanceof Inet4Address)
     			{
@@ -203,8 +272,19 @@ public class PluginEngine {
     			{
     				System.out.println("ProcessPeer: " + peer + " is reachable");
     				System.out.println("adding network connect for peer: " + peer);
-    				broker.AddNetworkConnector(peer);
-    				peerList.add(peer);
+    				if(isIPv6)
+    				{
+    					broker.AddNetworkConnector("[" + peer + "]");
+        			}
+    				else
+    				{
+    					broker.AddNetworkConnector(peer);
+        			}
+    				//peerList.add(peer);
+    				abhm.put(peer,agentpath);
+    				pbhm.put(agentpath,peer);
+    				
+    				isPeer = true;
     			}
     		}
     	}
@@ -212,5 +292,6 @@ public class PluginEngine {
     	{
     		System.out.println(ex.toString());
     	}
+    	return isPeer;
     }
 }

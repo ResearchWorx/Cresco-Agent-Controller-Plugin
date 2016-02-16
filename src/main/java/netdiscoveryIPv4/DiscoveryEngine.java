@@ -130,6 +130,11 @@ public class DiscoveryEngine implements Runnable
 					   	          //Send a response
 					   	          DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, packet.getAddress(), packet.getPort());
 					   	          sendsocket.send(sendPacket);
+					   	          
+					   	          //peer with remote
+					   	          PluginEngine.processPeer(packet.getAddress().getHostAddress(),"dummy-value");
+			  	 		          //peer with remote
+					   	          
 					   	          //System.out.println(getClass().getName() + ">>>Sent packet to: " + sendPacket.getAddress().getHostAddress());
 					   	        }
 					   	      }

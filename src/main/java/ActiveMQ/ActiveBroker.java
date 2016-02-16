@@ -82,7 +82,7 @@ return connector;
 		try
 		{
 			
-			NetworkConnector bridge = broker.addNetworkConnector(new URI("static:tcp://[" + URI + "]:32010"));
+			NetworkConnector bridge = broker.addNetworkConnector(new URI("static:tcp://" + URI + ":32010"));
 			//TransportConnector connector = new TransportConnector();
 			//connector.setUri(new URI(URI));
 			//connector.setDiscoveryUri(new URI("multicast://default?group=test"));
@@ -90,7 +90,11 @@ return connector;
 			//broker.requestRestart();
 			//broker.startAllConnectors();
 			//broker.startTransportConnector(connector);
+			System.out.println("BorkerNAme: " + bridge.getBrokerName() + " " + bridge.getBrokerService().getBrokerName());
 			bridge.start();
+			System.out.println("BorkerNAme: " + bridge.getBrokerName() + " " + bridge.getBrokerService().getDefaultSocketURIString());
+			
+			
 		}
 		catch(Exception ex)
 		{

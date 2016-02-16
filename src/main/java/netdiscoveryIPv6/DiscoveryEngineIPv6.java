@@ -136,7 +136,7 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 		          socket.send(sendPacket);
 		  	 		          
 		  	 		          // process peer
-		  	 		          PluginEngine.processPeer(packet.getAddress().getHostAddress());
+		  	 		          PluginEngine.processPeer(packet.getAddress().getHostAddress(), "dummy-value");
 		  	 		          // process peer
 		  	 		          
 		  	 		          //System.out.println(getClass().getName() + ">>>Sent packet to: " + sendPacket.getAddress().getHostAddress());
