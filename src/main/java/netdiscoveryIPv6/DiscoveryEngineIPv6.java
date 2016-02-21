@@ -2,6 +2,7 @@ package netdiscoveryIPv6;
 
 import java.net.DatagramPacket;
 import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.InterfaceAddress;
 import java.net.MulticastSocket;
@@ -149,12 +150,16 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 		    	  System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> P0 ");
 			  	 		      byte[] sendData = json.getBytes();
 			  	 		   System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> P1 ");
-			  	 		      
-		  	 		          //Send a response
-		  	 		          DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, packet.getAddress(), packet.getPort());
-		  	 		       System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> P2 ");
+			  	 		   InetAddress returnAddr = packet.getAddress();
+			  	 		System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> P2 ");
+			  	 		   int returnPort = packet.getLength();
+			  	 		System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> P3 ");
+			  	 		      //Send a response
+		  	 		       //   DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, packet.getAddress(), packet.getPort());
+			  	 	   DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
+	  	 		       System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> P4 ");
 			  	 		      socket.send(sendPacket);
-		  	 		       System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> P3 ");
+		  	 		       System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> P5 ");
 			  	 		      
 		  	 		       	  }
 		  	 		          catch(Exception ex)
