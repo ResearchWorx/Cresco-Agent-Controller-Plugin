@@ -144,12 +144,13 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 		      	// and returned as JSON formatted string
 		  	 		      	  String json = gson.toJson(me);
 		  	 		          //byte[] sendData = "DISCOVER_FUIFSERVER_RESPONSE".getBytes();
-		  	 		          byte[] sendData = json.getBytes();
+		  	 		       try{
+			  	 		         
+		  	 		      	  byte[] sendData = json.getBytes();
 		  	 		          //Send a response
 		  	 		          DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, packet.getAddress(), packet.getPort());
 		  	 		          socket.send(sendPacket);
 		  	 		          
-		  	 		          try{
 		  	 		          // process peer
 		  	 		       System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> PEER START0 ");
 		  	 		       String hsAddr = packet.getAddress().getHostAddress();
