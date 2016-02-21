@@ -79,11 +79,21 @@ public class DiscoveryEngineIPv6 implements Runnable
 		    {
 		    	try
 		    	{
-		    			SocketAddress sa = new InetSocketAddress("[::]",32005);
-	        			socket = new MulticastSocket(null);
-	        		    socket.bind(sa);
-	        			boolean isIPv6Bound = true;
-		  	 	        
+		    		//if (!networkInterface.getDisplayName().startsWith("docker") && !networkInterface.getDisplayName().startsWith("veth") && !networkInterface.isLoopback() && networkInterface.isUp() && networkInterface.supportsMulticast()  && !networkInterface.isPointToPoint() && !networkInterface.isVirtual())
+		    		//if (!networkInterface.getDisplayName().startsWith("docker") && !networkInterface.getDisplayName().startsWith("veth"))
+		    		//if (!networkInterface.getDisplayName().startsWith("veth"))
+		    		if (!networkInterface.getDisplayName().startsWith("veth") && !networkInterface.isLoopback() && networkInterface.isUp() && networkInterface.supportsMulticast() && !networkInterface.isPointToPoint() && !networkInterface.isVirtual())
+			    	{
+		    			System.out.println("Trying interface: " + networkInterface.getDisplayName());
+		    			boolean isIPv6Bound = true;
+			  	 	    
+		  	 	    	 			SocketAddress sa = new InetSocketAddress("[::]",32005);
+		  	 	        			socket = new MulticastSocket(null);
+		  	 	        		    socket.bind(sa);
+		  	 	        			System.out.println("IPv6 Bound to interface : " + networkInterface.getDisplayName() + " address: [::]");
+		  	 	        			
+			  			 
+		  	 	    	
 		  	 	    	if(isIPv6Bound)
 		  	 	    	{
 		  	 	    		SocketAddress saj = new InetSocketAddress(Inet6Address.getByName("ff05::1:c"),32005);
@@ -137,7 +147,7 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 		      }
 		  	 	    	}
 		  	 	    	
-		    		
+		    		}
 		    		
 		    	}
 		    	catch(Exception ex)
