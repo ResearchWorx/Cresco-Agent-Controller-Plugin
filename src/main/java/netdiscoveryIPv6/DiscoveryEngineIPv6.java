@@ -103,9 +103,8 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 	    	{
 		  	 	    		SocketAddress saj = new InetSocketAddress(Inet6Address.getByName("ff05::1:c"),32005);
 		  	 	    	    socket.joinGroup(saj, networkInterface);
-		  	 	    	    System.out.println(getClass().getName() + ">>> Bind5");
-		  	 			    //SocketAddress saj2 = new InetSocketAddress(Inet6Address.getByName("ff02::1:c"),32005);
-		  	 	    		//socket.joinGroup(saj2, networkInterface);
+		  	 	    	    SocketAddress saj2 = new InetSocketAddress(Inet6Address.getByName("ff02::1:c"),32005);
+		  	 	    		socket.joinGroup(saj2, networkInterface);
 		  	 	    		//System.out.println(getClass().getName() + ">>> Bind2");
 		  	 			    //SocketAddress saj3 = new InetSocketAddress(Inet6Address.getByName("ff01::1:c"),32005);
 		  	 	    		//socket.joinGroup(saj3, networkInterface);
@@ -120,15 +119,13 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 		        //Receive a packet
 		  	 		        byte[] recvBuf = new byte[15000];
 		  	 		        DatagramPacket packet = new DatagramPacket(recvBuf, recvBuf.length);
-		  	 		        System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> WAIT ");
-		  	 			    
+		  	 		        
 		  	 		        socket.receive(packet);
 		  	 		        //check if this is a local address
 		  	 		        
 		  	 		        if(!PluginEngine.isLocal(packet.getAddress().getHostAddress()))
 		  	 		        {
-		  	 		         System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> REC ");
-		  	 			    
+		  	 		         
 		  	 		        //Packet received
 		  	 		        
 		  	 		        System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
@@ -157,8 +154,7 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 		          //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, packet.getAddress(), packet.getPort());
 		  	 		    	  DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
 	  	 		              socket.send(sendPacket);
-	  	 		              System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> P5 SENT " + returnAddr);
-			  	 	
+	  	 		              
 		  	 		       	  }
 		  	 		          catch(Exception ex)
 		  	 		          {
