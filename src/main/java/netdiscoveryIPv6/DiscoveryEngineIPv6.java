@@ -149,13 +149,19 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 		          DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, packet.getAddress(), packet.getPort());
 		  	 		          socket.send(sendPacket);
 		  	 		          
+		  	 		          try{
 		  	 		          // process peer
 		  	 		       System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> PEER START0 ");
 		  	 		       String hsAddr = packet.getAddress().getHostAddress();
 		  	 		       System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> PEER START1 ");
 		  	 		          PluginEngine.processPeer(hsAddr, "dummy-value");
 		  	 		       System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> PEER STOP ");
-		  	 			     
+		  	 		          }
+		  	 		          catch(Exception ex)
+		  	 		          {
+		  	 		        	System.out.println("DE Process Peer " + getClass().getName() + " interface= " + networkInterfaceName + " >>> PEER ERROR " + ex.toString());
+				  	 		       
+		  	 		          }
 		  	 		          // process peer
 		  	 		          
 		  	 		          //System.out.println(getClass().getName() + ">>>Sent packet to: " + sendPacket.getAddress().getHostAddress());

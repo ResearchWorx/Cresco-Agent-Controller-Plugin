@@ -157,7 +157,7 @@ public class PluginEngine {
     	}
     	catch(Exception e)
     	{
-    		e.printStackTrace();
+    		System.out.println("PluginEngine : Main Error " + e.toString());
     	}
         
         
@@ -294,7 +294,8 @@ public class PluginEngine {
     	}
     	catch(Exception ex)
     	{
-    		System.out.println(ex.toString());
+    		System.out.println("PluginEngine : Process Peer " + ex.toString());
+    		
     	}
     	return isPeer;
     }
