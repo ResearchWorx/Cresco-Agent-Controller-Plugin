@@ -67,7 +67,7 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  private MulticastSocket socket;
 		    public DiscoveryEngineWorkerIPv6(NetworkInterface networkInterface)
 		    {
-		    	
+		    	System.out.println("DiscoveryEngineWorkerIPv6 : Init 0");
 		    	this.networkInterface = networkInterface;
 		    	
 		    }
@@ -79,6 +79,8 @@ public class DiscoveryEngineIPv6 implements Runnable
 		    {
 		    	try
 		    	{
+		    		System.out.println("DiscoveryEngineWorkerIPv6 : Init 1");
+			    	
 		    		//if (!networkInterface.getDisplayName().startsWith("docker") && !networkInterface.getDisplayName().startsWith("veth") && !networkInterface.isLoopback() && networkInterface.isUp() && networkInterface.supportsMulticast()  && !networkInterface.isPointToPoint() && !networkInterface.isVirtual())
 		    		//if (!networkInterface.getDisplayName().startsWith("docker") && !networkInterface.getDisplayName().startsWith("veth"))
 		    		//if (!networkInterface.getDisplayName().startsWith("veth"))
