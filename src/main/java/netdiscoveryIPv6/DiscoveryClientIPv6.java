@@ -31,7 +31,10 @@ public class DiscoveryClientIPv6
 			String multiCastNetwork = "ff02::1:c";
 			DiscoveryClientWorkerIPv6 dcw = new DiscoveryClientWorkerIPv6(discoveryTimeout,multiCastNetwork);
 			//populate map with possible peers
+			System.out.println("DiscoveryClientIPv6 : local hosts start search..");
 			disMap = dcw.getDiscoveryMap();
+			System.out.println("DiscoveryClientIPv6 : local hosts end search..");
+			
 			if(disMap.isEmpty())
 			{
 				System.out.println("DiscoveryClientIPv6 : No local hosts found - searching site..");
