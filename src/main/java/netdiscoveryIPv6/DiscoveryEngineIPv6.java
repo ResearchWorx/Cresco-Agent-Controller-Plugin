@@ -95,7 +95,7 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 	        			if(hostAddress.contains("%"))
 		  	 	        			{
 		  	 	        				String[] hostAddressScope = hostAddress.split("%");
-		  	 	        				hostAddress = hostAddressScope[0];
+		  	 	        				hostAddress = hostAddressScope[0] + "%1";
 		  	 	        			}
 		  	 	        			SocketAddress sa = new InetSocketAddress(hostAddress,32005);
 		  	 	        			socket = new MulticastSocket(null);
