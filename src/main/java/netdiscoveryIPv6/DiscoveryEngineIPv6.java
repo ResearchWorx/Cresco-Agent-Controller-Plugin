@@ -69,8 +69,6 @@ public class DiscoveryEngineIPv6 implements Runnable
 		    public DiscoveryEngineWorkerIPv6(NetworkInterface networkInterface)
 		    {
 		    	this.networkInterfaceName = networkInterface.getDisplayName();
-		    	System.out.println("DiscoveryEngineWorkerIPv6 : Init " + this.networkInterfaceName);
-		    	
 		    	this.networkInterface = networkInterface;
 		    	
 		    }
@@ -88,8 +86,8 @@ public class DiscoveryEngineIPv6 implements Runnable
 		    		//if (!networkInterface.getDisplayName().startsWith("veth"))
 		    		if (!networkInterface.getDisplayName().startsWith("veth") && !networkInterface.isLoopback() && networkInterface.isUp() && networkInterface.supportsMulticast() && !networkInterface.isPointToPoint() && !networkInterface.isVirtual())
 			    	{
-		    			System.out.println("Trying interface: " + networkInterface.getDisplayName());
-		    			boolean isIPv6Bound = true;
+		    			System.out.println("DiscoveryEngineWorkerIPv6 : Init " + this.networkInterfaceName);
+				    	boolean isIPv6Bound = true;
 			  	 	    
 		  	 	    	 			SocketAddress sa = new InetSocketAddress("[::]",32005);
 		  	 	        			socket = new MulticastSocket(null);
@@ -101,12 +99,15 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 	    	if(isIPv6Bound)
 		  	 	    	{
 		  	 	    		SocketAddress saj = new InetSocketAddress(Inet6Address.getByName("ff05::1:c"),32005);
-		  	 	    		//SocketAddress saj = new InetSocketAddress(Inet6Address.getByName("ff02::1:c"),32005);
-		  	 	    		socket.joinGroup(saj, networkInterface);
-		  	 	    		SocketAddress saj2 = new InetSocketAddress(Inet6Address.getByName("ff02::1:c"),32005);
+		  	 	    	    socket.joinGroup(saj, networkInterface);
+		  	 	    	    System.out.println(getClass().getName() + ">>> Bind5");
+		  	 			    SocketAddress saj2 = new InetSocketAddress(Inet6Address.getByName("ff02::1:c"),32005);
 		  	 	    		socket.joinGroup(saj2, networkInterface);
-		  	 	    		SocketAddress saj3 = new InetSocketAddress(Inet6Address.getByName("ff01::1:c"),32005);
+		  	 	    		System.out.println(getClass().getName() + ">>> Bind2");
+		  	 			    SocketAddress saj3 = new InetSocketAddress(Inet6Address.getByName("ff01::1:c"),32005);
 		  	 	    		socket.joinGroup(saj3, networkInterface);
+		  	 	    		System.out.println(getClass().getName() + ">>> Bind1");
+		  	 			    
 		  	 	    		
 		  	 	    		
 		  	 	    		while (PluginEngine.isActive) 
@@ -116,6 +117,8 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 		        //Receive a packet
 		  	 		        byte[] recvBuf = new byte[15000];
 		  	 		        DatagramPacket packet = new DatagramPacket(recvBuf, recvBuf.length);
+		  	 		        System.out.println(getClass().getName() + ">>> REC");
+		  	 			    
 		  	 		        socket.receive(packet);
 
 		  	 		        //Packet received
@@ -143,7 +146,11 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 		          socket.send(sendPacket);
 		  	 		          
 		  	 		          // process peer
+		  	 		         System.out.println(getClass().getName() + ">>> Peer0");
+		  	 			    
 		  	 		          PluginEngine.processPeer(packet.getAddress().getHostAddress(), "dummy-value");
+		  	 		       System.out.println(getClass().getName() + ">>> Peer1");
+		  	 			    
 		  	 		          // process peer
 		  	 		          
 		  	 		          //System.out.println(getClass().getName() + ">>>Sent packet to: " + sendPacket.getAddress().getHostAddress());
