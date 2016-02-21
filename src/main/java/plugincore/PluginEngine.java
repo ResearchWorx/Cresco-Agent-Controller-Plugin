@@ -234,8 +234,12 @@ public class PluginEngine {
 		    for (InterfaceAddress interfaceAddress : networkInter.getInterfaceAddresses()) 
 		    {
 		    	String localAddress = interfaceAddress.getAddress().getHostAddress();
+		    	if(localAddress.contains("%"))
+		    	{
+		    		String[] localScope = localAddress.split("%");
+		    		localAddress = localScope[0];
+		    	}
 		    	localAddressList.add(localAddress);
-		    
 		    }
 		  }
     	}
