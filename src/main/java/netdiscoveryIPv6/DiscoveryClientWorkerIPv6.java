@@ -230,13 +230,13 @@ class StopListnerTask extends TimerTask {
 	    		  			MsgEvent me = gson.fromJson(json, MsgEvent.class);
 	    		  			if(me != null)
 	    		  			{
-	    		  				String remoteAddress = interfaceAddress.getAddress().getHostAddress();
+	    		  				 String remoteAddress = receivePacket.getAddress().getHostAddress();
 	    		        		 if(remoteAddress.contains("%"))
 	    		        		 {
 	    		        			 String[] remoteScope = hostAddress.split("%");
 	    		        			 remoteAddress = remoteScope[0];
 	    		        		 }
-	    		        		 
+	    		        		 System.out.println("Client IP = " + me.getParam("clientip") + " Remote IP= " + receivePacket.getAddress().getHostAddress());
 	    		  				if(!me.getParam("clientip").equals(remoteAddress))
 	    		  				{
 	    		  					//System.out.println("SAME HOST");
