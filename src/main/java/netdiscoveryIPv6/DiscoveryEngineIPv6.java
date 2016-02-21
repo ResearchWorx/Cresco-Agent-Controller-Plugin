@@ -145,24 +145,27 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 		      	  String json = gson.toJson(me);
 		  	 		          //byte[] sendData = "DISCOVER_FUIFSERVER_RESPONSE".getBytes();
 		  	 		       try{
-			  	 		         
-		  	 		      	  byte[] sendData = json.getBytes();
+		  	 		    	  
+		  	 		    	  System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> P0 ");
+			  	 		      byte[] sendData = json.getBytes();
+			  	 		   System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> P1 ");
+			  	 		      
 		  	 		          //Send a response
 		  	 		          DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, packet.getAddress(), packet.getPort());
-		  	 		          socket.send(sendPacket);
-		  	 		          
-		  	 		          // process peer
-		  	 		       System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> PEER START0 ");
-		  	 		       String hsAddr = packet.getAddress().getHostAddress();
-		  	 		       System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> PEER START HostAddress= " + hsAddr);
-		  	 		          PluginEngine.processPeer(hsAddr, "dummy-value");
-		  	 		       System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> PEER STOP ");
-		  	 		          }
+		  	 		       System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> P2 ");
+			  	 		      socket.send(sendPacket);
+		  	 		       System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> P3 ");
+			  	 		      
+		  	 		       	  }
 		  	 		          catch(Exception ex)
 		  	 		          {
 		  	 		        	System.out.println("DE Process Peer " + getClass().getName() + " interface= " + networkInterfaceName + " >>> PEER ERROR " + ex.toString());
 				  	 		       
 		  	 		          }
+		  	 		          // process peer
+		  	 		       	   String hsAddr = packet.getAddress().getHostAddress();
+		  	 		          PluginEngine.processPeer(hsAddr, "dummy-value");
+		  	 		          
 		  	 		          // process peer
 		  	 		          
 		  	 		          //System.out.println(getClass().getName() + ">>>Sent packet to: " + sendPacket.getAddress().getHostAddress());
