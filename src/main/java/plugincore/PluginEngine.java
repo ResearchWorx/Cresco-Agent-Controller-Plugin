@@ -222,6 +222,26 @@ public class PluginEngine {
     	return foundNeighbor;
     }
     
+    public static boolean isLocal(String checkAddress)
+    {
+    	boolean isLocal = false;
+    	
+    	if(checkAddress.contains("%"))
+    	{
+    		String[] checkScope = checkAddress.split("%");
+    		checkAddress = checkScope[0];
+    	}
+    	
+    	List<String> localAddressList = localAddresses();
+    	for(String localAddress : localAddressList)
+    	{
+    		if(localAddress.contains(checkAddress))
+    		{
+    			isLocal = true;
+    		}
+    	}
+    	return isLocal;
+    }
     public static List<String> localAddresses()
     {
     	List<String> localAddressList = new ArrayList<String>();

@@ -123,7 +123,10 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 		        System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> WAIT ");
 		  	 			    
 		  	 		        socket.receive(packet);
-		  	 		     
+		  	 		        //check if this is a local address
+		  	 		        
+		  	 		        if(!PluginEngine.isLocal(packet.getAddress().getHostAddress()))
+		  	 		        {
 		  	 		         System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> REC ");
 		  	 			    
 		  	 		        //Packet received
@@ -177,6 +180,13 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 		          
 		  	 		          //System.out.println(getClass().getName() + ">>>Sent packet to: " + sendPacket.getAddress().getHostAddress());
 		  	 		        }
+		  	 	    		}
+		  	 	    		
+		  	 	    		else
+		  	 	    		{
+		  	 	    			//local address
+		  	 	    			//System.out.println("Local Address")
+		  	 	    		}
 		  	 		      }
 		  	 	    	}
 		  	 	    	
