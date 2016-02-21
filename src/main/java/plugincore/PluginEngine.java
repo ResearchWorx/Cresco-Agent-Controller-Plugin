@@ -239,7 +239,10 @@ public class PluginEngine {
 		    		String[] localScope = localAddress.split("%");
 		    		localAddress = localScope[0];
 		    	}
-		    	localAddressList.add(localAddress);
+		    	if(!localAddressList.contains(localAddress))
+		    	{
+		    		localAddressList.add(localAddress);
+		    	}
 		    }
 		  }
     	}
