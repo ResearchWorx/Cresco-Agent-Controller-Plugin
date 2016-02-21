@@ -147,23 +147,15 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 		          //byte[] sendData = "DISCOVER_FUIFSERVER_RESPONSE".getBytes();
 		  	 		       try{
 		  	 		    	  
-		  	 		    	  System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> P0 ");
-			  	 		      byte[] sendData = json.getBytes();
-			  	 		   System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> P1 ");
-			  	 		   InetAddress returnAddr = packet.getAddress();
-			  	 		   
-			  	 		System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> P2 " + returnAddr.getHostAddress());
-			  	 		System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> P2 " + returnAddr.getHostName());
-			  	 		System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> P2 " + returnAddr.getCanonicalHostName());
-			  	 		   int returnPort = packet.getLength();
-			  	 		System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> P3 return = " + returnAddr);
+		  	 		    	  byte[] sendData = json.getBytes();
+		  	 		    	  InetAddress returnAddr = packet.getAddress();
+		  	 		    	  int returnPort = packet.getLength();
 			  	 		      //Send a response
-		  	 		       //   DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, packet.getAddress(), packet.getPort());
-			  	 	   DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
-	  	 		       System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> P4 ");
-			  	 		      socket.send(sendPacket);
-		  	 		       System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> P5 SENT");
-			  	 		      
+		  	 		          //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, packet.getAddress(), packet.getPort());
+		  	 		    	  DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
+	  	 		              socket.send(sendPacket);
+	  	 		              System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> P5 SENT " + returnAddr);
+			  	 	
 		  	 		       	  }
 		  	 		          catch(Exception ex)
 		  	 		          {
