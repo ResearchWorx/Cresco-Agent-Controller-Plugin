@@ -187,6 +187,8 @@ class StopListnerTask extends TimerTask {
 	      	    //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName("ff02::1:c"), 32005);
 	      	    //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, GROUP, PORT);
 	      	    c.send(sendPacket);
+	      	    System.out.println(getClass().getName() + ">>> Request packet sent to: " + multiCastNetwork +  ": from : " + interfaceAddress.getAddress().getHostAddress());
+	      	    
 	      	    //System.out.println(getClass().getName() + ">>> Request packet sent to: ff05::1:c : from : " + interfaceAddress.getAddress().getHostAddress());
 	      	    //c.send(sendPacket2);
 	      	    //System.out.println(getClass().getName() + ">>> Request packet sent to: ff02::1:c : from : " + interfaceAddress.getAddress().getHostAddress());
