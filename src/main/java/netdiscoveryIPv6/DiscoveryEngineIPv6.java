@@ -89,8 +89,8 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 	    	 {
 		  	 	        	  if(interfaceAddress.getAddress() instanceof Inet6Address)
 		  	 	              {
-		  	 	        		  if(!interfaceAddress.getAddress().isLinkLocalAddress())
-		  	 	        		  {
+		  	 	        		  //if(!interfaceAddress.getAddress().isLinkLocalAddress())
+		  	 	        		  //{
 		  	 	        			isIPv6Bound = true;
 		  	 	        			String hostAddress = interfaceAddress.getAddress().getHostAddress();
 		  	 	        			if(hostAddress.contains("%"))
@@ -105,7 +105,7 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 	        			socket.bind(sa);
 		  	 	        			System.out.println("IPv6 Bound to interface : " + networkInterface.getDisplayName() + " address: " + hostAddress);
 		  	 	        			
-			  			     	  }
+			  			     	  //}
 		  	 	              }
 		  	 	    	 }
 		  	 	    	
