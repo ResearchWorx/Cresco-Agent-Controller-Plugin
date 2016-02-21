@@ -140,8 +140,9 @@ class StopListnerTask extends TimerTask {
 	  while (interfaces.hasMoreElements()) {
 	    NetworkInterface networkInterface = (NetworkInterface) interfaces.nextElement();
 
-	    if (networkInterface.isLoopback() || !networkInterface.isUp()) {
-	      continue; // Don't want to broadcast to the loopback interface
+	    //if (networkInterface.isLoopback() || !networkInterface.isUp()) {
+	    if (networkInterface.getDisplayName().startsWith("veth") || networkInterface.isLoopback() || !networkInterface.isUp() || !networkInterface.supportsMulticast() || networkInterface.isPointToPoint() || networkInterface.isVirtual()) {
+		continue; // Don't want to broadcast to the loopback interface
 	    }
 	    
 	    if(networkInterface.supportsMulticast())
@@ -150,8 +151,8 @@ class StopListnerTask extends TimerTask {
 	         {
 	          try {
 	        	  
-	        	  //if((interfaceAddress.getAddress() instanceof Inet6Address) && !interfaceAddress.getAddress().isLinkLocalAddress())
-	        	  if((interfaceAddress.getAddress() instanceof Inet6Address))
+	        	  if((interfaceAddress.getAddress() instanceof Inet6Address) && !interfaceAddress.getAddress().isLinkLocalAddress())
+	        	  //if((interfaceAddress.getAddress() instanceof Inet6Address))
 	        	  {  
 	        		  
 	        		 //c = new MulticastSocket(null);
