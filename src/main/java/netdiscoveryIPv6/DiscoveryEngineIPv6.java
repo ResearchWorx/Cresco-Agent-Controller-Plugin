@@ -80,7 +80,8 @@ public class DiscoveryEngineIPv6 implements Runnable
 		    	try
 		    	{
 		    		//if (!networkInterface.getDisplayName().startsWith("docker") && !networkInterface.getDisplayName().startsWith("veth") && !networkInterface.isLoopback() && networkInterface.isUp() && networkInterface.supportsMulticast()  && !networkInterface.isPointToPoint() && !networkInterface.isVirtual())
-		    		if (!networkInterface.getDisplayName().startsWith("docker") && !networkInterface.getDisplayName().startsWith("veth"))
+		    		//if (!networkInterface.getDisplayName().startsWith("docker") && !networkInterface.getDisplayName().startsWith("veth"))
+		    		if (!networkInterface.getDisplayName().startsWith("veth"))
 				    {
 		    			System.out.println("Trying interface: " + networkInterface.getDisplayName());
 		    			boolean isIPv6Bound = false;
