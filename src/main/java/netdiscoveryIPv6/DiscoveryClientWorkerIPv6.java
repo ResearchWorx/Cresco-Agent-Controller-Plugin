@@ -172,10 +172,14 @@ class StopListnerTask extends TimerTask {
 	          
 	      	    //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet4Address.getByName("255.255.255.255"), 32005);
 	      	    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName("ff05::1:c"), 32005);
+	      	    DatagramPacket sendPacket2 = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName("ff02::1:c"), 32005);
+	      	    DatagramPacket sendPacket3 = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName("ff01::1:c"), 32005);
+	      	   
 	      	    //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName("ff02::1:c"), 32005);
 	      	    //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, GROUP, PORT);
 	      	    c.send(sendPacket);
 	      	    //System.out.println(getClass().getName() + ">>> Request packet sent to: 255.255.255.255 (DEFAULT)");
+	      	   System.out.println(getClass().getName() + ">>> Request packet sent to: ff05::1:c");
 	      	   /*
 	      	  System.out.println("prebind0 " + interfaceAddress.getAddress());
         	  System.out.println("locallink " + interfaceAddress.getAddress().isLinkLocalAddress());
