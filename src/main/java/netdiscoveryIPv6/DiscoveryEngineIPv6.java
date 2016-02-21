@@ -94,6 +94,7 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 	        			SocketAddress sa = new InetSocketAddress(interfaceAddress.getAddress().getHostAddress(),32005);
 		  	 	        			socket = new MulticastSocket(null);
 		  	 	        			socket.bind(sa);
+		  	 	        			
 			  			     	  }
 		  	 	              }
 		  	 	    	 }
