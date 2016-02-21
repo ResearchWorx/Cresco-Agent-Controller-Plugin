@@ -122,6 +122,11 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 		        
 		  	 		        socket.receive(packet);
 		  	 		        //check if this is a local address
+		  	 		        System.out.println("saj " + saj);
+		  	 		        System.out.println("saj2 " + saj2);
+		  	 		        System.out.println("incoming " + packet.getSocketAddress());
+		  	 		        
+		  	 		        
 		  	 		        
 		  	 		        if(!PluginEngine.isLocal(packet.getAddress().getHostAddress()))
 		  	 		        {
