@@ -118,7 +118,7 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 	    	
 		  	 	    		while (PluginEngine.isActive) 
 		  	 	    		{
-		  	 		    	  //System.out.println(getClass().getName() + ">>>Ready to receive broadcast packets!");
+		  	 		    	  System.out.println(getClass().getName() + ">>>Ready to receive broadcast packets!");
 		  	 			        
 		  	 		        //Receive a packet
 		  	 		        byte[] recvBuf = new byte[15000];
