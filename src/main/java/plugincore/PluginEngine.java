@@ -132,7 +132,7 @@ public class PluginEngine {
         	boolean foundNeighbor = false;
         	
         	System.out.println("Broker Search IPv6:");
-    		if(processPeerMap(dcv6.getDiscoveryMap(6000)))
+    		if(processPeerMap(dcv6.getDiscoveryMap(2000)))
     		{
     			//Add all IPv6 Addresses
     			foundNeighbor = true;
