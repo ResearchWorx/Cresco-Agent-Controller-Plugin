@@ -162,8 +162,8 @@ class StopListnerTask extends TimerTask {
 	        		 if(hostAddress.contains("%"))
 	        			{
 	        				String[] hostAddressScope = hostAddress.split("%");
-	        				//hostAddress = hostAddressScope[0] + "%1";
-	        			    hostAddress = hostAddressScope[0];
+	        				hostAddress = hostAddressScope[0] + "%1";
+	        			    //hostAddress = hostAddressScope[0];
 	        				
 	        			}
 		        	 SocketAddress sa = new InetSocketAddress(hostAddress,0);
@@ -188,6 +188,8 @@ class StopListnerTask extends TimerTask {
 	      	    c.send(sendPacket);
 	      	    //System.out.println(getClass().getName() + ">>> Request packet sent to: 255.255.255.255 (DEFAULT)");
 	      	   System.out.println(getClass().getName() + ">>> Request packet sent to: ff05::1:c : from : " + hostAddress);
+	      	   System.out.println(getClass().getName() + ">>> Request packet sent to: ff05::1:c : from : " + interfaceAddress.getAddress().getHostAddress());
+	      	   
 	      	   /*
 	      	  System.out.println("prebind0 " + interfaceAddress.getAddress());
         	  System.out.println("locallink " + interfaceAddress.getAddress().isLinkLocalAddress());
