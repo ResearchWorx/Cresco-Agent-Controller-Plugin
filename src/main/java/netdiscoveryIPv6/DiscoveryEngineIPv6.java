@@ -93,18 +93,10 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 	        		  //if(!interfaceAddress.getAddress().isLinkLocalAddress())
 		  	 	        		  //{
 		  	 	        			isIPv6Bound = true;
-		  	 	        			String hostAddress = interfaceAddress.getAddress().getHostAddress();
-		  	 	        			if(hostAddress.contains("%"))
-		  	 	        			{
-		  	 	        				String[] hostAddressScope = hostAddress.split("%");
-		  	 	        				//hostAddress = hostAddressScope[0] + "%1";
-		  	 	        			    hostAddress = hostAddressScope[0];
-		  	 	        				
-		  	 	        			}
-		  	 	        			SocketAddress sa = new InetSocketAddress(hostAddress,32005);
+		  	 	        			SocketAddress sa = new InetSocketAddress(interfaceAddress.getAddress(),32005);
 		  	 	        			socket = new MulticastSocket(null);
 		  	 	        		    socket.bind(sa);
-		  	 	        			System.out.println("IPv6 Bound to interface : " + networkInterface.getDisplayName() + " address: " + hostAddress);
+		  	 	        			System.out.println("IPv6 Bound to interface : " + networkInterface.getDisplayName() + " address: " + interfaceAddress.getAddress().getHostAddress());
 		  	 	        			
 			  			     	  //}
 		  	 	              }
@@ -113,9 +105,14 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 	    	if(isIPv6Bound)
 		  	 	    	{
 		  	 	    		SocketAddress saj = new InetSocketAddress(Inet6Address.getByName("ff05::1:c"),32005);
-		  	 	    	    //SocketAddress saj = new InetSocketAddress(Inet6Address.getByName("ff02::1:c"),32005);
+		  	 	    		//SocketAddress saj = new InetSocketAddress(Inet6Address.getByName("ff02::1:c"),32005);
 		  	 	    		socket.joinGroup(saj, networkInterface);
-		  	 	    	
+		  	 	    		SocketAddress saj2 = new InetSocketAddress(Inet6Address.getByName("ff02::1:c"),32005);
+		  	 	    		socket.joinGroup(saj2, networkInterface);
+		  	 	    		SocketAddress saj3 = new InetSocketAddress(Inet6Address.getByName("ff01::1:c"),32005);
+		  	 	    		socket.joinGroup(saj3, networkInterface);
+		  	 	    		
+		  	 	    		
 		  	 	    		while (PluginEngine.isActive) 
 		  	 	    		{
 		  	 		    	  System.out.println(getClass().getName() + ">>>Ready to receive broadcast packets!");
