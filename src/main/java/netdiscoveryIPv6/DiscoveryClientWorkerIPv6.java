@@ -158,8 +158,15 @@ class StopListnerTask extends TimerTask {
 	        		 c = new DatagramSocket(null);
 	        		 //c.setReuseAddress(true);
 	        		  //System.out.println("prebind1");
-		        		
-		        	 SocketAddress sa = new InetSocketAddress(interfaceAddress.getAddress(),0);
+	        		 String hostAddress = interfaceAddress.getAddress().getHostAddress();
+	        		 if(hostAddress.contains("%"))
+	        			{
+	        				String[] hostAddressScope = hostAddress.split("%");
+	        				//hostAddress = hostAddressScope[0] + "%1";
+	        			    hostAddress = hostAddressScope[0];
+	        				
+	        			}
+		        	 SocketAddress sa = new InetSocketAddress(hostAddress,0);
 		        	  //System.out.println("prebind2");
 		        		
 		        	 c.bind(sa);
@@ -180,7 +187,7 @@ class StopListnerTask extends TimerTask {
 	      	    //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, GROUP, PORT);
 	      	    c.send(sendPacket);
 	      	    //System.out.println(getClass().getName() + ">>> Request packet sent to: 255.255.255.255 (DEFAULT)");
-	      	   System.out.println(getClass().getName() + ">>> Request packet sent to: ff05::1:c : from : " + interfaceAddress.getAddress());
+	      	   System.out.println(getClass().getName() + ">>> Request packet sent to: ff05::1:c : from : " + hostAddress);
 	      	   /*
 	      	  System.out.println("prebind0 " + interfaceAddress.getAddress());
         	  System.out.println("locallink " + interfaceAddress.getAddress().isLinkLocalAddress());
