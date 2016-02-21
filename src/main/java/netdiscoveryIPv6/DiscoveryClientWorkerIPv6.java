@@ -158,7 +158,13 @@ class StopListnerTask extends TimerTask {
 	        		 c = new DatagramSocket(null);
 	        		 //c.setReuseAddress(true);
 	        		  //System.out.println("prebind1");
-	        		 SocketAddress sa = new InetSocketAddress(interfaceAddress.getAddress().getHostAddress(),0);
+	        		 String hostAddress = interfaceAddress.getAddress().getHostAddress();
+	        		 if(hostAddress.contains("%"))
+	        		 {
+	        			 String[] hostScope = hostAddress.split("%");
+	        			 hostAddress = hostScope[0];
+	        		 }
+	        		 SocketAddress sa = new InetSocketAddress(hostAddress,0);
 		        	  //System.out.println("prebind2");
 		        		
 		        	 c.bind(sa);
