@@ -83,7 +83,8 @@ public class DiscoveryEngine implements Runnable
 		    {
 		    	try
 		    	{
-		    		if (!networkInterface.isLoopback() && networkInterface.isUp())
+		    		//if (!networkInterface.isLoopback() && networkInterface.isUp())
+		    		if (!networkInterface.getDisplayName().startsWith("docker") && !networkInterface.getDisplayName().startsWith("veth") && !networkInterface.isLoopback() && networkInterface.isUp() && networkInterface.supportsMulticast()  && !networkInterface.isPointToPoint() && !networkInterface.isVirtual())
 		    		{
 		    			
 		  	 	    	 for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) 
