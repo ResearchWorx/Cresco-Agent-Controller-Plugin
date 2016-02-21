@@ -235,6 +235,7 @@ public class PluginEngine {
     	List<String> localAddressList = localAddresses();
     	for(String localAddress : localAddressList)
     	{
+    		System.out.println("Checking: " + checkAddress + " localAddress: " + localAddress);
     		if(localAddress.contains(checkAddress))
     		{
     			isLocal = true;

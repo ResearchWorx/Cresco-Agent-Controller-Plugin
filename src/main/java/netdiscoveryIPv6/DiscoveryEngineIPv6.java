@@ -127,7 +127,6 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 		        {
 		  	 		         
 		  	 		        //Packet received
-		  	 		        
 		  	 		        System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
 		  	 		        //System.out.println(getClass().getName() + ">>>Packet received; data: " + new String(packet.getData()));
 
