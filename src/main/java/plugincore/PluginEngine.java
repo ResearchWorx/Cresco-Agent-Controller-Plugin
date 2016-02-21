@@ -273,7 +273,15 @@ public class PluginEngine {
     				System.out.println("adding network connect for peer: " + peer);
     				if(isIPv6)
     				{
-    					broker.AddNetworkConnector("[" + peer + "]");
+    					if(peer.contains("%"))
+    					{
+    						String[] peerScope = peer.split("%");
+    						broker.AddNetworkConnector("[" + peerScope[0] + "]");
+    					}
+    					else
+    					{
+    						broker.AddNetworkConnector("[" + peer + "]");
+    					}
         			}
     				else
     				{
