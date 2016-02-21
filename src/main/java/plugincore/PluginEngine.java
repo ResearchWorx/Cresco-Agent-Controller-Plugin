@@ -113,7 +113,7 @@ public class PluginEngine {
         }
         System.out.println("IPv6 DiscoveryEngine Started..");
 		
-    	
+    	/*
     	//Start IPv4 network discovery engine
     	Thread de = new Thread(new DiscoveryEngine());
     	de.start();
@@ -123,7 +123,7 @@ public class PluginEngine {
         	Thread.sleep(1000);
         }
         System.out.println("IPv4 DiscoveryEngine Started..");
-		
+		*/
         
         dc = new DiscoveryClient();
         dcv6 = new DiscoveryClientIPv6();
