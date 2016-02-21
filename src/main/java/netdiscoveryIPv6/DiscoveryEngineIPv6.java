@@ -91,10 +91,16 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 	        		  if(!interfaceAddress.getAddress().isLinkLocalAddress())
 		  	 	        		  {
 		  	 	        			isIPv6Bound = true;
-		  	 	        			SocketAddress sa = new InetSocketAddress(interfaceAddress.getAddress().getHostAddress(),32005);
+		  	 	        			String hostAddress = interfaceAddress.getAddress().getHostAddress();
+		  	 	        			if(hostAddress.contains("%"))
+		  	 	        			{
+		  	 	        				String[] hostAddressScope = hostAddress.split("%");
+		  	 	        				hostAddress = hostAddressScope[0];
+		  	 	        			}
+		  	 	        			SocketAddress sa = new InetSocketAddress(hostAddress,32005);
 		  	 	        			socket = new MulticastSocket(null);
 		  	 	        			socket.bind(sa);
-		  	 	        			System.out.println("IPv6 Bound to interface : " + networkInterface.getDisplayName() + " address: " + interfaceAddress.getAddress().getHostAddress());
+		  	 	        			System.out.println("IPv6 Bound to interface : " + networkInterface.getDisplayName() + " address: " + interfaceAddress.getAddress().getHostName());
 		  	 	        			
 			  			     	  }
 		  	 	              }
