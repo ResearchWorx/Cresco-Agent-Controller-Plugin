@@ -119,10 +119,12 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 		        //Receive a packet
 		  	 		        byte[] recvBuf = new byte[15000];
 		  	 		        DatagramPacket packet = new DatagramPacket(recvBuf, recvBuf.length);
-		  	 		        System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> REC ");
+		  	 		        System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> WAIT ");
 		  	 			    
 		  	 		        socket.receive(packet);
-
+		  	 		     
+		  	 		         System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> REC ");
+		  	 			    
 		  	 		        //Packet received
 		  	 		        
 		  	 		        //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
@@ -148,11 +150,10 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 		          socket.send(sendPacket);
 		  	 		          
 		  	 		          // process peer
-		  	 		         System.out.println(getClass().getName() + ">>> Peer0");
-		  	 			    
-		  	 		          PluginEngine.processPeer(packet.getAddress().getHostAddress(), "dummy-value");
-		  	 		       System.out.println(getClass().getName() + ">>> Peer1");
-		  	 			    
+		  	 		       System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> PEER START ");
+		  	 			      PluginEngine.processPeer(packet.getAddress().getHostAddress(), "dummy-value");
+		  	 		       System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> PEER STOP ");
+		  	 			     
 		  	 		          // process peer
 		  	 		          
 		  	 		          //System.out.println(getClass().getName() + ">>>Sent packet to: " + sendPacket.getAddress().getHostAddress());
