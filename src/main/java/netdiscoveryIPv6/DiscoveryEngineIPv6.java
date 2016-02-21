@@ -101,7 +101,8 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 	    	
 		  	 	    	if(isIPv6Bound)
 		  	 	    	{
-		  	 	    		SocketAddress saj = new InetSocketAddress(Inet6Address.getByName("ff05::1:c"),32005);
+		  	 	    		//SocketAddress saj = new InetSocketAddress(Inet6Address.getByName("ff05::1:c"),32005);
+		  	 	    	    SocketAddress saj = new InetSocketAddress(Inet6Address.getByName("ff02::1:c"),32005);
 		  	 	    		socket.joinGroup(saj, networkInterface);
 		  	 	    	
 		  	 	    		while (PluginEngine.isActive) 
