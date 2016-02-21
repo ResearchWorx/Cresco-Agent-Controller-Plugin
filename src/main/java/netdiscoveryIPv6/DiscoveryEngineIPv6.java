@@ -102,9 +102,8 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 	        				
 		  	 	        			}
 		  	 	        			SocketAddress sa = new InetSocketAddress(hostAddress,32005);
-		  	 	        			//socket = new MulticastSocket(null);
-		  	 	        		    socket = new MulticastSocket(32005);
-		  	 	        			socket.bind(sa);
+		  	 	        			socket = new MulticastSocket(null);
+		  	 	        		    socket.bind(sa);
 		  	 	        			System.out.println("IPv6 Bound to interface : " + networkInterface.getDisplayName() + " address: " + hostAddress);
 		  	 	        			
 			  			     	  //}
