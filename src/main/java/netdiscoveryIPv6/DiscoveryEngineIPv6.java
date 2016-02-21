@@ -65,9 +65,12 @@ public class DiscoveryEngineIPv6 implements Runnable
 	  {
 		  private NetworkInterface networkInterface;
 		  private MulticastSocket socket;
+		  private String networkInterfaceName;
 		    public DiscoveryEngineWorkerIPv6(NetworkInterface networkInterface)
 		    {
-		    	System.out.println("DiscoveryEngineWorkerIPv6 : Init 0");
+		    	this.networkInterfaceName = networkInterface.getDisplayName();
+		    	System.out.println("DiscoveryEngineWorkerIPv6 : Init " + this.networkInterfaceName);
+		    	
 		    	this.networkInterface = networkInterface;
 		    	
 		    }
@@ -79,8 +82,7 @@ public class DiscoveryEngineIPv6 implements Runnable
 		    {
 		    	try
 		    	{
-		    		System.out.println("DiscoveryEngineWorkerIPv6 : Init 1");
-			    	
+		    		
 		    		//if (!networkInterface.getDisplayName().startsWith("docker") && !networkInterface.getDisplayName().startsWith("veth") && !networkInterface.isLoopback() && networkInterface.isUp() && networkInterface.supportsMulticast()  && !networkInterface.isPointToPoint() && !networkInterface.isVirtual())
 		    		//if (!networkInterface.getDisplayName().startsWith("docker") && !networkInterface.getDisplayName().startsWith("veth"))
 		    		//if (!networkInterface.getDisplayName().startsWith("veth"))
@@ -92,7 +94,7 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 	    	 			SocketAddress sa = new InetSocketAddress("[::]",32005);
 		  	 	        			socket = new MulticastSocket(null);
 		  	 	        		    socket.bind(sa);
-		  	 	        			System.out.println("IPv6 Bound to interface : " + networkInterface.getDisplayName() + " address: [::]");
+		  	 	        			System.out.println("IPv6 Bound to interface : " + networkInterfaceName + " address: [::]");
 		  	 	        			
 			  			 
 		  	 	    	
@@ -154,7 +156,7 @@ public class DiscoveryEngineIPv6 implements Runnable
 		    	}
 		    	catch(Exception ex)
 		    	{
-		    		System.out.println("DiscoveryEngineIPv6 : DiscoveryEngineWorkerIPv6 : Run Error " + ex.toString());
+		    		System.out.println("DiscoveryEngineIPv6 : DiscoveryEngineWorkerIPv6 : Interface = "+ networkInterfaceName + " : Run Error " + ex.toString());
 		    	}
 		    }
 	  }
