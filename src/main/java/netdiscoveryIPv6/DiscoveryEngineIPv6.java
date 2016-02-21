@@ -150,8 +150,10 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 		          socket.send(sendPacket);
 		  	 		          
 		  	 		          // process peer
-		  	 		       System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> PEER START ");
-		  	 			      PluginEngine.processPeer(packet.getAddress().getHostAddress(), "dummy-value");
+		  	 		       System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> PEER START0 ");
+		  	 		       String hsAddr = packet.getAddress().getHostAddress();
+		  	 		       System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> PEER START1 ");
+		  	 		          PluginEngine.processPeer(hsAddr, "dummy-value");
 		  	 		       System.out.println(getClass().getName() + " interface= " + networkInterfaceName + " >>> PEER STOP ");
 		  	 			     
 		  	 		          // process peer
