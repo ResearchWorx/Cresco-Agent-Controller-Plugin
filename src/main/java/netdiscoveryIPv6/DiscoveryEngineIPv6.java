@@ -168,8 +168,8 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 		          // process peer
 		  	 		    try{
 		  	 		    	
-		  	 		       	   String hsAddr = packet.getAddress().getHostAddress();
-		  	 		          PluginEngine.processPeer(hsAddr, "dummy-value");
+		  	 		       	   //String hsAddr = packet.getAddress().getHostAddress();
+		  	 		          //PluginEngine.processPeer(hsAddr, "dummy-value");
 		  	 		 }
 	  	 		          catch(Exception ex)
 	  	 		          {
