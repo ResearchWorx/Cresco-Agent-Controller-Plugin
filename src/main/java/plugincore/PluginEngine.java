@@ -253,6 +253,11 @@ public class PluginEngine {
     	{
     		if((!localAddresses().contains(peer) && (!abhm.containsKey(peer))) && (!pbhm.containsKey(agentpath)))
     		{
+    			if(peer.contains("%"))
+				{
+					String[] peerScope = peer.split("%");
+					peer = peerScope[0];
+				}
     			System.out.println("ProcessPeer: " + peer);
     			InetAddress peerAddress = InetAddress.getByName(peer);
     			boolean isReachable = false;
@@ -273,15 +278,7 @@ public class PluginEngine {
     				System.out.println("adding network connect for peer: " + peer);
     				if(isIPv6)
     				{
-    					if(peer.contains("%"))
-    					{
-    						String[] peerScope = peer.split("%");
-    						broker.AddNetworkConnector("[" + peerScope[0] + "]");
-    					}
-    					else
-    					{
-    						broker.AddNetworkConnector("[" + peer + "]");
-    					}
+    					broker.AddNetworkConnector("[" + peer + "]");
         			}
     				else
     				{
