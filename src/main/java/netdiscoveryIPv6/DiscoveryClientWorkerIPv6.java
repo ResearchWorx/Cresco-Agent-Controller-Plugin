@@ -33,13 +33,15 @@ private DatagramSocket c;
 private Gson gson;
 public Timer timer;
 public int discoveryTimeout;
+public String multiCastNetwork;
 
-	public DiscoveryClientWorkerIPv6(int discoveryTimeout)
+	public DiscoveryClientWorkerIPv6(int discoveryTimeout, String multiCastNetwork)
 	{
 		gson = new Gson();
 		//timer = new Timer();
 	    //timer.scheduleAtFixedRate(new StopListnerTask(), 1000, discoveryTimeout);
 		this.discoveryTimeout = discoveryTimeout;
+		this.multiCastNetwork = multiCastNetwork;
 	    
 	}
 	
@@ -178,17 +180,17 @@ class StopListnerTask extends TimerTask {
 		        	 byte[] sendData = "DISCOVER_FUIFSERVER_REQUEST".getBytes();
 	          
 	      	    //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet4Address.getByName("255.255.255.255"), 32005);
-	      	    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName("ff05::1:c"), 32005);
-	      	    DatagramPacket sendPacket2 = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName("ff02::1:c"), 32005);
-	      	    DatagramPacket sendPacket3 = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName("ff01::1:c"), 32005);
+	      	    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName(multiCastNetwork), 32005);
+	      	    //DatagramPacket sendPacket2 = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName("ff02::1:c"), 32005);
+	      	    //DatagramPacket sendPacket3 = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName("ff01::1:c"), 32005);
 	      	   
 	      	    //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName("ff02::1:c"), 32005);
 	      	    //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, GROUP, PORT);
 	      	    c.send(sendPacket);
 	      	    //System.out.println(getClass().getName() + ">>> Request packet sent to: ff05::1:c : from : " + interfaceAddress.getAddress().getHostAddress());
-	      	    c.send(sendPacket2);
+	      	    //c.send(sendPacket2);
 	      	    //System.out.println(getClass().getName() + ">>> Request packet sent to: ff02::1:c : from : " + interfaceAddress.getAddress().getHostAddress());
-	      	    c.send(sendPacket3);
+	      	    //c.send(sendPacket3);
 	      	    //System.out.println(getClass().getName() + ">>> Request packet sent to: ff01::1:c : from : " + interfaceAddress.getAddress().getHostAddress());
 	      	   
       	    //System.out.println(getClass().getName() + ">>> Request packet sent to: 255.255.255.255 (DEFAULT)");

@@ -27,7 +27,16 @@ public class DiscoveryClientIPv6
 				Thread.sleep(2500);
 			}
 			PluginEngine.clientDiscoveryActiveIPv6 = true;
-			DiscoveryClientWorkerIPv6 dcw = new DiscoveryClientWorkerIPv6(discoveryTimeout);
+			//Searching local network [ff02::1:c]
+			String multiCastNetwork = "ff02::1:c";
+			DiscoveryClientWorkerIPv6 dcw = new DiscoveryClientWorkerIPv6(discoveryTimeout,multiCastNetwork);
+			if(dcw.getDiscoveryMap().isEmpty())
+			{
+				System.out.println("DiscoveryClientIPv6 : No local hosts found - searching site..");
+				//Searching site network [ff05::1:c]
+				multiCastNetwork = "ff05::1:c";
+				dcw = new DiscoveryClientWorkerIPv6(discoveryTimeout,multiCastNetwork);
+			}
 			disMap = dcw.getDiscoveryMap();
 		}
 		catch(Exception ex)
