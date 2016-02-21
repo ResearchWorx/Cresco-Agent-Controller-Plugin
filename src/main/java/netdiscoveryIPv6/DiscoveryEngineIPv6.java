@@ -164,13 +164,20 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 		       	  }
 		  	 		          catch(Exception ex)
 		  	 		          {
-		  	 		        	System.out.println("DE Process Peer " + getClass().getName() + " interface= " + networkInterfaceName + " >>> PEER ERROR " + ex.toString());
+		  	 		        	System.out.println("DE Sending remote " + getClass().getName() + " interface= " + networkInterfaceName + " >>> Socket Error ERROR " + ex.toString());
 				  	 		       
 		  	 		          }
 		  	 		          // process peer
+		  	 		    try{
+		  	 		    	
 		  	 		       	   String hsAddr = packet.getAddress().getHostAddress();
 		  	 		          PluginEngine.processPeer(hsAddr, "dummy-value");
-		  	 		          
+		  	 		 }
+	  	 		          catch(Exception ex)
+	  	 		          {
+	  	 		        	System.out.println("DE Process Peer " + getClass().getName() + " interface= " + networkInterfaceName + " >>> PEER ERROR " + ex.toString());
+			  	 		       
+	  	 		          }
 		  	 		          // process peer
 		  	 		          
 		  	 		          //System.out.println(getClass().getName() + ">>>Sent packet to: " + sendPacket.getAddress().getHostAddress());
