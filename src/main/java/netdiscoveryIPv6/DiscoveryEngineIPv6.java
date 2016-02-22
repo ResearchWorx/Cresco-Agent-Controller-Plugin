@@ -125,7 +125,7 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 		        System.out.println("saj " + saj);
 		  	 		        System.out.println("saj2 " + saj2);
 		  	 		        System.out.println("incoming " + packet.getSocketAddress());
-		  	 		        
+		  	 		        System.out.println("Thread = " + Thread.currentThread().toString());
 		  	 		        
 		  	 		        
 		  	 		        if(!PluginEngine.isLocal(packet.getAddress().getHostAddress()))
@@ -163,7 +163,8 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 		          catch(Exception ex)
 		  	 		          {
 		  	 		        	System.out.println("DE Sending remote " + getClass().getName() + " interface= " + networkInterfaceName + " >>> Socket Error ERROR " + ex.toString());
-				  	 		       
+		  	 		        	System.out.println("Thread = " + Thread.currentThread().toString());
+			  	 		          
 		  	 		          }
 		  	 		          // process peer
 		  	 		    try{
@@ -174,7 +175,8 @@ public class DiscoveryEngineIPv6 implements Runnable
 	  	 		          catch(Exception ex)
 	  	 		          {
 	  	 		        	System.out.println("DE Process Peer " + getClass().getName() + " interface= " + networkInterfaceName + " >>> PEER ERROR " + ex.toString());
-			  	 		       
+	  	 		        	System.out.println("Thread = " + Thread.currentThread().toString());
+		  	 		         
 	  	 		          }
 		  	 		          // process peer
 		  	 		          
@@ -196,6 +198,8 @@ public class DiscoveryEngineIPv6 implements Runnable
 		    	catch(Exception ex)
 		    	{
 		    		System.out.println("DiscoveryEngineIPv6 : DiscoveryEngineWorkerIPv6 : Interface = "+ networkInterfaceName + " : Run Error " + ex.toString());
+		    		System.out.println("Thread = " + Thread.currentThread().toString());
+  	 		        
 		    	}
 		    }
 	  }
