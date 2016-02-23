@@ -139,27 +139,27 @@ public class PluginEngine {
         System.out.println("IPv4 DiscoveryEngine Started..");
 		*/
         
-        dcv6 = new DiscoveryClientIPv6();
-        //dc = new DiscoveryClient();
+        //dcv6 = new DiscoveryClientIPv6();
+        dc = new DiscoveryClientIPv4();
         
         try{
         	boolean foundNeighbor = false;
-        	
+        	/*
         	System.out.println("Broker Search IPv6:");
     		if(processPeerMap(dcv6.getDiscoveryMap(2000)))
     		{
     			//Add all IPv6 Addresses
     			foundNeighbor = true;
     		}
+    		*/
     		
-    		/*
     		System.out.println("Broker Search IPv4:");
     		if(processPeerMap(dc.getDiscoveryMap(2000)))
     		{
     			foundNeighbor = true;
     			//Add all IPv6 Addresses
     		}
-    		*/
+    		
     		if(foundNeighbor)
       		{
       			System.out.println("Neighbor Exists");
