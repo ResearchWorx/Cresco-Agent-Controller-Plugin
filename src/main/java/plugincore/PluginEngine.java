@@ -8,6 +8,7 @@ import ActiveMQ.ActiveBroker;
 import ActiveMQ.ActiveConsumer;
 import ActiveMQ.ActiveProducer;
 import ch.qos.logback.classic.Level;
+import netdiscovery.DiscoveryBroker;
 import netdiscovery.DiscoveryClientIPv6;
 import netdiscovery.DiscoveryEngineIPv6;
 import netdiscoveryIPv4.DiscoveryClient;
@@ -106,6 +107,11 @@ public class PluginEngine {
     	Thread pt = new Thread(new ActiveProducer(args[2] + "_" + args[3],"tcp://localhost:32010"));
     	//Thread pt = new Thread(new ActiveProducer(args[2],"tcp://[::1]:32010"));
     	pt.start();
+    	
+    	//Start discovery broker
+    	Thread db = new Thread(new DiscoveryBroker());
+    	db.start();
+    	
     	
     	//Start IPv6 network discovery engine
     	Thread dev6 = new Thread(new DiscoveryEngineIPv6());
