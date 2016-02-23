@@ -33,6 +33,8 @@ public class PluginEngine {
 	public static boolean DiscoveryActive = false;
 	public static boolean DiscoveryResponderActive = false;
 	
+	public static boolean isIPv6 = false;
+	
 	public static boolean isActive = true;
 	
 	public static String region = "reg";
@@ -76,6 +78,8 @@ public class PluginEngine {
 	public static ActiveBroker broker;
     public static void main(String[] args) throws Exception 
     {
+    	isIPv6 = isIPv6();
+    	
     	region = args[0];
     	agent = args[1];
     	agentpath = region + "_" + agent;
@@ -284,6 +288,40 @@ public class PluginEngine {
     	}
     	return localAddressList;
     }
+    
+    public static boolean isIPv6()
+    {
+    	boolean isIPv6 = false;
+    	try
+    	{
+    		Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+  	 	  	while (interfaces.hasMoreElements()) 
+  	 	  	{
+  	 	  		NetworkInterface networkInterface = (NetworkInterface) interfaces.nextElement();
+  	 	  		if (networkInterface.getDisplayName().startsWith("veth") || networkInterface.isLoopback() || !networkInterface.isUp() || !networkInterface.supportsMulticast() || networkInterface.isPointToPoint() || networkInterface.isVirtual()) {
+  	 	  			continue; // Don't want to broadcast to the loopback interface
+  	 	  		}
+  		    
+  	 	  		if(networkInterface.supportsMulticast())
+  	 	  		{
+  	 	  			for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses())
+  	 	  			{
+  	 	  				if((interfaceAddress.getAddress() instanceof Inet6Address))
+  	 	  				{
+  		        		  isIPv6 = true;
+  	 	  				}
+  		        	 }
+  	 	  		}
+    		
+  	 	  	}
+    	}
+    	catch(Exception ex)
+    	{
+    		System.out.println("PluginEngine : isIPv6 Error " + ex.toString());
+    	}
+    	return isIPv6;
+    }
+    
     public static boolean processPeer(String peer,String agentpath)
     {
     	boolean isPeer = false;

@@ -89,24 +89,29 @@ public class DiscoveryEngine implements Runnable
 		    		if (!networkInterface.getDisplayName().startsWith("veth") && !networkInterface.isLoopback() && networkInterface.isUp() && networkInterface.supportsMulticast() && !networkInterface.isPointToPoint() && !networkInterface.isVirtual())
 					{
 		    			System.out.println("DiscoveryEngineWorkerIPv6 : Init " + this.networkInterfaceName);
-				    	boolean isIPv6Bound = true;
-			  	 	    
-		  	 	    	SocketAddress sa = new InetSocketAddress("[::]",32005);
+		    			SocketAddress sa = null;
+		    			if(PluginEngine.isIPv6)
+		    			{
+		    				sa = new InetSocketAddress("[::]",32005);
+		    			}
+		    			else
+		    			{
+		    				sa = new InetSocketAddress("0.0.0.0",32005);
+		    			}
 		  	 	        socket = new MulticastSocket(null);
 		  	 	        socket.bind(sa);
-		  	 	        System.out.println("IPv6 Bound to interface : " + networkInterfaceName + " address: [::]");
+		  	 	        System.out.println("Bound to interface : " + networkInterfaceName + " address: [::]");
 		  	 	        			
 			  			 
 		  	 	    	
-		  	 	    	if(isIPv6Bound)
-		  	 	    	{
-		  	 	    		//find to network and site multicast addresses
-		  	 	    		SocketAddress saj = new InetSocketAddress(Inet6Address.getByName("ff05::1:c"),32005);
+		  	 	        if(PluginEngine.isIPv6)
+		    			{
+		  	 	        	//find to network and site multicast addresses
+		    				SocketAddress saj = new InetSocketAddress(Inet6Address.getByName("ff05::1:c"),32005);
 		  	 	    	    socket.joinGroup(saj, networkInterface);
 		  	 	    	    SocketAddress saj2 = new InetSocketAddress(Inet6Address.getByName("ff02::1:c"),32005);
 		  	 	    		socket.joinGroup(saj2, networkInterface);
-		  	 	    		
-		  	 	    		
+		    			}
 		  	 	    		
 		  	 	    		while (PluginEngine.isActive) 
 		  	 	    		{
@@ -154,9 +159,7 @@ public class DiscoveryEngine implements Runnable
 		  	 	    			//local address do nothing
 		  	 	    		}
 		  	 		      }
-		  	 	    	}
-		  	 	    	
-		    		}
+		  	 	   }
 		    		
 		    	}
 		    	catch(Exception ex)
