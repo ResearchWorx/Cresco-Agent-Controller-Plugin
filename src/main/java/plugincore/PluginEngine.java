@@ -130,21 +130,22 @@ public class PluginEngine {
         
         try{
         	boolean foundNeighbor = false;
-        	
+        	/*
         	System.out.println("Broker Search IPv6:");
     		if(processPeerMap(dcv6.getDiscoveryMap(2000)))
     		{
     			//Add all IPv6 Addresses
     			foundNeighbor = true;
     		}
-    		/*
+    		*/
+    		
     		System.out.println("Broker Search IPv4:");
     		if(processPeerMap(dc.getDiscoveryMap(2000)))
     		{
     			foundNeighbor = true;
     			//Add all IPv6 Addresses
     		}
-    		*/
+    		
     		if(foundNeighbor)
       		{
       			System.out.println("Neighbor Exists");
