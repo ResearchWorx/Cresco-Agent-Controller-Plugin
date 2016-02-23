@@ -196,7 +196,7 @@ class StopListnerTask extends TimerTask {
   	 		           
 		          DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName(multiCastNetwork), 32005);
 	      	     c.send(sendPacket);
-	      	    System.out.println(getClass().getName() + ">>> Request packet sent to: " + multiCastNetwork +  ": from : " + interfaceAddress.getAddress().getHostAddress());
+	      	    //System.out.println(getClass().getName() + ">>> Request packet sent to: " + multiCastNetwork +  ": from : " + interfaceAddress.getAddress().getHostAddress());
 	      	    
 	      	  while(!c.isClosed())
 	    	  {
@@ -208,7 +208,7 @@ class StopListnerTask extends TimerTask {
 	    			  c.receive(receivePacket);
 
 	    			  //We have a response
-	    			  System.out.println(getClass().getName() + ">>> Broadcast response from server: " + receivePacket.getAddress().getHostAddress());
+	    			  //System.out.println(getClass().getName() + ">>> Broadcast response from server: " + receivePacket.getAddress().getHostAddress());
 
 	    			  //Check if the message is correct
 	    			  //System.out.println(new String(receivePacket.getData()));
@@ -218,6 +218,7 @@ class StopListnerTask extends TimerTask {
 	    		  		try
 	    		  		{
 	    		  			MsgEvent me = gson.fromJson(json, MsgEvent.class);
+	    		  			System.out.println("RESPONCE: " + me.getParamsString());
 	    		  			if(me != null)
 	    		  			{
 	    		  				 String remoteAddress = receivePacket.getAddress().getHostAddress();
@@ -227,13 +228,13 @@ class StopListnerTask extends TimerTask {
 	    		        			 remoteAddress = remoteScope[0];
 	    		        		 }
 	    		        		//System.out.println("Client IP = " + me.getParam("clientip") + " Remote IP= " + receivePacket.getAddress().getHostAddress());
-	    		  				//if(!me.getParam("src_ip").equals(remoteAddress))
-	    		  				//{
+	    		  				if(!me.getParam("src_ip").equals(remoteAddress))
+	    		  				{
 	    		  					//System.out.println("SAME HOST");
 	    		  					//System.out.println(me.getParamsString() + receivePacket.getAddress().getHostAddress());
 	    		  					//me.setParam("dst_ip", remoteAddress);
 	    		  					discoveryList.add(me);
-	    		  				//}
+	    		  				}
 	    		  			}
 	    		  		}
 	    		  		catch(Exception ex)
