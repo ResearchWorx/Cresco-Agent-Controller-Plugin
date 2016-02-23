@@ -59,7 +59,7 @@ public class ActiveBrokerManager implements Runnable
 					PluginEngine.brokeredAgents.put(agentPath, ba);
 				}
 				//try and connect
-				
+				addBroker(agentPath);
 			  }
 			  else
 			  {
