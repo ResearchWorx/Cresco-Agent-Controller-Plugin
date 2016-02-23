@@ -11,7 +11,7 @@ import ch.qos.logback.classic.Level;
 import netdiscovery.DiscoveryResponder;
 import netdiscovery.DiscoveryClientIPv6;
 import netdiscovery.DiscoveryEngine;
-import netdiscoveryIPv4.DiscoveryClient;
+import netdiscoveryIPv4.DiscoveryClientIPv4;
 import netdiscoveryIPv4.DiscoveryEngine_old;
 import shared.MsgEvent;
 
@@ -50,7 +50,7 @@ public class PluginEngine {
 	
 	public static ConcurrentLinkedQueue<MsgEvent> discoveryResponse;
 	
-	public static DiscoveryClient dc;
+	public static DiscoveryClientIPv4 dc;
 	public static DiscoveryClientIPv6 dcv6;
 	
 	//public static List<String> peerList;
