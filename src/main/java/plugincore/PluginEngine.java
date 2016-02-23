@@ -235,7 +235,7 @@ public class PluginEngine {
     	List<String> localAddressList = new ArrayList<String>();
     	try
     	{
-    	Enumeration inter = NetworkInterface.getNetworkInterfaces();
+    	Enumeration<NetworkInterface> inter = NetworkInterface.getNetworkInterfaces();
 		  while (inter.hasMoreElements()) 
 		  {
 		    NetworkInterface networkInter = (NetworkInterface) inter.nextElement();
@@ -294,58 +294,4 @@ public class PluginEngine {
     	return isIPv6;
     }
     
-    public static boolean processPeer(String peer,String agentpath)
-    {
-    	boolean isPeer = false;
-    	boolean isIPv6 = false;
-    	try
-    	{
-    		if((!localAddresses().contains(peer) && (!abhm.containsKey(peer))) && (!pbhm.containsKey(agentpath)))
-    		{
-    			if(peer.contains("%"))
-				{
-					String[] peerScope = peer.split("%");
-					peer = peerScope[0];
-				}
-    			System.out.println("ProcessPeer: " + peer);
-    			InetAddress peerAddress = InetAddress.getByName(peer);
-    			boolean isReachable = false;
-    		
-    			if(peerAddress instanceof Inet6Address)
-    			{
-    				isReachable = dcv6.isReachable(peer);
-    				isIPv6 = true;
-    			}
-    			else if(peerAddress instanceof Inet4Address)
-    			{
-    				isReachable = dc.isReachable(peer);
-    			}
-    		
-    			if(isReachable)
-    			{
-    				System.out.println("ProcessPeer: " + peer + " is reachable");
-    				System.out.println("adding network connect for peer: " + peer);
-    				if(isIPv6)
-    				{
-    					broker.AddNetworkConnector("[" + peer + "]");
-        			}
-    				else
-    				{
-    					broker.AddNetworkConnector(peer);
-        			}
-    				//peerList.add(peer);
-    				abhm.put(peer,agentpath);
-    				pbhm.put(agentpath,peer);
-    				
-    				isPeer = true;
-    			}
-    		}
-    	}
-    	catch(Exception ex)
-    	{
-    		System.out.println("PluginEngine : Process Peer " + ex.toString());
-    		
-    	}
-    	return isPeer;
-    }
 }

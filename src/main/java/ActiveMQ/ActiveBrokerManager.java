@@ -1,23 +1,12 @@
 package ActiveMQ;
 
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
+import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.InterfaceAddress;
-import java.net.MulticastSocket;
-import java.net.NetworkInterface;
-import java.net.SocketAddress;
 import java.net.SocketException;
-import java.util.Enumeration;
 
 import plugincore.PluginEngine;
-
-import com.google.gson.Gson;
-
 import shared.MsgEvent;
-import shared.MsgEventType;
 
 
 public class ActiveBrokerManager implements Runnable 
@@ -41,10 +30,11 @@ public class ActiveBrokerManager implements Runnable
 	    {
 		  try 
 		  {
-			  MsgEvent dr = PluginEngine.incomingCanidateBrokers.poll();
-			  if(dr != null)
+			  MsgEvent cb = PluginEngine.incomingCanidateBrokers.poll();
+			  if(cb != null)
 			  {
-				  
+				System.out.println(cb.getParam("canidateip"));
+				System.out.println(cb.getParam("canidateagent"));   
  	 		  }
 			  else
 			  {
@@ -59,5 +49,60 @@ public class ActiveBrokerManager implements Runnable
 	    }
 	  }
 	  
-	  
+	    public static boolean processPeer(String peer,String agentpath)
+	    {
+	    	boolean isPeer = false;
+	    	boolean isIPv6 = false;
+	    	try
+	    	{
+	    		if((!PluginEngine.localAddresses().contains(peer) && (!PluginEngine.abhm.containsKey(peer))) && (!PluginEngine.pbhm.containsKey(agentpath)))
+	    		{
+	    			if(peer.contains("%"))
+					{
+						String[] peerScope = peer.split("%");
+						peer = peerScope[0];
+					}
+	    			System.out.println("ProcessPeer: " + peer);
+	    			InetAddress peerAddress = InetAddress.getByName(peer);
+	    			boolean isReachable = false;
+	    		
+	    			if(peerAddress instanceof Inet6Address)
+	    			{
+	    				isReachable = PluginEngine.dcv6.isReachable(peer);
+	    				isIPv6 = true;
+	    			}
+	    			else if(peerAddress instanceof Inet4Address)
+	    			{
+	    				isReachable = PluginEngine.dc.isReachable(peer);
+	    			}
+	    		
+	    			if(isReachable)
+	    			{
+	    				System.out.println("ProcessPeer: " + peer + " is reachable");
+	    				System.out.println("adding network connect for peer: " + peer);
+	    				if(isIPv6)
+	    				{
+	    					PluginEngine.broker.AddNetworkConnector("[" + peer + "]");
+	        			}
+	    				else
+	    				{
+	    					PluginEngine.broker.AddNetworkConnector(peer);
+	        			}
+	    				//peerList.add(peer);
+	    				PluginEngine.abhm.put(peer,agentpath);
+	    				PluginEngine.pbhm.put(agentpath,peer);
+	    				
+	    				isPeer = true;
+	    			}
+	    		}
+	    	}
+	    	catch(Exception ex)
+	    	{
+	    		System.out.println("PluginEngine : Process Peer " + ex.toString());
+	    		
+	    	}
+	    	return isPeer;
+	    }
+
+
 }
