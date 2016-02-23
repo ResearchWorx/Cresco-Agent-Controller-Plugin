@@ -5,6 +5,7 @@ import org.apache.commons.configuration.SubnodeConfiguration;
 import org.slf4j.LoggerFactory;
 
 import ActiveMQ.ActiveBroker;
+import ActiveMQ.ActiveBrokerManager;
 import ActiveMQ.ActiveConsumer;
 import ActiveMQ.ActiveProducer;
 import ch.qos.logback.classic.Level;
@@ -13,6 +14,7 @@ import netdiscovery.DiscoveryResponder;
 import netdiscovery.DiscoveryClientIPv6;
 import netdiscovery.DiscoveryEngine;
 import shared.MsgEvent;
+import shared.MsgEventType;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -32,6 +34,8 @@ public class PluginEngine {
 	public static boolean clientDiscoveryActiveIPv6 = false;
 	public static boolean DiscoveryActive = false;
 	public static boolean DiscoveryResponderActive = false;
+	public static boolean ActiveBrokerManagerActive = false;
+	
 	
 	public static boolean isIPv6 = false;
 	
@@ -46,6 +50,7 @@ public class PluginEngine {
 	public static ConcurrentHashMap<String,String> pbhm;
 	
 	public static ConcurrentLinkedQueue<MsgEvent> discoveryResponse;
+	public static ConcurrentLinkedQueue<MsgEvent> incomingCanidateBrokers;
 	
 	public static DiscoveryClientIPv4 dc;
 	public static DiscoveryClientIPv6 dcv6;
@@ -88,6 +93,7 @@ public class PluginEngine {
     	abhm = new ConcurrentHashMap<String,String>(); 
     	pbhm = new ConcurrentHashMap<String,String>(); 
     	discoveryResponse = new ConcurrentLinkedQueue<MsgEvent>();
+    	incomingCanidateBrokers = new ConcurrentLinkedQueue<MsgEvent>();
     	
     	ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger)LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
     	//rootLogger.setLevel(Level.toLevel("debug"));
@@ -96,22 +102,29 @@ public class PluginEngine {
 
     	broker = new ActiveBroker(agentpath);
     	
+    	Thread abm = new Thread(new ActiveBrokerManager());
+    	abm.start();
+    	while(!ActiveBrokerManagerActive)
+        {
+        	Thread.sleep(1000);
+        }
+        System.out.println("ActiveBrokerManager Started..");
+		
     	
-    	Thread ct = new Thread(new ActiveConsumer(agentpath,"tcp://localhost:32010"));
+    	//Thread ct = new Thread(new ActiveConsumer(agentpath,"tcp://localhost:32010"));
     	//Thread ct = new Thread(new ActiveConsumer(args[1],"tcp://[::1]:32010"));
-    	ct.start();
+    	//ct.start();
     	
     	
-    	Thread pt = new Thread(new ActiveProducer(args[2] + "_" + args[3],"tcp://localhost:32010"));
+    	//Thread pt = new Thread(new ActiveProducer(args[2] + "_" + args[3],"tcp://localhost:32010"));
     	//Thread pt = new Thread(new ActiveProducer(args[2],"tcp://[::1]:32010"));
-    	pt.start();
+    	//pt.start();
     	
     	//Start discovery broker
     	Thread db = new Thread(new DiscoveryResponder());
     	db.start();
     	while(!DiscoveryResponderActive)
         {
-        	//System.out.println("Wating on Discovery Server to start...");
         	Thread.sleep(1000);
         }
         System.out.println("DiscoveryBroker Started..");
@@ -122,7 +135,6 @@ public class PluginEngine {
     	dev6.start();
     	while(!DiscoveryActive)
         {
-        	//System.out.println("Wating on Discovery Server to start...");
         	Thread.sleep(1000);
         }
         System.out.println("IPv6 DiscoveryEngine Started..");
@@ -143,30 +155,21 @@ public class PluginEngine {
         dc = new DiscoveryClientIPv4();
         
         try{
-        	boolean foundNeighbor = false;
+        	int processCount = 0;
         	/*
         	System.out.println("Broker Search IPv6:");
-    		if(processPeerMap(dcv6.getDiscoveryMap(2000)))
-    		{
-    			//Add all IPv6 Addresses
-    			foundNeighbor = true;
-    		}
+    		processCount = processPeerMap(dcv6.getDiscoveryMap(2000));
     		*/
     		
     		System.out.println("Broker Search IPv4:");
-    		if(processPeerMap(dc.getDiscoveryMap(2000)))
-    		{
-    			foundNeighbor = true;
-    			//Add all IPv6 Addresses
-    		}
+    		processCount = processPeerMap(dc.getDiscoveryMap(2000));
     		
-    		if(foundNeighbor)
+    		if(processCount > 0)
       		{
       			System.out.println("Neighbor Exists");
       		}
-    		
-    		if(!foundNeighbor)
-      		{
+    		else
+    		{
       			System.out.println("Better start something Brah");
       		}
     	}
@@ -175,49 +178,12 @@ public class PluginEngine {
     		System.out.println("PluginEngine : Main Error " + e.toString());
     	}
         
-        
-        /*
-        while(true)
-    	{
-    	try{
-    		System.out.println("Broker Search:");
-    		BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
-    	    String s = bufferRead.readLine();
-    	    String str[] = s.split(" ");
-    	    Map<String,String> bmap = null;
-    		if(str[0].equals("6"))
-    		{
-    			bmap = dcv6.getDiscoveryMap(Integer.parseInt(str[1]));
-    		}
-    		else if(str[0].equals("4"))
-    		{
-    			bmap = dc.getDiscoveryMap(Integer.parseInt(str[1]));
-    		}
-    		
-    		if(!bmap.isEmpty())
-    		{
-    			String[] discoveredAgents = bmap.get("discoveredagents").split(",");
-    			for(String discoveredAgent : discoveredAgents)
-    			{
-    				String[] agentNetwork = bmap.get(discoveredAgent).split("_");
-    				processPeer(agentNetwork[1]);
-    		    }
-    		}	
-    	}
-    	catch(Exception e)
-    	{
-    		e.printStackTrace();
-    	}
-    	}
-        */
-        
-        //end
        
     }
     
-    public static boolean processPeerMap(Map<String,String> bmap)
+    public static int processPeerMap(Map<String,String> bmap)
     {
-    	boolean foundNeighbor = false;
+    	int processCount = 0;
     	if(!bmap.isEmpty())
 		{
   			String[] discoveredAgents = bmap.get("discoveredagents").split(",");
@@ -227,14 +193,20 @@ public class PluginEngine {
 				for(String agentNetwork : agentNetworks)
 				{
 					String[] agentNetworkHosts = agentNetwork.split("_");
-					if(processPeer(agentNetworkHosts[1],discoveredAgent))
-					{
-						foundNeighbor = true;
-					}
+					//if(processPeer(agentNetworkHosts[1],discoveredAgent))
+					//{
+						MsgEvent cb = new MsgEvent(MsgEventType.DISCOVER,PluginEngine.region,PluginEngine.agent,PluginEngine.plugin,"Broadcast discovery response.");
+	  	 		        cb.setParam("canidateip",agentNetworkHosts[1]);
+	  	 		        cb.setParam("canidateagent",discoveredAgent);
+	  	 		        incomingCanidateBrokers.offer(cb);
+	  	 		        processCount++;
+					//	foundNeighbor = true;
+					//}
 				}
 		    }
 		}
-    	return foundNeighbor;
+    	return processCount;
+    	
     }
     
     public static boolean isLocal(String checkAddress)
