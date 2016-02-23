@@ -1,4 +1,4 @@
-package netdiscoveryIPv6;
+package netdiscovery;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -22,9 +22,12 @@ import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import plugincore.PluginEngine;
+
 import com.google.gson.Gson;
 
 import shared.MsgEvent;
+import shared.MsgEventType;
 
 public class DiscoveryClientWorkerIPv6 
 {
@@ -177,7 +180,16 @@ class StopListnerTask extends TimerTask {
 		        	  timer = new Timer();
 		        	  timer.schedule(new StopListnerTask(), discoveryTimeout);
 		        	 
-		        	 byte[] sendData = "DISCOVER_FUIFSERVER_REQUEST".getBytes();
+		        	  MsgEvent sme = new MsgEvent(MsgEventType.DISCOVER,PluginEngine.region,PluginEngine.agent,PluginEngine.plugin,"Cresco discovery request.");
+  	 		          //me.setParam("clientip", packet.getAddress().getHostAddress());
+
+  	 		      	// convert java object to JSON format,
+  	 		      	// and returned as JSON formatted string
+  	 		      	  String sendJson = gson.toJson(sme);
+
+  	 		         byte[] sendData = sendJson.getBytes();
+  	 		           
+		        	 //byte[] sendData = "DISCOVER_FUIFSERVER_REQUEST".getBytes();
 	          
 	      	    //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet4Address.getByName("255.255.255.255"), 32005);
 	      	    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName(multiCastNetwork), 32005);

@@ -1,4 +1,4 @@
-package netdiscoveryIPv6;
+package netdiscovery;
 
 import java.net.Inet6Address;
 import java.util.Map;

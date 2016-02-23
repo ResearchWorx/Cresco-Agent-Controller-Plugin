@@ -1,4 +1,4 @@
-package netdiscoveryIPv6;
+package netdiscovery;
 
 import java.net.DatagramPacket;
 import java.net.Inet6Address;
@@ -137,7 +137,18 @@ public class DiscoveryEngineIPv6 implements Runnable
 
 		  	 		        //See if the packet holds the right command (message)
 		  	 		        String message = new String(packet.getData()).trim();
-		  	 		        if (message.equals("DISCOVER_FUIFSERVER_REQUEST")) 
+		  	 		        //String response = "region=region0,agent=agent0,recaddr=" + packet.getAddress().getHostAddress();
+		  	 		        MsgEvent rme = null;
+		    		  		try
+		    		  		{
+		    		  			rme = gson.fromJson(message, MsgEvent.class);
+		    		  		}
+		    		  		catch(Exception ex)
+		    		  		{
+		    		  			System.out.println(getClass().getName() + " fail to marshal discovery");
+		    		  		}
+		  	 		        //if (message.equals("DISCOVER_FUIFSERVER_REQUEST")) 
+		    		  	    if (rme!=null) 
 		  	 		        {
 		  	 		          //String response = "region=region0,agent=agent0,recaddr=" + packet.getAddress().getHostAddress();
 		  	 		          //MsgEventType

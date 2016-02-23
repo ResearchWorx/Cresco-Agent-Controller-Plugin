@@ -8,12 +8,11 @@ import ActiveMQ.ActiveBroker;
 import ActiveMQ.ActiveConsumer;
 import ActiveMQ.ActiveProducer;
 import ch.qos.logback.classic.Level;
+import netdiscovery.DiscoveryClientIPv6;
+import netdiscovery.DiscoveryEngineIPv6;
 import netdiscoveryIPv4.DiscoveryClient;
 import netdiscoveryIPv4.DiscoveryEngine;
-import netdiscoveryIPv6.DiscoveryClientIPv6;
-import netdiscoveryIPv6.DiscoveryEngineIPv6;
 import shared.MsgEvent;
-
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -130,22 +129,22 @@ public class PluginEngine {
         
         try{
         	boolean foundNeighbor = false;
-        	/*
+        	
         	System.out.println("Broker Search IPv6:");
     		if(processPeerMap(dcv6.getDiscoveryMap(2000)))
     		{
     			//Add all IPv6 Addresses
     			foundNeighbor = true;
     		}
-    		*/
     		
+    		/*
     		System.out.println("Broker Search IPv4:");
     		if(processPeerMap(dc.getDiscoveryMap(2000)))
     		{
     			foundNeighbor = true;
     			//Add all IPv6 Addresses
     		}
-    		
+    		*/
     		if(foundNeighbor)
       		{
       			System.out.println("Neighbor Exists");
