@@ -140,6 +140,7 @@ class StopListnerTask extends TimerTask {
 	  sme.setParam("src_region",PluginEngine.region);
 	  sme.setParam("src_agent",PluginEngine.agent);
 	      
+	      
 	  
 	  String sendJson = gson.toJson(sme);
 	  byte[] sendData = sendJson.getBytes();
@@ -205,11 +206,11 @@ class StopListnerTask extends TimerTask {
 		  			MsgEvent me = gson.fromJson(json, MsgEvent.class);
 		  			if(me != null)
 		  			{
-		  				if(!me.getParam("clientip").equals(receivePacket.getAddress().getHostAddress()))
+		  				if(!me.getParam("src_ip").equals(receivePacket.getAddress().getHostAddress()))
 		  				{
 		  					//System.out.println("SAME HOST");
 		  					//System.out.println(me.getParamsString() + receivePacket.getAddress().getHostAddress());
-		  					me.setParam("serverip", receivePacket.getAddress().getHostAddress());
+		  					me.setParam("dst_ip", receivePacket.getAddress().getHostAddress());
 		  					discoveryList.add(me);
 		  				}
 		  			}
