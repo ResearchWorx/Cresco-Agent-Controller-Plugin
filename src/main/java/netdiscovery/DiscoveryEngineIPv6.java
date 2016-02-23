@@ -132,7 +132,7 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 		        {
 		  	 		         
 		  	 		        //Packet received
-		  	 		        System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
+		  	 		        //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
 		  	 		        //System.out.println(getClass().getName() + ">>>Packet received; data: " + new String(packet.getData()));
 
 		  	 		        //See if the packet holds the right command (message)
@@ -150,6 +150,8 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 		        //if (message.equals("DISCOVER_FUIFSERVER_REQUEST")) 
 		    		  	    if (rme!=null) 
 		  	 		        {
+		    		  	      System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
+			  	 		        
 		  	 		          //String response = "region=region0,agent=agent0,recaddr=" + packet.getAddress().getHostAddress();
 		  	 		          //MsgEventType
 		  	 		          //MsgEventType msgType, String msgRegion, String msgAgent, String msgPlugin, String msgBody
