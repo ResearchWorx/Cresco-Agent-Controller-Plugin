@@ -189,39 +189,10 @@ class StopListnerTask extends TimerTask {
 
   	 		         byte[] sendData = sendJson.getBytes();
   	 		           
-		        	 //byte[] sendData = "DISCOVER_FUIFSERVER_REQUEST".getBytes();
-	          
-	      	    //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet4Address.getByName("255.255.255.255"), 32005);
-	      	    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName(multiCastNetwork), 32005);
-	      	    //DatagramPacket sendPacket2 = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName("ff02::1:c"), 32005);
-	      	    //DatagramPacket sendPacket3 = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName("ff01::1:c"), 32005);
-	      	   
-	      	    //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName("ff02::1:c"), 32005);
-	      	    //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, GROUP, PORT);
-	      	    c.send(sendPacket);
+		          DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName(multiCastNetwork), 32005);
+	      	     c.send(sendPacket);
 	      	    System.out.println(getClass().getName() + ">>> Request packet sent to: " + multiCastNetwork +  ": from : " + interfaceAddress.getAddress().getHostAddress());
 	      	    
-	      	    //System.out.println(getClass().getName() + ">>> Request packet sent to: ff05::1:c : from : " + interfaceAddress.getAddress().getHostAddress());
-	      	    //c.send(sendPacket2);
-	      	    //System.out.println(getClass().getName() + ">>> Request packet sent to: ff02::1:c : from : " + interfaceAddress.getAddress().getHostAddress());
-	      	    //c.send(sendPacket3);
-	      	    //System.out.println(getClass().getName() + ">>> Request packet sent to: ff01::1:c : from : " + interfaceAddress.getAddress().getHostAddress());
-	      	   
-      	    //System.out.println(getClass().getName() + ">>> Request packet sent to: 255.255.255.255 (DEFAULT)");
-	      	   
-	      	   /*
-	      	  System.out.println("prebind0 " + interfaceAddress.getAddress());
-        	  System.out.println("locallink " + interfaceAddress.getAddress().isLinkLocalAddress());
-    		  System.out.println("global " + interfaceAddress.getAddress().isMCGlobal());
-    		  System.out.println("linklocal " + interfaceAddress.getAddress().isMCLinkLocal());
-    		  System.out.println("isNodelocal " + interfaceAddress.getAddress().isMCNodeLocal());
-    		  System.out.println("multicast " + interfaceAddress.getAddress().isMulticastAddress());
-    		  System.out.println("site " + interfaceAddress.getAddress().isSiteLocalAddress());
-    		  System.out.println("any " + interfaceAddress.getAddress().isAnyLocalAddress());
-    		  System.out.println("loop " + interfaceAddress.getAddress().isLoopbackAddress());
-    		  */
-	      	  
-    		  
 	      	  while(!c.isClosed())
 	    	  {
 	      		  
