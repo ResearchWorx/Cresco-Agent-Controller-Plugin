@@ -1,9 +1,11 @@
 package netdiscovery;
 
 import java.net.InetAddress;
+import java.util.List;
 import java.util.Map;
 
 import plugincore.PluginEngine;
+import shared.MsgEvent;
 
 public class DiscoveryClientIPv4 
 {
@@ -15,10 +17,10 @@ public class DiscoveryClientIPv4
 		//discoveryTimeout = 1000;
 	}
 	
-	public Map<String,String> getDiscoveryMap(int discoveryTimeout)
+	public List<MsgEvent> getDiscoveryMap(int discoveryTimeout)
 	{
-		Map<String,String> disMap = null;
-		
+		//Map<String,String> disMap = null;
+		List<MsgEvent> disList = null;
 		try
 		{
 			while(PluginEngine.clientDiscoveryActive)
@@ -28,7 +30,7 @@ public class DiscoveryClientIPv4
 			}
 			PluginEngine.clientDiscoveryActive = true;
 			DiscoveryClientWorkerIPv4 dcw = new DiscoveryClientWorkerIPv4(discoveryTimeout);
-			disMap = dcw.getDiscoveryMap();
+			disList = dcw.discover();
 		}
 		catch(Exception ex)
 		{
@@ -36,7 +38,7 @@ public class DiscoveryClientIPv4
 		}
 		PluginEngine.clientDiscoveryActive = false;
 		
-		return disMap;
+		return disList;
 	}
 	
 	public boolean isReachable(String hostname)

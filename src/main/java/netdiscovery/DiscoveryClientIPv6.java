@@ -1,9 +1,11 @@
 package netdiscovery;
 
 import java.net.Inet6Address;
+import java.util.List;
 import java.util.Map;
 
 import plugincore.PluginEngine;
+import shared.MsgEvent;
 
 public class DiscoveryClientIPv6 
 {
@@ -15,9 +17,9 @@ public class DiscoveryClientIPv6
 		//discoveryTimeout = 1000;
 	}
 	
-	public Map<String,String> getDiscoveryMap(int discoveryTimeout)
+	public List<MsgEvent> getDiscoveryMap(int discoveryTimeout)
 	{
-		Map<String,String> disMap = null;
+		List<MsgEvent> disList = null;
 		
 		try
 		{
@@ -32,16 +34,15 @@ public class DiscoveryClientIPv6
 			DiscoveryClientWorkerIPv6 dcw = new DiscoveryClientWorkerIPv6(discoveryTimeout,multiCastNetwork);
 			//populate map with possible peers
 			System.out.println("DiscoveryClientIPv6 : local hosts start search..");
-			disMap = dcw.getDiscoveryMap();
-			System.out.println("DiscoveryClientIPv6 : local hosts end search..");
+			disList = dcw.discover();
 			
-			if(disMap.isEmpty())
+			if(disList.isEmpty())
 			{
 				System.out.println("DiscoveryClientIPv6 : No local hosts found - searching site..");
 				//Searching site network [ff05::1:c]
 				multiCastNetwork = "ff05::1:c";
 				dcw = new DiscoveryClientWorkerIPv6(discoveryTimeout,multiCastNetwork);
-				disMap = dcw.getDiscoveryMap();
+				disList = dcw.discover();
 			}
 		}
 		catch(Exception ex)
@@ -50,7 +51,7 @@ public class DiscoveryClientIPv6
 		}
 		PluginEngine.clientDiscoveryActiveIPv6 = false;
 		
-		return disMap;
+		return disList;
 	}
 	
 	public boolean isReachable(String hostname)

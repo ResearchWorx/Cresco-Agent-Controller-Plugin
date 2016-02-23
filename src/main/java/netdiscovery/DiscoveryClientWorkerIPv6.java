@@ -141,7 +141,7 @@ class StopListnerTask extends TimerTask {
 		discoveryList = new ArrayList<MsgEvent>();
 		
 	  // Broadcast the message over all the network interfaces
-	  Enumeration interfaces = NetworkInterface.getNetworkInterfaces();
+	  Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
 	  while (interfaces.hasMoreElements()) {
 	    NetworkInterface networkInterface = (NetworkInterface) interfaces.nextElement();
 

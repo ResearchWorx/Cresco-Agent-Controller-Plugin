@@ -181,29 +181,17 @@ public class PluginEngine {
        
     }
     
-    public static int processPeerMap(Map<String,String> bmap)
+    public static int processPeerMap(List<MsgEvent> disList)
     {
     	int processCount = 0;
-    	if(!bmap.isEmpty())
+    	if(!disList.isEmpty())
 		{
-  			String[] discoveredAgents = bmap.get("discoveredagents").split(",");
-			for(String discoveredAgent : discoveredAgents)
-			{
-				String[] agentNetworks = bmap.get(discoveredAgent).split(",");
-				for(String agentNetwork : agentNetworks)
-				{
-					String[] agentNetworkHosts = agentNetwork.split("_");
-					//if(processPeer(agentNetworkHosts[1],discoveredAgent))
-					//{
-						MsgEvent cb = new MsgEvent(MsgEventType.DISCOVER,PluginEngine.region,PluginEngine.agent,PluginEngine.plugin,"Incoming Canidate Broker");
-	  	 		        cb.setParam("canidateip",agentNetworkHosts[1]);
-	  	 		        cb.setParam("canidateagent",discoveredAgent);
-	  	 		        incomingCanidateBrokers.offer(cb);
-	  	 		        processCount++;
-					//	foundNeighbor = true;
-					//}
-				}
-		    }
+    		for(MsgEvent db : disList)
+    		{
+    			incomingCanidateBrokers.offer(db);
+    			processCount++;
+    		}
+			
 		}
     	return processCount;
     	
