@@ -188,6 +188,8 @@ public class PluginEngine {
 		{
     		for(MsgEvent db : disList)
     		{
+    			//MsgEvent dbr = db.setReturn();
+    			db.setReturn();
     			incomingCanidateBrokers.offer(db);
     			processCount++;
     		}
