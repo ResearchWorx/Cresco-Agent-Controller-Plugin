@@ -42,24 +42,40 @@ public class ActiveBrokerManager implements Runnable
 			  MsgEvent cb = PluginEngine.incomingCanidateBrokers.poll();
 			  if(cb != null)
 			  {
+				boolean addBroker = false;
 				String agentPath = cb.getParam("dst_region") + cb.getParam("dst_agent");
 				String agentIP = cb.getParam("dst_ip");
 				BrokeredAgent ba;
 				if(PluginEngine.brokeredAgents.containsKey(agentPath))
 				{
 					ba = PluginEngine.brokeredAgents.get(agentPath);
-					if((ba.brokerStatus.equals(BrokerStatusType.FAILED) || (ba.brokerStatus.equals(BrokerStatusType.STOPPED))))
+					if(ba.addressMap.containsKey(agentIP))
+					{
+						if((ba.brokerStatus.equals(BrokerStatusType.FAILED) || (ba.brokerStatus.equals(BrokerStatusType.STOPPED))))
+						{
+							ba.addressMap.put(agentIP,BrokerStatusType.INIT);
+							ba.activeAddress = agentIP;
+							addBroker = true;
+						}
+					}
+					else
 					{
 						ba.addressMap.put(agentIP,BrokerStatusType.INIT);
+						ba.activeAddress = agentIP;
+						addBroker = true;
 					}
 				}
 				else
 				{
 					ba = new BrokeredAgent(agentIP,agentPath);
 					PluginEngine.brokeredAgents.put(agentPath, ba);
+					addBroker = true;
 				}
 				//try and connect
-				addBroker(agentPath);
+				if(addBroker)
+				{
+					addBroker(agentPath);
+				}
 			  }
 			  else
 			  {
