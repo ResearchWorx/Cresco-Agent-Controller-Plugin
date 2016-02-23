@@ -28,8 +28,11 @@ public class ActiveBrokerManager implements Runnable
 	  public void addBroker(String agentPath)
 	  {
 		  BrokeredAgent ba = PluginEngine.brokeredAgents.get(agentPath);
-			
-		  System.out.println("Adding Broker: " + agentPath + " IP:" + ba.activeAddress);
+		  if(ba.brokerStatus == BrokerStatusType.INIT)
+		  {
+			  ba.brokerStatus = BrokerStatusType.STARTING;
+			  System.out.println("Adding Broker: " + agentPath + " IP:" + ba.activeAddress);
+		  }
 	  }
 	  
 	  public void run() 
@@ -48,22 +51,21 @@ public class ActiveBrokerManager implements Runnable
 				BrokeredAgent ba;
 				if(PluginEngine.brokeredAgents.containsKey(agentPath))
 				{
+					
 					ba = PluginEngine.brokeredAgents.get(agentPath);
-					if(ba.addressMap.containsKey(agentIP))
-					{
-						if((ba.brokerStatus.equals(BrokerStatusType.FAILED) || (ba.brokerStatus.equals(BrokerStatusType.STOPPED))))
-						{
-							ba.addressMap.put(agentIP,BrokerStatusType.INIT);
-							ba.activeAddress = agentIP;
-							addBroker = true;
-						}
-					}
-					else
+					//add ip to possible list
+					if(!ba.addressMap.containsKey(agentIP)) 
 					{
 						ba.addressMap.put(agentIP,BrokerStatusType.INIT);
-						ba.activeAddress = agentIP;
-						addBroker = true;
 					}
+					//reset status if needed
+					if((ba.brokerStatus.equals(BrokerStatusType.FAILED) || (ba.brokerStatus.equals(BrokerStatusType.STOPPED))))
+					{
+							ba.activeAddress = agentIP;
+							ba.brokerStatus = BrokerStatusType.INIT;
+							addBroker = true;
+					}
+					
 				}
 				else
 				{

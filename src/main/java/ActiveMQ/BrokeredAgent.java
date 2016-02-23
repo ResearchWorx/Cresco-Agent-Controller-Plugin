@@ -15,9 +15,20 @@ public class BrokeredAgent {
 	  {
 		this.activeAddress = activeAddress;
 		this.agentPath = agentPath;
-		this.brokerStatus = BrokerStatusType.STARTING;
+		this.brokerStatus = BrokerStatusType.INIT;
 		this.addressMap = new HashMap<String,BrokerStatusType>();
+		this.addressMap.put(activeAddress, BrokerStatusType.INIT);
 	  }
 	  
+	  public void setStarting()
+	  {
+		  brokerStatus = BrokerStatusType.STARTING;
+		  addressMap.put(activeAddress, BrokerStatusType.STARTING);
+	  }
+	  public void setActive()
+	  {
+		  brokerStatus = BrokerStatusType.ACTIVE;
+		  addressMap.put(activeAddress, BrokerStatusType.ACTIVE);
+	  }
 	    	  
 	}
