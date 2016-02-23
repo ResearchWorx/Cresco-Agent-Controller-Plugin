@@ -122,10 +122,10 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 		        
 		  	 		        socket.receive(packet);
 		  	 		        //check if this is a local address
-		  	 		        System.out.println("saj " + saj);
-		  	 		        System.out.println("saj2 " + saj2);
-		  	 		        System.out.println("incoming " + packet.getSocketAddress());
-		  	 		        System.out.println("Thread = " + Thread.currentThread().toString());
+		  	 		        //System.out.println("saj " + saj);
+		  	 		        //System.out.println("saj2 " + saj2);
+		  	 		        //System.out.println("incoming " + packet.getSocketAddress());
+		  	 		        //System.out.println("Thread = " + Thread.currentThread().toString());
 		  	 		        
 		  	 		        
 		  	 		        if(!PluginEngine.isLocal(packet.getAddress().getHostAddress()))
@@ -150,6 +150,7 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 		        //if (message.equals("DISCOVER_FUIFSERVER_REQUEST")) 
 		    		  	    if (rme!=null) 
 		  	 		        {
+		    		  	    	//queue message
 		    		  	      System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
 			  	 		        
 		  	 		          //String response = "region=region0,agent=agent0,recaddr=" + packet.getAddress().getHostAddress();

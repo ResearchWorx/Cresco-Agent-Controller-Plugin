@@ -46,6 +46,8 @@ public class PluginEngine {
 	public static ConcurrentHashMap<String,String> abhm;
 	public static ConcurrentHashMap<String,String> pbhm;
 	
+	public static ConcurrentLinkedQueue<InetAddress> incomingDiscovery;
+	
 	public static DiscoveryClient dc;
 	public static DiscoveryClientIPv6 dcv6;
 	
@@ -84,6 +86,7 @@ public class PluginEngine {
     	//peerList = new ArrayList<String>();
     	abhm = new ConcurrentHashMap<String,String>(); 
     	pbhm = new ConcurrentHashMap<String,String>(); 
+    	incomingDiscovery = new ConcurrentLinkedQueue<InetAddress>();
     	
     	ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger)LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
     	//rootLogger.setLevel(Level.toLevel("debug"));
