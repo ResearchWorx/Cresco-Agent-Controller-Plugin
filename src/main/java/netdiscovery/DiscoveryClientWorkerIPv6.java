@@ -218,9 +218,10 @@ class StopListnerTask extends TimerTask {
 	    		  		try
 	    		  		{
 	    		  			MsgEvent me = gson.fromJson(json, MsgEvent.class);
-	    		  			System.out.println("RESPONCE: " + me.getParamsString());
 	    		  			if(me != null)
 	    		  			{
+	    		  				System.out.println("RESPONCE: " + me.getParamsString());
+		    		  			
 	    		  				 String remoteAddress = receivePacket.getAddress().getHostAddress();
 	    		        		 if(remoteAddress.contains("%"))
 	    		        		 {
