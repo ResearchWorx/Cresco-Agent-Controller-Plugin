@@ -110,7 +110,7 @@ public class PluginEngine {
     	//Start discovery broker
     	Thread db = new Thread(new DiscoveryResponder());
     	db.start();
-    	while(!DiscoveryBrokerActive)
+    	while(!DiscoveryResponderActive)
         {
         	//System.out.println("Wating on Discovery Server to start...");
         	Thread.sleep(1000);
@@ -121,7 +121,7 @@ public class PluginEngine {
     	//Start IPv6 network discovery engine
     	Thread dev6 = new Thread(new DiscoveryEngine());
     	dev6.start();
-    	while(!DiscoveryActiveIPv6)
+    	while(!DiscoveryActive)
         {
         	//System.out.println("Wating on Discovery Server to start...");
         	Thread.sleep(1000);
