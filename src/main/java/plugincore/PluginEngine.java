@@ -8,6 +8,7 @@ import ActiveMQ.ActiveBroker;
 import ActiveMQ.ActiveBrokerManager;
 import ActiveMQ.ActiveConsumer;
 import ActiveMQ.ActiveProducer;
+import ActiveMQ.BrokeredAgent;
 import ch.qos.logback.classic.Level;
 import netdiscovery.DiscoveryClientIPv4;
 import netdiscovery.DiscoveryResponder;
@@ -46,8 +47,7 @@ public class PluginEngine {
 	public static String plugin = "pl";
 	public static String agentpath;
 	
-	public static ConcurrentHashMap<String,String> abhm;
-	public static ConcurrentHashMap<String,String> pbhm;
+	public static ConcurrentHashMap<String,BrokeredAgent> brokeredAgents;
 	
 	public static ConcurrentLinkedQueue<MsgEvent> discoveryResponse;
 	public static ConcurrentLinkedQueue<MsgEvent> incomingCanidateBrokers;
@@ -90,8 +90,8 @@ public class PluginEngine {
     	agentpath = region + "_" + agent;
     	
     	//peerList = new ArrayList<String>();
-    	abhm = new ConcurrentHashMap<String,String>(); 
-    	pbhm = new ConcurrentHashMap<String,String>(); 
+    	brokeredAgents = new ConcurrentHashMap<String,BrokeredAgent>(); 
+    	
     	discoveryResponse = new ConcurrentLinkedQueue<MsgEvent>();
     	incomingCanidateBrokers = new ConcurrentLinkedQueue<MsgEvent>();
     	

@@ -4,6 +4,7 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.concurrent.ConcurrentHashMap;
 
 import plugincore.PluginEngine;
 import shared.MsgEvent;
@@ -13,7 +14,7 @@ public class ActiveBrokerManager implements Runnable
 {
 	//private MulticastSocket socket;
 	
-	public ActiveBrokerManager() throws SocketException
+	public ActiveBrokerManager()
 	{
 	
 	}
@@ -23,6 +24,14 @@ public class ActiveBrokerManager implements Runnable
 	
 	}
 	
+	  
+	  public void addBroker(String agentPath)
+	  {
+		  BrokeredAgent ba = PluginEngine.brokeredAgents.get(agentPath);
+			
+		  System.out.println("Adding Broker: " + agentPath + " IP:" + ba.activeAddress);
+	  }
+	  
 	  public void run() 
 	  {
 		PluginEngine.ActiveBrokerManagerActive = true;
@@ -33,7 +42,24 @@ public class ActiveBrokerManager implements Runnable
 			  MsgEvent cb = PluginEngine.incomingCanidateBrokers.poll();
 			  if(cb != null)
 			  {
-				System.out.println("Found canidate broker: IP=" + cb.getParam("dst_ip") + " Region=" + cb.getParam("dst_region") + " Agent=" + cb.getParam("dst_agent"));
+				String agentPath = cb.getParam("dst_region") + cb.getParam("dst_agent");
+				String agentIP = cb.getParam("dst_ip");
+				BrokeredAgent ba;
+				if(PluginEngine.brokeredAgents.containsKey(agentPath))
+				{
+					ba = PluginEngine.brokeredAgents.get(agentPath);
+					if((ba.brokerStatus.equals(BrokerStatusType.FAILED) || (ba.brokerStatus.equals(BrokerStatusType.STOPPED))))
+					{
+						ba.addressMap.put(agentIP,BrokerStatusType.INIT);
+					}
+				}
+				else
+				{
+					ba = new BrokeredAgent(agentIP,agentPath);
+					PluginEngine.brokeredAgents.put(agentPath, ba);
+				}
+				//try and connect
+				
 			  }
 			  else
 			  {
@@ -47,7 +73,7 @@ public class ActiveBrokerManager implements Runnable
 		  }
 	    }
 	  }
-	  
+	  /*
 	    public static boolean processPeer(String peer,String agentpath)
 	    {
 	    	boolean isPeer = false;
@@ -102,6 +128,6 @@ public class ActiveBrokerManager implements Runnable
 	    	}
 	    	return isPeer;
 	    }
-
+*/
 
 }
