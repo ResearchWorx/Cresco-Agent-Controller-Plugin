@@ -20,12 +20,12 @@ import shared.MsgEvent;
 import shared.MsgEventType;
 
 
-public class DiscoveryBroker implements Runnable 
+public class DiscoveryResponder implements Runnable 
 {
 	//private MulticastSocket socket;
 	private DatagramSocket socket;
 	private Gson gson;
-	public DiscoveryBroker() throws SocketException
+	public DiscoveryResponder() throws SocketException
 	{
 		gson = new Gson();
 		socket = new DatagramSocket();
@@ -38,8 +38,8 @@ public class DiscoveryBroker implements Runnable
 	
 	  public void run() 
 	  {
-		PluginEngine.DiscoveryBrokerActive = true;
-	    while(PluginEngine.DiscoveryBrokerActive)
+		PluginEngine.DiscoveryResponderActive = true;
+	    while(PluginEngine.DiscoveryResponderActive)
 	    {
 		  try 
 		  {

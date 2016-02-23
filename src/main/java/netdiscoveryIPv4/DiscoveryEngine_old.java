@@ -17,11 +17,11 @@ import shared.MsgEvent;
 import shared.MsgEventType;
 
 
-public class DiscoveryEngine implements Runnable 
+public class DiscoveryEngine_old implements Runnable 
 {
 	//private DatagramSocket socket;
 	private Gson gson;
-	public DiscoveryEngine()
+	public DiscoveryEngine_old()
 	{
 		gson = new Gson();
 	}
@@ -53,13 +53,13 @@ public class DiscoveryEngine implements Runnable
 	    }
 	  }
 	  
-	  public static DiscoveryEngine getInstance() {
+	  public static DiscoveryEngine_old getInstance() {
 	    return DiscoveryThreadHolder.INSTANCE;
 	  }
 
 	  private static class DiscoveryThreadHolder {
 
-	    private static final DiscoveryEngine INSTANCE = new DiscoveryEngine();
+	    private static final DiscoveryEngine_old INSTANCE = new DiscoveryEngine_old();
 	  }
 
 	  class DiscoveryEngineWorkerIPv4 implements Runnable 

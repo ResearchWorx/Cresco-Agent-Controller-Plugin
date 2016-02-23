@@ -8,11 +8,11 @@ import ActiveMQ.ActiveBroker;
 import ActiveMQ.ActiveConsumer;
 import ActiveMQ.ActiveProducer;
 import ch.qos.logback.classic.Level;
-import netdiscovery.DiscoveryBroker;
+import netdiscovery.DiscoveryResponder;
 import netdiscovery.DiscoveryClientIPv6;
-import netdiscovery.DiscoveryEngineIPv6;
+import netdiscovery.DiscoveryEngine;
 import netdiscoveryIPv4.DiscoveryClient;
-import netdiscoveryIPv4.DiscoveryEngine;
+import netdiscoveryIPv4.DiscoveryEngine_old;
 import shared.MsgEvent;
 
 import java.io.BufferedReader;
@@ -36,8 +36,7 @@ public class PluginEngine {
 	public static boolean clientDiscoveryActive = false;
 	public static boolean clientDiscoveryActiveIPv6 = false;
 	public static boolean DiscoveryActive = false;
-	public static boolean DiscoveryActiveIPv6 = false;
-	public static boolean DiscoveryBrokerActive = false;
+	public static boolean DiscoveryResponderActive = false;
 	
 	public static boolean isActive = true;
 	
@@ -109,7 +108,7 @@ public class PluginEngine {
     	pt.start();
     	
     	//Start discovery broker
-    	Thread db = new Thread(new DiscoveryBroker());
+    	Thread db = new Thread(new DiscoveryResponder());
     	db.start();
     	while(!DiscoveryBrokerActive)
         {
@@ -120,7 +119,7 @@ public class PluginEngine {
 		
     	
     	//Start IPv6 network discovery engine
-    	Thread dev6 = new Thread(new DiscoveryEngineIPv6());
+    	Thread dev6 = new Thread(new DiscoveryEngine());
     	dev6.start();
     	while(!DiscoveryActiveIPv6)
         {
