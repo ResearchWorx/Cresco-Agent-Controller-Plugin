@@ -135,7 +135,12 @@ class StopListnerTask extends TimerTask {
 	  c.setBroadcast(true);
 
 	  //byte[] sendData = "DISCOVER_FUIFSERVER_REQUEST".getBytes();
-	  MsgEvent sme = new MsgEvent(MsgEventType.DISCOVER,PluginEngine.region,PluginEngine.agent,PluginEngine.plugin,"Cresco discovery request.");
+	  MsgEvent sme = new MsgEvent(MsgEventType.DISCOVER,PluginEngine.region,PluginEngine.agent,PluginEngine.plugin,"Discovery request.");
+	  sme.setParam("broadcast_ip","255.255.255.0");
+	  sme.setParam("src_region",PluginEngine.region);
+	  sme.setParam("src_agent",PluginEngine.agent);
+	      
+	  
 	  String sendJson = gson.toJson(sme);
 	  byte[] sendData = sendJson.getBytes();
 	  

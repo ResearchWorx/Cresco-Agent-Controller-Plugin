@@ -33,9 +33,8 @@ public class ActiveBrokerManager implements Runnable
 			  MsgEvent cb = PluginEngine.incomingCanidateBrokers.poll();
 			  if(cb != null)
 			  {
-				System.out.println(cb.getParam("canidateip"));
-				System.out.println(cb.getParam("canidateagent"));   
- 	 		  }
+				System.out.println("Found canidate broker: IP=" + cb.getParam("dst_ip") + " Region=" + cb.getParam("dst_region") + " Agent=" + cb.getParam("dst_agent"));
+			  }
 			  else
 			  {
 				  Thread.sleep(1000);

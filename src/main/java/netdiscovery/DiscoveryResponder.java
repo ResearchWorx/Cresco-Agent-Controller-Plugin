@@ -46,15 +46,16 @@ public class DiscoveryResponder implements Runnable
 			  MsgEvent dr = PluginEngine.discoveryResponse.poll();
 			  if(dr != null)
 			  {
-				  System.out.println(getClass().getName() + ">>>Broker Discovery packet received from " +  dr.getParam("clientip"));
+				  //System.out.println(getClass().getName() + ">>>Broker Discovery packet received from " +  dr.getParam("clientip"));
   	 		      
 				  String json = gson.toJson(dr);
 				  byte[] sendData = json.getBytes();
-	 		      InetAddress returnAddr = InetAddress.getByName(dr.getParam("clientip"));
-	 		      int returnPort = Integer.parseInt(dr.getParam("clientport"));
+	 		      InetAddress returnAddr = InetAddress.getByName(dr.getParam("dst_ip"));
+	 		      int returnPort = Integer.parseInt(dr.getParam("dst_port"));
   	 		      DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
 	 		      socket.send(sendPacket);
-	 		     System.out.println(getClass().getName() + ">>>Broker Discovery packet sent to " +  dr.getParam("clientip"));
+	 		      //System.out.println(getClass().getName() + ">>>Broker Discovery packet sent to " +  dr.getParam("clientip"));
+	 		      PluginEngine.incomingCanidateBrokers.offer(dr);  
  	 		  }
 			  else
 			  {

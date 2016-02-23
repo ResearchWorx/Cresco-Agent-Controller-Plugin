@@ -180,7 +180,12 @@ class StopListnerTask extends TimerTask {
 		        	  timer = new Timer();
 		        	  timer.schedule(new StopListnerTask(), discoveryTimeout);
 		        	 
-		        	  MsgEvent sme = new MsgEvent(MsgEventType.DISCOVER,PluginEngine.region,PluginEngine.agent,PluginEngine.plugin,"Cresco discovery request.");
+		        	  MsgEvent sme = new MsgEvent(MsgEventType.DISCOVER,PluginEngine.region,PluginEngine.agent,PluginEngine.plugin,"Discovery request.");
+		        	  sme.setParam("broadcast_ip",multiCastNetwork);
+		 		      sme.setParam("src_region",PluginEngine.region);
+		 		      sme.setParam("src_agent",PluginEngine.agent);
+		 		      
+		 		      
   	 		          //me.setParam("clientip", packet.getAddress().getHostAddress());
 
   	 		      	// convert java object to JSON format,

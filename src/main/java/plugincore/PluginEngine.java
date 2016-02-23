@@ -195,7 +195,7 @@ public class PluginEngine {
 					String[] agentNetworkHosts = agentNetwork.split("_");
 					//if(processPeer(agentNetworkHosts[1],discoveredAgent))
 					//{
-						MsgEvent cb = new MsgEvent(MsgEventType.DISCOVER,PluginEngine.region,PluginEngine.agent,PluginEngine.plugin,"Broadcast discovery response.");
+						MsgEvent cb = new MsgEvent(MsgEventType.DISCOVER,PluginEngine.region,PluginEngine.agent,PluginEngine.plugin,"Incoming Canidate Broker");
 	  	 		        cb.setParam("canidateip",agentNetworkHosts[1]);
 	  	 		        cb.setParam("canidateagent",discoveredAgent);
 	  	 		        incomingCanidateBrokers.offer(cb);

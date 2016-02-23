@@ -147,8 +147,12 @@ public class DiscoveryEngine implements Runnable
 		  	 		        {
 		    		  	    
 		  	 		          MsgEvent me = new MsgEvent(MsgEventType.DISCOVER,PluginEngine.region,PluginEngine.agent,PluginEngine.plugin,"Broadcast discovery response.");
-		  	 		          me.setParam("clientip", packet.getAddress().getHostAddress());
-		  	 		          me.setParam("clientport", String.valueOf(packet.getPort()));
+		  	 		          me.setParam("dst_region",rme.getParam("src_region"));
+		  	 		          me.setParam("dst_agent",rme.getParam("src_agent"));
+				 		      me.setParam("src_region",PluginEngine.region);
+				 		      me.setParam("src_agent",PluginEngine.agent);
+				 		      me.setParam("dst_ip", packet.getAddress().getHostAddress());
+		  	 		          me.setParam("dst_port", String.valueOf(packet.getPort()));
 		  	 		          PluginEngine.discoveryResponse.offer(me);
 		  	 		          //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress() +  " Sent to broker. " + PluginEngine.discoveryResponse.size());
 			  	 		      
