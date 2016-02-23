@@ -151,15 +151,15 @@ public class PluginEngine {
         System.out.println("IPv4 DiscoveryEngine Started..");
 		*/
         
-        //dcv6 = new DiscoveryClientIPv6();
+        dcv6 = new DiscoveryClientIPv6();
         dc = new DiscoveryClientIPv4();
         
         try{
         	int processCount = 0;
-        	/*
+        	
         	System.out.println("Broker Search IPv6:");
     		processCount = processPeerMap(dcv6.getDiscoveryMap(2000));
-    		*/
+    		
     		
     		System.out.println("Broker Search IPv4:");
     		processCount = processPeerMap(dc.getDiscoveryMap(2000));
