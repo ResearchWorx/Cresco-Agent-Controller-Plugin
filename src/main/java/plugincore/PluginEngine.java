@@ -111,7 +111,13 @@ public class PluginEngine {
     	//Start discovery broker
     	Thread db = new Thread(new DiscoveryBroker());
     	db.start();
-    	
+    	while(!DiscoveryBrokerActive)
+        {
+        	//System.out.println("Wating on Discovery Server to start...");
+        	Thread.sleep(1000);
+        }
+        System.out.println("DiscoveryBroker Started..");
+		
     	
     	//Start IPv6 network discovery engine
     	Thread dev6 = new Thread(new DiscoveryEngineIPv6());

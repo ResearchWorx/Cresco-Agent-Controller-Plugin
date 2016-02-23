@@ -38,6 +38,7 @@ public class DiscoveryBroker implements Runnable
 	
 	  public void run() 
 	  {
+		PluginEngine.DiscoveryBrokerActive = true;
 	    while(PluginEngine.DiscoveryBrokerActive)
 	    {
 		  try 

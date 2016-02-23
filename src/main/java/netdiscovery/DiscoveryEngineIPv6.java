@@ -160,7 +160,7 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 		          me.setParam("clientip", packet.getAddress().getHostAddress());
 		  	 		          me.setParam("clientport", String.valueOf(packet.getPort()));
 		  	 		          PluginEngine.discoveryResponse.offer(me);
-		  	 		          System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress() +  " Sent to broker.");
+		  	 		          System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress() +  " Sent to broker. " + PluginEngine.discoveryResponse.size());
 			  	 		      
 		  	 		      	// convert java object to JSON format,
 		  	 		      	// and returned as JSON formatted string
