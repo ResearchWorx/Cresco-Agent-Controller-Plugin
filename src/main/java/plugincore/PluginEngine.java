@@ -125,8 +125,8 @@ public class PluginEngine {
         System.out.println("IPv4 DiscoveryEngine Started..");
 		*/
         
+        //dcv6 = new DiscoveryClientIPv6();
         dc = new DiscoveryClient();
-        dcv6 = new DiscoveryClientIPv6();
         
         try{
         	boolean foundNeighbor = false;
