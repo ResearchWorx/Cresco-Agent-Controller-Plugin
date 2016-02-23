@@ -21,6 +21,7 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
+import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -35,6 +36,7 @@ public class PluginEngine {
 	public static boolean clientDiscoveryActiveIPv6 = false;
 	public static boolean DiscoveryActive = false;
 	public static boolean DiscoveryActiveIPv6 = false;
+	public static boolean DiscoveryBrokerActive = false;
 	
 	public static boolean isActive = true;
 	
@@ -46,7 +48,7 @@ public class PluginEngine {
 	public static ConcurrentHashMap<String,String> abhm;
 	public static ConcurrentHashMap<String,String> pbhm;
 	
-	public static ConcurrentLinkedQueue<InetAddress> incomingDiscovery;
+	public static ConcurrentLinkedQueue<MsgEvent> discoveryResponse;
 	
 	public static DiscoveryClient dc;
 	public static DiscoveryClientIPv6 dcv6;
@@ -86,7 +88,7 @@ public class PluginEngine {
     	//peerList = new ArrayList<String>();
     	abhm = new ConcurrentHashMap<String,String>(); 
     	pbhm = new ConcurrentHashMap<String,String>(); 
-    	incomingDiscovery = new ConcurrentLinkedQueue<InetAddress>();
+    	discoveryResponse = new ConcurrentLinkedQueue<MsgEvent>();
     	
     	ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger)LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
     	//rootLogger.setLevel(Level.toLevel("debug"));

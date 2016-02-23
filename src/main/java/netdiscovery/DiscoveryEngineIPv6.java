@@ -21,6 +21,7 @@ import shared.MsgEventType;
 public class DiscoveryEngineIPv6 implements Runnable 
 {
 	//private MulticastSocket socket;
+	
 	private Gson gson;
 	public DiscoveryEngineIPv6()
 	{
@@ -150,14 +151,17 @@ public class DiscoveryEngineIPv6 implements Runnable
 		    		  	    if (rme!=null) 
 		  	 		        {
 		    		  	    	//queue message
-		    		  	      System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
+		    		  	      //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
 			  	 		        
 		  	 		          //String response = "region=region0,agent=agent0,recaddr=" + packet.getAddress().getHostAddress();
 		  	 		          //MsgEventType
 		  	 		          //MsgEventType msgType, String msgRegion, String msgAgent, String msgPlugin, String msgBody
 		  	 		          MsgEvent me = new MsgEvent(MsgEventType.DISCOVER,PluginEngine.region,PluginEngine.agent,PluginEngine.plugin,"Broadcast discovery response.");
 		  	 		          me.setParam("clientip", packet.getAddress().getHostAddress());
-
+		  	 		          me.setParam("clientport", String.valueOf(packet.getPort()));
+		  	 		          PluginEngine.discoveryResponse.offer(me);
+		  	 		          System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress() +  " Sent to broker.");
+			  	 		      
 		  	 		      	// convert java object to JSON format,
 		  	 		      	// and returned as JSON formatted string
 		  	 		      	  String json = gson.toJson(me);
@@ -170,12 +174,7 @@ public class DiscoveryEngineIPv6 implements Runnable
 			  	 		      //Send a response
 		  	 		          //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, packet.getAddress(), packet.getPort());
 		  	 		    	  DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
-		  	 		    	  System.out.println("Socket Interface = " + socket.getInterface());
-		  	 		    	  System.out.println("Socket Inet = " + socket.getInetAddress());
-		  	 		    	  System.out.println("Socket Local = " + socket.getLocalAddress());
-		  	 		    	
-	  	 		              
-		  	 		    	  socket.send(sendPacket);
+		  	 		    	  //socket.send(sendPacket);
 	  	 		              
 		  	 		       	  }
 		  	 		          catch(Exception ex)
