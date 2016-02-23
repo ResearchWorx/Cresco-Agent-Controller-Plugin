@@ -101,8 +101,8 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 	    	
 		  	 	    	if(isIPv6Bound)
 		  	 	    	{
-		  	 	    		//SocketAddress saj = new InetSocketAddress(Inet6Address.getByName("ff05::1:c"),32005);
-		  	 	    	    //socket.joinGroup(saj, networkInterface);
+		  	 	    		SocketAddress saj = new InetSocketAddress(Inet6Address.getByName("ff05::1:c"),32005);
+		  	 	    	    socket.joinGroup(saj, networkInterface);
 		  	 	    	    SocketAddress saj2 = new InetSocketAddress(Inet6Address.getByName("ff02::1:c"),32005);
 		  	 	    		socket.joinGroup(saj2, networkInterface);
 		  	 	    		//System.out.println(getClass().getName() + ">>> Bind2");
@@ -126,7 +126,6 @@ public class DiscoveryEngineIPv6 implements Runnable
 		  	 		        //System.out.println("saj2 " + saj2);
 		  	 		        //System.out.println("incoming " + packet.getSocketAddress());
 		  	 		        //System.out.println("Thread = " + Thread.currentThread().toString());
-		  	 		        
 		  	 		        
 		  	 		        if(!PluginEngine.isLocal(packet.getAddress().getHostAddress()))
 		  	 		        {
@@ -171,7 +170,12 @@ public class DiscoveryEngineIPv6 implements Runnable
 			  	 		      //Send a response
 		  	 		          //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, packet.getAddress(), packet.getPort());
 		  	 		    	  DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
-	  	 		              socket.send(sendPacket);
+		  	 		    	  System.out.println("Socket Interface = " + socket.getInterface());
+		  	 		    	  System.out.println("Socket Inet = " + socket.getInetAddress());
+		  	 		    	  System.out.println("Socket Local = " + socket.getLocalAddress());
+		  	 		    	
+	  	 		              
+		  	 		    	  socket.send(sendPacket);
 	  	 		              
 		  	 		       	  }
 		  	 		          catch(Exception ex)
