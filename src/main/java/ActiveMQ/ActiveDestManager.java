@@ -60,11 +60,15 @@ public class ActiveDestManager implements Runnable
 		  
 	  public void run() 
 	  {
+		  System.out.println("Checking Queues");
+			
 		while(PluginEngine.ActiveDestManagerActive)
 	    {
+			  System.out.println("Checking Queues START");
+				
 		  try 
 		  {
-			  System.out.println("Checking Queues");
+			  System.out.println("Checking Queues LOOP");
 			  DestinationSource destinationSource = activeMQConnection.getDestinationSource();
 
 			    Set<ActiveMQQueue> queues = destinationSource.getQueues();
@@ -79,6 +83,8 @@ public class ActiveDestManager implements Runnable
 			  System.out.println("ActiveDestManager : Run Error " + ex.toString());
 		  }
 	    }
+		  System.out.println("Checking Queues EXIT");
+			
 	  }
 	
 		class BrokerWatchDog extends TimerTask {
