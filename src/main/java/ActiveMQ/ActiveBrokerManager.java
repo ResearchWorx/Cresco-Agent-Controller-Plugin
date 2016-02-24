@@ -46,11 +46,11 @@ public class ActiveBrokerManager implements Runnable
 			  if(cb != null)
 			  {
 				String agentIP = cb.getParam("dst_ip");
-				if(!PluginEngine.isLocal(agentIP))
+				if(!PluginEngine.isLocal(agentIP)) //ignore local responses 
 				{
 				boolean addBroker = false;
 				String agentPath = cb.getParam("dst_region") + "_" + cb.getParam("dst_agent");
-				System.out.println(getClass().getName() + ">>> dst_ip:" + cb.getParam("dst_ip") + " src_ip:" + cb.getParam("dst_ip")) ;
+				System.out.println(getClass().getName() + ">>> canidate boker :" + agentPath + " canidate ip:" + agentIP) ;
 	 		      
 				BrokeredAgent ba;
 				if(PluginEngine.brokeredAgents.containsKey(agentPath))

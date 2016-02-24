@@ -3,19 +3,15 @@ package netdiscovery;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.Inet4Address;
 import java.net.Inet6Address;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.InterfaceAddress;
-import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -241,7 +237,7 @@ class StopListnerTask extends TimerTask {
 	    		  		}
 	    		  		catch(Exception ex)
 	    		  		{
-	    		  			System.out.println("in loop 0" + ex.toString());
+	    		  			System.out.println("DiscoveryClientWorker in loop 0" + ex.toString());
 	    		  		}
 	    		  	}
 	    		  	catch(SocketException ex)

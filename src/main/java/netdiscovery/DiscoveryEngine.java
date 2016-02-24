@@ -38,7 +38,7 @@ public class DiscoveryEngine implements Runnable
 	 	  while (interfaces.hasMoreElements()) 
 	 	  {
 	 	    NetworkInterface networkInterface = (NetworkInterface) interfaces.nextElement();
-	 	    new Thread(new DiscoveryEngineWorkerIPv6(networkInterface)).start();
+	 	    new Thread(new DiscoveryEngineWorker(networkInterface)).start();
 	      }
 	 	  
 	 	 PluginEngine.DiscoveryActive = true;
@@ -160,7 +160,7 @@ public class DiscoveryEngine implements Runnable
 				 		      me.setParam("dst_ip", remoteAddress);
 		  	 		          me.setParam("dst_port", String.valueOf(packet.getPort()));
 		  	 		          PluginEngine.discoveryResponse.offer(me);
-		  	 		          System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress() +  " Sent to broker. " + PluginEngine.discoveryResponse.size());
+		  	 		          //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress() +  " Sent to broker. " + PluginEngine.discoveryResponse.size());
 			  	 		      
 		  	 		        }
 		  	 	    		}
