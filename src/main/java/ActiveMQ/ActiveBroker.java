@@ -77,6 +77,14 @@ return connector;
 		
 	}	
 
+	public boolean RemoteNetworkConnector(NetworkConnector bridge)
+	{
+		//boolean isRemoved = false;
+		
+		return broker.removeNetworkConnector(bridge);
+		//return isRemoved;
+		
+	}
 	public NetworkConnector AddNetworkConnector(String URI)
 	{
 		NetworkConnector bridge = null;

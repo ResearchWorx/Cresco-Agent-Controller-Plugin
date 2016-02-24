@@ -60,6 +60,21 @@ class BrokerMonitor implements Runnable
 		  }
 		  return isConnected;
 	  }
+	  public void failBridge()
+	  {
+		  System.out.println("Failed Bridge : " + agentPath);
+			
+		   try {
+			bridge.stop();
+			PluginEngine.broker.RemoteNetworkConnector(bridge);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		   PluginEngine.brokeredAgents.get(agentPath).brokerStatus = BrokerStatusType.FAILED;
+		   MonitorActive = false;
+		   
+	  }
 	  public void run() 
 	  {
 		  try
@@ -68,8 +83,7 @@ class BrokerMonitor implements Runnable
 			  
 			  if(!connectToBroker(brokerAddress)) //connect to broker
 			  {
-				  PluginEngine.brokeredAgents.get(agentPath).brokerStatus = BrokerStatusType.FAILED;
-	    		   MonitorActive = false;
+				   failBridge();    
 			  }
 			    while(MonitorActive)
 	    		{
@@ -96,9 +110,7 @@ class BrokerMonitor implements Runnable
 	    			}
 	    			if(!bridgeActive)
 	    			{
-	    				System.out.println("Monitoring thread for : " + agentPath);
-		    			PluginEngine.brokeredAgents.get(agentPath).brokerStatus = BrokerStatusType.FAILED;
-		    			MonitorActive = false;
+	    				failBridge(); 
 	    			}
 	    			Thread.sleep(5000);
 	    			
