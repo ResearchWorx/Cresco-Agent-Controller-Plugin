@@ -30,7 +30,7 @@ public class ActiveDestManager implements Runnable
 		//timer.scheduleAtFixedRate(new BrokerWatchDog(), 500, 15000);//remote
 		try{
 			System.out.println("test0");
-		JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:1099/jmxrmi");
+		JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:9999/jmxrmi");
 		System.out.println("test1");
 		                                
 		JMXConnector jmxc = JMXConnectorFactory.connect(url);
