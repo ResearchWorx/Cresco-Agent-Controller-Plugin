@@ -47,10 +47,10 @@ class BrokerMonitor implements Runnable
   				  {
 					String remoteBroker = b.getRemoteBrokerName();
 					System.out.println("Try: " + connect_count);
-					System.out.println("local address: " + b.getLocalAddress());
+					//System.out.println("local address: " + b.getLocalAddress());
 					System.out.println("localbrokername: " + b.getLocalBrokerName());
 					System.out.println("remoteaddress: " + b.getRemoteAddress());
-					System.out.println("remotebrokerid: " + b.getRemoteBrokerId());
+					//System.out.println("remotebrokerid: " + b.getRemoteBrokerId());
 					System.out.println("remotebrokername: "+ b.getRemoteBrokerName());
 					connect_count++;
 					if(remoteBroker != null)

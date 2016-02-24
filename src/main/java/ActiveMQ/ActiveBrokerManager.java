@@ -70,7 +70,7 @@ public class ActiveBrokerManager implements Runnable
 							ba.activeAddress = agentIP;
 							ba.brokerStatus = BrokerStatusType.INIT;
 							addBroker = true;
-							System.out.println("BA EXIST ADDING agentPath: " + agentPath + " remote_ip: " + agentIP);
+							//System.out.println("BA EXIST ADDING agentPath: " + agentPath + " remote_ip: " + agentIP);
 					}
 					
 				}
@@ -79,7 +79,7 @@ public class ActiveBrokerManager implements Runnable
 					ba = new BrokeredAgent(agentIP,agentPath);
 					PluginEngine.brokeredAgents.put(agentPath, ba);
 					addBroker = true;
-					System.out.println("BA NEW ADDING agentPath: " + agentPath + " remote_ip: " + agentIP);
+					//System.out.println("BA NEW ADDING agentPath: " + agentPath + " remote_ip: " + agentIP);
 				}
 				//try and connect
 				if(addBroker)
@@ -114,8 +114,9 @@ public class ActiveBrokerManager implements Runnable
 		    			//System.out.println("stopping agentPath: " + ba.agentPath);
 		    			ba.setStop();
 		    			System.out.println("Cleared agentPath: " + ba.agentPath);
+		    			PluginEngine.brokeredAgents.remove(entry.getKey());//remove agent
+				    	
 		    		}
-		    		//PluginEngine.brokeredAgents.remove(entry.getKey());//remove agent
 		    		
 		    	}
 		    }
