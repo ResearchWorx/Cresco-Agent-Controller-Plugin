@@ -16,7 +16,7 @@ public class ActiveBrokerManager implements Runnable
 	{
 		timer = new Timer();
 	    //timer.scheduleAtFixedRate(new BrokerWatchDog(), 500, 300000);//remote 
-		timer.scheduleAtFixedRate(new BrokerWatchDog(), 500, 5000);//remote 
+		timer.scheduleAtFixedRate(new BrokerWatchDog(), 500, 15000);//remote 
 	}
 	  
 	public void shutdown()
@@ -108,9 +108,9 @@ public class ActiveBrokerManager implements Runnable
 		    		BrokeredAgent ba = entry.getValue();
 		    		if(ba.brokerStatus == BrokerStatusType.FAILED)
 		    		{
-		    			System.out.println("stopping agentPath: " + ba.agentPath);
+		    			//System.out.println("stopping agentPath: " + ba.agentPath);
 		    			ba.setStop();
-		    			System.out.println("cleared agentPath: " + ba.agentPath);
+		    			System.out.println("Cleared agentPath: " + ba.agentPath);
 		    		}
 		    		PluginEngine.brokeredAgents.remove(entry.getKey());//remove agent
 		    		
