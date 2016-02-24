@@ -97,10 +97,14 @@ return connector;
 		
 		for(ActiveMQDestination dest : dests)
 		{
-			System.out.println(dest.getDestinationTypeAsString());
-			System.out.println(dest.getPhysicalName());
-			System.out.println(dest.getQualifiedName());
+			//System.out.println(dest.getDestinationTypeAsString());
 			System.out.println("get des2");
+			System.out.println(dest.getPhysicalName());
+			System.out.println("get des2.1");
+			
+			System.out.println(dest.getQualifiedName());
+			System.out.println("get des2.2");
+			
 			String[] paths = dest.getDestinationPaths();
 			System.out.println("get des3");
 			
