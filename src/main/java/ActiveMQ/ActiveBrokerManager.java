@@ -31,7 +31,8 @@ public class ActiveBrokerManager implements Runnable
 		  {
 			  //Fire up new thread.
 			  //ba.brokerStatus = BrokerStatusType.STARTING;
-			  System.out.println("Adding Broker: " + agentPath + " IP:" + ba.activeAddress);
+			  //System.out.println("Adding Broker: " + agentPath + " IP:" + ba.activeAddress);
+			  ba.setStarting();
 		  }
 	  }
 	  

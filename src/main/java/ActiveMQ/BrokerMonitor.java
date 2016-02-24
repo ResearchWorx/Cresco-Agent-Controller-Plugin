@@ -11,7 +11,7 @@ class BrokerMonitor implements Runnable
 	  }
 	  public void shutdown()
 	  {
-			
+			MonitorActive = false;
 	  }
 	  public void run() 
 	  {
@@ -19,7 +19,8 @@ class BrokerMonitor implements Runnable
 		  {
 	    		while(MonitorActive)
 	    		{
-	    			Thread.sleep(1000);
+	    			System.out.println("Monitoring thread for : " + agentPath);
+	    			Thread.sleep(5000);
 	    		}
 		  }
 		  catch(Exception ex)
