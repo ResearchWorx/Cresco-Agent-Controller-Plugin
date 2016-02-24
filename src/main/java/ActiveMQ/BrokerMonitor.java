@@ -43,17 +43,29 @@ class BrokerMonitor implements Runnable
 	    			System.out.println("Broker Name : " + bridge.getBrokerName());
 	    			System.out.println("Name : " + bridge.getName());
 	    			int count = 0;
+	    			boolean bridgeActive = false;
 	    			for(NetworkBridge b : bridge.activeBridges())
 	    			{
 	    				System.out.println("Active Bridge:" + count);
-	    				System.out.println("local address:" + b.getLocalAddress() + " localbrokername: " + b.getLocalBrokerName() + " remoteaddress: " + b.getRemoteAddress() + " remotebrokerid: " + b.getRemoteBrokerId() +" remotebrokername: "+ b.getRemoteBrokerName());
+	    				System.out.println("local address:" + b.getLocalAddress());
+	    				System.out.println("localbrokername: " + b.getLocalBrokerName());
+	    				System.out.println("remoteaddress: " + b.getRemoteAddress());
+	    				System.out.println("remotebrokerid: " + b.getRemoteBrokerId());
+	    				System.out.println("remotebrokername: "+ b.getRemoteBrokerName());
 	    				count++;
+	    				if(b.getRemoteBrokerName().equals(agentPath))
+	    				{
+	    					bridgeActive = true;
+	    				}
 	    			}
-	    			
+	    			if(!bridgeActive)
+	    			{
+	    				bridge.stop();
+		    			PluginEngine.brokeredAgents.get(agentPath).brokerStatus = BrokerStatusType.FAILED;
+		    			MonitorActive = false;
+	    			}
 	    			Thread.sleep(5000);
-	    			//bridge.stop();
-	    			//PluginEngine.brokeredAgents.get(agentPath).brokerStatus = BrokerStatusType.FAILED;
-	    			//MonitorActive = false;
+	    			
 	    		}
 		  }
 		  catch(Exception ex)
