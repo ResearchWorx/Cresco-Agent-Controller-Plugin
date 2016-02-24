@@ -92,6 +92,8 @@ return connector;
 		{
 			
 			bridge = broker.addNetworkConnector(new URI("static:tcp://" + URI + ":32010"));
+			bridge.setName(URI);
+			bridge.setDuplex(false);
 			//TransportConnector connector = new TransportConnector();
 			//connector.setUri(new URI(URI));
 			//connector.setDiscoveryUri(new URI("multicast://default?group=test"));
