@@ -64,6 +64,7 @@ public class ActiveDestManager implements Runnable
 	    {
 		  try 
 		  {
+			  System.out.println("Checking Queues");
 			  DestinationSource destinationSource = activeMQConnection.getDestinationSource();
 
 			    Set<ActiveMQQueue> queues = destinationSource.getQueues();
