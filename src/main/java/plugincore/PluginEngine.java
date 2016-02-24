@@ -132,7 +132,7 @@ public class PluginEngine {
     	{
     		ct2 = new Thread(new ActiveConsumer2(agentpath,"tcp://localhost:32010"));
     	}
-    	ct2.start();
+    	//ct2.start();
     	
     	
     	//Thread pt = new Thread(new ActiveProducer(args[2] + "_" + args[3],"tcp://localhost:32010"));
