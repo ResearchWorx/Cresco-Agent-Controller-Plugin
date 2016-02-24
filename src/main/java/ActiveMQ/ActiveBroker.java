@@ -89,7 +89,12 @@ return connector;
 	}
 	public void getDest()
 	{
+		System.out.println("get des0");
+		
 		ActiveMQDestination[] dests = broker.getDestinations();
+	
+		System.out.println("get des1");
+		
 		for(ActiveMQDestination dest : dests)
 		{
 			System.out.println(dest.getDestinationTypeAsString());
