@@ -111,10 +111,16 @@ public class PluginEngine {
         }
         System.out.println("ActiveBrokerManager Started..");
 		
-    	
-    	//Thread ct = new Thread(new ActiveConsumer(agentpath,"tcp://localhost:32010"));
-    	//Thread ct = new Thread(new ActiveConsumer(args[1],"tcp://[::1]:32010"));
-    	//ct.start();
+        Thread ct = null;
+    	if(isIPv6)
+    	{
+    		ct = new Thread(new ActiveConsumer(agentpath,"tcp://[::1]:32010"));
+    	}
+    	else
+    	{
+    		ct = new Thread(new ActiveConsumer(agentpath,"tcp://localhost:32010"));
+    	}
+    	ct.start();
     	
     	
     	//Thread pt = new Thread(new ActiveProducer(args[2] + "_" + args[3],"tcp://localhost:32010"));
