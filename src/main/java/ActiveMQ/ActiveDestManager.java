@@ -38,10 +38,17 @@ public class ActiveDestManager implements Runnable
 			System.out.println("test " + PluginEngine.broker.broker.getManagementContext().getSuppressMBean());
 			
 			System.out.println("test0");
-		JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:9999/jmxrmi");
+		//JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:9999/jmxrmi");
+			String JMXHost = PluginEngine.broker.broker.getManagementContext().getConnectorHost();
+			String JMXPort = String.valueOf(PluginEngine.broker.broker.getManagementContext().getConnectorPort());
+			String JMXPath = PluginEngine.broker.broker.getManagementContext().getConnectorPath();
+			
+		String urlString = "service:jmx:rmi:///jndi/rmi://" + JMXHost + ":" + JMXPort + JMXPath;
+		System.out.println("JMXURL= " + urlString);
 		//JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://[::]:9999/jmxrmi");
 		System.out.println("test1");
-		                                
+		JMXServiceURL url = new JMXServiceURL(urlString	);
+		                               
 		JMXConnector jmxc = JMXConnectorFactory.connect(url);
 		System.out.println("test2");
 		
