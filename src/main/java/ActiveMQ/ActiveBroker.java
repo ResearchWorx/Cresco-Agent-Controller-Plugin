@@ -87,37 +87,6 @@ return connector;
 		//return isRemoved;
 		
 	}
-	public void getDest()
-	{
-		System.out.println("get des0");
-		
-		ActiveMQDestination[] dests = broker.getDestinations();
-	
-		System.out.println("get des1");
-		
-		for(ActiveMQDestination dest : dests)
-		{
-			//System.out.println(dest.getDestinationTypeAsString());
-			System.out.println("get des2");
-			System.out.println(dest.getPhysicalName());
-			System.out.println("get des2.1");
-			
-			System.out.println(dest.getQualifiedName());
-			System.out.println("get des2.2");
-			
-			String[] paths = dest.getDestinationPaths();
-			System.out.println("get des3");
-			
-			for(String path : paths)
-			{
-				System.out.println("Path: " + path);
-				
-			}
-			System.out.println("get des4");
-			
-			
-		}
-	}
 	public NetworkConnector AddNetworkConnector(String URI)
 	{
 		NetworkConnector bridge = null;
