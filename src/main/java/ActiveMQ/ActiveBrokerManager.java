@@ -111,6 +111,7 @@ public class ActiveBrokerManager implements Runnable
 		    			ba.setStop();
 		    			System.out.println("cleared agentPath: " + ba.agentPath);
 		    		}
+		    		PluginEngine.brokeredAgents.remove(entry.getKey());//remove agent
 		    		
 		    	}
 		    }
