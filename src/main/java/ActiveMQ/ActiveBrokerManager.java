@@ -46,8 +46,10 @@ public class ActiveBrokerManager implements Runnable
 			  if(cb != null)
 			  {
 				boolean addBroker = false;
-				String agentPath = cb.getParam("dst_region") + cb.getParam("dst_agent");
+				String agentPath = cb.getParam("dst_region") + "_" + cb.getParam("dst_agent");
 				String agentIP = cb.getParam("dst_ip");
+				System.out.println(getClass().getName() + ">>> dst_ip:" + cb.getParam("dst_ip") + " src_ip:" + cb.getParam("dst_ip")) ;
+	 		      
 				BrokeredAgent ba;
 				if(PluginEngine.brokeredAgents.containsKey(agentPath))
 				{
