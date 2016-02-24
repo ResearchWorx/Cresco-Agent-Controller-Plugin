@@ -45,9 +45,11 @@ public class ActiveBrokerManager implements Runnable
 			  MsgEvent cb = PluginEngine.incomingCanidateBrokers.poll();
 			  if(cb != null)
 			  {
+				String agentIP = cb.getParam("dst_ip");
+				if(!PluginEngine.isLocal(agentIP))
+				{
 				boolean addBroker = false;
 				String agentPath = cb.getParam("dst_region") + "_" + cb.getParam("dst_agent");
-				String agentIP = cb.getParam("dst_ip");
 				System.out.println(getClass().getName() + ">>> dst_ip:" + cb.getParam("dst_ip") + " src_ip:" + cb.getParam("dst_ip")) ;
 	 		      
 				BrokeredAgent ba;
@@ -81,6 +83,7 @@ public class ActiveBrokerManager implements Runnable
 					addBroker(agentPath);
 				}
 			  }
+		  		}
 			  else
 			  {
 				  Thread.sleep(1000);

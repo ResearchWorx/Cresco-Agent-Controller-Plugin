@@ -211,9 +211,9 @@ class StopListnerTask extends TimerTask {
 		  					//System.out.println("SAME HOST");
 		  					//System.out.println(me.getParamsString() + receivePacket.getAddress().getHostAddress());
 		  					//me.setParam("serverip", receivePacket.getAddress().getHostAddress());
-		  					me.setParam("src_ip", receivePacket.getAddress().getHostAddress());
+		  					//me.setParam("src_ip", receivePacket.getAddress().getHostAddress());
 		  					discoveryList.add(me);
-		  					System.out.println(getClass().getName() + ">>> Added server: " + receivePacket.getAddress().getHostAddress() + " to broker list");
+		  					//System.out.println(getClass().getName() + ">>> Added server: " + receivePacket.getAddress().getHostAddress() + " to broker list");
 
 		  				}
 		  			}
