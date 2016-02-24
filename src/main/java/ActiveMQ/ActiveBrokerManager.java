@@ -87,7 +87,8 @@ public class ActiveBrokerManager implements Runnable
 					addBroker(agentPath);
 				}
 			  }
-		  		}
+		  		Thread.sleep(500); //allow HM to catch up
+			  }
 			  else
 			  {
 				  Thread.sleep(1000);
