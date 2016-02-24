@@ -60,8 +60,7 @@ public class PluginEngine {
 	
 	public String getName()
 	{
-		return "Name";
-				
+		return "Name";	
 	}
 	public String getVersion()
 	{
@@ -101,7 +100,7 @@ public class PluginEngine {
     	//rootLogger.setLevel(Level.toLevel("debug"));
     	//rootLogger.setLevel(Level.toLevel("none"));
     	rootLogger.setLevel(Level.WARN);
-
+    	
     	broker = new ActiveBroker(agentpath);
     	
     	Thread abm = new Thread(new ActiveBrokerManager());

@@ -1,9 +1,11 @@
 package ActiveMQ;
 
+import plugincore.PluginEngine;
+
 class BrokerMonitor implements Runnable 
 {
 	  private String agentPath;
-	  private boolean MonitorActive;
+	  public boolean MonitorActive;
 	  public BrokerMonitor(String agentPath)
 	  {
 	    	this.agentPath = agentPath;
@@ -21,6 +23,8 @@ class BrokerMonitor implements Runnable
 	    		{
 	    			System.out.println("Monitoring thread for : " + agentPath);
 	    			Thread.sleep(5000);
+	    			PluginEngine.brokeredAgents.get(agentPath).brokerStatus = BrokerStatusType.FAILED;
+	    			MonitorActive = false;
 	    		}
 		  }
 		  catch(Exception ex)

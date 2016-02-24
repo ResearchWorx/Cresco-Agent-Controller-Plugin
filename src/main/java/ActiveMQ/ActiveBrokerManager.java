@@ -1,8 +1,7 @@
 package ActiveMQ;
 
-
-import java.net.MulticastSocket;
-import java.net.NetworkInterface;
+import java.util.Map.Entry;
+import java.util.Timer;
 import java.util.TimerTask;
 
 import plugincore.PluginEngine;
@@ -12,10 +11,12 @@ import shared.MsgEvent;
 public class ActiveBrokerManager implements Runnable 
 {
 	//private MulticastSocket socket;
-	
+	private Timer timer;
 	public ActiveBrokerManager()
 	{
-	
+		timer = new Timer();
+	    //timer.scheduleAtFixedRate(new BrokerWatchDog(), 500, 300000);//remote 
+		timer.scheduleAtFixedRate(new BrokerWatchDog(), 500, 5000);//remote 
 	}
 	  
 	public void shutdown()
@@ -97,5 +98,23 @@ public class ActiveBrokerManager implements Runnable
 		  }
 	    }
 	  }
-	 	  
+	
+		class BrokerWatchDog extends TimerTask {
+		    public void run() 
+		    {
+		    	for (Entry<String, BrokeredAgent> entry : PluginEngine.brokeredAgents.entrySet())
+		    	{
+		    	    //System.out.println(entry.getKey() + "/" + entry.getValue());
+		    		BrokeredAgent ba = entry.getValue();
+		    		if(ba.brokerStatus == BrokerStatusType.FAILED)
+		    		{
+		    			ba.setStop();
+		    			System.out.println("cleared agentPath: " + ba.agentPath);
+		    		}
+		    		
+		    	}
+		    }
+		  }
+
+	  
 }

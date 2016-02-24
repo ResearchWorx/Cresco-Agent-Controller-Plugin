@@ -11,7 +11,6 @@ public class BrokeredAgent {
 	  public String activeAddress;
 	  public String agentPath;
 	  public BrokerMonitor bm;
-	  public boolean BrokerMonitorActive = false;
 	  
 	  public BrokeredAgent(String activeAddress, String agentPath)
 	  {
@@ -23,17 +22,42 @@ public class BrokeredAgent {
 		this.addressMap.put(activeAddress, BrokerStatusType.INIT);
 		
 	  }
-	  
+	  public void setStop()
+	  {
+		  if(bm.MonitorActive)
+		  {
+			  bm.shutdown();
+		  }
+		  while(bm.MonitorActive)
+		  {
+			  try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		  }
+		  brokerStatus = BrokerStatusType.STOPPED;
+	  }
 	  public void setStarting()
 	  {
 		  brokerStatus = BrokerStatusType.STARTING;
 		  addressMap.put(activeAddress, BrokerStatusType.STARTING);
-		  if(BrokerMonitorActive)
+		  if(bm.MonitorActive)
 		  {
 			  bm.shutdown();
 		  }
 		  bm = new BrokerMonitor(agentPath);
 		  new Thread(bm).start();
+		  while(!bm.MonitorActive)
+		  {
+			  try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		  }
 	  }
 	  public void setActive()
 	  {
