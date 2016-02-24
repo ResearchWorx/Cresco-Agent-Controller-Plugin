@@ -192,7 +192,7 @@ public class PluginEngine {
     		{
     			//MsgEvent dbr = db.setReturn();
     			//db.setReturn();
-    			System.out.println("SENDING TO INCOMING CAN: " + db.getParamsString());
+    			//System.out.println("SENDING TO INCOMING CAN: " + db.getParamsString());
     			incomingCanidateBrokers.offer(db);
     			processCount++;
     		}
