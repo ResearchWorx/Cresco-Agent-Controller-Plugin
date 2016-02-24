@@ -73,7 +73,12 @@ public class ActiveDestManager implements Runnable
 			    Set<ActiveMQQueue> queues = destinationSource.getQueues();
 			    for(ActiveMQQueue queue : queues)
 			    {
-			    	System.out.println("Queue: " + queue.getPhysicalName() + " " + queue.getQueueName());
+			    	System.out.println("Queue: " + queue.getPhysicalName());
+			    	for(String path : queue.getDestinationPaths())
+			    	{
+			    		System.out.println("PATH: " + path);
+			    	}
+			    	
 			    }
 			  Thread.sleep(3000);
 		  } 
