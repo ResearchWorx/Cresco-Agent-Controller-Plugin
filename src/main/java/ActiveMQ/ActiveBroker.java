@@ -58,6 +58,7 @@ return connector;
 			    broker.getManagementContext().setConnectorPort(9999);
 			    broker.getManagementContext().isCreateConnector();
 			    
+			    
 			    //NetworkConnector connector = bridge
 				//connector.
 				// = new NetworkConnector();
@@ -74,6 +75,11 @@ return connector;
 				//NetworkConnector bridge = broker.addNetworkConnector(new URI("static://" + remoteIP + ":32010"));
 				//bridge.setUserName(userName);
 				broker.start();
+				broker.getManagementContext().start();
+			    while(!broker.isStarted() || !broker.getManagementContext().isConnectorStarted())
+			    {
+			    	Thread.sleep(1000);
+			    }
 			}
 		}
 		catch(Exception ex)
