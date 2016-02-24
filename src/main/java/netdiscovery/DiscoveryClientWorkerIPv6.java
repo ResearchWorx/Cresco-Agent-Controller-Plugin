@@ -225,7 +225,8 @@ class StopListnerTask extends TimerTask {
 	    		        			 remoteAddress = remoteScope[0];
 	    		        		 }
 	    		        		//System.out.println("Client IP = " + me.getParam("clientip") + " Remote IP= " + receivePacket.getAddress().getHostAddress());
-	    		  				//if(!me.getParam("dst_ip").equals(remoteAddress))
+	    		        		System.out.println("Client IP = " + remoteAddress  + " Remote IP= " + me.getParam("dst_ip"));
+		    		  				//if(!me.getParam("dst_ip").equals(remoteAddress))
 	    		  				//{
 	    		  					//System.out.println("SAME HOST");
 	    		  					//System.out.println(me.getParamsString() + receivePacket.getAddress().getHostAddress());
