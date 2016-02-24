@@ -84,14 +84,12 @@ public class PluginEngine {
 	public static ActiveBroker broker;
     public static void main(String[] args) throws Exception 
     {
-    	isIPv6 = isIPv6();
     	region = "region0";
     	RandomString rs = new RandomString(4);
 		String agent = "agent-" + rs.nextString();
-		
-    	//region = args[0];
-    	//agent = args[1];
-    	agentpath = region + "_" + agent;
+		agentpath = region + "_" + agent;
+    	
+		isIPv6 = isIPv6();
     	
     	//peerList = new ArrayList<String>();
     	brokeredAgents = new ConcurrentHashMap<String,BrokeredAgent>(); 
@@ -193,7 +191,7 @@ public class PluginEngine {
     		for(MsgEvent db : disList)
     		{
     			//MsgEvent dbr = db.setReturn();
-    			db.setReturn();
+    			//db.setReturn();
     			incomingCanidateBrokers.offer(db);
     			processCount++;
     		}

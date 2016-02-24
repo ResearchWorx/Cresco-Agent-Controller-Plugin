@@ -147,7 +147,7 @@ class StopListnerTask extends TimerTask {
 	  try {
 	    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet4Address.getByName("255.255.255.255"), 32005);
 	    c.send(sendPacket);
-	    //System.out.println(getClass().getName() + ">>> Request packet sent to: 255.255.255.255 (DEFAULT)");
+	    System.out.println(getClass().getName() + ">>> Request packet sent to: 255.255.255.255 (DEFAULT)");
 	  } catch (Exception e) {
 	  }
 
@@ -192,7 +192,7 @@ class StopListnerTask extends TimerTask {
 			  c.receive(receivePacket);
 
 			  //We have a response
-			  //System.out.println(getClass().getName() + ">>> Broadcast response from server: " + receivePacket.getAddress().getHostAddress());
+			  System.out.println(getClass().getName() + ">>> Broadcast response from server: " + receivePacket.getAddress().getHostAddress());
 
 			  //Check if the message is correct
 			  //System.out.println(new String(receivePacket.getData()));
@@ -212,6 +212,8 @@ class StopListnerTask extends TimerTask {
 		  					//System.out.println(me.getParamsString() + receivePacket.getAddress().getHostAddress());
 		  					//me.setParam("serverip", receivePacket.getAddress().getHostAddress());
 		  					discoveryList.add(me);
+		  					System.out.println(getClass().getName() + ">>> Added server: " + receivePacket.getAddress().getHostAddress() + " to broker list");
+
 		  				}
 		  			}
 		  		}
