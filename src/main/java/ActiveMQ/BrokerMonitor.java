@@ -46,7 +46,7 @@ class BrokerMonitor implements Runnable
 	    			for(NetworkBridge b : bridge.activeBridges())
 	    			{
 	    				System.out.println("Active Bridge:" + count);
-	    				System.out.println("local address " + b.getLocalAddress() + " localbrokername" + b.getLocalBrokerName() + " remoteaddress" + b.getRemoteAddress() + " remotebrokerid" + b.getRemoteBrokerId() +" remotebrokername"+ b.getRemoteBrokerName());
+	    				System.out.println("local address:" + b.getLocalAddress() + " localbrokername: " + b.getLocalBrokerName() + " remoteaddress: " + b.getRemoteAddress() + " remotebrokerid: " + b.getRemoteBrokerId() +" remotebrokername: "+ b.getRemoteBrokerName());
 	    				count++;
 	    			}
 	    			
