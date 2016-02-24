@@ -191,7 +191,8 @@ public class PluginEngine {
     		for(MsgEvent db : disList)
     		{
     			//MsgEvent dbr = db.setReturn();
-    			db.setReturn();
+    			//db.setReturn();
+    			System.out.println("SENDING TO INCOMING CAN: " + db.getParamsString());
     			incomingCanidateBrokers.offer(db);
     			processCount++;
     		}
