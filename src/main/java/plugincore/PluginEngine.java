@@ -115,14 +115,22 @@ public class PluginEngine {
         }
         System.out.println("ActiveBrokerManager Started..");
 		
-        Thread adm = new Thread(new ActiveDestManager());
-    	adm.start();
-    	while(!ActiveDestManagerActive)
+        Thread adm;
+        if(isIPv6)
+    	{
+        	adm = new Thread(new ActiveDestManager("tcp://[::1]:32010"));
+    	}
+    	else
+    	{
+    		adm = new Thread(new ActiveDestManager("tcp://localhost:32010"));
+    	}
+        while(!ActiveDestManagerActive)
         {
         	Thread.sleep(1000);
         }
         System.out.println("ActiveDestManager Started..");
-		
+        
+        
         
         Thread ct = null;
     	if(isIPv6)

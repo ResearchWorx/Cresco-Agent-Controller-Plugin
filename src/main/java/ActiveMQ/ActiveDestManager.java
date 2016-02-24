@@ -1,6 +1,7 @@
 package ActiveMQ;
 
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -11,8 +12,12 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.apache.activemq.ActiveMQConnection;
+import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.advisory.DestinationSource;
 import org.apache.activemq.broker.jmx.BrokerViewMBean;
 import org.apache.activemq.broker.jmx.QueueViewMBean;
+import org.apache.activemq.command.ActiveMQQueue;
 
 import plugincore.PluginEngine;
 import shared.MsgEvent;
@@ -22,43 +27,21 @@ public class ActiveDestManager implements Runnable
 {
 	//private MulticastSocket socket;
 	private Timer timer;
-	private MBeanServerConnection conn;
-	public ActiveDestManager()
+	private ActiveMQConnection activeMQConnection;
+	
+	public ActiveDestManager(String URI)
 	{
+		
 		//timer = new Timer();
 	    //timer.scheduleAtFixedRate(new BrokerWatchDog(), 500, 300000);//remote 
 		//timer.scheduleAtFixedRate(new BrokerWatchDog(), 500, 15000);//remote
 		try{
-			System.out.println("test " + PluginEngine.broker.broker.getManagementContext().getBrokerName());
-			System.out.println("test " + PluginEngine.broker.broker.getManagementContext().getConnectorHost());
-			System.out.println("test " + PluginEngine.broker.broker.getManagementContext().getConnectorPath());
-			System.out.println("test " + PluginEngine.broker.broker.getManagementContext().getConnectorPort());
-			System.out.println("test " + PluginEngine.broker.broker.getManagementContext().getJmxDomainName());
-			System.out.println("test " + PluginEngine.broker.broker.getManagementContext().getRmiServerPort());
-			System.out.println("test " + PluginEngine.broker.broker.getManagementContext().getSuppressMBean());
-			System.out.println("isStarted " + PluginEngine.broker.broker.getManagementContext().isConnectorStarted());
-			System.out.println("isStarted " + PluginEngine.broker.broker.getManagementContext().isCreateMBeanServer());
-			System.out.println("isStarted " + PluginEngine.broker.broker.getManagementContext().isCreateConnector());
-			
-			
-			System.out.println("test0");
-		//JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:9999/jmxrmi");
-			String JMXHost = PluginEngine.broker.broker.getManagementContext().getConnectorHost();
-			String JMXPort = String.valueOf(PluginEngine.broker.broker.getManagementContext().getConnectorPort());
-			String JMXPath = PluginEngine.broker.broker.getManagementContext().getConnectorPath();
-			
-		String urlString = "service:jmx:rmi:///jndi/rmi://" + JMXHost + ":" + JMXPort + JMXPath;
-		//String urlString = "service:jmx:rmi:///jndi/rmi://" + "[::1]" + ":" + JMXPort + JMXPath;
-		System.out.println("JMXURL= " + urlString);
-		//JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://[::]:9999/jmxrmi");
-		System.out.println("test1");
-		JMXServiceURL url = new JMXServiceURL(urlString);
-		                               
-		JMXConnector jmxc = JMXConnectorFactory.connect(url);
-		System.out.println("test2");
-		
-		conn = jmxc.getMBeanServerConnection();
-		System.out.println("test3");
+			ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(URI);
+			//Connection conn = factory.createConnection();
+			//conn.start();
+			activeMQConnection = (ActiveMQConnection) factory.createConnection();
+		    activeMQConnection.start();
+		    
 		
 		PluginEngine.ActiveDestManagerActive = true;
 	    
@@ -67,7 +50,6 @@ public class ActiveDestManager implements Runnable
 		{
 			System.out.println("ActiveDestManager Init : Run Error " + ex.toString());
 			PluginEngine.ActiveDestManagerActive = false;
-		    
 		}
 	}
 	  
@@ -82,30 +64,14 @@ public class ActiveDestManager implements Runnable
 	    {
 		  try 
 		  {
-			  //String operationName="addQueue";
-			  //String parameter="MyNewQueue";
-			   
-			  
-			  ObjectName activeMQ = new ObjectName("org.apache.activemq:BrokerName=localhost,Type=Broker");
-			  BrokerViewMBean mbean = (BrokerViewMBean) MBeanServerInvocationHandler.newProxyInstance(conn, activeMQ,BrokerViewMBean.class, true);
-			  for (ObjectName name : mbean.getQueues()) 
-			  {
-				  System.out.println("Queue Name: " + name.getCanonicalName());
-				  
-			  }
-			  Thread.sleep(3000);
-			  /*
-			  for (ObjectName name : mbean.getQueues()) {
-			      QueueViewMBean queueMbean = (QueueViewMBean)
-			             MBeanServerInvocationHandler.newProxyInstance(mbsc, name, QueueViewMBean.class, true);
+			  DestinationSource destinationSource = activeMQConnection.getDestinationSource();
 
-			      if (queueMbean.getName().equals(queueName)) {
-			          queueViewBeanCache.put(cacheKey, queueMbean);
-			          return queueMbean;
-			      }
-			  } 
-			  */
-			  
+			    Set<ActiveMQQueue> queues = destinationSource.getQueues();
+			    for(ActiveMQQueue queue : queues)
+			    {
+			    	System.out.println("Queue: " + queue.getPhysicalName() + " " + queue.getQueueName());
+			    }
+			  Thread.sleep(3000);
 		  } 
 		  catch (Exception ex) 
 		  {
