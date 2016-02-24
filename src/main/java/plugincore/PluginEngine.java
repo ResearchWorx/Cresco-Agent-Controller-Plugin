@@ -8,6 +8,7 @@ import ActiveMQ.ActiveBroker;
 import ActiveMQ.ActiveBrokerManager;
 import ActiveMQ.ActiveConsumer;
 import ActiveMQ.ActiveConsumer2;
+import ActiveMQ.ActiveDestManager;
 import ActiveMQ.ActiveProducer;
 import ActiveMQ.BrokeredAgent;
 import ch.qos.logback.classic.Level;
@@ -38,6 +39,8 @@ public class PluginEngine {
 	public static boolean DiscoveryActive = false;
 	public static boolean DiscoveryResponderActive = false;
 	public static boolean ActiveBrokerManagerActive = false;
+	public static boolean ActiveDestManagerActive = false;
+	
 	
 	
 	public static boolean isIPv6 = false;
@@ -112,6 +115,15 @@ public class PluginEngine {
         }
         System.out.println("ActiveBrokerManager Started..");
 		
+        Thread adm = new Thread(new ActiveDestManager());
+    	adm.start();
+    	while(!ActiveDestManagerActive)
+        {
+        	Thread.sleep(1000);
+        }
+        System.out.println("ActiveDestManager Started..");
+		
+        
         Thread ct = null;
     	if(isIPv6)
     	{

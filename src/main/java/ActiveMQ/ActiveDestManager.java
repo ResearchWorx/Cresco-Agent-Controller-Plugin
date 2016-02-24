@@ -4,6 +4,16 @@ import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.management.MBeanServerConnection;
+import javax.management.MBeanServerInvocationHandler;
+import javax.management.ObjectName;
+import javax.management.remote.JMXConnector;
+import javax.management.remote.JMXConnectorFactory;
+import javax.management.remote.JMXServiceURL;
+
+import org.apache.activemq.broker.jmx.BrokerViewMBean;
+import org.apache.activemq.broker.jmx.QueueViewMBean;
+
 import plugincore.PluginEngine;
 import shared.MsgEvent;
 
@@ -12,92 +22,63 @@ public class ActiveDestManager implements Runnable
 {
 	//private MulticastSocket socket;
 	private Timer timer;
+	private MBeanServerConnection conn;
 	public ActiveDestManager()
 	{
-		timer = new Timer();
+		//timer = new Timer();
 	    //timer.scheduleAtFixedRate(new BrokerWatchDog(), 500, 300000);//remote 
-		timer.scheduleAtFixedRate(new BrokerWatchDog(), 500, 15000);//remote 
+		//timer.scheduleAtFixedRate(new BrokerWatchDog(), 500, 15000);//remote
+		try{
+		JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:1099/jmxrmi");
+		JMXConnector jmxc = JMXConnectorFactory.connect(url);
+		conn = jmxc.getMBeanServerConnection();
+		}
+		catch(Exception ex)
+		{
+			System.out.println("ActiveDestManager Init : Run Error " + ex.toString());
+		}
 	}
 	  
 	public void shutdown()
 	{
 	
 	}
-	
-
-	  public void addBroker(String agentPath)
-	  {
-		  BrokeredAgent ba = PluginEngine.brokeredAgents.get(agentPath);
-		  if(ba.brokerStatus == BrokerStatusType.INIT)
-		  {
-			  //Fire up new thread.
-			  //ba.brokerStatus = BrokerStatusType.STARTING;
-			  //System.out.println("Adding Broker: " + agentPath + " IP:" + ba.activeAddress);
-			  ba.setStarting();
-		  }
-	  }
-	  
+		  
 	  public void run() 
 	  {
-		PluginEngine.ActiveBrokerManagerActive = true;
-	    while(PluginEngine.ActiveBrokerManagerActive)
+		PluginEngine.ActiveDestManagerActive = true;
+	    while(PluginEngine.ActiveDestManagerActive)
 	    {
 		  try 
 		  {
-			  MsgEvent cb = PluginEngine.incomingCanidateBrokers.poll();
-			  if(cb != null)
+			  //String operationName="addQueue";
+			  //String parameter="MyNewQueue";
+			   
+			  
+			  ObjectName activeMQ = new ObjectName("org.apache.activemq:BrokerName=localhost,Type=Broker");
+			  BrokerViewMBean mbean = (BrokerViewMBean) MBeanServerInvocationHandler.newProxyInstance(conn, activeMQ,BrokerViewMBean.class, true);
+			  for (ObjectName name : mbean.getQueues()) 
 			  {
-				String agentIP = cb.getParam("dst_ip");
-				if(!PluginEngine.isLocal(agentIP)) //ignore local responses 
-				{
-				boolean addBroker = false;
-				String agentPath = cb.getParam("dst_region") + "_" + cb.getParam("dst_agent");
-				//System.out.println(getClass().getName() + ">>> canidate boker :" + agentPath + " canidate ip:" + agentIP) ;
-	 		      
-				BrokeredAgent ba;
-				if(PluginEngine.brokeredAgents.containsKey(agentPath))
-				{
-					
-					ba = PluginEngine.brokeredAgents.get(agentPath);
-					//add ip to possible list
-					if(!ba.addressMap.containsKey(agentIP)) 
-					{
-						ba.addressMap.put(agentIP,BrokerStatusType.INIT);
-					}
-					//reset status if needed
-					if((ba.brokerStatus.equals(BrokerStatusType.FAILED) || (ba.brokerStatus.equals(BrokerStatusType.STOPPED))))
-					{
-							ba.activeAddress = agentIP;
-							ba.brokerStatus = BrokerStatusType.INIT;
-							addBroker = true;
-							//System.out.println("BA EXIST ADDING agentPath: " + agentPath + " remote_ip: " + agentIP);
-					}
-					
-				}
-				else
-				{
-					ba = new BrokeredAgent(agentIP,agentPath);
-					PluginEngine.brokeredAgents.put(agentPath, ba);
-					addBroker = true;
-					//System.out.println("BA NEW ADDING agentPath: " + agentPath + " remote_ip: " + agentIP);
-				}
-				//try and connect
-				if(addBroker)
-				{
-					addBroker(agentPath);
-				}
+				  System.out.println("Queue Name: " + name.getCanonicalName());
+				  
 			  }
-		  		Thread.sleep(500); //allow HM to catch up
-			  }
-			  else
-			  {
-				  Thread.sleep(1000);
-			  }
+			  Thread.sleep(3000);
+			  /*
+			  for (ObjectName name : mbean.getQueues()) {
+			      QueueViewMBean queueMbean = (QueueViewMBean)
+			             MBeanServerInvocationHandler.newProxyInstance(mbsc, name, QueueViewMBean.class, true);
+
+			      if (queueMbean.getName().equals(queueName)) {
+			          queueViewBeanCache.put(cacheKey, queueMbean);
+			          return queueMbean;
+			      }
+			  } 
+			  */
 			  
 		  } 
 		  catch (Exception ex) 
 		  {
-			  System.out.println("DiscoveryEngineIPv6 : Run Error " + ex.toString());
+			  System.out.println("ActiveDestManager : Run Error " + ex.toString());
 		  }
 	    }
 	  }
