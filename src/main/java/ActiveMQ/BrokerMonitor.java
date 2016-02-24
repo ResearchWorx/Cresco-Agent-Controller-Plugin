@@ -116,6 +116,9 @@ class BrokerMonitor implements Runnable
 	    			System.out.println("compress : " + bridge.isUseCompression());
 	    			*/
 	    			//int count = 0;
+			    	System.out.println("Global Dest");
+			    	PluginEngine.broker.getDest();
+			    	
 			    	System.out.println("Check Dynamic Dest");
 			    	List<ActiveMQDestination> dd = bridge.getDynamicallyIncludedDestinations();
 			    	for(ActiveMQDestination ad : dd)

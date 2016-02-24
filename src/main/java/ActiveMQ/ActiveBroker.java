@@ -2,6 +2,7 @@ package ActiveMQ;
 
 import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.broker.TransportConnector;
+import org.apache.activemq.command.ActiveMQDestination;
 import org.apache.activemq.network.NetworkConnector;
 import org.slf4j.LoggerFactory;
 
@@ -86,12 +87,29 @@ return connector;
 		//return isRemoved;
 		
 	}
+	public void getDest()
+	{
+		ActiveMQDestination[] dests = broker.getDestinations();
+		for(ActiveMQDestination dest : dests)
+		{
+			System.out.println(dest.getDestinationTypeAsString());
+			System.out.println(dest.getPhysicalName());
+			System.out.println(dest.getQualifiedName());
+			String[] paths = dest.getDestinationPaths();
+			for(String path : paths)
+			{
+				System.out.println("Path: " + path);
+				
+			}
+			
+			
+		}
+	}
 	public NetworkConnector AddNetworkConnector(String URI)
 	{
 		NetworkConnector bridge = null;
 		try
 		{
-			
 			bridge = broker.addNetworkConnector(new URI("static:tcp://" + URI + ":32010"));
 			RandomString rs = new RandomString(5);
 			
