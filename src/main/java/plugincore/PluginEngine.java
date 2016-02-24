@@ -16,6 +16,7 @@ import netdiscovery.DiscoveryClientIPv6;
 import netdiscovery.DiscoveryEngine;
 import shared.MsgEvent;
 import shared.MsgEventType;
+import shared.RandomString;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -84,9 +85,12 @@ public class PluginEngine {
     public static void main(String[] args) throws Exception 
     {
     	isIPv6 = isIPv6();
-    	
-    	region = args[0];
-    	agent = args[1];
+    	region = "region0";
+    	RandomString rs = new RandomString(4);
+		String agent = "agent-" + rs.nextString();
+		
+    	//region = args[0];
+    	//agent = args[1];
     	agentpath = region + "_" + agent;
     	
     	//peerList = new ArrayList<String>();
