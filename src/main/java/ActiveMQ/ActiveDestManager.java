@@ -36,6 +36,10 @@ public class ActiveDestManager implements Runnable
 			System.out.println("test " + PluginEngine.broker.broker.getManagementContext().getJmxDomainName());
 			System.out.println("test " + PluginEngine.broker.broker.getManagementContext().getRmiServerPort());
 			System.out.println("test " + PluginEngine.broker.broker.getManagementContext().getSuppressMBean());
+			System.out.println("isStarted " + PluginEngine.broker.broker.getManagementContext().isConnectorStarted());
+			System.out.println("isStarted " + PluginEngine.broker.broker.getManagementContext().isCreateMBeanServer());
+			System.out.println("isStarted " + PluginEngine.broker.broker.getManagementContext().isCreateConnector());
+			
 			
 			System.out.println("test0");
 		//JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:9999/jmxrmi");
