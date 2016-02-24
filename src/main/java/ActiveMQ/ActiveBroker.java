@@ -54,6 +54,7 @@ return connector;
 				broker = new BrokerService();
 				broker.setPersistent(false);
 				broker.setBrokerName(brokerName);
+				
 				//NetworkConnector connector = bridge
 				//connector.
 				// = new NetworkConnector();
