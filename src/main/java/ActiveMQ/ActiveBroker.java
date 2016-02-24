@@ -56,6 +56,8 @@ return connector;
 				broker.setBrokerName(brokerName);
 				broker.setUseJmx(true);
 			    broker.getManagementContext().setConnectorPort(9999);
+			    broker.getManagementContext().isCreateConnector();
+			    
 			    //NetworkConnector connector = bridge
 				//connector.
 				// = new NetworkConnector();
