@@ -54,81 +54,6 @@ class StopListnerTask extends TimerTask {
 	    }
 	  }
 
-	public Map<String,String> getDiscoveryMap()
-	{
-		Map<String,String> dhm = null;
-		try
-		{
-			Map<String, ArrayList<String>> tmphm = new HashMap<String,ArrayList<String>>();
-			dhm = new HashMap<String,String>();
-			List<MsgEvent> dlist = discover();
-			for(MsgEvent me : dlist)
-			{
-				String agentpath = me.getMsgRegion() + "_" + me.getMsgAgent();
-				String ippath = me.getParam("clientip") + "_" + me.getParam("serverip");
-				//Benchmark connection here.. will have to do self-terminating code at some point
-				/*
-				String netBenchResult = nbc.benchmarkThroughput(me.getParam("serverip"),"benchmark-throughput",3,1);
-		    	if(netBenchResult != null)
-		    	{
-		    		ippath = ippath + "_" + netBenchResult;
-		    	}
-				*/
-				//
-				if(!tmphm.containsKey(agentpath))
-				{
-					ArrayList<String> newList = new ArrayList<String>();
-					newList.add(ippath);
-					tmphm.put(agentpath, newList);
-				}
-				else
-				{
-					ArrayList<String> newList = tmphm.get(agentpath);
-					if(!newList.contains(ippath))
-					{
-						newList.add(ippath);
-						tmphm.put(agentpath, newList);
-					}
-					
-				}
-			}
-			
-			if(!tmphm.isEmpty())
-			{
-				StringBuilder keylist = new StringBuilder();
-				for(Entry<String, ArrayList<String>> entry : tmphm.entrySet()) 
-				{
-					String agentpath = entry.getKey();
-					keylist.append(agentpath + ",");
-					ArrayList<String> ipList = entry.getValue();
-					//System.out.println(agentpath);
-					StringBuilder sb = new StringBuilder();
-		        
-					for(String ip : ipList)
-					{
-						//System.out.println(ip);
-						sb.append(ip + ",");
-					}
-					String ips = sb.substring(0,sb.length() -1);
-					dhm.put(agentpath, ips);
-					// do what you have to do here
-					// In your case, an other loop.
-				}
-				
-				String keyfound = keylist.substring(0, keylist.length() -1);
-				dhm.put("discoveredagents", keyfound);
-			}
-			
-			
-		}
-		catch(Exception ex)
-		{
-			System.out.println("DiscoveryClient : getDiscovery : " + ex.toString());
-		}
-		
-		return dhm;
-	}
-	
 	public List<MsgEvent> discover()
 	{
 		List<MsgEvent> discoveryList = null;
@@ -233,6 +158,9 @@ class StopListnerTask extends TimerTask {
 	    		  					//me.setParam("dst_ip", remoteAddress);
 	    		  					//me.setParam("src_ip", remoteAddress);
 	    		        		    me.setParam("dst_ip", remoteAddress);
+	    		        		    me.setParam("dst_region", me.getParam("src_region"));
+	    		        		    me.setParam("dst_agent", me.getParam("src_agent"));
+	    		        		    
 	    		  					discoveryList.add(me);
 	    		  				//}
 	    		  			}
