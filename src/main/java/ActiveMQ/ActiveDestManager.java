@@ -48,11 +48,11 @@ public class ActiveDestManager implements Runnable
 			String JMXPath = PluginEngine.broker.broker.getManagementContext().getConnectorPath();
 			
 		//String urlString = "service:jmx:rmi:///jndi/rmi://" + JMXHost + ":" + JMXPort + JMXPath;
-		String urlString = "service:jmx:rmi:///jndi/rmi://" + "[::]" + ":" + JMXPort + JMXPath;
+		String urlString = "service:jmx:rmi:///jndi/rmi://" + "[::1]" + ":" + JMXPort + JMXPath;
 		System.out.println("JMXURL= " + urlString);
 		//JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://[::]:9999/jmxrmi");
 		System.out.println("test1");
-		JMXServiceURL url = new JMXServiceURL(urlString	);
+		JMXServiceURL url = new JMXServiceURL(urlString);
 		                               
 		JMXConnector jmxc = JMXConnectorFactory.connect(url);
 		System.out.println("test2");
