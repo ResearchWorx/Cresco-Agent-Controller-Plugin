@@ -116,7 +116,8 @@ class BrokerMonitor implements Runnable
 	    			System.out.println("compress : " + bridge.isUseCompression());
 	    			*/
 	    			//int count = 0;
-			    	List<ActiveMQDestination> dd = bridge.getStaticallyIncludedDestinations();
+			    	System.out.println("Check Dynamic Dest");
+			    	List<ActiveMQDestination> dd = bridge.getDynamicallyIncludedDestinations();
 			    	for(ActiveMQDestination ad : dd)
 			    	{
 			    		System.out.println("DES :" + ad.getPhysicalName());
@@ -124,6 +125,8 @@ class BrokerMonitor implements Runnable
 			    		
 			    		
 			    	}
+			    	
+			    	System.out.println("Check Static Dest");
 			    	List<ActiveMQDestination> sd = bridge.getStaticallyIncludedDestinations();
 			    	for(ActiveMQDestination ad : sd)
 			    	{
