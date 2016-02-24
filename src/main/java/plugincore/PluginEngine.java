@@ -86,7 +86,7 @@ public class PluginEngine {
     {
     	region = "region0";
     	RandomString rs = new RandomString(4);
-		String agent = "agent-" + rs.nextString();
+		agent = "agent-" + rs.nextString();
 		agentpath = region + "_" + agent;
     	
 		isIPv6 = isIPv6();
