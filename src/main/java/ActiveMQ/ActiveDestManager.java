@@ -32,10 +32,14 @@ public class ActiveDestManager implements Runnable
 		JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:1099/jmxrmi");
 		JMXConnector jmxc = JMXConnectorFactory.connect(url);
 		conn = jmxc.getMBeanServerConnection();
+		PluginEngine.ActiveDestManagerActive = true;
+	    
 		}
 		catch(Exception ex)
 		{
 			System.out.println("ActiveDestManager Init : Run Error " + ex.toString());
+			PluginEngine.ActiveDestManagerActive = false;
+		    
 		}
 	}
 	  
@@ -46,8 +50,7 @@ public class ActiveDestManager implements Runnable
 		  
 	  public void run() 
 	  {
-		PluginEngine.ActiveDestManagerActive = true;
-	    while(PluginEngine.ActiveDestManagerActive)
+		while(PluginEngine.ActiveDestManagerActive)
 	    {
 		  try 
 		  {
