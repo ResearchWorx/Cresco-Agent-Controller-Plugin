@@ -2,7 +2,9 @@ package ActiveMQ;
 
 import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.util.List;
 
+import org.apache.activemq.command.ActiveMQDestination;
 import org.apache.activemq.network.NetworkBridge;
 import org.apache.activemq.network.NetworkConnector;
 
@@ -113,7 +115,24 @@ class BrokerMonitor implements Runnable
 	    			System.out.println("duplex : " + bridge.isDuplex());
 	    			System.out.println("compress : " + bridge.isUseCompression());
 	    			*/
-	    			int count = 0;
+	    			//int count = 0;
+			    	List<ActiveMQDestination> dd = bridge.getStaticallyIncludedDestinations();
+			    	for(ActiveMQDestination ad : dd)
+			    	{
+			    		System.out.println("DES :" + ad.getPhysicalName());
+			    		System.out.println("DES Q :" + ad.getQualifiedName());
+			    		
+			    		
+			    	}
+			    	List<ActiveMQDestination> sd = bridge.getStaticallyIncludedDestinations();
+			    	for(ActiveMQDestination ad : sd)
+			    	{
+			    		System.out.println("S :" + ad.getPhysicalName());
+			    		System.out.println("S Q :" + ad.getQualifiedName());
+			    		
+			    		
+			    	}
+			    	
 	    			boolean bridgeActive = false;
 	    			for(NetworkBridge b : bridge.activeBridges())
 	    			{
@@ -125,7 +144,7 @@ class BrokerMonitor implements Runnable
 	    				System.out.println("remotebrokerid: " + b.getRemoteBrokerId());
 	    				System.out.println("remotebrokername: "+ b.getRemoteBrokerName());
 	    				*/
-	    				count++;
+	    				//count++;
 	    				if(b.getRemoteBrokerName().equals(agentPath))
 	    				{
 	    					bridgeActive = true;
