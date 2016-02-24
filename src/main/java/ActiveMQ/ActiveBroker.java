@@ -100,12 +100,16 @@ return connector;
 			System.out.println(dest.getDestinationTypeAsString());
 			System.out.println(dest.getPhysicalName());
 			System.out.println(dest.getQualifiedName());
+			System.out.println("get des2");
 			String[] paths = dest.getDestinationPaths();
+			System.out.println("get des3");
+			
 			for(String path : paths)
 			{
 				System.out.println("Path: " + path);
 				
 			}
+			System.out.println("get des4");
 			
 			
 		}
