@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import ActiveMQ.ActiveBroker;
 import ActiveMQ.ActiveBrokerManager;
 import ActiveMQ.ActiveConsumer;
-import ActiveMQ.ActiveConsumer2;
 import ActiveMQ.ActiveDestManager;
 import ActiveMQ.ActiveProducer;
 import ActiveMQ.BrokeredAgent;
@@ -142,17 +141,6 @@ public class PluginEngine {
     		ct = new Thread(new ActiveConsumer(agentpath,"tcp://localhost:32010"));
     	}
     	ct.start();
-    	
-    	Thread ct2 = null;
-    	if(isIPv6)
-    	{
-    		ct2 = new Thread(new ActiveConsumer2(agentpath,"tcp://[::1]:32010"));
-    	}
-    	else
-    	{
-    		ct2 = new Thread(new ActiveConsumer2(agentpath,"tcp://localhost:32010"));
-    	}
-    	//ct2.start();
     	
     	
     	//Thread pt = new Thread(new ActiveProducer(args[2] + "_" + args[3],"tcp://localhost:32010"));
