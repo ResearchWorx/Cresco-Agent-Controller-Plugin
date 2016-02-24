@@ -61,12 +61,12 @@ public class DiscoveryEngine implements Runnable
 	    private static final DiscoveryEngine INSTANCE = new DiscoveryEngine();
 	  }
 
-	  class DiscoveryEngineWorkerIPv6 implements Runnable 
+	  class DiscoveryEngineWorker implements Runnable 
 	  {
 		  private NetworkInterface networkInterface;
 		  private MulticastSocket socket;
 		  private String networkInterfaceName;
-		    public DiscoveryEngineWorkerIPv6(NetworkInterface networkInterface)
+		    public DiscoveryEngineWorker(NetworkInterface networkInterface)
 		    {
 		    	this.networkInterfaceName = networkInterface.getDisplayName();
 		    	this.networkInterface = networkInterface;
