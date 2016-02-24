@@ -35,6 +35,12 @@ class BrokerMonitor implements Runnable
 			  bridge = PluginEngine.broker.AddNetworkConnector(brokerAddress);
 			  bridge.start();
 			  int connect_count = 0;
+			  while((connect_count < 10) && !bridge.isStarted())
+			  {
+				  Thread.sleep(1000);
+			  }
+			  connect_count = 0;
+			  
 			  while((connect_count < 10) && !isConnected)
 			  {
 				  for(NetworkBridge b : bridge.activeBridges())
