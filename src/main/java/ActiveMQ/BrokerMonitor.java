@@ -98,6 +98,7 @@ class BrokerMonitor implements Runnable
 			  }
 			    while(MonitorActive)
 	    		{
+			    	/*
 	    			System.out.println("Monitoring thread for : " + agentPath);
 	    			System.out.println("Started : " + bridge.isStarted());
 	    			System.out.println("Static : " + bridge.isStaticBridge());
@@ -105,17 +106,19 @@ class BrokerMonitor implements Runnable
 	    			System.out.println("Name : " + bridge.getName());
 	    			System.out.println("duplex : " + bridge.isDuplex());
 	    			System.out.println("compress : " + bridge.isUseCompression());
-	    			
+	    			*/
 	    			int count = 0;
 	    			boolean bridgeActive = false;
 	    			for(NetworkBridge b : bridge.activeBridges())
 	    			{
+	    				/*
 	    				System.out.println("Active Bridge: " + count);
 	    				System.out.println("local address: " + b.getLocalAddress());
 	    				System.out.println("localbrokername: " + b.getLocalBrokerName());
 	    				System.out.println("remoteaddress: " + b.getRemoteAddress());
 	    				System.out.println("remotebrokerid: " + b.getRemoteBrokerId());
 	    				System.out.println("remotebrokername: "+ b.getRemoteBrokerName());
+	    				*/
 	    				count++;
 	    				if(b.getRemoteBrokerName().equals(agentPath))
 	    				{
