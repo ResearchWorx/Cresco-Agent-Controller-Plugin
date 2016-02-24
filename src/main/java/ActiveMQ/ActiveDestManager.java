@@ -29,6 +29,14 @@ public class ActiveDestManager implements Runnable
 	    //timer.scheduleAtFixedRate(new BrokerWatchDog(), 500, 300000);//remote 
 		//timer.scheduleAtFixedRate(new BrokerWatchDog(), 500, 15000);//remote
 		try{
+			System.out.println("test " + PluginEngine.broker.broker.getManagementContext().getBrokerName());
+			System.out.println("test " + PluginEngine.broker.broker.getManagementContext().getConnectorHost());
+			System.out.println("test " + PluginEngine.broker.broker.getManagementContext().getConnectorPath());
+			System.out.println("test " + PluginEngine.broker.broker.getManagementContext().getConnectorPort());
+			System.out.println("test " + PluginEngine.broker.broker.getManagementContext().getJmxDomainName());
+			System.out.println("test " + PluginEngine.broker.broker.getManagementContext().getRmiServerPort());
+			System.out.println("test " + PluginEngine.broker.broker.getManagementContext().getSuppressMBean());
+			
 			System.out.println("test0");
 		JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:9999/jmxrmi");
 		//JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://[::]:9999/jmxrmi");
