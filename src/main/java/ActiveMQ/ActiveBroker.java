@@ -5,6 +5,7 @@ import org.apache.activemq.broker.TransportConnector;
 import org.apache.activemq.network.NetworkConnector;
 import org.slf4j.LoggerFactory;
 
+import shared.RandomString;
 import ch.qos.logback.classic.Level;
 
 import java.io.IOException;
@@ -92,7 +93,9 @@ return connector;
 		{
 			
 			bridge = broker.addNetworkConnector(new URI("static:tcp://" + URI + ":32010"));
-			bridge.setName(URI);
+			RandomString rs = new RandomString(5);
+			
+			bridge.setName(rs.nextString());
 			bridge.setDuplex(false);
 			//TransportConnector connector = new TransportConnector();
 			//connector.setUri(new URI(URI));
