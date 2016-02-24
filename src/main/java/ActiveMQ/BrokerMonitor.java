@@ -103,6 +103,9 @@ class BrokerMonitor implements Runnable
 	    			System.out.println("Static : " + bridge.isStaticBridge());
 	    			System.out.println("Broker Name : " + bridge.getBrokerName());
 	    			System.out.println("Name : " + bridge.getName());
+	    			System.out.println("duplex : " + bridge.isDuplex());
+	    			System.out.println("compress : " + bridge.isUseCompression());
+	    			
 	    			int count = 0;
 	    			boolean bridgeActive = false;
 	    			for(NetworkBridge b : bridge.activeBridges())
