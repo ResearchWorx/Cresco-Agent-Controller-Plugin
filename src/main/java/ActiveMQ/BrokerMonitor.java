@@ -2,7 +2,6 @@ package ActiveMQ;
 
 import java.net.Inet6Address;
 import java.net.InetAddress;
-import java.util.Map.Entry;
 
 import org.apache.activemq.network.NetworkBridge;
 import org.apache.activemq.network.NetworkConnector;
@@ -12,6 +11,7 @@ import plugincore.PluginEngine;
 class BrokerMonitor implements Runnable 
 {
 	  private String agentPath;
+	  private NetworkConnector bridge;
 	  public boolean MonitorActive;
 	  public BrokerMonitor(String agentPath)
 	  {
@@ -22,20 +22,56 @@ class BrokerMonitor implements Runnable
 	  {
 			MonitorActive = false;
 	  }
+	  public boolean connectToBroker(String brokerAddress)
+	  {
+		  boolean isConnected = false;
+		  try
+		  {
+
+			  if((InetAddress.getByName(brokerAddress) instanceof Inet6Address))
+        	  {
+				  brokerAddress = "[" + brokerAddress + "]";
+        	  }
+			  bridge = PluginEngine.broker.AddNetworkConnector(brokerAddress);
+			  bridge.start();
+			  int connect_count = 0;
+			  while((connect_count < 10) && !isConnected)
+			  {
+				  for(NetworkBridge b : bridge.activeBridges())
+  				  {
+					System.out.println("Try: " + connect_count);
+					System.out.println("local address: " + b.getLocalAddress());
+					System.out.println("localbrokername: " + b.getLocalBrokerName());
+					System.out.println("remoteaddress: " + b.getRemoteAddress());
+					System.out.println("remotebrokerid: " + b.getRemoteBrokerId());
+					System.out.println("remotebrokername: "+ b.getRemoteBrokerName());
+					connect_count++;
+					if(b.getRemoteBrokerName().equals(agentPath))
+    				{
+    					isConnected = true;
+    				}
+					Thread.sleep(1000);
+  				  }
+			  }
+		  }
+		  catch(Exception ex)
+		  {
+			System.out.println(getClass().getName() + " connectToBroker Error " + ex.toString());
+		  }
+		  return isConnected;
+	  }
 	  public void run() 
 	  {
 		  try
 		  {
 			  String brokerAddress = PluginEngine.brokeredAgents.get(agentPath).activeAddress;
 			  
-			  if((InetAddress.getByName(brokerAddress) instanceof Inet6Address))
-        	  {
-				  brokerAddress = "[" + brokerAddress + "]";
-        	  }
-			  NetworkConnector bridge = PluginEngine.broker.AddNetworkConnector(brokerAddress);
-			  bridge.start();
-			    //PluginEngine.broker.AddNetworkConnector(URI)
-	    		while(MonitorActive)
+			  if(!connectToBroker(brokerAddress)) //connect to broker
+			  {
+				  PluginEngine.brokeredAgents.get(agentPath).brokerStatus = BrokerStatusType.FAILED;
+	    		   MonitorActive = false;
+			  }
+			    while(MonitorActive)
 	    		{
 	    			System.out.println("Monitoring thread for : " + agentPath);
 	    			System.out.println("Started : " + bridge.isStarted());
@@ -46,8 +82,8 @@ class BrokerMonitor implements Runnable
 	    			boolean bridgeActive = false;
 	    			for(NetworkBridge b : bridge.activeBridges())
 	    			{
-	    				System.out.println("Active Bridge:" + count);
-	    				System.out.println("local address:" + b.getLocalAddress());
+	    				System.out.println("Active Bridge: " + count);
+	    				System.out.println("local address: " + b.getLocalAddress());
 	    				System.out.println("localbrokername: " + b.getLocalBrokerName());
 	    				System.out.println("remoteaddress: " + b.getRemoteAddress());
 	    				System.out.println("remotebrokerid: " + b.getRemoteBrokerId());
@@ -60,7 +96,7 @@ class BrokerMonitor implements Runnable
 	    			}
 	    			if(!bridgeActive)
 	    			{
-	    				bridge.stop();
+	    				System.out.println("Monitoring thread for : " + agentPath);
 		    			PluginEngine.brokeredAgents.get(agentPath).brokerStatus = BrokerStatusType.FAILED;
 		    			MonitorActive = false;
 	    			}
