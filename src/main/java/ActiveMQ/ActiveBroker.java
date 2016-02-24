@@ -77,12 +77,13 @@ return connector;
 		
 	}	
 
-	public void AddNetworkConnector(String URI)
+	public NetworkConnector AddNetworkConnector(String URI)
 	{
+		NetworkConnector bridge = null;
 		try
 		{
 			
-			NetworkConnector bridge = broker.addNetworkConnector(new URI("static:tcp://" + URI + ":32010"));
+			bridge = broker.addNetworkConnector(new URI("static:tcp://" + URI + ":32010"));
 			//TransportConnector connector = new TransportConnector();
 			//connector.setUri(new URI(URI));
 			//connector.setDiscoveryUri(new URI("multicast://default?group=test"));
@@ -90,9 +91,10 @@ return connector;
 			//broker.requestRestart();
 			//broker.startAllConnectors();
 			//broker.startTransportConnector(connector);
-			System.out.println("BorkerNAme: " + bridge.getBrokerName() + " " + bridge.getBrokerService().getBrokerName());
-			bridge.start();
-			System.out.println("BorkerNAme: " + bridge.getBrokerName() + " " + bridge.getBrokerService().getDefaultSocketURIString());
+			
+			//System.out.println("BorkerNAme: " + bridge.getBrokerName() + " " + bridge.getBrokerService().getBrokerName());
+			//bridge.start();
+			//System.out.println("BorkerNAme: " + bridge.getBrokerName() + " " + bridge.getBrokerService().getDefaultSocketURIString());
 			
 			
 		}
@@ -100,6 +102,7 @@ return connector;
 		{
 			System.out.println("ActiveBroker : AddNetworkConnector Error : " + ex.toString());
 		}
+		return bridge;
 	}
 	
 	public static void AddTransportConnector(String URI)
