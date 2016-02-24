@@ -108,6 +108,7 @@ public class ActiveBrokerManager implements Runnable
 		    		BrokeredAgent ba = entry.getValue();
 		    		if(ba.brokerStatus == BrokerStatusType.FAILED)
 		    		{
+		    			System.out.println("stopping agentPath: " + ba.agentPath);
 		    			ba.setStop();
 		    			System.out.println("cleared agentPath: " + ba.agentPath);
 		    		}

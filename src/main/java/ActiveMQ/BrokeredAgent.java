@@ -31,6 +31,7 @@ public class BrokeredAgent {
 		  while(bm.MonitorActive)
 		  {
 			  try {
+				  System.out.println("STOPPING " + agentPath);
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
