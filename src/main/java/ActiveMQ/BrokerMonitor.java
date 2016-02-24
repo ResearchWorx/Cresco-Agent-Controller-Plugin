@@ -42,10 +42,12 @@ class BrokerMonitor implements Runnable
 	    			System.out.println("Static : " + bridge.isStaticBridge());
 	    			System.out.println("Broker Name : " + bridge.getBrokerName());
 	    			System.out.println("Name : " + bridge.getName());
-	    			
+	    			int count = 0;
 	    			for(NetworkBridge b : bridge.activeBridges())
 	    			{
-	    				System.out.println("Active Bridges: " + b.getLocalAddress() + " " + b.getLocalBrokerName() + " " + b.getRemoteAddress() + " " + b.getRemoteBrokerId() +" "+ b.getRemoteBrokerName());
+	    				System.out.println("Active Bridge:" + count);
+	    				System.out.println("local address " + b.getLocalAddress() + " localbrokername" + b.getLocalBrokerName() + " remoteaddress" + b.getRemoteAddress() + " remotebrokerid" + b.getRemoteBrokerId() +" remotebrokername"+ b.getRemoteBrokerName());
+	    				count++;
 	    			}
 	    			
 	    			Thread.sleep(5000);
