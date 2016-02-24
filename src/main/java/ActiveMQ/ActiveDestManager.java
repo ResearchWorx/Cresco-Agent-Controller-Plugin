@@ -41,10 +41,7 @@ public class ActiveDestManager implements Runnable
 			//conn.start();
 			activeMQConnection = (ActiveMQConnection) factory.createConnection();
 		    activeMQConnection.start();
-		    
 		
-		PluginEngine.ActiveDestManagerActive = true;
-	    
 		}
 		catch(Exception ex)
 		{
@@ -60,6 +57,8 @@ public class ActiveDestManager implements Runnable
 		  
 	  public void run() 
 	  {
+		  PluginEngine.ActiveDestManagerActive = true;
+		    
 		  System.out.println("Checking Queues");
 			
 		while(PluginEngine.ActiveDestManagerActive)

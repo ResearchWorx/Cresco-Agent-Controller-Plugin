@@ -123,6 +123,7 @@ public class PluginEngine {
     	{
     		adm = new Thread(new ActiveDestManager("tcp://localhost:32010"));
     	}
+        adm.start();
         while(!ActiveDestManagerActive)
         {
         	Thread.sleep(1000);
