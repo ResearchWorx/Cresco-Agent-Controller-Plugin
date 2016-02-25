@@ -64,13 +64,28 @@ return connector;
 				broker = new BrokerService();
 				broker.setPersistent(false);
 				broker.setBrokerName(brokerName);
+				System.out.println("0");
 				broker.setSchedulePeriodForDestinationPurge(10000);
+				System.out.println("1");
+				
 				PolicyMap pm = broker.getDestinationPolicy();
+				System.out.println("2");
+				
 				PolicyEntry pe = pm.getDefaultEntry();
+				System.out.println("3");
+				
 				pe.setGcInactiveDestinations(true);
+				System.out.println("4");
+				
 				pe.setInactiveTimeoutBeforeGC(30000);
+				System.out.println("5");
+				
 				pm.setDefaultEntry(pe);
+				System.out.println("6");
+				
 				broker.setDestinationPolicy(pm);
+				System.out.println("7");
+				
 			    //NetworkConnector connector = bridge
 				//connector.
 				// = new NetworkConnector();
