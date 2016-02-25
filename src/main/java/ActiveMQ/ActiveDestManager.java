@@ -68,27 +68,22 @@ public class ActiveDestManager implements Runnable
 				
 		  try 
 		  {
-			  System.out.println("Checking Queues LOOP");
-			  
 			  ActiveMQDestination[] er = PluginEngine.broker.broker.getBroker().getDestinations();
-			  
-			  System.out.println("Checking Queues LOOP.1 " + er.length);
-				 
 			  for(ActiveMQDestination des : er)
 			  {
 				  System.out.println("Checking Queues LOOP.1.0");
 					
-				 System.out.println("Dest: " + des.getPhysicalName());
-				 System.out.println("Checking Queues LOOP.1.1");
-					
-			    	for(String path : des.getDestinationPaths())
-			    	{
-			    		System.out.println("DES PATH: " + path);
-			    		
-			    	}
+				 	if(des.isQueue())
+					{
+						for(String path : des.getDestinationPaths())
+						{
+							System.out.println("Dest: " + des.getPhysicalName());
+							 
+							System.out.println("DES PATH: " + path);
+			    		}
+					}
 			  }
-			  System.out.println("Checking Queues LOOP.2");
-				 
+			   
 			  DestinationSource destinationSource = activeMQConnection.getDestinationSource();
 
 			    Set<ActiveMQQueue> queues = destinationSource.getQueues();
