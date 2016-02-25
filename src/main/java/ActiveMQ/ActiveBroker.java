@@ -71,7 +71,7 @@ return connector;
 				PolicyMap pm = broker.getDestinationPolicy();
 				System.out.println("2");
 				
-				PolicyEntry pe = pm.getDefaultEntry();
+				PolicyEntry pe = new PolicyEntry();
 				System.out.println("3");
 				
 				pe.setGcInactiveDestinations(true);
