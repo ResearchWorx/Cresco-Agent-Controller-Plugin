@@ -86,6 +86,26 @@ public class PluginEngine {
 	public static ActiveBroker broker;
     public static void main(String[] args) throws Exception 
     {
+    	//Cleanup on Shutdown
+		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+	        public void run() {
+	            try
+	            {
+	            	broker.broker.getBroker().stop();
+	            	while(!broker.broker.getBroker().isStopped())
+	            	{
+	            		Thread.sleep(1000);
+	            		System.out.println("Shutdown Broker");
+	            	}
+	            }
+	            catch(Exception ex)
+	            {
+	            	System.out.println("Exception Shutting Down:" + ex.toString());
+	            }
+	        }
+	    }, "Shutdown-thread"));
+		
+    	
     	region = "region0";
     	RandomString rs = new RandomString(4);
 		agent = "agent-" + rs.nextString();
