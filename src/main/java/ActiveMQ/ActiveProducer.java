@@ -15,13 +15,14 @@ public class ActiveProducer implements Runnable
 	private Queue TXqueue; 
 	private Session sess;
 	private String URI;
+	private Connection conn;
 
 public ActiveProducer(String TXQueueName, String URI) 
 {
 	try
 	{
 		ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(URI);
-		Connection conn = factory.createConnection();
+		conn = factory.createConnection();
 		conn.start();
 		this.sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
 		this.TXqueue = sess.createQueue(TXQueueName);
@@ -47,6 +48,8 @@ public void run() {
             producer.send(this.sess.createTextMessage("from " + URI + " to " + TXqueue.getQueueName()));
             //Thread.sleep(5000);
         }
+        sess.close();
+        conn.stop();
         System.out.println("Ended Producer Thread :" + Thread.currentThread());
     } catch (JMSException jmse) {
         System.out.println(jmse.getErrorCode());

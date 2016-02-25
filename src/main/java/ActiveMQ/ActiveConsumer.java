@@ -16,6 +16,7 @@ public class ActiveConsumer implements Runnable
 {
 	private Queue RXqueue; 
 	private Session sess;
+	private Connection conn;
 	
 	public ActiveConsumer(String RXQueueName, String URI)
 	{
@@ -23,7 +24,7 @@ public class ActiveConsumer implements Runnable
 		{
 			//ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory("discovery:(multicast://default?group=test)?reconnectDelay=1000&maxReconnectAttempts=30&useExponentialBackOff=false");
 			ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(URI);
-			Connection conn = factory.createConnection();
+			conn = factory.createConnection();
 			conn.start();
 			this.sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
 			//this.RXqueue = sess.createQueue(RXQueueName);
@@ -63,6 +64,8 @@ public class ActiveConsumer implements Runnable
 					}
 				}
 			}
+			sess.close();
+			conn.close();
 		}
 		catch(Exception ex)
 		{
