@@ -361,7 +361,7 @@ public class PluginEngine {
 					{
 						for(String path : des.getDestinationPaths())
 						{
-							if(!des.getPhysicalName().equals(remoteAgentPath))
+							if(des.getPhysicalName().equals(remoteAgentPath))
 							{
 								if(brokeredAgents.containsKey(path))
 								{
