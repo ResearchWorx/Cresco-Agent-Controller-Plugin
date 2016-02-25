@@ -17,6 +17,7 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.advisory.DestinationSource;
 import org.apache.activemq.broker.jmx.BrokerViewMBean;
 import org.apache.activemq.broker.jmx.QueueViewMBean;
+import org.apache.activemq.command.ActiveMQDestination;
 import org.apache.activemq.command.ActiveMQQueue;
 
 import plugincore.PluginEngine;
@@ -70,6 +71,16 @@ public class ActiveDestManager implements Runnable
 			  System.out.println("Checking Queues LOOP");
 			  DestinationSource destinationSource = activeMQConnection.getDestinationSource();
 
+			  ActiveMQDestination[] er = PluginEngine.broker.broker.getDestinations();
+			  for(ActiveMQDestination des : er)
+			  {
+				 System.out.println("Dest: " + des.getPhysicalName());
+			    	for(String path : des.getDestinationPaths())
+			    	{
+			    		System.out.println("DES PATH: " + path);
+			    		
+			    	}
+			  }
 			    Set<ActiveMQQueue> queues = destinationSource.getQueues();
 			    for(ActiveMQQueue queue : queues)
 			    {
@@ -77,6 +88,7 @@ public class ActiveDestManager implements Runnable
 			    	for(String path : queue.getDestinationPaths())
 			    	{
 			    		System.out.println("PATH: " + path);
+			    		
 			    	}
 			    	
 			    }
