@@ -73,7 +73,10 @@ public class ActiveDestManager implements Runnable
 			  Map<ActiveMQDestination, Destination> er2 = PluginEngine.broker.broker.getBroker().getDestinationMap();
 			  for (Entry<ActiveMQDestination, Destination> entry : er2.entrySet())
 			  {
+				  if(entry.getKey().isQueue())
+				  {
 			      System.out.println(entry.getKey().getPhysicalName() + "/" + entry.getValue().getInactiveTimeoutBeforeGC());
+				  }
 			  }
 			  
 			  ActiveMQDestination[] er = PluginEngine.broker.broker.getBroker().getDestinations();
