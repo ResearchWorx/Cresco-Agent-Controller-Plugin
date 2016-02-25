@@ -22,7 +22,8 @@ class BrokerMonitor implements Runnable
 	  }
 	  public void shutdown()
 	  {
-		    failBridge();
+		    //failBridge();
+		  System.out.println("BrokerMonitor : agentPath : " + agentPath);
 			MonitorActive = false;
 	  }
 	  public boolean connectToBroker(String brokerAddress)
@@ -85,7 +86,6 @@ class BrokerMonitor implements Runnable
 		  System.out.println("Failed Bridge : " + agentPath);
 			
 		   try {
-			bridge.stop();
 			PluginEngine.broker.removeNetworkConnector(bridge);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

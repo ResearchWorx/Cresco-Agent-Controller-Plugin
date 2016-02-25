@@ -109,6 +109,7 @@ return connector;
 		try
 		{
 			bridge.stop();
+			
 			while(!bridge.isStopped())
 			{
 				Thread.sleep(1000);
