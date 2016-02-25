@@ -24,12 +24,17 @@ public class BrokeredAgent {
 	  }
 	  public void setStop()
 	  {
+		  System.out.println("BrokeredAgent : setStop");
 		  if(bm.MonitorActive)
 		  {
+			  System.out.println("BrokeredAgent : setStop : shutdown");
+			  
 			  bm.shutdown();
 		  }
 		  while(bm.MonitorActive)
 		  {
+			  System.out.println("BrokeredAgent : setStop : Monitor Active");
+			  
 			  try {
 				  //System.out.println("STOPPING " + agentPath);
 				Thread.sleep(1000);
@@ -40,6 +45,8 @@ public class BrokeredAgent {
 		  }
 		  
 		  brokerStatus = BrokerStatusType.STOPPED;
+		  System.out.println("BrokeredAgent : setStop : Broker STOP");
+		  
 	  }
 	  public void setStarting()
 	  {
