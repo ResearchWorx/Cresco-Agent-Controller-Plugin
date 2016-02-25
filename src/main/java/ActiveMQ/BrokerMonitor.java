@@ -112,7 +112,8 @@ class BrokerMonitor implements Runnable
 			  
 			  if(connectToBroker(brokerAddress)) //connect to broker
 			  {
-				  MonitorActive = true;    
+				  MonitorActive = true;
+				  PluginEngine.brokeredAgents.get(agentPath).brokerStatus = BrokerStatusType.ACTIVE;
 			  }
 			  
 			    while(MonitorActive)
