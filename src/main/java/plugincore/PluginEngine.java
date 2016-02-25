@@ -363,12 +363,21 @@ public class PluginEngine {
 						{
 							if(des.getPhysicalName().equals(remoteAgentPath))
 							{
+								System.out.println("queue matches : " + remoteAgentPath);
 								if(brokeredAgents.containsKey(path))
 								{
+									System.out.println("found network entry matches : " + path);
+									
+									System.out.println("some : " + brokeredAgents.get(path).brokerStatus);
 									if(brokeredAgents.get(path).brokerStatus == BrokerStatusType.ACTIVE)
 									{
 										isReachableAgent = true;
 									}
+								}
+								else
+								{
+									System.out.println("didnt found network entry matches : " + path);
+									
 								}
 							   
 							}
