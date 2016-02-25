@@ -76,6 +76,7 @@ public class ActiveDestManager implements Runnable
 				  if(entry.getKey().isQueue())
 				  {
 			      System.out.println(entry.getKey().getPhysicalName() + "/" + entry.getValue().getInactiveTimeoutBeforeGC());
+			      
 				  }
 			  }
 			  
