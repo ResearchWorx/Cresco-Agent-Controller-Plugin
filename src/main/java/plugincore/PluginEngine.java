@@ -362,29 +362,9 @@ public class PluginEngine {
 				  		String testPath = des.getPhysicalName();
 				  		if(testPath.equals(remoteAgentPath))
 				  		{
-				  			System.out.println("INT1 : ALIVE " + remoteAgentPath);
+				  			isReachableAgent = true;
 				  		}
 				  		
-						for(String path : des.getDestinationPaths())
-						{
-							if(des.getPhysicalName().equals(remoteAgentPath))
-							{
-								if(brokeredAgents.containsKey(path))
-								{
-									if(brokeredAgents.get(path).brokerStatus == BrokerStatusType.ACTIVE)
-									{
-										isReachableAgent = true;
-										System.out.println("INT2 : ALIVE " + remoteAgentPath);
-									}
-								}
-								else
-								{
-									System.out.println("didnt found network entry matches : " + path);
-									
-								}
-							   
-							}
-			    		}
 					}
 			  }
     	}
