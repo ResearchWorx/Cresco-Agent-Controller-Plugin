@@ -23,7 +23,7 @@ class BrokerMonitor implements Runnable
 	  public void shutdown()
 	  {
 		    //failBridge();
-		  System.out.println("BrokerMonitor : agentPath : " + agentPath);
+		  System.out.println("CODY!!! BrokerMonitor : agentPath : " + agentPath + " CODY!!!");
 			MonitorActive = false;
 	  }
 	  public boolean connectToBroker(String brokerAddress)
