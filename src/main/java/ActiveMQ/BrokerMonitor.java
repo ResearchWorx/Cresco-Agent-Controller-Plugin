@@ -148,7 +148,7 @@ class BrokerMonitor implements Runnable
 	    			Thread.sleep(5000);
 	    			
 	    		}
-			    System.out.println("OUT");
+			    shutdown();
 		  }
 		  catch(Exception ex)
 		  {
