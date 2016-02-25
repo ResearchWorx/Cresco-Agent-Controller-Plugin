@@ -1,6 +1,8 @@
 package ActiveMQ;
 
 import javax.jms.Connection;
+import javax.jms.DeliveryMode;
+import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.Queue;
@@ -8,6 +10,7 @@ import javax.jms.Session;
 
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.command.ActiveMQDestination;
 
 
 public class ActiveProducer implements Runnable
@@ -17,6 +20,7 @@ public class ActiveProducer implements Runnable
 	private Session sess;
 	private String URI;
 	private ActiveMQConnection  conn;
+	private Destination destination;
 
 public ActiveProducer(String TXQueueName, String URI) 
 {
@@ -27,7 +31,8 @@ public ActiveProducer(String TXQueueName, String URI)
 		//conn = factory.createConnection();
 		conn.start();
 		this.sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
-		this.TXqueue = sess.createQueue(TXQueueName);
+		//this.TXqueue = sess.createQueue(TXQueueName);
+		destination = sess.createQueue(TXQueueName);
 		
 		this.URI = URI;
 		
@@ -43,7 +48,9 @@ public ActiveProducer(String TXQueueName, String URI)
 public void run() {
     try {
     	ActiveProducer = true;
-        MessageProducer producer = this.sess.createProducer(TXqueue);
+        MessageProducer producer = this.sess.createProducer(destination);
+        producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+        
         System.out.println("Started Producer Thread :" + Thread.currentThread());
         while (ActiveProducer) 
         {
@@ -51,6 +58,7 @@ public void run() {
             //Thread.sleep(5000);
         }
         sess.close();
+        conn.destroyDestination((ActiveMQDestination) destination);
         conn.cleanup();
         conn.doCleanup(true);
         conn.stop();
