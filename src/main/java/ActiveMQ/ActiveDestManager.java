@@ -64,15 +64,13 @@ public class ActiveDestManager implements Runnable
 			
 		while(PluginEngine.ActiveDestManagerActive)
 	    {
-			  System.out.println("Checking Queues START");
-				
+			  
 		  try 
 		  {
 			  ActiveMQDestination[] er = PluginEngine.broker.broker.getBroker().getDestinations();
 			  for(ActiveMQDestination des : er)
 			  {
-				  System.out.println("Checking Queues LOOP.1.0");
-					
+				  
 				 	if(des.isQueue())
 					{
 						for(String path : des.getDestinationPaths())
@@ -104,8 +102,7 @@ public class ActiveDestManager implements Runnable
 			  System.out.println("ActiveDestManager : Run Error " + ex.toString());
 		  }
 	    }
-		  System.out.println("Checking Queues EXIT");
-			
+		  
 	  }
 	
 		class BrokerWatchDog extends TimerTask {
