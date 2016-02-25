@@ -80,7 +80,7 @@ public class ActiveDestManager implements Runnable
 			  for(ActiveMQDestination des : er)
 			  {
 				  
-				 	if(des.isTopic())
+				 	if(des.isQueue())
 					{
 						for(String path : des.getDestinationPaths())
 						{

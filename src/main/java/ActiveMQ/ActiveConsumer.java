@@ -6,7 +6,6 @@ import javax.jms.MessageConsumer;
 import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.TextMessage;
-import javax.jms.Topic;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 
@@ -15,7 +14,7 @@ import plugincore.PluginEngine;
 
 public class ActiveConsumer implements Runnable
 {
-	private Topic RXqueue; 
+	private Queue RXqueue; 
 	private Session sess;
 	
 	public ActiveConsumer(String RXQueueName, String URI)
@@ -28,7 +27,7 @@ public class ActiveConsumer implements Runnable
 			conn.start();
 			this.sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
 			//this.RXqueue = sess.createQueue(RXQueueName);
-			this.RXqueue = sess.createTopic(RXQueueName);
+			this.RXqueue = sess.createQueue(RXQueueName);
 			
 			//Queue TXqueue = sess.createQueue(TXQueueName);
 		}
