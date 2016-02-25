@@ -75,7 +75,11 @@ public class ActiveDestManager implements Runnable
 				 
 			  for(ActiveMQDestination des : er)
 			  {
+				  System.out.println("Checking Queues LOOP.1.0");
+					
 				 System.out.println("Dest: " + des.getPhysicalName());
+				 System.out.println("Checking Queues LOOP.1.1");
+					
 			    	for(String path : des.getDestinationPaths())
 			    	{
 			    		System.out.println("DES PATH: " + path);
