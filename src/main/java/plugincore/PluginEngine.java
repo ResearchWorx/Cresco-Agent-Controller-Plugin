@@ -101,12 +101,9 @@ public class PluginEngine {
 	            	ActiveDestManagerActive = false;
 	            	ActiveBrokerManagerActive = false;
 	            	 
-	            	broker.broker.getBroker().stop();
-	            	while(!broker.broker.getBroker().isStopped())
-	            	{
-	            		Thread.sleep(1000);
-	            		System.out.println("Shutdown Broker");
-	            	}
+	            	
+	            	broker.stopBroker();
+	            	
 	            }
 	            catch(Exception ex)
 	            {

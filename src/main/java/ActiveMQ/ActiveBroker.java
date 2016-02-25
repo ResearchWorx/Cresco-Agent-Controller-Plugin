@@ -20,6 +20,7 @@ import java.net.URI;
 public class ActiveBroker {
 
 	public static BrokerService broker;
+	public static TransportConnector connector;
 	
 	private NetworkConnector bridge(BrokerService from, BrokerService to) throws Exception {
 		   TransportConnector toConnector = to.getTransportConnectors().get(0);
@@ -77,7 +78,7 @@ return connector;
 				//connector.
 				// = new NetworkConnector();
 				//TransportConnector connectorIPv4 = new TransportConnector();
-				TransportConnector connector = new TransportConnector();
+				connector = new TransportConnector();
 				
 				//connectorIPv4.setUri(new URI("tcp://0.0.0.0:32010")); //all ipv4 addresses
 				connector.setUri(new URI("tcp://[::]:32010"));
@@ -103,6 +104,24 @@ return connector;
 		
 	}	
 
+	public void stopBroker()
+	{
+		try {
+			connector.stop();
+			
+			broker.stop();
+			while(!broker.isStopped())
+			{
+				Thread.sleep(1000);
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+	
 	public boolean removeNetworkConnector(NetworkConnector bridge)
 	{
 		boolean isRemoved = false;
