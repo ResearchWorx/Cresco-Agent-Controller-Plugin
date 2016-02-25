@@ -77,10 +77,10 @@ return connector;
 				//bridge.setUserName(userName);
 				broker.start();
 				broker.getManagementContext().start();
-			    //while(!broker.isStarted() || !broker.getManagementContext().isConnectorStarted())
-			    //{
-			    //	Thread.sleep(1000);
-			    //}
+				while(!broker.isStarted() || !broker.getManagementContext().isConnectorStarted())
+			    {
+			    	Thread.sleep(1000);
+			    }
 			}
 		}
 		catch(Exception ex)

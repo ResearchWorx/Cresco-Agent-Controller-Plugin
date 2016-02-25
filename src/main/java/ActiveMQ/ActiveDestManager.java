@@ -70,7 +70,8 @@ public class ActiveDestManager implements Runnable
 		  {
 			  System.out.println("Checking Queues LOOP");
 			  
-			  ActiveMQDestination[] er = PluginEngine.broker.broker.getDestinations();
+			  ActiveMQDestination[] er = PluginEngine.broker.broker.broker.getDestinations();
+			  
 			  System.out.println("Checking Queues LOOP.1 " + er.length);
 				 
 			  for(ActiveMQDestination des : er)
