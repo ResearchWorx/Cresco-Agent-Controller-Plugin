@@ -67,6 +67,7 @@ return connector;
 				broker.setSchedulePeriodForDestinationPurge(10000);
 				PolicyMap pm = new PolicyMap();
 				PolicyEntry pe = new PolicyEntry();
+				pe.setQueue(">");
 				pe.setGcInactiveDestinations(true);
 				pe.setInactiveTimeoutBeforeGC(30000);
 				broker.setDestinationPolicy(pm);
@@ -119,6 +120,8 @@ return connector;
 			
 			bridge.setName(rs.nextString());
 			bridge.setDuplex(false);
+			bridge.setDynamicOnly(true);
+			bridge.setPrefetchSize(1);
 			//TransportConnector connector = new TransportConnector();
 			//connector.setUri(new URI(URI));
 			//connector.setDiscoveryUri(new URI("multicast://default?group=test"));
