@@ -104,7 +104,7 @@ class BrokerMonitor implements Runnable
 			  
 			  if(!connectToBroker(brokerAddress)) //connect to broker
 			  {
-				   failBridge();    
+				   stopBridge();    
 			  }
 			    while(MonitorActive)
 	    		{
@@ -138,7 +138,7 @@ class BrokerMonitor implements Runnable
 	    			}
 	    			if(!bridgeActive)
 	    			{
-	    				failBridge(); 
+	    				stopBridge(); 
 	    			}
 	    			Thread.sleep(5000);
 	    			
