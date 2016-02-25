@@ -2,6 +2,8 @@ package ActiveMQ;
 
 import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.broker.TransportConnector;
+import org.apache.activemq.broker.region.policy.PolicyEntry;
+import org.apache.activemq.broker.region.policy.PolicyMap;
 import org.apache.activemq.command.ActiveMQDestination;
 import org.apache.activemq.network.NetworkConnector;
 import org.slf4j.LoggerFactory;
@@ -45,7 +47,15 @@ return connector;
 		//ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger)LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
     	//rootLogger.setLevel(Level.toLevel("debug"));
     	//rootLogger.setLevel(Level.OFF);
-    	
+		/*
+		<destinationPolicy>
+	     <policyMap>
+	        <policyEntries>
+	           <policyEntry queue=">" gcInactiveDestinations="true" inactiveTimoutBeforeGC="30000"/>
+	        </policyEntries>
+	     </policyMap>
+	  </destinationPolicy>
+	      */ 
 		
 		try
 		{
@@ -54,12 +64,13 @@ return connector;
 				broker = new BrokerService();
 				broker.setPersistent(false);
 				broker.setBrokerName(brokerName);
-				//broker.setUseJmx(true);
-				//broker.getManagementContext().setCreateConnector(true);
-			    //broker.getManagementContext().setConnectorPort(9999);
-			    //broker.getManagementContext().isCreateConnector();
-			    
-			    
+				broker.setSchedulePeriodForDestinationPurge(10000);
+				PolicyMap pm = broker.getDestinationPolicy();
+				PolicyEntry pe = pm.getDefaultEntry();
+				pe.setGcInactiveDestinations(true);
+				pe.setInactiveTimeoutBeforeGC(30000);
+				pm.setDefaultEntry(pe);
+				broker.setDestinationPolicy(pm);
 			    //NetworkConnector connector = bridge
 				//connector.
 				// = new NetworkConnector();
