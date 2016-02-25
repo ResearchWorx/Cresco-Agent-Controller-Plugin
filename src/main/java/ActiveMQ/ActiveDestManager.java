@@ -69,9 +69,10 @@ public class ActiveDestManager implements Runnable
 		  try 
 		  {
 			  System.out.println("Checking Queues LOOP");
-			  DestinationSource destinationSource = activeMQConnection.getDestinationSource();
-
+			  
 			  ActiveMQDestination[] er = PluginEngine.broker.broker.getDestinations();
+			  System.out.println("Checking Queues LOOP.1");
+				 
 			  for(ActiveMQDestination des : er)
 			  {
 				 System.out.println("Dest: " + des.getPhysicalName());
@@ -81,6 +82,10 @@ public class ActiveDestManager implements Runnable
 			    		
 			    	}
 			  }
+			  System.out.println("Checking Queues LOOP.2");
+				 
+			  DestinationSource destinationSource = activeMQConnection.getDestinationSource();
+
 			    Set<ActiveMQQueue> queues = destinationSource.getQueues();
 			    for(ActiveMQQueue queue : queues)
 			    {
