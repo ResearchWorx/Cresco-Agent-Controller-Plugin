@@ -67,6 +67,7 @@ public class ActiveDestManager implements Runnable
 			  
 		  try 
 		  {
+			  /*
 			  ActiveMQDestination[] er = PluginEngine.broker.broker.getBroker().getDestinations();
 			  for(ActiveMQDestination des : er)
 			  {
@@ -81,7 +82,7 @@ public class ActiveDestManager implements Runnable
 			    		}
 					}
 			  }
-			   
+			   */
 			  DestinationSource destinationSource = activeMQConnection.getDestinationSource();
 
 			    Set<ActiveMQQueue> queues = destinationSource.getQueues();
