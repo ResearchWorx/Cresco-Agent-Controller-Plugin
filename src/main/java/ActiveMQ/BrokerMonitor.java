@@ -16,15 +16,15 @@ class BrokerMonitor implements Runnable
 	  {
 	    	this.agentPath = agentPath;
 	    	//this.MonitorActive = true;
-	    	System.out.println("CODY!!! BrokerMonitor : INIT agentPath : " + agentPath + " CODY!!!");
+	    	//System.out.println("CODY!!! BrokerMonitor : INIT agentPath : " + agentPath + " CODY!!!");
 			  
 	  }
 	  public void shutdown()
 	  {
 		    //failBridge();
 		  System.out.println("CODY!!! BrokerMonitor : Stopping agentPath : " + agentPath + " CODY!!!");
-		  System.out.println(PluginEngine.brokeredAgents.get(agentPath).activeAddress);
-		  System.out.println(PluginEngine.brokeredAgents.get(agentPath).bm.MonitorActive);
+		  //System.out.println(PluginEngine.brokeredAgents.get(agentPath).activeAddress);
+		  //System.out.println(PluginEngine.brokeredAgents.get(agentPath).bm.MonitorActive);
 		  stopBridge(); //kill bridge
 		  MonitorActive = false;
 	  }
@@ -102,20 +102,18 @@ class BrokerMonitor implements Runnable
 		   
 	  }
 	  
+	  
 	  public void run() 
 	  {
 		  try
 		  {
 			  String brokerAddress = PluginEngine.brokeredAgents.get(agentPath).activeAddress;
 			  
-			  if(!connectToBroker(brokerAddress)) //connect to broker
+			  if(connectToBroker(brokerAddress)) //connect to broker
 			  {
-				   stopBridge();    
+				  MonitorActive = true;    
 			  }
-			  else
-			  {
-				  MonitorActive = true;
-			  }
+			  
 			    while(MonitorActive)
 	    		{
 			    	/*
@@ -129,7 +127,7 @@ class BrokerMonitor implements Runnable
 	    			*/
 	    			//int count = 0;
 			    	
-	    			boolean bridgeActive = false;
+			    	MonitorActive = false;
 	    			for(NetworkBridge b : bridge.activeBridges())
 	    			{
 	    				/*
@@ -143,20 +141,17 @@ class BrokerMonitor implements Runnable
 	    				//count++;
 	    				if(b.getRemoteBrokerName().equals(agentPath))
 	    				{
-	    					bridgeActive = true;
+	    					MonitorActive = true;
 	    				}
 	    			}
-	    			if(!bridgeActive)
-	    			{
-	    				stopBridge(); 
-	    			}
+	    			
 	    			Thread.sleep(5000);
 	    			
 	    		}
 		  }
 		  catch(Exception ex)
 		  {
-	    		
+	    		System.out.println("BorkerMonitor : RUN " + ex.toString());
 		  }
 	  }
 }
