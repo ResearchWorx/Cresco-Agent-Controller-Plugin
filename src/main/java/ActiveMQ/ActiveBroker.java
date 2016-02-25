@@ -155,7 +155,7 @@ return connector;
 			RandomString rs = new RandomString(5);
 			
 			bridge.setName(rs.nextString());
-			bridge.setDuplex(false);
+			bridge.setDuplex(true);
 			bridge.setDynamicOnly(true);
 			bridge.setPrefetchSize(1);
 			//TransportConnector connector = new TransportConnector();

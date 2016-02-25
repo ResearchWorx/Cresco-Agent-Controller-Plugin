@@ -55,7 +55,7 @@ public class DiscoveryResponder implements Runnable
   	 		      DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
 	 		      socket.send(sendPacket);
 	 		      //System.out.println(getClass().getName() + ">>>Broker Discovery packet sent to " +  dr.getParam("clientip"));
-	 		      PluginEngine.incomingCanidateBrokers.offer(dr);  
+	 		      //PluginEngine.incomingCanidateBrokers.offer(dr);  
  	 		  }
 			  else
 			  {
