@@ -359,7 +359,13 @@ public class PluginEngine {
 				  		String testPath = des.getPhysicalName();
 				  		if(testPath.equals(remoteAgentPath))
 				  		{
-				  			isReachableAgent = true;
+				  			if(brokeredAgents.containsKey(remoteAgentPath))
+				  			{
+				  				if(brokeredAgents.get(remoteAgentPath).brokerStatus == BrokerStatusType.ACTIVE)
+				  				{
+				  					isReachableAgent = true;				  			
+				  				}
+				  			}
 				  		}
 				  		
 					}
