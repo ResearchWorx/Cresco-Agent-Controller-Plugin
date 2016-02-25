@@ -67,6 +67,7 @@ public class ActiveDestManager implements Runnable
 			  
 		  try 
 		  {
+			  System.out.println("Checking Queues 0");
 			  /*
 			  ActiveMQDestination[] er = PluginEngine.broker.broker.getBroker().getDestinations();
 			  for(ActiveMQDestination des : er)
@@ -96,11 +97,13 @@ public class ActiveDestManager implements Runnable
 			    	}
 			    	
 			    }
+			    System.out.println("Checking Queues 1");
 			  Thread.sleep(3000);
 		  } 
 		  catch (Exception ex) 
 		  {
 			  System.out.println("ActiveDestManager : Run Error " + ex.toString());
+			  PluginEngine.ActiveDestManagerActive = false;
 		  }
 	    }
 		  
