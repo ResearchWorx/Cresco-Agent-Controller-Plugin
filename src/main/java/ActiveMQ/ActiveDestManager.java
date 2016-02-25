@@ -76,13 +76,15 @@ public class ActiveDestManager implements Runnable
 					{
 						for(String path : des.getDestinationPaths())
 						{
-							System.out.println("Dest: " + des.getPhysicalName());
-							 
-							System.out.println("DES PATH: " + path);
+							if(!des.getPhysicalName().equals(PluginEngine.agentpath))
+							{
+								System.out.println("Dest: " + des.getPhysicalName());
+								System.out.println("DES PATH: " + path);
+							}
 			    		}
 					}
 			  }
-			   
+			   /*
 			  DestinationSource destinationSource = activeMQConnection.getDestinationSource();
 
 			    Set<ActiveMQQueue> queues = destinationSource.getQueues();
@@ -96,6 +98,7 @@ public class ActiveDestManager implements Runnable
 			    	}
 			    	
 			    }
+			    */
 			  Thread.sleep(3000);
 		  } 
 		  catch (Exception ex) 

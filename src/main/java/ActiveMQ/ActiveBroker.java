@@ -64,12 +64,13 @@ return connector;
 				broker = new BrokerService();
 				broker.setPersistent(false);
 				broker.setBrokerName(brokerName);
-				broker.setSchedulePeriodForDestinationPurge(10000);
+				//broker.setSchedulePeriodForDestinationPurge(10000);
+				broker.setSchedulePeriodForDestinationPurge(5000);
 				PolicyMap pm = new PolicyMap();
 				PolicyEntry pe = new PolicyEntry();
 				pe.setQueue(">");
 				pe.setGcInactiveDestinations(true);
-				pe.setInactiveTimeoutBeforeGC(30000);
+				pe.setInactiveTimeoutBeforeGC(10000);
 				broker.setDestinationPolicy(pm);
 				
 			    //NetworkConnector connector = bridge
