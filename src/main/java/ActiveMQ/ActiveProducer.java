@@ -6,6 +6,7 @@ import javax.jms.MessageProducer;
 import javax.jms.Queue;
 import javax.jms.Session;
 
+import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 
@@ -15,14 +16,15 @@ public class ActiveProducer implements Runnable
 	private Queue TXqueue; 
 	private Session sess;
 	private String URI;
-	private Connection conn;
+	private ActiveMQConnection  conn;
 
 public ActiveProducer(String TXQueueName, String URI) 
 {
 	try
 	{
-		ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(URI);
-		conn = factory.createConnection();
+		//ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(URI);
+		conn = (ActiveMQConnection) new    ActiveMQConnectionFactory(URI).createConnection();
+		//conn = factory.createConnection();
 		conn.start();
 		this.sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
 		this.TXqueue = sess.createQueue(TXQueueName);
@@ -49,6 +51,8 @@ public void run() {
             //Thread.sleep(5000);
         }
         sess.close();
+        conn.cleanup();
+        conn.doCleanup(true);
         conn.stop();
         System.out.println("Ended Producer Thread :" + Thread.currentThread());
     } catch (JMSException jmse) {

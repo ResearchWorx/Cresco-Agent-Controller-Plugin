@@ -7,6 +7,7 @@ import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
+import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 import plugincore.PluginEngine;
@@ -16,15 +17,17 @@ public class ActiveConsumer implements Runnable
 {
 	private Queue RXqueue; 
 	private Session sess;
-	private Connection conn;
+	private ActiveMQConnection conn;
 	
 	public ActiveConsumer(String RXQueueName, String URI)
 	{
 		try
 		{
 			//ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory("discovery:(multicast://default?group=test)?reconnectDelay=1000&maxReconnectAttempts=30&useExponentialBackOff=false");
-			ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(URI);
-			conn = factory.createConnection();
+			//ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(URI);
+			//conn = factory.createConnection();
+			conn = (ActiveMQConnection) new    ActiveMQConnectionFactory(URI).createConnection();
+			
 			conn.start();
 			this.sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
 			//this.RXqueue = sess.createQueue(RXQueueName);
@@ -65,6 +68,7 @@ public class ActiveConsumer implements Runnable
 				}
 			}
 			sess.close();
+			conn.cleanup();
 			conn.close();
 		}
 		catch(Exception ex)
