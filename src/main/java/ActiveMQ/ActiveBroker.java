@@ -6,6 +6,7 @@ import org.apache.activemq.broker.region.policy.PolicyEntry;
 import org.apache.activemq.broker.region.policy.PolicyMap;
 import org.apache.activemq.command.ActiveMQDestination;
 import org.apache.activemq.network.NetworkConnector;
+import org.apache.activemq.util.ServiceStopper;
 import org.slf4j.LoggerFactory;
 
 import shared.RandomString;
@@ -108,8 +109,10 @@ return connector;
 	{
 		try {
 			connector.stop();
+			ServiceStopper stopper = new ServiceStopper();
+            broker.stopAllConnectors(stopper);
+            broker.stop();
 			
-			broker.stop();
 			while(!broker.isStopped())
 			{
 				Thread.sleep(1000);
