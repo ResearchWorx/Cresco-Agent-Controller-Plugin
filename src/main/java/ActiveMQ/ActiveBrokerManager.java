@@ -31,8 +31,6 @@ public class ActiveBrokerManager implements Runnable
 		  if(ba.brokerStatus == BrokerStatusType.INIT)
 		  {
 			  //Fire up new thread.
-			  //ba.brokerStatus = BrokerStatusType.STARTING;
-			  //System.out.println("Adding Broker: " + agentPath + " IP:" + ba.activeAddress);
 			  ba.setStarting();
 		  }
 	  }
@@ -57,7 +55,7 @@ public class ActiveBrokerManager implements Runnable
 				BrokeredAgent ba;
 				if(PluginEngine.brokeredAgents.containsKey(agentPath))
 				{
-					/*
+					
 					ba = PluginEngine.brokeredAgents.get(agentPath);
 					//add ip to possible list
 					if(!ba.addressMap.containsKey(agentIP)) 
@@ -70,9 +68,9 @@ public class ActiveBrokerManager implements Runnable
 							ba.activeAddress = agentIP;
 							ba.brokerStatus = BrokerStatusType.INIT;
 							addBroker = true;
-							System.out.println("BA EXIST ADDING agentPath: " + agentPath + " remote_ip: " + agentIP);
+							//System.out.println("BA EXIST ADDING agentPath: " + agentPath + " remote_ip: " + agentIP);
 					}
-					*/
+					
 					//System.out.println("BA EXIST ADDING agentPath: " + agentPath + " remote_ip: " + agentIP);
 					
 				}
@@ -80,13 +78,8 @@ public class ActiveBrokerManager implements Runnable
 				{
 					ba = new BrokeredAgent(agentIP,agentPath);
 					PluginEngine.brokeredAgents.put(agentPath, ba);
-					while(!PluginEngine.brokeredAgents.containsKey(agentPath))
-					{
-						System.out.println("NEW WAITING!!");
-						Thread.sleep(10000);
-					}
 					addBroker = true;
-					System.out.println("BA NEW ADDING agentPath: " + agentPath + " remote_ip: " + agentIP);
+					//System.out.println("BA NEW ADDING agentPath: " + agentPath + " remote_ip: " + agentIP);
 				}
 				//try and connect
 				if(addBroker)
@@ -94,7 +87,7 @@ public class ActiveBrokerManager implements Runnable
 					addBroker(agentPath);
 				}
 			  }
-		  		Thread.sleep(500); //allow HM to catch up
+		  		//Thread.sleep(500); //allow HM to catch up
 			  }
 			  else
 			  {
