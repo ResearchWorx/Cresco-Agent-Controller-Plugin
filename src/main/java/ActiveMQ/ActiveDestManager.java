@@ -91,6 +91,7 @@ public class ActiveDestManager implements Runnable
 								{
 									if(PluginEngine.isReachableAgent(des.getPhysicalName()))
 									{
+										System.out.println("Dest: " + des.getPhysicalName() + "starting feed");
 										
 										ActiveProducer ap = new ActiveProducer(des.getPhysicalName(),"tcp://[::1]:32010");
 										cm.put(des.getPhysicalName(), ap);
@@ -106,6 +107,8 @@ public class ActiveDestManager implements Runnable
 										
 										ActiveProducer ap = cm.get(des.getPhysicalName());
 										ap.ActiveProducer = false;
+										System.out.println("Dest: " + des.getPhysicalName() + "stopping feed");
+										
 										cm.remove(ap);
 										
 									}
