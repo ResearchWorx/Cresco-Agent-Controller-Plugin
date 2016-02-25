@@ -63,16 +63,14 @@ return connector;
 			{
 				PolicyEntry entry = new PolicyEntry();
 		        entry.setGcInactiveDestinations(true);
-		        entry.setInactiveTimeoutBeforeGC(3000);
+		        entry.setInactiveTimeoutBeforeGC(5000);
 		        PolicyMap map = new PolicyMap();
 		        map.setDefaultEntry(entry);
 				
 				broker = new BrokerService();
 				broker.setPersistent(false);
 				broker.setBrokerName(brokerName);
-				
-				broker.setSchedulePeriodForDestinationPurge(3000);
-				
+				broker.setSchedulePeriodForDestinationPurge(2500);
 				broker.setDestinationPolicy(map);
 				
 			    //NetworkConnector connector = bridge
