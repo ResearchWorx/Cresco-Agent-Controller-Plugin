@@ -47,6 +47,7 @@ public class ActiveBrokerManager implements Runnable
 			  MsgEvent cb = PluginEngine.incomingCanidateBrokers.poll();
 			  if(cb != null)
 			  {
+				  Thread.sleep(10000);
 				String agentIP = cb.getParam("dst_ip");
 				if(!PluginEngine.isLocal(agentIP)) //ignore local responses 
 				{
