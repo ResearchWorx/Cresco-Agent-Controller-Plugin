@@ -47,7 +47,10 @@ public class ActiveBrokerManager implements Runnable
 			  MsgEvent cb = PluginEngine.incomingCanidateBrokers.poll();
 			  if(cb != null)
 			  {
+				  System.out.println("NEW BROKER CODY START");
 				  Thread.sleep(10000);
+				  System.out.println("NEW BROKER CODY WAIT");
+				  
 				String agentIP = cb.getParam("dst_ip");
 				if(!PluginEngine.isLocal(agentIP)) //ignore local responses 
 				{
