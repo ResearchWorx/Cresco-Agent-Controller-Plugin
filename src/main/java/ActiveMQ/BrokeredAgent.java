@@ -38,6 +38,7 @@ public class BrokeredAgent {
 				e.printStackTrace();
 			}
 		  }
+		  
 		  brokerStatus = BrokerStatusType.STOPPED;
 	  }
 	  public void setStarting()

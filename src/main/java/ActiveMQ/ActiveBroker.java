@@ -103,12 +103,24 @@ return connector;
 		
 	}	
 
-	public boolean RemoteNetworkConnector(NetworkConnector bridge)
+	public boolean removeNetworkConnector(NetworkConnector bridge)
 	{
-		//boolean isRemoved = false;
-		
-		return broker.removeNetworkConnector(bridge);
-		//return isRemoved;
+		boolean isRemoved = false;
+		try
+		{
+			bridge.stop();
+			while(!bridge.isStopped())
+			{
+				Thread.sleep(1000);
+			}
+			broker.removeNetworkConnector(bridge);
+			isRemoved = true;
+		}
+		catch(Exception ex)
+		{
+			System.out.println("ActiveBoker : removeNetworkConnector : Error " + ex.toString());
+		}
+		return isRemoved; 
 		
 	}
 	public NetworkConnector AddNetworkConnector(String URI)
