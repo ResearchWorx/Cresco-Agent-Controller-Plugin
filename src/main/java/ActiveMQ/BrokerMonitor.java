@@ -22,7 +22,7 @@ class BrokerMonitor implements Runnable
 	  public void shutdown()
 	  {
 		    //failBridge();
-		  System.out.println("CODY!!! BrokerMonitor : Stopping agentPath : " + agentPath + " CODY!!!");
+		  //System.out.println("CODY!!! BrokerMonitor : Stopping agentPath : " + agentPath + " CODY!!!");
 		  //System.out.println(PluginEngine.brokeredAgents.get(agentPath).activeAddress);
 		  //System.out.println(PluginEngine.brokeredAgents.get(agentPath).bm.MonitorActive);
 		  stopBridge(); //kill bridge
@@ -30,8 +30,8 @@ class BrokerMonitor implements Runnable
 	  }
 	  public boolean connectToBroker(String brokerAddress)
 	  {
-		  System.out.println("CODY!!! BrokerMonitor : Incoming agentPath : " + agentPath + " CODY!!!");
-		  System.out.println(brokerAddress);
+		  //System.out.println("CODY!!! BrokerMonitor : Incoming agentPath : " + agentPath + " CODY!!!");
+		  //System.out.println(brokerAddress);
 		  
 		  boolean isConnected = false;
 		  try
@@ -89,7 +89,7 @@ class BrokerMonitor implements Runnable
 	  
 	  public void stopBridge()
 	  {
-		  System.out.println("Failed Bridge : " + agentPath);
+		  System.out.println("Stopping Bridge : " + agentPath);
 			
 		   try {
 			PluginEngine.broker.removeNetworkConnector(bridge);
@@ -98,7 +98,7 @@ class BrokerMonitor implements Runnable
 			e.printStackTrace();
 		}
 		   PluginEngine.brokeredAgents.get(agentPath).brokerStatus = BrokerStatusType.FAILED;
-		   MonitorActive = false;
+		   
 		   
 	  }
 	  
@@ -130,14 +130,13 @@ class BrokerMonitor implements Runnable
 			    	MonitorActive = false;
 	    			for(NetworkBridge b : bridge.activeBridges())
 	    			{
-	    				
-	    				//System.out.println("Active Bridge: " + count);
+	    				/*
 	    				System.out.println("local address: " + b.getLocalAddress());
 	    				System.out.println("localbrokername: " + b.getLocalBrokerName());
 	    				System.out.println("remoteaddress: " + b.getRemoteAddress());
 	    				System.out.println("remotebrokerid: " + b.getRemoteBrokerId());
 	    				System.out.println("remotebrokername: "+ b.getRemoteBrokerName());
-	    				
+	    				*/
 	    				//count++;
 	    				if(b.getRemoteBrokerName().equals(agentPath))
 	    				{

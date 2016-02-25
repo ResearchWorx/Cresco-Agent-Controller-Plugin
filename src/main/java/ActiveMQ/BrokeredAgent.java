@@ -14,7 +14,7 @@ public class BrokeredAgent {
 	  
 	  public BrokeredAgent(String activeAddress, String agentPath)
 	  {
-		  System.out.println("Creating BrokerAgnet : " + agentPath + " address: " + activeAddress);
+		System.out.println("Creating BrokerAgnet : " + agentPath + " address: " + activeAddress);
 		this.bm = new BrokerMonitor(agentPath);
 		this.activeAddress = activeAddress;
 		this.agentPath = agentPath;
@@ -25,16 +25,16 @@ public class BrokeredAgent {
 	  }
 	  public void setStop()
 	  {
-		  System.out.println("BrokeredAgent : setStop");
+		  //System.out.println("BrokeredAgent : setStop");
 		  if(bm.MonitorActive)
 		  {
-			  System.out.println("BrokeredAgent : setStop : shutdown");
+			  //System.out.println("BrokeredAgent : setStop : shutdown");
 			  
 			  bm.shutdown();
 		  }
 		  while(bm.MonitorActive)
 		  {
-			  System.out.println("BrokeredAgent : setStop : Monitor Active");
+			  //System.out.println("BrokeredAgent : setStop : Monitor Active");
 			  
 			  try {
 				  //System.out.println("STOPPING " + agentPath);
