@@ -68,7 +68,8 @@ return connector;
 				broker.setSchedulePeriodForDestinationPurge(10000);
 				System.out.println("1");
 				
-				PolicyMap pm = broker.getDestinationPolicy();
+				//PolicyMap pm = broker.getDestinationPolicy();
+				PolicyMap pm = new PolicyMap();
 				System.out.println("2");
 				
 				PolicyEntry pe = new PolicyEntry();
@@ -80,7 +81,7 @@ return connector;
 				pe.setInactiveTimeoutBeforeGC(30000);
 				System.out.println("5");
 				
-				pm.setDefaultEntry(pe);
+				//pm.setDefaultEntry(pe);
 				System.out.println("6");
 				
 				broker.setDestinationPolicy(pm);
