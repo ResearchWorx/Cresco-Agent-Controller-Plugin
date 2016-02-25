@@ -57,12 +57,13 @@ public void run() {
             producer.send(this.sess.createTextMessage("from " + URI + " to " ));
             //Thread.sleep(5000);
         }
+        System.out.println("CODY 0 Ended Producer Thread :" + Thread.currentThread());
         sess.close();
         conn.destroyDestination((ActiveMQDestination) destination);
         conn.cleanup();
         conn.doCleanup(true);
         conn.stop();
-        System.out.println("Ended Producer Thread :" + Thread.currentThread());
+        System.out.println("CODY 1 Ended Producer Thread :" + Thread.currentThread());
     } catch (JMSException jmse) {
         System.out.println(jmse.getErrorCode());
     } //catch (InterruptedException ie) {

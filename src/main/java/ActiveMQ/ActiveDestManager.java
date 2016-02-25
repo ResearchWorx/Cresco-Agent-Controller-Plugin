@@ -109,7 +109,7 @@ public class ActiveDestManager implements Runnable
 										ap.ActiveProducer = false;
 										System.out.println("Dest: " + des.getPhysicalName() + "stopping feed");
 										
-										cm.remove(ap);
+										cm.remove(des.getPhysicalName());
 										
 									}
 								}
