@@ -80,6 +80,10 @@ public class ActiveBrokerManager implements Runnable
 				{
 					ba = new BrokeredAgent(agentIP,agentPath);
 					PluginEngine.brokeredAgents.put(agentPath, ba);
+					while(!PluginEngine.brokeredAgents.containsKey(agentPath))
+					{
+						Thread.sleep(100);
+					}
 					addBroker = true;
 					System.out.println("BA NEW ADDING agentPath: " + agentPath + " remote_ip: " + agentIP);
 				}
