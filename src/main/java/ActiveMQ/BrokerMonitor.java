@@ -2,9 +2,6 @@ package ActiveMQ;
 
 import java.net.Inet6Address;
 import java.net.InetAddress;
-import java.util.List;
-
-import org.apache.activemq.command.ActiveMQDestination;
 import org.apache.activemq.network.NetworkBridge;
 import org.apache.activemq.network.NetworkConnector;
 
@@ -18,7 +15,9 @@ class BrokerMonitor implements Runnable
 	  public BrokerMonitor(String agentPath)
 	  {
 	    	this.agentPath = agentPath;
-	    	this.MonitorActive = true;
+	    	//this.MonitorActive = true;
+	    	System.out.println("CODY!!! BrokerMonitor : INIT agentPath : " + agentPath + " CODY!!!");
+			  
 	  }
 	  public void shutdown()
 	  {
@@ -104,6 +103,7 @@ class BrokerMonitor implements Runnable
 		   MonitorActive = false;
 		   
 	  }
+	  
 	  public void run() 
 	  {
 		  try
@@ -113,6 +113,10 @@ class BrokerMonitor implements Runnable
 			  if(!connectToBroker(brokerAddress)) //connect to broker
 			  {
 				   stopBridge();    
+			  }
+			  else
+			  {
+				  MonitorActive = true;
 			  }
 			    while(MonitorActive)
 	    		{
