@@ -54,7 +54,7 @@ public void run() {
         System.out.println("Started Producer Thread :" + Thread.currentThread());
         while (ActiveProducer) 
         {
-            producer.send(this.sess.createTextMessage("from " + URI + " to " + TXqueue.getQueueName()));
+            producer.send(this.sess.createTextMessage("from " + URI + " to " ));
             //Thread.sleep(5000);
         }
         sess.close();
