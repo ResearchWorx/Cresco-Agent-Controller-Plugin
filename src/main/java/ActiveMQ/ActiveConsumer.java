@@ -45,14 +45,20 @@ public class ActiveConsumer implements Runnable
 		{
 			PluginEngine.ConsumerThreadActive = true;
 			MessageConsumer consumer = sess.createConsumer(RXqueue);
+			int count = 0;
 			while (PluginEngine.ConsumerThreadActive) 
 			{
 				TextMessage msg = (TextMessage) consumer.receive(1000);
 				if (msg != null) 
 				{
+					count++;
+					if(count == 1000)
+					{
 					System.out.println("");
 					System.out.println(msg.getText());
 					System.out.println("");
+					count = 0;
+					}
 				}
 			}
 		}
