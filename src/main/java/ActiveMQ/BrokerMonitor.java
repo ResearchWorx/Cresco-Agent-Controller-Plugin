@@ -23,7 +23,7 @@ class BrokerMonitor implements Runnable
 	  public void shutdown()
 	  {
 		    //failBridge();
-		  System.out.println("CODY!!! BrokerMonitor : agentPath : " + agentPath + " CODY!!!");
+		  System.out.println("CODY!!! BrokerMonitor : Stopping agentPath : " + agentPath + " CODY!!!");
 		  System.out.println(PluginEngine.brokeredAgents.remove(agentPath).activeAddress);
 		  System.out.println(PluginEngine.brokeredAgents.remove(agentPath).bm.MonitorActive);
 		  
@@ -33,6 +33,9 @@ class BrokerMonitor implements Runnable
 	  }
 	  public boolean connectToBroker(String brokerAddress)
 	  {
+		  System.out.println("CODY!!! BrokerMonitor : Incoming agentPath : " + agentPath + " CODY!!!");
+		  System.out.println(brokerAddress);
+		  
 		  boolean isConnected = false;
 		  try
 		  {
