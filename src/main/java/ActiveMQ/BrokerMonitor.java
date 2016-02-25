@@ -24,6 +24,10 @@ class BrokerMonitor implements Runnable
 	  {
 		    //failBridge();
 		  System.out.println("CODY!!! BrokerMonitor : agentPath : " + agentPath + " CODY!!!");
+		  System.out.println(PluginEngine.brokeredAgents.remove(agentPath).activeAddress);
+		  System.out.println(PluginEngine.brokeredAgents.remove(agentPath).bm.MonitorActive);
+		  
+		  
 		  stopBridge(); //kill bridge
 		  MonitorActive = false;
 	  }
@@ -82,6 +86,7 @@ class BrokerMonitor implements Runnable
 		  }
 		  return isConnected;
 	  }
+	  
 	  public void stopBridge()
 	  {
 		  System.out.println("Failed Bridge : " + agentPath);
