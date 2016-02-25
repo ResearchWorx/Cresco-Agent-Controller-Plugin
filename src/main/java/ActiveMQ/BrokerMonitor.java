@@ -128,10 +128,12 @@ class BrokerMonitor implements Runnable
 	    			System.out.println("compress : " + bridge.isUseCompression());
 	    			*/
 	    			//int count = 0;
+			    	//bridge.getDynamicallyIncludedDestinations()
 			    	
 			    	MonitorActive = false;
 	    			for(NetworkBridge b : bridge.activeBridges())
 	    			{
+	    				
 	    				/*
 	    				System.out.println("local address: " + b.getLocalAddress());
 	    				System.out.println("localbrokername: " + b.getLocalBrokerName());

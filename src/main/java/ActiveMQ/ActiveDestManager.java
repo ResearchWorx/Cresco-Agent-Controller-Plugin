@@ -1,5 +1,6 @@
 package ActiveMQ;
 
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Timer;
@@ -17,6 +18,7 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.advisory.DestinationSource;
 import org.apache.activemq.broker.jmx.BrokerViewMBean;
 import org.apache.activemq.broker.jmx.QueueViewMBean;
+import org.apache.activemq.broker.region.Destination;
 import org.apache.activemq.command.ActiveMQDestination;
 import org.apache.activemq.command.ActiveMQQueue;
 
@@ -67,6 +69,12 @@ public class ActiveDestManager implements Runnable
 			  
 		  try 
 		  {
+			 
+			  Map<ActiveMQDestination, Destination> er2 = PluginEngine.broker.broker.getBroker().getDestinationMap();
+			  for (Entry<ActiveMQDestination, Destination> entry : er2.entrySet())
+			  {
+			      System.out.println(entry.getKey().getPhysicalName() + "/" + entry.getValue().getInactiveTimeoutBeforeGC());
+			  }
 			  
 			  ActiveMQDestination[] er = PluginEngine.broker.broker.getBroker().getDestinations();
 			  for(ActiveMQDestination des : er)
