@@ -82,7 +82,8 @@ public class ActiveBrokerManager implements Runnable
 					PluginEngine.brokeredAgents.put(agentPath, ba);
 					while(!PluginEngine.brokeredAgents.containsKey(agentPath))
 					{
-						Thread.sleep(100);
+						System.out.println("NEW WAITING!!");
+						Thread.sleep(10000);
 					}
 					addBroker = true;
 					System.out.println("BA NEW ADDING agentPath: " + agentPath + " remote_ip: " + agentIP);
