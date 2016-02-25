@@ -9,6 +9,8 @@ import javax.jms.TextMessage;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 
+import plugincore.PluginEngine;
+
 
 public class ActiveConsumer implements Runnable
 {
@@ -41,8 +43,9 @@ public class ActiveConsumer implements Runnable
 		//new Thread(new Sender(sess, TXqueue, RXQueueName)).start();
 		try
 		{
+			PluginEngine.ConsumerThreadActive = true;
 			MessageConsumer consumer = sess.createConsumer(RXqueue);
-			while (true) 
+			while (PluginEngine.ConsumerThreadActive) 
 			{
 				TextMessage msg = (TextMessage) consumer.receive(1000);
 				if (msg != null) 

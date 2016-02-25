@@ -40,6 +40,7 @@ public class PluginEngine {
 	public static boolean ActiveBrokerManagerActive = false;
 	public static boolean ActiveDestManagerActive = false;
 	
+	public static boolean ConsumerThreadActive = false;
 	
 	
 	public static boolean isIPv6 = false;
@@ -91,6 +92,13 @@ public class PluginEngine {
 	        public void run() {
 	            try
 	            {
+	            	System.out.println("Shutting down!");
+	            	DiscoveryActive = false;
+	            	DiscoveryResponderActive = false;
+	            	ConsumerThreadActive = false;
+	            	ActiveDestManagerActive = false;
+	            	ActiveBrokerManagerActive = false;
+	            	 
 	            	broker.broker.getBroker().stop();
 	            	while(!broker.broker.getBroker().isStopped())
 	            	{
@@ -133,7 +141,7 @@ public class PluginEngine {
         	Thread.sleep(1000);
         }
         System.out.println("ActiveBrokerManager Started..");
-		
+        
         Thread adm;
         if(isIPv6)
     	{
@@ -150,8 +158,6 @@ public class PluginEngine {
         }
         System.out.println("ActiveDestManager Started..");
         
-        
-        
         Thread ct = null;
     	if(isIPv6)
     	{
@@ -162,12 +168,18 @@ public class PluginEngine {
     		ct = new Thread(new ActiveConsumer(agentpath,"tcp://localhost:32010"));
     	}
     	ct.start();
-    	
+    	while(!ConsumerThreadActive)
+        {
+        	Thread.sleep(1000);
+        }
+        System.out.println("ConsumerThread Started..");
+        
     	
     	//Thread pt = new Thread(new ActiveProducer(args[2] + "_" + args[3],"tcp://localhost:32010"));
     	//Thread pt = new Thread(new ActiveProducer(args[2],"tcp://[::1]:32010"));
     	//pt.start();
-    	
+        
+        
     	//Start discovery broker
     	Thread db = new Thread(new DiscoveryResponder());
     	db.start();
@@ -177,8 +189,7 @@ public class PluginEngine {
         }
         System.out.println("DiscoveryBroker Started..");
 		
-    	
-    	//Start IPv6 network discovery engine
+        //Start IPv6 network discovery engine
     	Thread dev6 = new Thread(new DiscoveryEngine());
     	dev6.start();
     	while(!DiscoveryActive)
