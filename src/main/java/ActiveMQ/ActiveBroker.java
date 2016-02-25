@@ -61,18 +61,19 @@ return connector;
 		{
 			if(portAvailable(1099))
 			{
+				PolicyEntry entry = new PolicyEntry();
+		        entry.setGcInactiveDestinations(true);
+		        entry.setInactiveTimeoutBeforeGC(3000);
+		        PolicyMap map = new PolicyMap();
+		        map.setDefaultEntry(entry);
+				
 				broker = new BrokerService();
 				broker.setPersistent(false);
 				broker.setBrokerName(brokerName);
 				
 				broker.setSchedulePeriodForDestinationPurge(3000);
-				PolicyMap pm = new PolicyMap();
-				PolicyEntry pe = new PolicyEntry();
-				//pe.setQueue(">");
-			
-				pe.setGcInactiveDestinations(true);
-				pe.setInactiveTimeoutBeforeGC(5000);
-				broker.setDestinationPolicy(pm);
+				
+				broker.setDestinationPolicy(map);
 				
 			    //NetworkConnector connector = bridge
 				//connector.
