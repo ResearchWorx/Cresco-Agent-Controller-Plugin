@@ -354,7 +354,7 @@ public class PluginEngine {
     		ActiveMQDestination[] er = broker.broker.getBroker().getDestinations();
 			  for(ActiveMQDestination des : er)
 			  {
-				  	if(des.isQueue())
+				  	if(des.isTopic())
 					{
 				  		String testPath = des.getPhysicalName();
 				  		if(testPath.equals(remoteAgentPath))
