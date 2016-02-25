@@ -1,6 +1,7 @@
 package ActiveMQ;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -66,7 +67,9 @@ public class ActiveDestManager implements Runnable
 		    
 		  System.out.println("Checking Queues");
 			
-		List<String> agentList = new ArrayList<String>();
+		//List<String> agentList = new ArrayList<String>();
+		Map<String,ActiveProducer> cm = new HashMap<String,ActiveProducer>();
+		
 		while(PluginEngine.ActiveDestManagerActive)
 	    {
 			  
@@ -84,11 +87,27 @@ public class ActiveDestManager implements Runnable
 							if(!des.getPhysicalName().equals(PluginEngine.agentpath))
 							{
 								System.out.println("Dest: " + des.getPhysicalName() + " is rearchable = " + PluginEngine.isReachableAgent(des.getPhysicalName()));
-								if(!agentList.contains(des.getPhysicalName()))
+								if(!cm.containsKey(des.getPhysicalName()))
 								{
 									if(PluginEngine.isReachableAgent(des.getPhysicalName()))
 									{
-										new Thread(new ActiveProducer(des.getPhysicalName(),"tcp://[::1]:32010")).start();;	
+										
+										ActiveProducer ap = new ActiveProducer(des.getPhysicalName(),"tcp://[::1]:32010");
+										cm.put(des.getPhysicalName(), ap);
+										new Thread(ap).start();
+										
+									}
+									
+								}
+								else
+								{
+									if(!PluginEngine.isReachableAgent(des.getPhysicalName()))
+									{
+										
+										ActiveProducer ap = cm.get(des.getPhysicalName());
+										ap.ActiveProducer = false;
+										cm.remove(ap);
+										
 									}
 								}
 								

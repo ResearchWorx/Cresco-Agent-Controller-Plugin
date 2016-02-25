@@ -11,7 +11,7 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 
 public class ActiveProducer implements Runnable
 {
-
+	public boolean ActiveProducer;
 	private Queue TXqueue; 
 	private Session sess;
 	private String URI;
@@ -38,8 +38,9 @@ public ActiveProducer(String TXQueueName, String URI)
 @Override
 public void run() {
     try {
+    	ActiveProducer = true;
         MessageProducer producer = this.sess.createProducer(TXqueue);
-        while (true) 
+        while (ActiveProducer) 
         {
             producer.send(this.sess.createTextMessage("from " + URI + " to " + TXqueue.getQueueName()));
             //Thread.sleep(5000);
