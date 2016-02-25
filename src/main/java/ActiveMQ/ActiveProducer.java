@@ -42,12 +42,12 @@ public void run() {
         while (true) 
         {
             producer.send(this.sess.createTextMessage("from " + URI + " to " + TXqueue.getQueueName()));
-            Thread.sleep(5000);
+            //Thread.sleep(5000);
         }
     } catch (JMSException jmse) {
         System.out.println(jmse.getErrorCode());
-    } catch (InterruptedException ie) {
-        System.out.println(ie.getMessage());
-    }
+    } //catch (InterruptedException ie) {
+      //  System.out.println(ie.getMessage());
+    //}
 }
 }
