@@ -57,7 +57,7 @@ public class ActiveBrokerManager implements Runnable
 				BrokeredAgent ba;
 				if(PluginEngine.brokeredAgents.containsKey(agentPath))
 				{
-					
+					/*
 					ba = PluginEngine.brokeredAgents.get(agentPath);
 					//add ip to possible list
 					if(!ba.addressMap.containsKey(agentIP)) 
@@ -72,6 +72,8 @@ public class ActiveBrokerManager implements Runnable
 							addBroker = true;
 							System.out.println("BA EXIST ADDING agentPath: " + agentPath + " remote_ip: " + agentIP);
 					}
+					*/
+					System.out.println("BA EXIST ADDING agentPath: " + agentPath + " remote_ip: " + agentIP);
 					
 				}
 				else
