@@ -66,12 +66,13 @@ class BrokerMonitor implements Runnable
 					{
 						if(remoteBroker.equals(agentPath))
 	    				{
+							/*
 							System.out.println("New Network Broker:");
-							System.out.println("localbrokername: " + b.getLocalBrokerName());
+						    System.out.println("localbrokername: " + b.getLocalBrokerName());
 							System.out.println("remoteaddress: " + b.getRemoteAddress());
 							System.out.println("remotebrokerid: " + b.getRemoteBrokerId());
 							System.out.println("remotebrokername: "+ b.getRemoteBrokerName());
-							
+							*/
 	    					isConnected = true;
 	    				}
 					}

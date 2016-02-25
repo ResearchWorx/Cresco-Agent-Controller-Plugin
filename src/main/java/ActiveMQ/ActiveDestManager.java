@@ -78,8 +78,9 @@ public class ActiveDestManager implements Runnable
 						{
 							if(!des.getPhysicalName().equals(PluginEngine.agentpath))
 							{
-								System.out.println("Dest: " + des.getPhysicalName());
-								System.out.println("DES PATH: " + path);
+								System.out.println("Dest: " + des.getPhysicalName() + " is rearchable = " + PluginEngine.isReachableAgent(des.getPhysicalName()));
+								
+								//System.out.println("DES PATH: " + path);
 							}
 			    		}
 					}

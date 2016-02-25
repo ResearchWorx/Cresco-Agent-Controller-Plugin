@@ -1,6 +1,7 @@
 package plugincore;
 
 
+import org.apache.activemq.command.ActiveMQDestination;
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.slf4j.LoggerFactory;
 
@@ -9,6 +10,7 @@ import ActiveMQ.ActiveBrokerManager;
 import ActiveMQ.ActiveConsumer;
 import ActiveMQ.ActiveDestManager;
 import ActiveMQ.ActiveProducer;
+import ActiveMQ.BrokerStatusType;
 import ActiveMQ.BrokeredAgent;
 import ch.qos.logback.classic.Level;
 import netdiscovery.DiscoveryClientIPv4;
@@ -142,6 +144,7 @@ public class PluginEngine {
         }
         System.out.println("ActiveBrokerManager Started..");
         
+        
         Thread adm;
         if(isIPv6)
     	{
@@ -157,6 +160,8 @@ public class PluginEngine {
         	Thread.sleep(1000);
         }
         System.out.println("ActiveDestManager Started..");
+        
+        
         
         Thread ct = null;
     	if(isIPv6)
@@ -342,6 +347,42 @@ public class PluginEngine {
     		System.out.println("PluginEngine : isIPv6 Error " + ex.toString());
     	}
     	return isIPv6;
+    }
+    
+    public static boolean isReachableAgent(String remoteAgentPath)
+    {
+    	boolean isReachableAgent = false;
+    	try
+    	{
+    		ActiveMQDestination[] er = broker.broker.getBroker().getDestinations();
+			  for(ActiveMQDestination des : er)
+			  {
+				  	if(des.isQueue())
+					{
+						for(String path : des.getDestinationPaths())
+						{
+							if(!des.getPhysicalName().equals(remoteAgentPath))
+							{
+								if(brokeredAgents.containsKey(path))
+								{
+									if(brokeredAgents.get(path).brokerStatus == BrokerStatusType.ACTIVE)
+									{
+										isReachableAgent = true;
+									}
+								}
+							   
+							}
+			    		}
+					}
+			  }
+    	}
+    	catch(Exception ex)
+    	{
+    		System.out.println("PluginEngine : isReachableAgent");
+    	}
+    	
+    	
+    	return isReachableAgent;
     }
     
 }
