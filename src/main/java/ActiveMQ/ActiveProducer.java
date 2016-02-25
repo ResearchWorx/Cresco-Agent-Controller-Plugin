@@ -41,11 +41,13 @@ public void run() {
     try {
     	ActiveProducer = true;
         MessageProducer producer = this.sess.createProducer(TXqueue);
+        System.out.println("Started Producer Thread :" + Thread.currentThread());
         while (ActiveProducer) 
         {
             producer.send(this.sess.createTextMessage("from " + URI + " to " + TXqueue.getQueueName()));
             //Thread.sleep(5000);
         }
+        System.out.println("Ended Producer Thread :" + Thread.currentThread());
     } catch (JMSException jmse) {
         System.out.println(jmse.getErrorCode());
     } //catch (InterruptedException ie) {
