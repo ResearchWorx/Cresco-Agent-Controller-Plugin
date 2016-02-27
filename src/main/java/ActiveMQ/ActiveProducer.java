@@ -52,10 +52,12 @@ public void run() {
         producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
         
         System.out.println("Started Producer Thread :" + Thread.currentThread());
-        while (ActiveProducer) 
+        int count = 0;
+        while (count < 100000) 
         {
             producer.send(this.sess.createTextMessage("from " + URI + " to " ));
             //Thread.sleep(5000);
+            count++;
         }
         System.out.println("CODY 0 Ended Producer Thread :" + Thread.currentThread());
         sess.close();
