@@ -1,18 +1,57 @@
 package ActiveMQ;
 
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
+
 import plugincore.PluginEngine;
 import shared.MsgEvent;
 
 
+public class ActiveProducer
+{
 
-public class ActiveProducer implements Runnable
-{
+	public Map<String,ActiveProducerWorker> producerWorkers;
 	
-public ActiveProducer(String TXQueueName, String URI) 
-{
-	try
+	private String URI;
+	
+	class ClearProducerTask extends TimerTask 
 	{
 		
+	    public void run() 
+	    {
+	    	for (Entry<String, ActiveProducerWorker> entry : producerWorkers.entrySet())
+	    	{
+	    	    //System.out.println(entry.getKey() + "/" + entry.getValue());
+	    		ActiveProducerWorker apw = entry.getValue();
+	    		if(apw.isActive)
+		    	{
+	    			apw.isActive = false;
+	    			producerWorkers.put(entry.getKey(),apw);
+		    	}
+		    	else
+		    	{
+		    		if(apw.shutdown())
+		    		{
+		    			producerWorkers.remove(entry.getKey());
+		    		}
+		    		
+		    	}
+		    	
+	    	}
+	    	
+	    }
+	  }
+
+	
+public ActiveProducer(String URI) 
+{
+	
+	try
+	{
+		producerWorkers = new ConcurrentHashMap<String,ActiveProducerWorker>();
+		this.URI = URI;
 	}
 	catch(Exception ex)
 	{
@@ -20,35 +59,42 @@ public ActiveProducer(String TXQueueName, String URI)
 	}
 }
 
+public boolean sendMessage(MsgEvent sm)
+{
+	boolean isSent = false;
+	try
+	{
+		String agentPath = sm.getMsgRegion() + "_" + sm.getMsgAgent();
+		ActiveProducerWorker apw = null;
+		if(!producerWorkers.containsKey(agentPath))
+		{
+			if(PluginEngine.isReachableAgent(agentPath))
+			{
+				apw = producerWorkers.get(agentPath);
+			}
+		}
+		else
+		{
+			apw = new ActiveProducerWorker(agentPath,URI);
+	    	
+		}
+		if(apw != null)
+		{
+			apw.sendMessage(sm);
+			isSent = true;
+		}
+		
+		
+	}
+	catch(Exception ex)
+	{
+		System.out.println("ActiveProducer : sendMessage Error " + ex.toString());
+	}
 	
-@Override
-public void run() {
-	PluginEngine.ProducerThreadActive = true;
-    try {
-    	
-    	while(PluginEngine.ProducerThreadActive)
-    	{
-    		MsgEvent om = PluginEngine.outgoingMessages.poll();
-    		if(om !=null)
-    		{
-    			System.out.println("outgoing message to " + om.getMsgRegion() + "_" + om.getMsgAgent());
-    			/*
-    			if(PluginEngine.isReachableAgent(des.getPhysicalName()))
-				{
-					//System.out.println("Dest: " + des.getPhysicalName() + "starting feed");
-					//ActiveProducer ap = new ActiveProducer(des.getPhysicalName(),"tcp://[::1]:32010");
-					//cm.put(des.getPhysicalName(), ap);
-					//new Thread(ap).start();
-					
-				}
-				*/
-    		}
-    				
-    		Thread.sleep(1000);
-    	}
-    } 
-    catch (Exception ex) {
-        System.out.println("ActiveProducer : Run : " + ex.toString());
-    }
+	return isSent;
+	
 }
+
+	
+
 }
