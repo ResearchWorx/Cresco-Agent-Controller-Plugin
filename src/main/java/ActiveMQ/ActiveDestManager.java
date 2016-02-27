@@ -70,10 +70,10 @@ public class ActiveDestManager implements Runnable
 			
 		//List<String> agentList = new ArrayList<String>();
 		//Map<String,ActiveProducer> cm = new HashMap<String,ActiveProducer>();
-		
 		while(PluginEngine.ActiveDestManagerActive)
 	    {
-			  
+			int count = 0; //count queues
+			
 		  try 
 		  {
 			  
@@ -83,6 +83,7 @@ public class ActiveDestManager implements Runnable
 				  
 				 	if(des.isQueue())
 					{
+				 		count++;
 						for(String path : des.getDestinationPaths())
 						{
 							if(!des.getPhysicalName().equals(PluginEngine.agentpath))
