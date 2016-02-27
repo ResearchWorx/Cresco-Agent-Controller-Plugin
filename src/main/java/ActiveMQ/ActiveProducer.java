@@ -1,75 +1,54 @@
 package ActiveMQ;
 
-import javax.jms.Connection;
-import javax.jms.DeliveryMode;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.MessageProducer;
-import javax.jms.Queue;
-import javax.jms.Session;
+import plugincore.PluginEngine;
+import shared.MsgEvent;
 
-import org.apache.activemq.ActiveMQConnection;
-import org.apache.activemq.ActiveMQConnectionFactory;
-import org.apache.activemq.command.ActiveMQDestination;
 
 
 public class ActiveProducer implements Runnable
 {
-	public boolean ActiveProducer;
-	private Queue TXqueue; 
-	private Session sess;
-	private String URI;
-	private ActiveMQConnection  conn;
-	private Destination destination;
-
+	
 public ActiveProducer(String TXQueueName, String URI) 
 {
 	try
 	{
-		//ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(URI);
-		conn = (ActiveMQConnection) new    ActiveMQConnectionFactory(URI).createConnection();
-		//conn = factory.createConnection();
-		conn.start();
-		this.sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
-		//this.TXqueue = sess.createQueue(TXQueueName);
-		destination = sess.createQueue(TXQueueName);
-		
-		this.URI = URI;
 		
 	}
 	catch(Exception ex)
 	{
-		System.out.println("ActiveConsumer Init " + ex.toString());
+		System.out.println("ActiveProducer Init " + ex.toString());
 	}
 }
 
 	
 @Override
 public void run() {
+	PluginEngine.ProducerThreadActive = true;
     try {
-    	ActiveProducer = true;
-        MessageProducer producer = this.sess.createProducer(destination);
-        producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
-        
-        System.out.println("Started Producer Thread :" + Thread.currentThread());
-        int count = 0;
-        while (count < 100000) 
-        {
-            producer.send(this.sess.createTextMessage("from " + URI + " to " ));
-            //Thread.sleep(5000);
-            count++;
-        }
-        System.out.println("CODY 0 Ended Producer Thread :" + Thread.currentThread());
-        sess.close();
-        conn.destroyDestination((ActiveMQDestination) destination);
-        conn.cleanup();
-        conn.doCleanup(true);
-        conn.stop();
-        System.out.println("CODY 1 Ended Producer Thread :" + Thread.currentThread());
-    } catch (JMSException jmse) {
-        System.out.println(jmse.getErrorCode());
-    } //catch (InterruptedException ie) {
-      //  System.out.println(ie.getMessage());
-    //}
+    	
+    	while(PluginEngine.ProducerThreadActive)
+    	{
+    		MsgEvent om = PluginEngine.outgoingMessages.poll();
+    		if(om !=null)
+    		{
+    			System.out.println("outgoing message to " + om.getMsgRegion() + "_" + om.getMsgAgent());
+    			/*
+    			if(PluginEngine.isReachableAgent(des.getPhysicalName()))
+				{
+					//System.out.println("Dest: " + des.getPhysicalName() + "starting feed");
+					//ActiveProducer ap = new ActiveProducer(des.getPhysicalName(),"tcp://[::1]:32010");
+					//cm.put(des.getPhysicalName(), ap);
+					//new Thread(ap).start();
+					
+				}
+				*/
+    		}
+    				
+    		Thread.sleep(1000);
+    	}
+    } 
+    catch (Exception ex) {
+        System.out.println("ActiveProducer : Run : " + ex.toString());
+    }
 }
 }

@@ -41,8 +41,8 @@ public class PluginEngine {
 	public static boolean DiscoveryResponderActive = false;
 	public static boolean ActiveBrokerManagerActive = false;
 	public static boolean ActiveDestManagerActive = false;
-	
 	public static boolean ConsumerThreadActive = false;
+	public static boolean ProducerThreadActive = false;
 	
 	
 	public static boolean isIPv6 = false;
@@ -58,6 +58,7 @@ public class PluginEngine {
 	
 	public static ConcurrentLinkedQueue<MsgEvent> discoveryResponse;
 	public static ConcurrentLinkedQueue<MsgEvent> incomingCanidateBrokers;
+	public static ConcurrentLinkedQueue<MsgEvent> outgoingMessages;
 	
 	public static DiscoveryClientIPv4 dc;
 	public static DiscoveryClientIPv6 dcv6;
@@ -126,6 +127,8 @@ public class PluginEngine {
     	discoveryResponse = new ConcurrentLinkedQueue<MsgEvent>();
     	incomingCanidateBrokers = new ConcurrentLinkedQueue<MsgEvent>();
     	
+    	outgoingMessages = new ConcurrentLinkedQueue<MsgEvent>();
+    	
     	ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger)LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
     	//rootLogger.setLevel(Level.toLevel("debug"));
     	//rootLogger.setLevel(Level.toLevel("none"));
@@ -176,7 +179,23 @@ public class PluginEngine {
         }
         System.out.println("ConsumerThread Started..");
         
-    	
+        Thread pt = null;
+    	if(isIPv6)
+    	{
+    		pt = new Thread(new ActiveProducer(agentpath,"tcp://[::1]:32010"));
+    	}
+    	else
+    	{
+    		pt = new Thread(new ActiveProducer(agentpath,"tcp://localhost:32010"));
+    	}
+    	pt.start();
+    	while(!ProducerThreadActive)
+        {
+        	Thread.sleep(1000);
+        }
+        System.out.println("ProducerThread Started..");
+        
+        
     	//Thread pt = new Thread(new ActiveProducer(args[2] + "_" + args[3],"tcp://localhost:32010"));
     	//Thread pt = new Thread(new ActiveProducer(args[2],"tcp://[::1]:32010"));
     	//pt.start();
