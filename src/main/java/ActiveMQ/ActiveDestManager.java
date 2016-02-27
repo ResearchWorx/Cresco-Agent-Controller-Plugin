@@ -99,7 +99,8 @@ public class ActiveDestManager implements Runnable
 								  
 								//
 								
-								PluginEngine.outgoingMessages.offer(sme);
+								//PluginEngine.outgoingMessages.offer(sme);
+								PluginEngine.ap.sendMessage(sme);
 								//if(!cm.containsKey(des.getPhysicalName()))
 								//{
 								/*
