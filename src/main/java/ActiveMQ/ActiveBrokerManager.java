@@ -82,7 +82,7 @@ public class ActiveBrokerManager implements Runnable
 					//System.out.println("BA NEW ADDING agentPath: " + agentPath + " remote_ip: " + agentIP);
 				}
 				//try and connect
-				if(addBroker)
+				if(addBroker && !PluginEngine.isReachableAgent(agentPath))
 				{
 					addBroker(agentPath);
 				}
