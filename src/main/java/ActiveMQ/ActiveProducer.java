@@ -1,6 +1,7 @@
 package ActiveMQ;
 
 import java.util.Map;
+import java.util.Timer;
 import java.util.Map.Entry;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,15 +16,17 @@ public class ActiveProducer
 	public Map<String,ActiveProducerWorker> producerWorkers;
 	
 	private String URI;
-	
+	private Timer timer;
+	  
 	class ClearProducerTask extends TimerTask 
 	{
 		
 	    public void run() 
 	    {
+	    	
 	    	for (Entry<String, ActiveProducerWorker> entry : producerWorkers.entrySet())
 	    	{
-	    	    //System.out.println(entry.getKey() + "/" + entry.getValue());
+	    	    System.out.println("Cleanup: " + entry.getKey() + "/" + entry.getValue());
 	    		ActiveProducerWorker apw = entry.getValue();
 	    		if(apw.isActive)
 		    	{
@@ -52,6 +55,7 @@ public ActiveProducer(String URI)
 	{
 		producerWorkers = new ConcurrentHashMap<String,ActiveProducerWorker>();
 		this.URI = URI;
+		timer.scheduleAtFixedRate(new ClearProducerTask(), 5000, 5000);//start at 5000 end at 5000
 	}
 	catch(Exception ex)
 	{
