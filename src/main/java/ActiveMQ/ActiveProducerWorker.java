@@ -66,6 +66,7 @@ public boolean shutdown()
         
         
     } catch (JMSException jmse) {
+		jmse.printStackTrace();
         System.out.println(jmse.getErrorCode());
     }
     return isShutdown;
