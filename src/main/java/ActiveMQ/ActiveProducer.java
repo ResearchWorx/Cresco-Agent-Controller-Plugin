@@ -108,6 +108,7 @@ public boolean sendMessage(MsgEvent sm)
 		}
 		if(apw != null)
 		{
+			System.out.println("Sending message");
 			apw.sendMessage(sm);
 			isSent = true;
 		}
