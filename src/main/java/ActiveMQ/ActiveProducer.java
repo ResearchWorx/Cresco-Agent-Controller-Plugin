@@ -72,7 +72,7 @@ public boolean sendMessage(MsgEvent sm)
 	{
 		String agentPath = sm.getMsgRegion() + "_" + sm.getMsgAgent();
 		ActiveProducerWorker apw = null;
-		if(!producerWorkers.containsKey(agentPath))
+		if(producerWorkers.containsKey(agentPath))
 		{
 			if(PluginEngine.isReachableAgent(agentPath))
 			{
@@ -99,6 +99,10 @@ public boolean sendMessage(MsgEvent sm)
 		{
 			apw.sendMessage(sm);
 			isSent = true;
+		}
+		else
+		{
+			System.out.println("apw is null");
 		}
 		
 		
