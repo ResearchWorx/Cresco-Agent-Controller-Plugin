@@ -70,6 +70,7 @@ public class ActiveDestManager implements Runnable
 			
 		//List<String> agentList = new ArrayList<String>();
 		//Map<String,ActiveProducer> cm = new HashMap<String,ActiveProducer>();
+		  HashMap<String, Integer> delayCount = new HashMap<String, Integer>();
 		while(PluginEngine.ActiveDestManagerActive)
 	    {
 			int count = 0; //count queues
@@ -88,7 +89,11 @@ public class ActiveDestManager implements Runnable
 						{
 							if(!des.getPhysicalName().equals(PluginEngine.agentpath))
 							{
-								System.out.println("Dest: " + des.getPhysicalName() + " is reachable = " + PluginEngine.isReachableAgent(des.getPhysicalName()));
+								if (!delayCount.containsKey(des.getPhysicalName())) { delayCount.put(des.getPhysicalName(), 0); }
+								if (delayCount.put(des.getPhysicalName(), delayCount.get(des.getPhysicalName() + 1)) > 10) {
+									System.out.println("Dest: " + des.getPhysicalName() + " is reachable = " + PluginEngine.isReachableAgent(des.getPhysicalName()));
+									delayCount.put(des.getPhysicalName(), 0);
+								}
 								//
 								String[] str = des.getPhysicalName().split("_");
 								MsgEvent sme = new MsgEvent(MsgEventType.INFO,PluginEngine.region,PluginEngine.agent,PluginEngine.plugin,"Discovery request.");
