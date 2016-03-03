@@ -59,7 +59,7 @@ public class ActiveConsumer implements Runnable
 				{
 					//count++;
 					//if(count == 1000)
-					/{
+					//{
 					System.out.println("");
 					System.out.println(msg.getText());
 					System.out.println("");
