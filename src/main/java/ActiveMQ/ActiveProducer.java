@@ -36,7 +36,7 @@ public class ActiveProducer
 		    	}
 		    	else
 		    	{
-					//System.out.println("Shutting Down/Removing ActiveProducerWork [" + entry.getKey() + "]");
+					System.out.println("Shutting Down/Removing ActiveProducerWork [" + entry.getKey() + "]");
 		    		if(apw.shutdown())
 		    		{
 		    			producerWorkers.remove(entry.getKey());
@@ -107,7 +107,7 @@ public boolean sendMessage(MsgEvent sm)
 		if(/*apw != null && */PluginEngine.isReachableAgent(dstPath))
 		{
 			apw.isActive = true;
-			System.out.println("Dest: " + dstPath + " is reachable = true");
+			//System.out.println("Dest: " + dstPath + " is reachable = true");
 			apw.sendMessage(sm);
 			isSent = true;
 		}
