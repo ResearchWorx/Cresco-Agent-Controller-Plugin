@@ -56,17 +56,16 @@ public boolean shutdown()
 {
 	boolean isShutdown = false;
     try {
-    	
+    	producer.close();
     	sess.close();
         conn.destroyDestination((ActiveMQDestination) destination);
         conn.cleanup();
         conn.doCleanup(true);
         conn.stop();
         System.out.println("CODY 1 Ended Producer Thread :" + Thread.currentThread());
-        
-        
+        isShutdown = true;
     } catch (JMSException jmse) {
-		jmse.printStackTrace();
+		//jmse.printStackTrace();
         System.out.println(jmse.getErrorCode());
     }
     return isShutdown;
