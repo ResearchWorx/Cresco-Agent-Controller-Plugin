@@ -55,6 +55,7 @@ public ActiveProducer(String URI)
 	{
 		producerWorkers = new ConcurrentHashMap<String,ActiveProducerWorker>();
 		this.URI = URI;
+		timer = new Timer();
 		timer.scheduleAtFixedRate(new ClearProducerTask(), 5000, 5000);//start at 5000 end at 5000
 	}
 	catch(Exception ex)
