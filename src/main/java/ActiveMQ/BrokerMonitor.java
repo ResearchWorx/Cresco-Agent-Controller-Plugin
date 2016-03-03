@@ -44,13 +44,16 @@ class BrokerMonitor implements Runnable
 			  bridge = PluginEngine.broker.AddNetworkConnector(brokerAddress);
 			  bridge.start();
 			  int connect_count = 0;
-			  while((connect_count < 10) && !bridge.isStarted())
+			  while((connect_count++ < 10) && !bridge.isStarted())
 			  {
 				  Thread.sleep(1000);
 			  }
+			  if (connect_count >= 10 && !bridge.isStarted()) {
+				  throw new Exception("Failed to start bridge after 10 attempts. Aborting.");
+			  }
 			  connect_count = 0;
 			  
-			  while((connect_count < 10) && !isConnected)
+			  while((connect_count++ < 10) && !isConnected)
 			  {
 				  for(NetworkBridge b : bridge.activeBridges())
   				  {
@@ -61,7 +64,7 @@ class BrokerMonitor implements Runnable
 					//System.out.println("remoteaddress: " + b.getRemoteAddress());
 					//System.out.println("remotebrokerid: " + b.getRemoteBrokerId());
 					//System.out.println("remotebrokername: "+ b.getRemoteBrokerName());
-					connect_count++;
+					//connect_count++;
 					if(remoteBroker != null)
 					{
 						if(remoteBroker.equals(agentPath))
