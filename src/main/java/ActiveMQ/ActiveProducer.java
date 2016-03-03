@@ -78,10 +78,21 @@ public boolean sendMessage(MsgEvent sm)
 			{
 				apw = producerWorkers.get(agentPath);
 			}
+			else
+			{
+				System.out.println(agentPath + " is unreachable...");
+			}
 		}
 		else
 		{
-			apw = new ActiveProducerWorker(agentPath,URI);
+			if (PluginEngine.isReachableAgent(agentPath))
+			{
+				apw = new ActiveProducerWorker(agentPath, URI);
+			}
+			else
+			{
+				System.out.println(agentPath + " is unreachable...");
+			}
 	    	
 		}
 		if(apw != null)

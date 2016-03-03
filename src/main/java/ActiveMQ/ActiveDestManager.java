@@ -100,9 +100,7 @@ public class ActiveDestManager implements Runnable
 								//
 								
 								//PluginEngine.outgoingMessages.offer(sme);
-								if (PluginEngine.ap.sendMessage(sme)) {
-									System.out.println("Message sent!");
-								} else {
+								if (!PluginEngine.ap.sendMessage(sme)) {
 									System.out.println("Message send failure!");
 								}
 								//if(!cm.containsKey(des.getPhysicalName()))

@@ -32,7 +32,7 @@ public ActiveProducerWorker(String TXQueueName, String URI)
 	{
 		gson = new Gson();
 		//ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(URI);
-		conn = (ActiveMQConnection) new    ActiveMQConnectionFactory(URI).createConnection();
+		conn = (ActiveMQConnection) new ActiveMQConnectionFactory(URI).createConnection();
 		//conn = factory.createConnection();
 		conn.start();
 		this.sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -41,6 +41,10 @@ public ActiveProducerWorker(String TXQueueName, String URI)
 		producer = this.sess.createProducer(destination);
         producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
         isActive = true;
+	}
+	catch (JMSException e)
+	{
+		System.out.println("ActiveConsumer JMS " + e.getMessage())
 	}
 	catch(Exception ex)
 	{
