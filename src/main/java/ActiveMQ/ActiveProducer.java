@@ -26,15 +26,17 @@ public class ActiveProducer
 	    	
 	    	for (Entry<String, ActiveProducerWorker> entry : producerWorkers.entrySet())
 	    	{
-	    	    System.out.println("Cleanup: " + entry.getKey() + "/" + entry.getValue());
+	    	    //System.out.println("Cleanup: " + entry.getKey() + "/" + entry.getValue());
 	    		ActiveProducerWorker apw = entry.getValue();
 	    		if(apw.isActive)
 		    	{
+					System.out.println("Marking ActiveProducerWork [" + entry.getKey() + "] inactive");
 	    			apw.isActive = false;
 	    			producerWorkers.put(entry.getKey(),apw);
 		    	}
 		    	else
 		    	{
+					System.out.println("Shutting Down/Removing ActiveProducerWork [" + entry.getKey() + "]");
 		    		if(apw.shutdown())
 		    		{
 		    			producerWorkers.remove(entry.getKey());
@@ -87,6 +89,7 @@ public boolean sendMessage(MsgEvent sm)
 		{
 			if (PluginEngine.isReachableAgent(agentPath))
 			{
+				System.out.println("Creating new ActiveProducerWorker [" + agentPath + "]");
 				apw = new ActiveProducerWorker(agentPath, URI);
 			}
 			else
