@@ -73,7 +73,7 @@ public boolean sendMessage(MsgEvent sm)
 	try
 	{
 		ActiveProducerWorker apw = null;
-		/*String agentPath = sm.getMsgRegion() + "_" + sm.getMsgAgent();
+		String agentPath = sm.getMsgRegion() + "_" + sm.getMsgAgent();
 		if(producerWorkers.containsKey(agentPath))
 		{
 			if(PluginEngine.isReachableAgent(agentPath))
@@ -89,7 +89,7 @@ public boolean sendMessage(MsgEvent sm)
 		{
 			if (PluginEngine.isReachableAgent(agentPath))
 			{
-				System.out.println("Creating new ActiveProducerWorker [" + agentPath + "]");
+				//System.out.println("Creating new ActiveProducerWorker [" + agentPath + "]");
 				apw = new ActiveProducerWorker(agentPath, URI);
 			}
 			else
@@ -97,24 +97,24 @@ public boolean sendMessage(MsgEvent sm)
 				System.out.println(agentPath + " is unreachable...");
 			}
 	    	
-		}*/
-		String dstPath = sm.getParam("dst_region") + "_" + sm.getParam("dst_agent");
+		}
+		/*String dstPath = sm.getParam("dst_region") + "_" + sm.getParam("dst_agent");
 		if ((apw = producerWorkers.get(dstPath)) == null) {
 			System.out.println("Creating new ActiveProducerWorker [" + dstPath + "]");
 			apw = new ActiveProducerWorker(dstPath, URI);
 			producerWorkers.put(dstPath, apw);
-		}
-		if(/*apw != null && */PluginEngine.isReachableAgent(dstPath))
+		}*/
+		if(apw != null/* && PluginEngine.isReachableAgent(dstPath)*/)
 		{
-			apw.isActive = true;
+			//apw.isActive = true;
 			//System.out.println("Dest: " + dstPath + " is reachable = true");
 			apw.sendMessage(sm);
 			isSent = true;
 		}
 		else
 		{
-			//System.out.println("apw is null");
-			System.out.println("apw is inactive");
+			System.out.println("apw is null");
+			//System.out.println("apw is inactive");
 		}
 		
 	}
