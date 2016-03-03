@@ -73,7 +73,6 @@ public boolean shutdown()
 	
 }
 public boolean sendMessage(MsgEvent se) {
-	isActive = true;
 	boolean isSent = false;
     try {
     	String sendJson = gson.toJson(se);
