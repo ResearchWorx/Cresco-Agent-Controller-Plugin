@@ -73,6 +73,7 @@ public boolean sendMessage(MsgEvent sm)
 	try
 	{
 		String agentPath = sm.getMsgRegion() + "_" + sm.getMsgAgent();
+		String dstPath = sm.getParam("dst_region") + "_" + sm.getParam("dst_agent");
 		ActiveProducerWorker apw = null;
 		/*if(producerWorkers.containsKey(agentPath))
 		{
@@ -98,12 +99,12 @@ public boolean sendMessage(MsgEvent sm)
 			}
 	    	
 		}*/
-		if (PluginEngine.isReachableAgent(agentPath)) {
-			System.out.println("Dest: " + agentPath + " is reachable = true");
-			if ((apw = producerWorkers.get(agentPath)) == null) {
-				System.out.println("Creating new ActiveProducerWorker [" + agentPath + "]");
-				apw = new ActiveProducerWorker(agentPath, URI);
-				producerWorkers.put(agentPath, apw);
+		if (PluginEngine.isReachableAgent(dstPath)) {
+			System.out.println("Dest: " + dstPath + " is reachable = true");
+			if ((apw = producerWorkers.get(dstPath)) == null) {
+				System.out.println("Creating new ActiveProducerWorker [" + dstPath + "]");
+				apw = new ActiveProducerWorker(dstPath, URI);
+				producerWorkers.put(dstPath, apw);
 			}
 		}
 		if(apw != null)
