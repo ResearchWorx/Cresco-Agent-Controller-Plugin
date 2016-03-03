@@ -70,7 +70,6 @@ public class ActiveDestManager implements Runnable
 			
 		//List<String> agentList = new ArrayList<String>();
 		//Map<String,ActiveProducer> cm = new HashMap<String,ActiveProducer>();
-		  HashMap<String, Integer> delayCount = new HashMap<String, Integer>();
 		while(PluginEngine.ActiveDestManagerActive)
 	    {
 			int count = 0; //count queues
@@ -81,20 +80,17 @@ public class ActiveDestManager implements Runnable
 			  ActiveMQDestination[] er = PluginEngine.broker.broker.getBroker().getDestinations();
 			  for(ActiveMQDestination des : er)
 			  {
-				  
 				 	if(des.isQueue())
 					{
+						boolean reachable = false;
 				 		count++;
 						for(String path : des.getDestinationPaths())
 						{
 							if(!des.getPhysicalName().equals(PluginEngine.agentpath))
 							{
-								if (!delayCount.containsKey(des.getPhysicalName())) { delayCount.put(des.getPhysicalName(), 0); }
-								if (delayCount.put(des.getPhysicalName(), delayCount.get(des.getPhysicalName()) + 1) > 10) {
-									System.out.println("Dest: " + des.getPhysicalName() + " is reachable = " + PluginEngine.isReachableAgent(des.getPhysicalName()));
-									delayCount.put(des.getPhysicalName(), 0);
-								}
-								//
+								reachable = true;
+								System.out.println("Dest: " + des.getPhysicalName() + " is reachable = " + PluginEngine.isReachableAgent(des.getPhysicalName()));
+
 								String[] str = des.getPhysicalName().split("_");
 								MsgEvent sme = new MsgEvent(MsgEventType.INFO,PluginEngine.region,PluginEngine.agent,PluginEngine.plugin,"Discovery request.");
 								sme.setParam("src_region",PluginEngine.region);
@@ -139,6 +135,9 @@ public class ActiveDestManager implements Runnable
 								//System.out.println("DES PATH: " + path);
 							}
 			    		}
+						if (!reachable) {
+							System.out.println(des.getPhysicalName() + " is unreachable");
+						}
 					}
 			  }
 			   /*
