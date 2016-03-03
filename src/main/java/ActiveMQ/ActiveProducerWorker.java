@@ -44,7 +44,7 @@ public ActiveProducerWorker(String TXQueueName, String URI)
 	}
 	catch (JMSException e)
 	{
-		System.out.println("ActiveConsumer JMS " + e.getMessage())
+		System.out.println("ActiveConsumer JMS " + e.getMessage());
 	}
 	catch(Exception ex)
 	{
