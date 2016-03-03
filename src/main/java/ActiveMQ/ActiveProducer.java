@@ -91,6 +91,7 @@ public boolean sendMessage(MsgEvent sm)
 			{
 				//System.out.println("Creating new ActiveProducerWorker [" + agentPath + "]");
 				apw = new ActiveProducerWorker(agentPath, URI);
+				producerWorkers.put(agentPath, apw);
 			}
 			else
 			{
