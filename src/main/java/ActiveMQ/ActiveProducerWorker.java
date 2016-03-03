@@ -58,12 +58,19 @@ public boolean shutdown()
 {
 	boolean isShutdown = false;
     try {
+		System.out.println("Unsubscribing");
 		sess.unsubscribe(queueName);
+		System.out.println("Closing Producer");
     	producer.close();
+		System.out.println("Closing Session");
     	sess.close();
+		System.out.println("Destroying Destination");
         conn.destroyDestination((ActiveMQDestination) destination);
+		System.out.println("Cleaning up Connection");
         conn.cleanup();
+		System.out.println("Cleaning up Connection Again");
         conn.doCleanup(true);
+		System.out.println("Stopping Connection");
         conn.stop();
         System.out.println("CODY 1 Ended Producer Thread :" + Thread.currentThread());
         isShutdown = true;
