@@ -160,6 +160,7 @@ public class ActiveDestManager implements Runnable
 		  } 
 		  catch (Exception ex) 
 		  {
+			  ex.printStackTrace();
 			  System.out.println("ActiveDestManager : Run Error " + ex.toString());
 			  PluginEngine.ActiveDestManagerActive = false;
 		  }
