@@ -25,11 +25,13 @@ public class ActiveProducerWorker
 	private MessageProducer producer;
 	private Gson gson;
 	public boolean isActive;
+	private String queueName;
 	
 public ActiveProducerWorker(String TXQueueName, String URI) 
 {
 	try
 	{
+		queueName = TXQueueName;
 		gson = new Gson();
 		//ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(URI);
 		conn = (ActiveMQConnection) new ActiveMQConnectionFactory(URI).createConnection();
@@ -56,6 +58,7 @@ public boolean shutdown()
 {
 	boolean isShutdown = false;
     try {
+		sess.unsubscribe(queueName);
     	producer.close();
     	sess.close();
         conn.destroyDestination((ActiveMQDestination) destination);
