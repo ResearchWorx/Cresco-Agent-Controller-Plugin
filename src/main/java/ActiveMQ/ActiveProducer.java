@@ -107,8 +107,7 @@ public boolean sendMessage(MsgEvent sm)
 		}*/
 		if(apw != null/* && PluginEngine.isReachableAgent(dstPath)*/)
 		{
-			//apw.isActive = true;
-			//System.out.println("Dest: " + dstPath + " is reachable = true");
+			apw.isActive = true;
 			apw.sendMessage(sm);
 			isSent = true;
 		}
