@@ -90,7 +90,7 @@ public class ActiveDestManager implements Runnable
 							if(!des.getPhysicalName().equals(PluginEngine.agentpath))
 							{
 								if (!delayCount.containsKey(des.getPhysicalName())) { delayCount.put(des.getPhysicalName(), 0); }
-								if (delayCount.put(des.getPhysicalName(), delayCount.get(des.getPhysicalName() + 1)) > 10) {
+								if (delayCount.put(des.getPhysicalName(), delayCount.get(des.getPhysicalName()) + 1) > 10) {
 									System.out.println("Dest: " + des.getPhysicalName() + " is reachable = " + PluginEngine.isReachableAgent(des.getPhysicalName()));
 									delayCount.put(des.getPhysicalName(), 0);
 								}
