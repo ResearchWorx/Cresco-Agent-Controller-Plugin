@@ -58,8 +58,6 @@ public boolean shutdown()
 {
 	boolean isShutdown = false;
     try {
-		System.out.println("Unsubscribing");
-		sess.unsubscribe(queueName);
 		System.out.println("Closing Producer");
     	producer.close();
 		System.out.println("Closing Session");
