@@ -59,6 +59,7 @@ public ActiveProducer(String URI)
 	}
 	catch(Exception ex)
 	{
+		ex.printStackTrace();
 		System.out.println("ActiveProducer Init " + ex.toString());
 	}
 }
