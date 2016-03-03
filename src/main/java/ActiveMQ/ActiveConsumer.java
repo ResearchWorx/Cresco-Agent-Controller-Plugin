@@ -57,14 +57,14 @@ public class ActiveConsumer implements Runnable
 				TextMessage msg = (TextMessage) consumer.receive(1000);
 				if (msg != null) 
 				{
-					count++;
-					if(count == 1000)
-					{
+					//count++;
+					//if(count == 1000)
+					/{
 					System.out.println("");
 					System.out.println(msg.getText());
 					System.out.println("");
-					count = 0;
-					}
+					//count = 0;
+					//}
 				}
 			}
 			sess.close();
