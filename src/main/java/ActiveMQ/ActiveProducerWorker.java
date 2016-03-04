@@ -39,7 +39,7 @@ public ActiveProducerWorker(String TXQueueName, String URI)
 		conn.start();
 		this.sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
 		//this.TXqueue = sess.createQueue(TXQueueName);
-		destination = sess.createQueue(TXQueueName);
+		destination = sess.createTopic(TXQueueName);
 		producer = this.sess.createProducer(destination);
 		producer.setTimeToLive(3000L);
         producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
