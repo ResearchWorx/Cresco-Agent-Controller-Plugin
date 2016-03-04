@@ -255,31 +255,24 @@ public class PluginEngine {
 		while (true) {
 			System.out.print("Name of Agent to message: ");
 			Scanner scanner = new Scanner(System.in);
-			String queueName = scanner.nextLine();
-			if (isReachableAgent(queueName)) {
-				System.out.println("Sending to Agent [" + queueName + "]");
-				/*ActiveProducerWorker apw;
-				if(isIPv6)
-				{
-					apw = new ActiveProducerWorker(queueName, "tcp://[::1]:32010");
-				}
-				else
-				{
-					apw = new ActiveProducerWorker(queueName, "tcp://localhost:32010");
-
-				}*/
-				String[] str = queueName.split("_");
-				MsgEvent sme = new MsgEvent(MsgEventType.INFO, region, agent, plugin, "Discovery request.");
-				sme.setParam("src_region", region);
-				sme.setParam("src_agent", agent);
-				sme.setParam("dst_region", str[0]);
-				sme.setParam("dst_agent", str[1]);
-				ap.sendMessage(sme);
-			} else {
-				System.out.println("Cannot reach Agent [" + queueName + "]");
-			}
+			sendMessage(MsgEventType.INFO, scanner.nextLine(), "Test Message!");
 		}
     }
+
+	public static void sendMessage(MsgEventType type, String targetAgent, String msg) {
+		if (isReachableAgent(targetAgent)) {
+			System.out.println("Sending to Agent [" + targetAgent + "]");
+			String[] str = targetAgent.split("_");
+			MsgEvent sme = new MsgEvent(type, region, agent, plugin, msg);
+			sme.setParam("src_region", region);
+			sme.setParam("src_agent", agent);
+			sme.setParam("dst_region", str[0]);
+			sme.setParam("dst_agent", str[1]);
+			ap.sendMessage(sme);
+		} else {
+			System.out.println("Cannot reach Agent [" + targetAgent + "]");
+		}
+	}
     
     public static int processPeerMap(List<MsgEvent> disList)
     {
