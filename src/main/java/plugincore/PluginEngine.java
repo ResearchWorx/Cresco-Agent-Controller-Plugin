@@ -26,10 +26,7 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -256,8 +253,20 @@ public class PluginEngine {
     	{
     		System.out.println("PluginEngine : Main Error " + e.toString());
     	}
+
+		System.out.println("Agent [" + agentpath + "] running...");
         
-       
+       String input;
+		while (true) {
+			System.out.println("Name of Agent to message: ");
+			Scanner scanner = new Scanner(System.in);
+			String queueName = scanner.nextLine();
+			if (isReachableAgent(queueName)) {
+				System.out.println("Sending to Agent [" + queueName + "]");
+			} else {
+				System.out.println("Cannot reach Agent [" + queueName + "]");
+			}
+		}
     }
     
     public static int processPeerMap(List<MsgEvent> disList)
