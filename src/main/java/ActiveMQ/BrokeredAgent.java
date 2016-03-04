@@ -14,7 +14,8 @@ public class BrokeredAgent {
 	  
 	  public BrokeredAgent(String activeAddress, String agentPath)
 	  {
-		System.out.println("Creating BrokerAgnet : " + agentPath + " address: " + activeAddress);
+		System.out.println("Creating BrokerAgent : " + agentPath + " address: " + activeAddress);
+		System.out.print("Name of Agent to message: ");
 		this.bm = new BrokerMonitor(agentPath);
 		this.activeAddress = activeAddress;
 		this.agentPath = agentPath;
