@@ -68,7 +68,7 @@ public class ActiveConsumer implements Runnable
 					//{
 					//System.out.println("");
 					java.util.Date date= new java.util.Date();
-					System.out.println("[" + new Timestamp(date.getTime()) + "] " + me.getParam("src_region") + "_" + me.getParam("src_agent") + " sent a message.");
+					System.out.println("\n[" + new Timestamp(date.getTime()) + "] " + me.getParam("src_region") + "_" + me.getParam("src_agent") + " sent a message.");
 					System.out.print("Name of Agent to message: ");
 					//System.out.println("");
 					count = 0;
