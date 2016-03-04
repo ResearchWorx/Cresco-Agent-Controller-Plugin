@@ -26,7 +26,7 @@ public class ActiveProducer
 	    	
 	    	for (Entry<String, ActiveProducerWorker> entry : producerWorkers.entrySet())
 	    	{
-	    	    System.out.println("Cleanup: " + entry.getKey() + "/" + entry.getValue());
+	    	    //System.out.println("Cleanup: " + entry.getKey() + "/" + entry.getValue());
 	    		ActiveProducerWorker apw = entry.getValue();
 	    		if(apw.isActive)
 		    	{

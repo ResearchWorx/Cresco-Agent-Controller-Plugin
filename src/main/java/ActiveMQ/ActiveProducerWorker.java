@@ -62,14 +62,7 @@ public boolean shutdown()
     	producer.close();
 		System.out.println("Closing Session");
     	sess.close();
-		/*System.out.println("Destroying Destination");
-        conn.destroyDestination((ActiveMQDestination) destination);
-		System.out.println("Cleaning up Connection");
-        conn.cleanup();
-		System.out.println("Cleaning up Connection Again");
-        conn.doCleanup(true);
-		System.out.println("Stopping Connection");
-        conn.stop();*/
+		System.out.println("Closing Connection");
 		conn.close();
         System.out.println("CODY 1 Ended Producer Thread :" + Thread.currentThread());
         isShutdown = true;
