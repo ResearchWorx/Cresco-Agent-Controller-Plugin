@@ -59,14 +59,14 @@ public boolean shutdown()
 {
 	boolean isShutdown = false;
     try {
-		System.out.println("Closing Producer");
+		System.out.println("Closing [" + queueName + "] Producer");
     	producer.close();
-		System.out.println("Closing Session");
+		System.out.println("Closing [" + queueName + "] Session");
     	sess.close();
-		System.out.println("Closing Connection");
+		System.out.println("Closing [" + queueName + "] Connection");
 		conn.cleanup();
 		conn.close();
-        System.out.println("CODY 1 Ended Producer Thread :" + Thread.currentThread());
+        System.out.println("CODY 1 Ended [" + queueName + "] Producer Thread :" + Thread.currentThread());
         isShutdown = true;
     } catch (JMSException jmse) {
 		jmse.printStackTrace();
