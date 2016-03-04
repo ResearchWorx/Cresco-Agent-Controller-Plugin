@@ -7,10 +7,12 @@ import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
+import com.google.gson.Gson;
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 import plugincore.PluginEngine;
+import shared.MsgEvent;
 
 
 public class ActiveConsumer implements Runnable
@@ -45,6 +47,7 @@ public class ActiveConsumer implements Runnable
 	@Override
 	public void run() 
 	{
+		Gson gson;
 		// TODO Auto-generated method stub
 		//new Thread(new Sender(sess, TXqueue, RXQueueName)).start();
 		try
@@ -57,11 +60,12 @@ public class ActiveConsumer implements Runnable
 				TextMessage msg = (TextMessage) consumer.receive(1000);
 				if (msg != null) 
 				{
+					MsgEvent me = gson.fromJson(msg.getText(), MsgEvent.class);
 					//count++;
 					//if(count++ == 10)
 					//{
 					System.out.println("");
-					System.out.println(msg.getStringProperty("src_region") + "_" + msg.getStringProperty("src_agent") + " sent a message.");
+					System.out.println(me.getParam("dst_region") + "_" + me.getParam("dst_agent") + " sent a message.");
 					System.out.println("");
 					count = 0;
 					//}
