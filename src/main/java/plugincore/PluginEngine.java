@@ -176,7 +176,7 @@ public class PluginEngine {
         }
         System.out.println("ConsumerThread Started..");
         
-        /*if(isIPv6)
+        if(isIPv6)
     	{
     		ap = new ActiveProducer("tcp://[::1]:32010");
     	}
@@ -184,7 +184,7 @@ public class PluginEngine {
     	{
     		ap = new ActiveProducer("tcp://localhost:32010");
     		
-    	}*/
+    	}
         
     	//Thread pt = new Thread(new ActiveProducer(args[2] + "_" + args[3],"tcp://localhost:32010"));
     	//Thread pt = new Thread(new ActiveProducer(args[2],"tcp://[::1]:32010"));
@@ -258,7 +258,7 @@ public class PluginEngine {
 			String queueName = scanner.nextLine();
 			if (isReachableAgent(queueName)) {
 				System.out.println("Sending to Agent [" + queueName + "]");
-				ActiveProducerWorker apw;
+				/*ActiveProducerWorker apw;
 				if(isIPv6)
 				{
 					apw = new ActiveProducerWorker(queueName, "tcp://[::1]:32010");
@@ -267,15 +267,14 @@ public class PluginEngine {
 				{
 					apw = new ActiveProducerWorker(queueName, "tcp://localhost:32010");
 
-				}
+				}*/
 				String[] str = queueName.split("_");
 				MsgEvent sme = new MsgEvent(MsgEventType.INFO, region, agent, plugin, "Discovery request.");
 				sme.setParam("src_region", region);
 				sme.setParam("src_agent", agent);
 				sme.setParam("dst_region", str[0]);
 				sme.setParam("dst_agent", str[1]);
-				apw.sendMessage(sme);
-				apw.shutdown();
+				ap.sendMessage(sme);
 			} else {
 				System.out.println("Cannot reach Agent [" + queueName + "]");
 			}
