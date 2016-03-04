@@ -73,7 +73,8 @@ public boolean sendMessage(MsgEvent sm)
 	try
 	{
 		ActiveProducerWorker apw = null;
-		String agentPath = sm.getMsgRegion() + "_" + sm.getMsgAgent();
+		//String agentPath = sm.getMsgRegion() + "_" + sm.getMsgAgent();
+		String agentPath = sm.getParam("dst_region") + "_" + sm.getParam("dst_agent");
 		if(producerWorkers.containsKey(agentPath))
 		{
 			if(PluginEngine.isReachableAgent(agentPath))
