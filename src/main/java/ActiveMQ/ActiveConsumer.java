@@ -74,6 +74,7 @@ public class ActiveConsumer implements Runnable
 					//}
 				}
 			}
+			System.out.println("Cleaning up ActiveConsumer");
 			sess.close();
 			conn.cleanup();
 			conn.close();

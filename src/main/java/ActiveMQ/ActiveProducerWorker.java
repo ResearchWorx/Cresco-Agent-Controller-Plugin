@@ -39,7 +39,7 @@ public ActiveProducerWorker(String TXQueueName, String URI)
 		conn.start();
 		this.sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
 		//this.TXqueue = sess.createQueue(TXQueueName);
-		destination = sess.createTopic(TXQueueName);
+		destination = sess.createQueue(TXQueueName);
 		producer = this.sess.createProducer(destination);
 		producer.setTimeToLive(3000L);
         producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
@@ -64,6 +64,7 @@ public boolean shutdown()
 		System.out.println("Closing Session");
     	sess.close();
 		System.out.println("Closing Connection");
+		conn.cleanup();
 		conn.close();
         System.out.println("CODY 1 Ended Producer Thread :" + Thread.currentThread());
         isShutdown = true;
