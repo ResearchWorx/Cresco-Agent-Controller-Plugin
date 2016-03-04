@@ -32,11 +32,11 @@ public class ActiveProducer
 		    	{
 					//System.out.println("Marking ActiveProducerWork [" + entry.getKey() + "] inactive");
 	    			apw.isActive = false;
-	    			producerWorkers.put(entry.getKey(),apw);
+	    			//producerWorkers.put(entry.getKey(),apw);
 		    	}
 		    	else
 		    	{
-					System.out.println("Shutting Down/Removing ActiveProducerWork [" + entry.getKey() + "]");
+					//System.out.println("Shutting Down/Removing ActiveProducerWork [" + entry.getKey() + "]");
 		    		if(apw.shutdown())
 		    		{
 		    			producerWorkers.remove(entry.getKey());
@@ -73,7 +73,6 @@ public boolean sendMessage(MsgEvent sm)
 	try
 	{
 		ActiveProducerWorker apw = null;
-		String agentPath = sm.getMsgRegion() + "_" + sm.getMsgAgent();
 		String dstPath = sm.getParam("dst_region") + "_" + sm.getParam("dst_agent");
 		if(producerWorkers.containsKey(dstPath))
 		{
@@ -96,7 +95,7 @@ public boolean sendMessage(MsgEvent sm)
 			}
 			else
 			{
-				System.out.println(agentPath + " is unreachable...");
+				System.out.println(dstPath + " is unreachable...");
 			}
 	    	
 		}
