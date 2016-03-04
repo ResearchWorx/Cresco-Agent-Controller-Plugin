@@ -70,6 +70,7 @@ return connector;
 		        map.setDefaultEntry(entry);
 				
 				broker = new BrokerService();
+				broker.setUseShutdownHook(false);
 				broker.setPersistent(false);
 				broker.setBrokerName(brokerName);
 				broker.setSchedulePeriodForDestinationPurge(2500);
