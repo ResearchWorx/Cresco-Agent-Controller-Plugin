@@ -58,13 +58,13 @@ public class ActiveConsumer implements Runnable
 				if (msg != null) 
 				{
 					//count++;
-					if(count++ == 10)
-					{
+					//if(count++ == 10)
+					//{
 					System.out.println("");
-					System.out.println(msg.getText());
+					System.out.println(msg.getStringProperty("src_region") + "_" + msg.getStringProperty("src_agent") + " sent a message.");
 					System.out.println("");
 					count = 0;
-					}
+					//}
 				}
 			}
 			sess.close();
