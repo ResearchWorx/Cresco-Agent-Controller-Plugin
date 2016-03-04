@@ -47,7 +47,7 @@ public class ActiveConsumer implements Runnable
 	@Override
 	public void run() 
 	{
-		Gson gson;
+		Gson gson = new Gson();
 		// TODO Auto-generated method stub
 		//new Thread(new Sender(sess, TXqueue, RXQueueName)).start();
 		try
@@ -64,9 +64,9 @@ public class ActiveConsumer implements Runnable
 					//count++;
 					//if(count++ == 10)
 					//{
-					System.out.println("");
+					//System.out.println("");
 					System.out.println(me.getParam("dst_region") + "_" + me.getParam("dst_agent") + " sent a message.");
-					System.out.println("");
+					//System.out.println("");
 					count = 0;
 					//}
 				}
