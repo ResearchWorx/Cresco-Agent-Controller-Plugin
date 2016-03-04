@@ -14,6 +14,8 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 import plugincore.PluginEngine;
 import shared.MsgEvent;
 
+import java.sql.Timestamp;
+
 
 public class ActiveConsumer implements Runnable
 {
@@ -65,7 +67,8 @@ public class ActiveConsumer implements Runnable
 					//if(count++ == 10)
 					//{
 					//System.out.println("");
-					System.out.println(me.getParam("dst_region") + "_" + me.getParam("dst_agent") + " sent a message.");
+					java.util.Date date= new java.util.Date();
+					System.out.println("[" + new Timestamp(date.getTime()) + "]" + me.getParam("dst_region") + "_" + me.getParam("dst_agent") + " sent a message.");
 					//System.out.println("");
 					count = 0;
 					//}
