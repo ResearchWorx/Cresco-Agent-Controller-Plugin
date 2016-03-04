@@ -106,7 +106,7 @@ public class PluginEngine {
 	            	ActiveDestManagerActive = false;
 					//Thread.sleep(500);
 	            	ActiveBrokerManagerActive = false;
-					//Thread.sleep(500);
+					Thread.sleep(1000);
 	            	 
 	            	
 	            	broker.stopBroker();
