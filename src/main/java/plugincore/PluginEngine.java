@@ -250,6 +250,8 @@ public class PluginEngine {
 
 		System.out.println("Agent [" + agentpath + "] running...");
 
+		Thread.sleep(2000);
+
 		while (true) {
 			System.out.print("Name of Agent to message: ");
 			Scanner scanner = new Scanner(System.in);
