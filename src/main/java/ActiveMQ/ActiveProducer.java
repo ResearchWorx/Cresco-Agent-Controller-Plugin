@@ -77,7 +77,7 @@ public boolean sendMessage(MsgEvent sm)
 		String dstPath = sm.getParam("dst_region") + "_" + sm.getParam("dst_agent");
 		if(producerWorkers.containsKey(dstPath))
 		{
-			if(PluginEngine.isReachableAgent(dstPath))
+			if(PluginEngine.isReachableAgent(agentPath))
 			{
 				apw = producerWorkers.get(dstPath);
 			}
@@ -88,7 +88,7 @@ public boolean sendMessage(MsgEvent sm)
 		}
 		else
 		{
-			if (PluginEngine.isReachableAgent(dstPath))
+			if (PluginEngine.isReachableAgent(agentPath))
 			{
 				System.out.println("Creating new ActiveProducerWorker [" + dstPath + "]");
 				apw = new ActiveProducerWorker(dstPath, URI);
