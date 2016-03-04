@@ -67,9 +67,20 @@ public class ActiveConsumer implements Runnable
 					//if(count++ == 10)
 					//{
 					//System.out.println("");
-					java.util.Date date= new java.util.Date();
-					System.out.println("\n[" + new Timestamp(date.getTime()) + "] " + me.getParam("src_region") + "_" + me.getParam("src_agent") + " sent a message.");
-					System.out.print("Name of Agent to message: ");
+					if (me.getMsgBody().toLowerCase().equals("ping")) {
+						String pingAgent = me.getParam("src_region") + "_" + me.getParam("src_agent");
+						System.out.println("Sending to Agent [" + pingAgent + "]");
+						MsgEvent sme = new MsgEvent(me.getMsgType(), PluginEngine.region, PluginEngine.agent, PluginEngine.plugin, "pong");
+						sme.setParam("src_region", me.getParam("dst_region"));
+						sme.setParam("src_agent", me.getParam("dst_agent"));
+						sme.setParam("dst_region", me.getParam("src_region"));
+						sme.setParam("dst_agent", me.getParam("src_agent"));
+						PluginEngine.ap.sendMessage(sme);
+					} else {
+						java.util.Date date = new java.util.Date();
+						System.out.println("\n[" + new Timestamp(date.getTime()) + "] " + me.getParam("src_region") + "_" + me.getParam("src_agent") + " sent a message.");
+						System.out.print("Name of Agent to message: ");
+					}
 					//System.out.println("");
 					count = 0;
 					//}
