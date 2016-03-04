@@ -97,8 +97,8 @@ public class ActiveDestManager implements Runnable
 								sme.setParam("dst_region", str[0]);
 								sme.setParam("dst_agent", str[1]);
 
-								java.util.Date date = new java.util.Date();
-								System.out.println("[" + new Timestamp(date.getTime()) + "] " + PluginEngine.agentpath + " sending message to " + des.getPhysicalName());
+								//java.util.Date date = new java.util.Date();
+								//System.out.println("[" + new Timestamp(date.getTime()) + "] " + PluginEngine.agentpath + " sending message to " + des.getPhysicalName());
 								//
 								//PluginEngine.outgoingMessages.offer(sme);
 								//if (!PluginEngine.ap.sendMessage(sme)) {
