@@ -74,7 +74,8 @@ public boolean shutdown()
         isShutdown = true;
     } catch (JMSException jmse) {
 		jmse.printStackTrace();
-        System.out.println(jmse.getErrorCode());
+		System.out.println(jmse.getMessage());
+        System.out.println(jmse.getLinkedException().getMessage());
     }
     return isShutdown;
     
