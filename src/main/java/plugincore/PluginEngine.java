@@ -97,11 +97,11 @@ public class PluginEngine {
 	            {
 					System.out.println("");
 	            	System.out.println("Shutting down!");
-					ConsumerThreadActive = false;
-					//Thread.sleep(500);
 	            	DiscoveryActive = false;
 					//Thread.sleep(500);
 	            	DiscoveryResponderActive = false;
+					//Thread.sleep(500);
+					ConsumerThreadActive = false;
 					//Thread.sleep(500);
 	            	ActiveDestManagerActive = false;
 					//Thread.sleep(500);

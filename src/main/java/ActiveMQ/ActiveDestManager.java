@@ -177,7 +177,10 @@ public class ActiveDestManager implements Runnable
 		    			ba.setStop();
 		    			System.out.println("Cleared agentPath: " + ba.agentPath);
 		    			PluginEngine.brokeredAgents.remove(entry.getKey());//remove agent
-				    	
+
+				    	if (PluginEngine.ap.producerWorkers.containsKey(entry.getKey())) {
+							PluginEngine.ap.producerWorkers.get(entry.getKey()).shutdown();
+						}
 		    		}
 		    		
 		    	}
