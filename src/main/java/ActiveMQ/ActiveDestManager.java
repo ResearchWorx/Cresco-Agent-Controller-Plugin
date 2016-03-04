@@ -67,7 +67,8 @@ public class ActiveDestManager implements Runnable
 		  PluginEngine.ActiveDestManagerActive = true;
 		    
 		  System.out.println("Checking Queues");
-			
+
+		  int msgs = 0;
 		//List<String> agentList = new ArrayList<String>();
 		//Map<String,ActiveProducer> cm = new HashMap<String,ActiveProducer>();
 		while(PluginEngine.ActiveDestManagerActive)
@@ -99,7 +100,7 @@ public class ActiveDestManager implements Runnable
 								sme.setParam("dst_agent",str[1]);
 								  
 								//
-								if (count > 20) continue;
+								if (msgs++ > 20) continue;
 								//PluginEngine.outgoingMessages.offer(sme);
 								if (!PluginEngine.ap.sendMessage(sme)) {
 									System.out.println("Message send failure!");
