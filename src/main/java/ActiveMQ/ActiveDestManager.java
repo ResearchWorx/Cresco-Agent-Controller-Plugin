@@ -99,7 +99,7 @@ public class ActiveDestManager implements Runnable
 								sme.setParam("dst_agent",str[1]);
 								  
 								//
-								
+								if (count > 20) continue;
 								//PluginEngine.outgoingMessages.offer(sme);
 								if (!PluginEngine.ap.sendMessage(sme)) {
 									System.out.println("Message send failure!");
