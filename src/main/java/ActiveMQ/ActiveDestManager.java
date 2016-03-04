@@ -83,30 +83,26 @@ public class ActiveDestManager implements Runnable
 			  {
 				 	if(des.isQueue())
 					{
-						boolean reachable = false;
 				 		count++;
 						for(String path : des.getDestinationPaths())
 						{
 							if(!des.getPhysicalName().equals(PluginEngine.agentpath))
 							{
-								reachable = true;
 								System.out.println("Dest: " + des.getPhysicalName() + " is reachable = " + PluginEngine.isReachableAgent(des.getPhysicalName()));
 
-								if (PluginEngine.isReachableAgent(des.getPhysicalName())) {
-									String[] str = des.getPhysicalName().split("_");
-									MsgEvent sme = new MsgEvent(MsgEventType.INFO, PluginEngine.region, PluginEngine.agent, PluginEngine.plugin, "Discovery request.");
-									sme.setParam("src_region", PluginEngine.region);
-									sme.setParam("src_agent", PluginEngine.agent);
-									sme.setParam("dst_region", str[0]);
-									sme.setParam("dst_agent", str[1]);
+								String[] str = des.getPhysicalName().split("_");
+								MsgEvent sme = new MsgEvent(MsgEventType.INFO, PluginEngine.region, PluginEngine.agent, PluginEngine.plugin, "Discovery request.");
+								sme.setParam("src_region", PluginEngine.region);
+								sme.setParam("src_agent", PluginEngine.agent);
+								sme.setParam("dst_region", str[0]);
+								sme.setParam("dst_agent", str[1]);
 
-									java.util.Date date = new java.util.Date();
-									System.out.println("[" + new Timestamp(date.getTime()) + "] " + PluginEngine.agentpath + " sending message to " + des.getPhysicalName());
-									//
-									//PluginEngine.outgoingMessages.offer(sme);
-									if (!PluginEngine.ap.sendMessage(sme)) {
-										System.out.println("Message send failure!");
-									}
+								java.util.Date date = new java.util.Date();
+								System.out.println("[" + new Timestamp(date.getTime()) + "] " + PluginEngine.agentpath + " sending message to " + des.getPhysicalName());
+								//
+								//PluginEngine.outgoingMessages.offer(sme);
+								if (!PluginEngine.ap.sendMessage(sme)) {
+									System.out.println("Message send failure!");
 								}
 								//if(!cm.containsKey(des.getPhysicalName()))
 								//{

@@ -91,7 +91,7 @@ public boolean sendMessage(MsgEvent sm)
 			if (PluginEngine.isReachableAgent(dstPath))
 			{
 				System.out.println("Creating new ActiveProducerWorker [" + dstPath + "]");
-				apw = new ActiveProducerWorker(agentPath, URI);
+				apw = new ActiveProducerWorker(dstPath, URI);
 				producerWorkers.put(dstPath, apw);
 			}
 			else

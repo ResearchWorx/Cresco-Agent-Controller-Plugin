@@ -41,6 +41,7 @@ public ActiveProducerWorker(String TXQueueName, String URI)
 		//this.TXqueue = sess.createQueue(TXQueueName);
 		destination = sess.createQueue(TXQueueName);
 		producer = this.sess.createProducer(destination);
+		producer.setTimeToLive(3000L);
         producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
         isActive = true;
 	}
