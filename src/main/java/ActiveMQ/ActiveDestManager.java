@@ -94,8 +94,7 @@ public class ActiveDestManager implements Runnable
 
 								if (PluginEngine.isReachableAgent(des.getPhysicalName())) {
 									String[] str = des.getPhysicalName().split("_");
-									//MsgEvent sme = new MsgEvent(MsgEventType.INFO, PluginEngine.region, PluginEngine.agent, PluginEngine.plugin, "Discovery request.");
-									MsgEvent sme = new MsgEvent(MsgEventType.INFO, str[0], str[1], PluginEngine.plugin, "Discovery request.");
+									MsgEvent sme = new MsgEvent(MsgEventType.INFO, PluginEngine.region, PluginEngine.agent, PluginEngine.plugin, "Discovery request.");
 									sme.setParam("src_region", PluginEngine.region);
 									sme.setParam("src_agent", PluginEngine.agent);
 									sme.setParam("dst_region", str[0]);
