@@ -1,17 +1,11 @@
 package plugincore;
 
 
+import ActiveMQ.*;
 import org.apache.activemq.command.ActiveMQDestination;
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.slf4j.LoggerFactory;
 
-import ActiveMQ.ActiveBroker;
-import ActiveMQ.ActiveBrokerManager;
-import ActiveMQ.ActiveConsumer;
-import ActiveMQ.ActiveDestManager;
-import ActiveMQ.ActiveProducer;
-import ActiveMQ.BrokerStatusType;
-import ActiveMQ.BrokeredAgent;
 import ch.qos.logback.classic.Level;
 import netdiscovery.DiscoveryClientIPv4;
 import netdiscovery.DiscoveryResponder;
@@ -182,7 +176,7 @@ public class PluginEngine {
         }
         System.out.println("ConsumerThread Started..");
         
-        if(isIPv6)
+        /*if(isIPv6)
     	{
     		ap = new ActiveProducer("tcp://[::1]:32010");
     	}
@@ -190,7 +184,7 @@ public class PluginEngine {
     	{
     		ap = new ActiveProducer("tcp://localhost:32010");
     		
-    	}
+    	}*/
         
     	//Thread pt = new Thread(new ActiveProducer(args[2] + "_" + args[3],"tcp://localhost:32010"));
     	//Thread pt = new Thread(new ActiveProducer(args[2],"tcp://[::1]:32010"));
@@ -255,14 +249,31 @@ public class PluginEngine {
     	}
 
 		System.out.println("Agent [" + agentpath + "] running...");
-        
-       String input;
+
 		while (true) {
-			System.out.println("Name of Agent to message: ");
+			System.out.print("Name of Agent to message: ");
 			Scanner scanner = new Scanner(System.in);
 			String queueName = scanner.nextLine();
 			if (isReachableAgent(queueName)) {
 				System.out.println("Sending to Agent [" + queueName + "]");
+				ActiveProducerWorker apw;
+				if(isIPv6)
+				{
+					apw = new ActiveProducerWorker(queueName, "tcp://[::1]:32010");
+				}
+				else
+				{
+					apw = new ActiveProducerWorker(queueName, "tcp://localhost:32010");
+
+				}
+				String[] str = queueName.split("_");
+				MsgEvent sme = new MsgEvent(MsgEventType.INFO, region, agent, plugin, "Discovery request.");
+				sme.setParam("src_region", region);
+				sme.setParam("src_agent", agent);
+				sme.setParam("dst_region", str[0]);
+				sme.setParam("dst_agent", str[1]);
+				apw.sendMessage(sme);
+				apw.shutdown();
 			} else {
 				System.out.println("Cannot reach Agent [" + queueName + "]");
 			}

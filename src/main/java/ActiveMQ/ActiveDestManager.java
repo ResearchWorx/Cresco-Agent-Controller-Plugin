@@ -88,7 +88,7 @@ public class ActiveDestManager implements Runnable
 						{
 							if(!des.getPhysicalName().equals(PluginEngine.agentpath))
 							{
-								System.out.println("Dest: " + des.getPhysicalName() + " is reachable = " + PluginEngine.isReachableAgent(des.getPhysicalName()));
+								//System.out.println("Dest: " + des.getPhysicalName() + " is reachable = " + PluginEngine.isReachableAgent(des.getPhysicalName()));
 
 								String[] str = des.getPhysicalName().split("_");
 								MsgEvent sme = new MsgEvent(MsgEventType.INFO, PluginEngine.region, PluginEngine.agent, PluginEngine.plugin, "Discovery request.");
@@ -101,9 +101,9 @@ public class ActiveDestManager implements Runnable
 								System.out.println("[" + new Timestamp(date.getTime()) + "] " + PluginEngine.agentpath + " sending message to " + des.getPhysicalName());
 								//
 								//PluginEngine.outgoingMessages.offer(sme);
-								if (!PluginEngine.ap.sendMessage(sme)) {
-									System.out.println("Message send failure!");
-								}
+								//if (!PluginEngine.ap.sendMessage(sme)) {
+								//	System.out.println("Message send failure!");
+								//}
 								//if(!cm.containsKey(des.getPhysicalName()))
 								//{
 								/*
