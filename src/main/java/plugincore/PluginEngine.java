@@ -95,17 +95,18 @@ public class PluginEngine {
 	        public void run() {
 	            try
 	            {
+					System.out.println("");
 	            	System.out.println("Shutting down!");
+					ConsumerThreadActive = false;
+					//Thread.sleep(500);
 	            	DiscoveryActive = false;
-					Thread.sleep(500);
+					//Thread.sleep(500);
 	            	DiscoveryResponderActive = false;
-					Thread.sleep(500);
-	            	ConsumerThreadActive = false;
-					Thread.sleep(500);
+					//Thread.sleep(500);
 	            	ActiveDestManagerActive = false;
-					Thread.sleep(500);
+					//Thread.sleep(500);
 	            	ActiveBrokerManagerActive = false;
-					Thread.sleep(500);
+					//Thread.sleep(500);
 	            	 
 	            	
 	            	broker.stopBroker();
