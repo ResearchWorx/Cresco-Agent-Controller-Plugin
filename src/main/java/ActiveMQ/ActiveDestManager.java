@@ -1,5 +1,6 @@
 package ActiveMQ;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -68,7 +69,6 @@ public class ActiveDestManager implements Runnable
 		    
 		  System.out.println("Checking Queues");
 
-		  int msgs = 0;
 		//List<String> agentList = new ArrayList<String>();
 		//Map<String,ActiveProducer> cm = new HashMap<String,ActiveProducer>();
 		while(PluginEngine.ActiveDestManagerActive)
@@ -98,9 +98,10 @@ public class ActiveDestManager implements Runnable
 								sme.setParam("src_agent",PluginEngine.agent);
 								sme.setParam("dst_region",str[0]);
 								sme.setParam("dst_agent",str[1]);
-								  
+
+								java.util.Date date= new java.util.Date();
+								System.out.println("[" + new Timestamp(date.getTime()) + "] " + PluginEngine.agentpath + " sending message to " + des.getPhysicalName());
 								//
-								if (msgs++ > 20) continue;
 								//PluginEngine.outgoingMessages.offer(sme);
 								if (!PluginEngine.ap.sendMessage(sme)) {
 									System.out.println("Message send failure!");
