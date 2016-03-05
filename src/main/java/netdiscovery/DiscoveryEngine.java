@@ -157,6 +157,7 @@ public class DiscoveryEngine implements Runnable
 		      try
 		      {
 		    	  sendSocket = new DatagramSocket();
+		    	  
 		    	  //SocketAddress sa = new InetSocketAddress(returnAddr,returnPort);
 		    	  //sendSocket.connect(sa);
 		      	  sendSocket.send(sendPacket);
@@ -239,6 +240,8 @@ public class DiscoveryEngine implements Runnable
 		 		      InetAddress returnAddr = InetAddress.getByName(me.getParam("dst_ip"));
 		 		      int returnPort = Integer.parseInt(me.getParam("dst_port"));
 	  	 		      DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
+	  	 		      socket.send(sendPacket);
+	  	 		      /*
 	  	 		      boolean isSent = false;
 	  	 		      int failCount = 1;
 	  	 		      while(!isSent)
@@ -258,7 +261,7 @@ public class DiscoveryEngine implements Runnable
 	  	 		    	}
 	  	 		    	Thread.sleep(1000);
 	  	 		      }
-	  	 		      
+	  	 		      */
 	  	 		      
 	 		        }  
 	 		        
