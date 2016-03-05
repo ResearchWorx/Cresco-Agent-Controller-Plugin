@@ -59,7 +59,7 @@ public String multiCastNetwork;
 	        //byte[] data = makeResponse(); // code not shown
 	    	
 	    	//We have a response
-			  System.out.println(getClass().getName() + ">>> Broadcast response from server: " + packet.getAddress().getHostAddress());
+			  //System.out.println(getClass().getName() + ">>> Broadcast response from server: " + packet.getAddress().getHostAddress());
 
 			  //Check if the message is correct
 			  //System.out.println(new String(receivePacket.getData()));
