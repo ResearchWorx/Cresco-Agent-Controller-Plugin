@@ -17,10 +17,8 @@ public class DiscoveryClientIPv6
 		//discoveryTimeout = 1000;
 	}
 	
-	public List<MsgEvent> getDiscoveryMap(int discoveryTimeout)
+	public void getDiscoveryMap(int discoveryTimeout)
 	{
-		List<MsgEvent> disList = null;
-		
 		try
 		{
 			while(PluginEngine.clientDiscoveryActiveIPv6)
@@ -33,17 +31,15 @@ public class DiscoveryClientIPv6
 			String multiCastNetwork = "ff02::1:c";
 			DiscoveryClientWorkerIPv6 dcw = new DiscoveryClientWorkerIPv6(discoveryTimeout,multiCastNetwork);
 			//populate map with possible peers
-			System.out.println("DiscoveryClientIPv6 : local hosts start search..");
-			disList = dcw.discover();
+			System.out.println("DiscoveryClientIPv6 : searching "+ multiCastNetwork +" ..");
+			dcw.discover();
+			//Searching site network [ff05::1:c]
+			multiCastNetwork = "ff05::1:c";
+			dcw = new DiscoveryClientWorkerIPv6(discoveryTimeout,multiCastNetwork);
+			System.out.println("DiscoveryClientIPv6 : searching " + multiCastNetwork +" ..");
+			dcw.discover();
 			
-			if(disList.isEmpty())
-			{
-				System.out.println("DiscoveryClientIPv6 : No local hosts found - searching site..");
-				//Searching site network [ff05::1:c]
-				multiCastNetwork = "ff05::1:c";
-				dcw = new DiscoveryClientWorkerIPv6(discoveryTimeout,multiCastNetwork);
-				disList = dcw.discover();
-			}
+	
 		}
 		catch(Exception ex)
 		{
@@ -51,7 +47,6 @@ public class DiscoveryClientIPv6
 		}
 		PluginEngine.clientDiscoveryActiveIPv6 = false;
 		
-		return disList;
 	}
 	
 	public boolean isReachable(String hostname)

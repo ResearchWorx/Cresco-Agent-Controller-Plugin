@@ -9,9 +9,7 @@ import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketAddress;
 import java.net.SocketException;
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -41,6 +39,60 @@ public String multiCastNetwork;
 	    
 	}
 	
+	public class IPv6Responder implements Runnable {
+
+		DatagramSocket socket = null;
+	    DatagramPacket packet = null;
+	    String hostAddress = null;
+	    Gson gson;
+		
+
+	    public IPv6Responder(DatagramSocket socket, DatagramPacket packet, String hostAddress) {
+	        this.socket = socket;
+	        this.packet = packet;
+	        this.hostAddress = hostAddress;
+	        gson = new Gson();
+	    }
+
+	    public void run() 
+	    {
+	        //byte[] data = makeResponse(); // code not shown
+	    	
+	    	//We have a response
+			  System.out.println(getClass().getName() + ">>> Broadcast response from server: " + packet.getAddress().getHostAddress());
+
+			  //Check if the message is correct
+			  //System.out.println(new String(receivePacket.getData()));
+	  
+			  String json = new String(packet.getData()).trim();
+			  //String response = "region=region0,agent=agent0,recaddr=" + packet.getAddress().getHostAddress();
+		  		try
+		  		{
+		  			MsgEvent me = gson.fromJson(json, MsgEvent.class);
+		  			if(me != null)
+		  			{
+		  				//System.out.println("RESPONCE: " + me.getParamsString());
+  		  			
+		  				 String remoteAddress = packet.getAddress().getHostAddress();
+		        		 if(remoteAddress.contains("%"))
+		        		 {
+		        			 String[] remoteScope = hostAddress.split("%");
+		        			 remoteAddress = remoteScope[0];
+		        		 }
+		        		    me.setParam("dst_ip", remoteAddress);
+		        		    me.setParam("dst_region", me.getParam("src_region"));
+		        		    me.setParam("dst_agent", me.getParam("src_agent"));
+		        		    PluginEngine.incomingCanidateBrokers.offer(me);
+		  			}
+		  		}
+		  		catch(Exception ex)
+		  		{
+		  			System.out.println("DiscoveryClientWorker in loop 0" + ex.toString());
+		  		}
+	    	
+	    }
+	}
+	
 class StopListnerTask extends TimerTask {
 		
 	    public void run() 
@@ -51,12 +103,10 @@ class StopListnerTask extends TimerTask {
 	    }
 	  }
 
-	public List<MsgEvent> discover()
+	public void discover()
 	{
-		List<MsgEvent> discoveryList = null;
 	// Find the server using UDP broadcast
 	try {
-		discoveryList = new ArrayList<MsgEvent>();
 		
 	  // Broadcast the message over all the network interfaces
 	  Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
@@ -118,59 +168,20 @@ class StopListnerTask extends TimerTask {
 	      	    
 	      	  while(!c.isClosed())
 	    	  {
-	      		  
+	      		
 	      		  try
 	    		  {
 	    			  byte[] recvBuf = new byte[15000];
 	    			  DatagramPacket receivePacket = new DatagramPacket(recvBuf, recvBuf.length);
 	    			  c.receive(receivePacket);
 
-	    			  //We have a response
-	    			  System.out.println(getClass().getName() + ">>> Broadcast response from server: " + receivePacket.getAddress().getHostAddress());
-
-	    			  //Check if the message is correct
-	    			  //System.out.println(new String(receivePacket.getData()));
-	    	  
-	    			  String json = new String(receivePacket.getData()).trim();
-	    			  //String response = "region=region0,agent=agent0,recaddr=" + packet.getAddress().getHostAddress();
-	    		  		try
-	    		  		{
-	    		  			MsgEvent me = gson.fromJson(json, MsgEvent.class);
-	    		  			if(me != null)
-	    		  			{
-	    		  				//System.out.println("RESPONCE: " + me.getParamsString());
-		    		  			
-	    		  				 String remoteAddress = receivePacket.getAddress().getHostAddress();
-	    		        		 if(remoteAddress.contains("%"))
-	    		        		 {
-	    		        			 String[] remoteScope = hostAddress.split("%");
-	    		        			 remoteAddress = remoteScope[0];
-	    		        		 }
-	    		        		//System.out.println("Client IP = " + me.getParam("clientip") + " Remote IP= " + receivePacket.getAddress().getHostAddress());
-	    		        		//System.out.println("Client IP = " + remoteAddress  + " Remote IP= " + me.getParam("dst_ip"));
-		    		  				//if(!me.getParam("dst_ip").equals(remoteAddress))
-	    		  				//{
-	    		  					//System.out.println("SAME HOST");
-	    		  					//System.out.println(me.getParamsString() + receivePacket.getAddress().getHostAddress());
-	    		  					//me.setParam("dst_ip", remoteAddress);
-	    		  					//me.setParam("src_ip", remoteAddress);
-	    		        		    me.setParam("dst_ip", remoteAddress);
-	    		        		    me.setParam("dst_region", me.getParam("src_region"));
-	    		        		    me.setParam("dst_agent", me.getParam("src_agent"));
-	    		        		    
-	    		  					discoveryList.add(me);
-	    		  				//}
-	    		  			}
-	    		  		}
-	    		  		catch(Exception ex)
-	    		  		{
-	    		  			System.out.println("DiscoveryClientWorker in loop 0" + ex.toString());
-	    		  		}
+	    			  new Thread(new IPv6Responder(c,receivePacket,hostAddress)).start();
+	  	              
 	    		  	}
 	    		  	catch(SocketException ex)
 	    		  	{
 	    		  		//eat message.. this should happen
-	    		  		//System.out.println("should eat exception");
+	    		  		System.out.println(ex.getMessage());
 	    		  	}
 	    		    catch(Exception ex)
 	    		  	{
@@ -185,7 +196,7 @@ class StopListnerTask extends TimerTask {
 	          catch (IOException ie)
 	          {
 	        	  //eat exception
-	        	  //System.out.println("DiscoveryClientWorkerIPv6 : getDiscoveryMap IO Error : " + ie.toString());
+	        	  System.out.println("DiscoveryClientWorkerIPv6 : getDiscoveryMap IO Error : " + ie.getMessage());
 	          }
 	      	  catch (Exception e) 
 	      	  {
@@ -198,9 +209,7 @@ class StopListnerTask extends TimerTask {
 	    
 	    	    
 	    }
-      
-
-	  //Wait for a response
+      	  //Wait for a response
 	  
 	  //c.close();
 	  //System.out.println("CODY : Dicsicer Client Worker Engned!");
@@ -210,6 +219,6 @@ class StopListnerTask extends TimerTask {
 	{
 	  System.out.println("while not closed: " + ex.toString());
 	}
-	return discoveryList;
+	
 }
 }

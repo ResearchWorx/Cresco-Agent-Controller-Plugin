@@ -226,10 +226,11 @@ public class PluginEngine {
         
         try{
         	int processCount = 0;
-        	
+        	dcv6.getDiscoveryMap(2000);
+        	/*
         	System.out.println("Broker Search IPv6:");
     		processCount = processPeerMap(dcv6.getDiscoveryMap(2000));
-    		
+    		*/
     		
     		System.out.println("Broker Search IPv4:");
     		processCount = processPeerMap(dc.getDiscoveryMap(2000));
