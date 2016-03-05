@@ -222,7 +222,14 @@ public class DiscoveryEngine implements Runnable
 	  	 		    	  DatagramSocket sendSocket = new DatagramSocket();
 	  	 		    	  sendSocket.send(sendPacket);
 	  	 		    	System.out.println(getClass().getName() + " sending to address: " + returnAddr + " port " + returnPort);
+	  	 		    	try
+		  	 		      {
 	  	 		    	  sendSocket.close();
+		  	 		      }
+	  	 		    	catch(Exception ex)
+		  	 		      {
+	  	 		    		System.out.println(getClass().getName() + " fail to close discovery socket : " + ex.getMessage());
+		  	 		      }
 	  	 		      }
 	  	 		      catch(Exception ex)
 	  	 		      {
