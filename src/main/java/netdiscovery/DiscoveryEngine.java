@@ -236,6 +236,13 @@ public class DiscoveryEngine implements Runnable
 	  	 		    	catch(Exception ex)
 		  	 		      {
 	  	 		    		System.out.println(getClass().getName() + " fail to send discovery socket : " + ex.getMessage());
+	  	 		    		System.out.println(getClass().getName() + " failed rec from interface: " + socket.getInetAddress().getHostAddress());
+	  	 		    		System.out.println(getClass().getName() + " failed rec from local interface: " + socket.getLocalAddress().getHostAddress());
+	  	 		    		
+	  	 		    		System.out.println(getClass().getName() + " failed sending from interface: " + sendSocket.getInetAddress().getHostAddress());
+	  	 		    		System.out.println(getClass().getName() + " failed sending from local interface: " + sendSocket.getLocalAddress().getHostAddress());
+	  	 		    		
+		  		  		    System.out.println(getClass().getName() + " failed sending to address: " + returnAddr + ":" + returnPort);
 		  	 		      }
 	  	 		    	
 	  	 		    	  try
@@ -250,8 +257,7 @@ public class DiscoveryEngine implements Runnable
 	  	 		      catch(Exception ex)
 	  	 		      {
 	  		  			System.out.println(getClass().getName() + " fail to create discovery response : " + ex.getMessage());
-	  		  			System.out.println(getClass().getName() + " failed sending from interface: " + sendSocket.getInetAddress().getHostAddress());
-	  		  		    System.out.println(getClass().getName() + " failed sending to address: " + returnAddr + ":" + returnPort);
+	  		  			
 	  	 		      }
 		 		     //System.out.println(getClass().getName() + "4 " + Thread.currentThread().getId());
 			  			
