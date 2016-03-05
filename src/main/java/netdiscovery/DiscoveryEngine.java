@@ -201,6 +201,7 @@ public class DiscoveryEngine implements Runnable
 	 		        
 	 		        MsgEvent rme = null;
 	 		       DatagramPacket sendPacket = null;
+	 		       InetAddress returnAddr = null;
 		  		try
 		  		{
 		  		    //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
@@ -240,11 +241,11 @@ public class DiscoveryEngine implements Runnable
 			  			
 	 		          String json = gson.toJson(me);
 					  byte[] sendData = json.getBytes();
-		 		      InetAddress returnAddr = InetAddress.getByName(me.getParam("dst_ip"));
+		 		      returnAddr = InetAddress.getByName(me.getParam("dst_ip"));
 		 		      int returnPort = Integer.parseInt(me.getParam("dst_port"));
 	  	 		      //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
 		 		      sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
-		 		      socket.send(sendPacket);
+		 		      //socket.send(sendPacket);
 		 		      /*
 	  	 		   else {
 	  	                // we're connected
@@ -283,7 +284,7 @@ public class DiscoveryEngine implements Runnable
 	  	 		      */
 	  	 		      
 	 		        //}  
-	 		        
+		  			sendDiscovery(sendPacket);
 		  		}
 		  		catch(Exception ex)
 		  		{
@@ -298,6 +299,16 @@ public class DiscoveryEngine implements Runnable
 		  			}
 		  			*/
 		  			ex.printStackTrace(System.out);
+		  			System.out.println(getClass().getName() + "socket: " + socket.isBound());
+		  			SocketAddress sa = socket.getRemoteSocketAddress();
+		  			InetSocketAddress inetAddr = (InetSocketAddress)sa;
+		  			SocketAddress sa2 = socket.getLocalSocketAddress();
+		  			InetSocketAddress inetAddr2 = (InetSocketAddress)sa2;
+		  			
+		  			System.out.println(getClass().getName() + "remote address packet: " + returnAddr.getHostAddress());
+		  			System.out.println(getClass().getName() + "remote address socket: " + inetAddr.getAddress().getHostAddress());
+		  			System.out.println(getClass().getName() + "local address: " + inetAddr2.getAddress().getHostAddress());
+		  			
 		  			//ex.getStackTrace()
 			  		
 		  		}
