@@ -199,6 +199,7 @@ public class DiscoveryEngine implements Runnable
 	 		          }
 	 		         //System.out.println(getClass().getName() + "1 " + Thread.currentThread().getId());
 			  			
+	 		          
 	 		          MsgEvent me = new MsgEvent(MsgEventType.DISCOVER,PluginEngine.region,PluginEngine.agent,PluginEngine.plugin,"Broadcast discovery response.");
 	 		          me.setParam("dst_region",rme.getParam("src_region"));
 	 		          me.setParam("dst_agent",rme.getParam("src_agent"));
@@ -236,8 +237,9 @@ public class DiscoveryEngine implements Runnable
 		  	 		      }
 	  	 		    	try
 		  	 		      {
-	  	 		    		//System.out.println("sendSocket p" + sendSocket.getLocalAddress());
-  	 		    			//System.out.println("socket p" + sendSocket.getRemoteSocketAddress());
+	  	 		    		System.out.println("sendSocket p" + sendSocket.getInetAddress());
+	  	 		    		
+	  	 		    		//System.out.println("socket p" + sendSocket.getRemoteSocketAddress());
 	  	 		    		
 	  	 		    		sendSocket.send(sendPacket);
 	  	 		    	  }
@@ -246,6 +248,7 @@ public class DiscoveryEngine implements Runnable
 	  	 		    		System.out.println(getClass().getName() + " fail to send discovery socket : " + ex.getMessage());
 	  	 		    		System.out.println(getClass().getName() + " failed sending to address: " + returnAddr + " port " + returnPort);
 	  	 		    		System.out.println(getClass().getName() + " isconnected: " + sendSocket.isConnected());
+	  	 		    		System.out.println(getClass().getName() + " " + me.getParamsString());
 	  	 		    		
 	  	 		    
 		  	 		      }
