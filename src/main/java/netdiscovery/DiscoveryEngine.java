@@ -243,16 +243,8 @@ public class DiscoveryEngine implements Runnable
 		  	 		      {
 	  	 		    		System.out.println(getClass().getName() + " fail to send discovery socket : " + ex.getMessage());
 	  	 		    		System.out.println(getClass().getName() + " failed sending to address: " + returnAddr + " port " + returnPort);
-	  	 		    		System.out.println(getClass().getName() + " isconnected: " + sendSocket.isConnected();
-	  	 		    		if(sendSocket != null)
-	  	 		    		{
-	  	 		    			//System.out.println("sendSocket a" + sendSocket.getRemoteSocketAddress() sendSocket.getLocalAddress());
-	  	 		    			//System.out.println("socket a" + socket.getLocalAddress());		
-	  	 		    		}
-	  	 		    		else
-	  	 		    		{
-	  	 		    			System.out.println("Socket null");
-	  	 		    		}
+	  	 		    		System.out.println(getClass().getName() + " isconnected: " + sendSocket.isConnected());
+	  	 		    		
 	  	 		    
 		  	 		      }
 	  	 		    	
