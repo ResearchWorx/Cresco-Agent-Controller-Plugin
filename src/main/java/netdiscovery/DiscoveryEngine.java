@@ -202,6 +202,7 @@ public class DiscoveryEngine implements Runnable
 	 		        MsgEvent rme = null;
 	 		       DatagramPacket sendPacket = null;
 	 		       InetAddress returnAddr = null;
+	 		       String returnAddS = null;
 		  		try
 		  		{
 		  		    //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
@@ -242,6 +243,7 @@ public class DiscoveryEngine implements Runnable
 	 		          String json = gson.toJson(me);
 					  byte[] sendData = json.getBytes();
 		 		      returnAddr = InetAddress.getByName(me.getParam("dst_ip"));
+		 		      returnAddS = me.getParam("dst_ip");
 		 		      int returnPort = Integer.parseInt(me.getParam("dst_port"));
 	  	 		      //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
 		 		      sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
@@ -288,18 +290,22 @@ public class DiscoveryEngine implements Runnable
 		  			InetSocketAddress inetAddr = (InetSocketAddress)sa;
 		  			SocketAddress sa2 = socket.getLocalSocketAddress();
 		  			InetSocketAddress inetAddr2 = (InetSocketAddress)sa2;
-		  			
+		  			//returnAddS
 		  			if(returnAddr != null)
 		  			{
-		  				System.out.println(getClass().getName() + "remote address packet: " + returnAddr.getHostAddress());
+		  				System.out.println(getClass().getName() + " remote address packet: " + returnAddr.getHostAddress());
+		  			}
+		  			if(returnAddS != null)
+		  			{
+		  				System.out.println(getClass().getName() + " remote address packet string : " + returnAddS);
 		  			}
 		  			if( inetAddr != null)
 		  			{
-		  				System.out.println(getClass().getName() + "remote address socket: " + inetAddr.getAddress().getHostAddress());
+		  				System.out.println(getClass().getName() + " remote address socket: " + inetAddr.getAddress().getHostAddress());
 		  			}
 		  			if(inetAddr2 != null)
 		  			{
-		  				System.out.println(getClass().getName() + "local address: " + inetAddr2.getAddress().getHostAddress());
+		  				System.out.println(getClass().getName() + " local address: " + inetAddr2.getAddress().getHostAddress());
 		  			}
 		  			sendDiscovery(sendPacket);
 		  		}
