@@ -235,9 +235,9 @@ public class PluginEngine {
 					System.out.println("Found " + rAgents.size() + " agents");
 					for(String str : rAgents)
 					{
-						System.out.print(str + ", ");
+						System.out.println(str);
 					}
-					System.out.print(" ");
+					
 				}
 			}
 			else
@@ -254,10 +254,10 @@ public class PluginEngine {
 						System.out.println("Sending message to " + rAgents.size() + " agents");
 						for(String str : rAgents)
 						{
-							System.out.print(str + ", ");
+							System.out.println(str);
 							sendMessage(MsgEventType.INFO, str, "Test Message!");
 						}
-						System.out.print(" ");
+						
 					}
 				}
 				else
