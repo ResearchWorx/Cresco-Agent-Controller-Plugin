@@ -262,6 +262,9 @@ public class DiscoveryEngine implements Runnable
 		 		      
 		 		      DatagramSocket sendSocket = new DatagramSocket(null);
 		 		     Inet6Address address = getInet6AddressByName(returnAddr.getHostAddress());
+		 		     System.out.println("returnAddr: " + returnAddr.getHostAddress());
+		 		    System.out.println("returnAddr2: " + address.getHostAddress());
+		 		     
 		 		     InetSocketAddress nsa = new InetSocketAddress(address,0);
 		 		      sendSocket.bind(nsa);
 		 		      //SocketAddress sa = new InetSocketAddress(new Inet6Address(),0);
