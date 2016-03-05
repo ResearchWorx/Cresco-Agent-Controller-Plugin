@@ -224,7 +224,9 @@ public class DiscoveryEngine implements Runnable
 	  	 		    	try
 		  	 		      {
 	  	 		    		sendSocket = new DatagramSocket();
-	  	 		    		SocketAddress sa = sendSocket.getRemoteSocketAddress();
+	  	 		    		//SocketAddress sa = sendSocket.getRemoteSocketAddress();
+	  	 		    		SocketAddress sa = new InetSocketAddress(returnAddr,returnPort);
+	  			        	 
 	  	 		    		sendSocket.connect(sa);
 	  	 		    		
 	  	 		    	  }
