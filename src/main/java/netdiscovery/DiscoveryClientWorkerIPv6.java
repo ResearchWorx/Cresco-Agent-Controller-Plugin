@@ -97,7 +97,7 @@ class StopListnerTask extends TimerTask {
 		
 	    public void run() 
 	    {
-	    	//System.out.println("CODY: Closing Shop!");
+	    	//user timer to close socket
 	    	c.close();
 	    	timer.cancel();
 	    }
@@ -195,8 +195,8 @@ class StopListnerTask extends TimerTask {
 	      	  }
 	          catch (IOException ie)
 	          {
-	        	  //eat exception
-	        	  System.out.println("DiscoveryClientWorkerIPv6 : getDiscoveryMap IO Error : " + ie.getMessage());
+	        	  //eat exception we are closing port
+	        	  //System.out.println("DiscoveryClientWorkerIPv6 : getDiscoveryMap IO Error : " + ie.getMessage());
 	          }
 	      	  catch (Exception e) 
 	      	  {
