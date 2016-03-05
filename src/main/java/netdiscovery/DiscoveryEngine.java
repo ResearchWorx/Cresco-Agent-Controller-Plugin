@@ -244,8 +244,21 @@ public class DiscoveryEngine implements Runnable
 		 		      int returnPort = Integer.parseInt(me.getParam("dst_port"));
 	  	 		      //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
 		 		      sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
-	  	 		      socket.send(sendPacket);
-		 		      
+		 		      socket.send(sendPacket);
+		 		      /*
+	  	 		   else {
+	  	                // we're connected
+	  	                packetAddress = p.getAddress();
+	  	                if (packetAddress == null) {
+	  	                    p.setAddress(connectedAddress);
+	  	                    p.setPort(connectedPort);
+	  	                } else if ((!packetAddress.equals(connectedAddress)) ||
+	  	                           p.getPort() != connectedPort) {
+	  	                    throw new IllegalArgumentException("connected address " +
+	  	                                                       "and packet address" +
+	  	                                                       " differ");
+	  	                }
+	  	 		      */
 	 		        }
 	  	 		      /*
 	  	 		      boolean isSent = false;
@@ -274,6 +287,7 @@ public class DiscoveryEngine implements Runnable
 		  		}
 		  		catch(Exception ex)
 		  		{
+		  			/*
 		  			System.out.println(getClass().getName() + " Discovery Respond Failed 0: " + ex.getMessage());
 		  			System.out.println(getClass().getName() + " Discovery Respond Failed 1: " + ex.getLocalizedMessage() );
 		  			for(StackTraceElement se : ex.getStackTrace())
@@ -282,6 +296,8 @@ public class DiscoveryEngine implements Runnable
 		  				System.out.println(getClass().getName() + "Class : " + se.getClassName());
 		  				System.out.println(getClass().getName() + "Line : " + se.getLineNumber());
 		  			}
+		  			*/
+		  			ex.printStackTrace(System.out);
 		  			//ex.getStackTrace()
 			  		
 		  		}
