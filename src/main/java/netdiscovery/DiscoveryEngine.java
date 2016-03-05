@@ -221,7 +221,22 @@ public class DiscoveryEngine implements Runnable
 	  	 		      {
 	  	 		    	  //netdiscovery.DiscoveryEngine$DiscoveryResponder fail to send discovery : Invalid argument
 	  	 		    	  sendSocket = new DatagramSocket();
-	  	 		    	  sendSocket.send(sendPacket);
+	  	 		    	try
+		  	 		      {
+	  	 		    		sendSocket = new DatagramSocket();
+	  	 		    	  }
+	  	 		    	catch(Exception ex)
+		  	 		      {
+	  	 		    		System.out.println(getClass().getName() + " fail to create discovery socket : " + ex.getMessage());
+		  	 		      }
+	  	 		    	try
+		  	 		      {
+	  	 		    		sendSocket.send(sendPacket);
+	  	 		    	  }
+	  	 		    	catch(Exception ex)
+		  	 		      {
+	  	 		    		System.out.println(getClass().getName() + " fail to send discovery socket : " + ex.getMessage());
+		  	 		      }
 	  	 		    	
 	  	 		    	  try
 		  	 		      {
@@ -234,7 +249,7 @@ public class DiscoveryEngine implements Runnable
 	  	 		      }
 	  	 		      catch(Exception ex)
 	  	 		      {
-	  		  			System.out.println(getClass().getName() + " fail to send discovery : " + ex.getMessage());
+	  		  			System.out.println(getClass().getName() + " fail to create discovery response : " + ex.getMessage());
 	  		  			System.out.println(getClass().getName() + " failed sending from interface: " + sendSocket.getInetAddress().getHostAddress());
 	  		  		    System.out.println(getClass().getName() + " failed sending to address: " + returnAddr + ":" + returnPort);
 	  	 		      }
