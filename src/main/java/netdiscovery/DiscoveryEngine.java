@@ -1,5 +1,6 @@
 package netdiscovery;
 
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.Inet6Address;
@@ -8,6 +9,7 @@ import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.net.SocketAddress;
+import java.net.SocketException;
 import java.util.Enumeration;
 
 import netdiscovery.DiscoveryClientWorkerIPv6.IPv6Responder;
@@ -148,14 +150,14 @@ public class DiscoveryEngine implements Runnable
 		    }
 	  }
 
-	  private boolean sendDiscovery(DatagramPacket sendPacket)
+	  private boolean sendDiscovery(DatagramPacket sendPacket) throws IOException
 	  {
 		  boolean isSent = false;
 
 		     //System.out.println(getClass().getName() + "3 " + Thread.currentThread().getId());
 		      DatagramSocket sendSocket = null;
-		      try
-		      {
+		      //try
+		      //{
 		    	  sendSocket = new DatagramSocket();
 		    	  
 		    	  //SocketAddress sa = new InetSocketAddress(returnAddr,returnPort);
@@ -163,12 +165,12 @@ public class DiscoveryEngine implements Runnable
 		      	  sendSocket.send(sendPacket);
 		      	  sendSocket.close();
 		      	  isSent = true;
-		      }
-		   	  catch(Exception ex)
-		      {
+		      //}
+		   	  //catch(Exception ex)
+		      //{
 		   		  //eat error
 	  			//System.out.println(getClass().getName() + " DiscoveryEngine sendDiscovery Error : " + ex.getMessage());
-	  		  }
+	  		  //}
 		    
 		  return isSent;
 	  }
@@ -198,6 +200,7 @@ public class DiscoveryEngine implements Runnable
 	 		        String message = new String(packet.getData()).trim();
 	 		        
 	 		        MsgEvent rme = null;
+	 		       DatagramPacket sendPacket = null;
 		  		try
 		  		{
 		  		    //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
@@ -239,9 +242,12 @@ public class DiscoveryEngine implements Runnable
 					  byte[] sendData = json.getBytes();
 		 		      InetAddress returnAddr = InetAddress.getByName(me.getParam("dst_ip"));
 		 		      int returnPort = Integer.parseInt(me.getParam("dst_port"));
-	  	 		      DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
-	  	 		      socket.send(sendPacket);
-	  	 		      /*
+	  	 		      //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
+		 		      sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
+	  	 		      //socket.send(sendPacket);
+		 		      
+	 		        }
+	  	 		      
 	  	 		      boolean isSent = false;
 	  	 		      int failCount = 1;
 	  	 		      while(!isSent)
@@ -255,20 +261,23 @@ public class DiscoveryEngine implements Runnable
 	  	 		    		if(failCount == 5)
 	  	 		    		{
 	  	 		    			isSent = true;
-	  	 		    			System.out.println("Giving up on responding to host " + returnAddr.getHostAddress());
+	  	 		    			//System.out.println("Giving up on responding to host " + returnAddr.getHostAddress());
 	  	 		    		}
 	  	 		    		failCount++;
 	  	 		    	}
 	  	 		    	Thread.sleep(1000);
 	  	 		      }
-	  	 		      */
 	  	 		      
-	 		        }  
+	  	 		      
+	 		        //}  
 	 		        
 		  		}
 		  		catch(Exception ex)
 		  		{
-		  			System.out.println(getClass().getName() + " Discovery Respond Failed : " + ex.getMessage());
+		  			System.out.println(getClass().getName() + " Discovery Respond Failed 0: " + ex.getMessage());
+		  			System.out.println(getClass().getName() + " Discovery Respond Failed 1: " + ex.getLocalizedMessage() );
+		  			System.out.println(getClass().getName() + " Discovery Respond Failed 2: " + ex.getStackTrace().toString());
+			  		
 		  		}
 	 		        
 	 		      
