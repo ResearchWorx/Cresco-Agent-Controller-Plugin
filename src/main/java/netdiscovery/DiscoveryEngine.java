@@ -224,6 +224,8 @@ public class DiscoveryEngine implements Runnable
 	  	 		    	try
 		  	 		      {
 	  	 		    		sendSocket = new DatagramSocket();
+	  	 		    		SocketAddress sa = sendSocket.getRemoteSocketAddress();
+	  	 		    		sendSocket.connect(sa);
 	  	 		    		
 	  	 		    	  }
 	  	 		    	catch(Exception ex)
@@ -232,18 +234,20 @@ public class DiscoveryEngine implements Runnable
 		  	 		      }
 	  	 		    	try
 		  	 		      {
-	  	 		    		System.out.println("sendSocket p" + sendSocket.getLocalAddress());
-  	 		    			System.out.println("socket p" + socket.getLocalAddress());
+	  	 		    		//System.out.println("sendSocket p" + sendSocket.getLocalAddress());
+  	 		    			//System.out.println("socket p" + sendSocket.getRemoteSocketAddress());
+	  	 		    		
 	  	 		    		sendSocket.send(sendPacket);
 	  	 		    	  }
 	  	 		    	catch(Exception ex)
 		  	 		      {
 	  	 		    		System.out.println(getClass().getName() + " fail to send discovery socket : " + ex.getMessage());
 	  	 		    		System.out.println(getClass().getName() + " failed sending to address: " + returnAddr + " port " + returnPort);
+	  	 		    		System.out.println(getClass().getName() + " isconnected: " + sendSocket.isConnected();
 	  	 		    		if(sendSocket != null)
 	  	 		    		{
-	  	 		    			System.out.println("sendSocket a" + sendSocket.getLocalAddress());
-	  	 		    			System.out.println("socket a" + socket.getLocalAddress());		
+	  	 		    			//System.out.println("sendSocket a" + sendSocket.getRemoteSocketAddress() sendSocket.getLocalAddress());
+	  	 		    			//System.out.println("socket a" + socket.getLocalAddress());		
 	  	 		    		}
 	  	 		    		else
 	  	 		    		{
