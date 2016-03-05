@@ -223,14 +223,47 @@ public class PluginEngine {
 			System.out.print("Name of Agent to message: ");
 			Scanner scanner = new Scanner(System.in);
 			String input = scanner.nextLine();
-			System.out.println("*" + input + "*");
 			if(input.length() == 0)
 			{
-				System.out.println("inout null");
+				List<String> rAgents = reachableAgents();
+				if(rAgents.isEmpty())
+				{
+					System.out.println("No agents found...");
+				}
+				else
+				{
+					System.out.println("Found " + rAgents.size() + " agents");
+					for(String str : rAgents)
+					{
+						System.out.print(str + ", ");
+					}
+					System.out.print(" ");
+				}
 			}
 			else
 			{
-				sendMessage(MsgEventType.INFO, input, "Test Message!");
+				if(input.toLowerCase().equals("all"))
+				{
+					List<String> rAgents = reachableAgents();
+					if(rAgents.isEmpty())
+					{
+						System.out.println("No agents found...");
+					}
+					else
+					{
+						System.out.println("Sending message to " + rAgents.size() + " agents");
+						for(String str : rAgents)
+						{
+							System.out.print(str + ", ");
+							sendMessage(MsgEventType.INFO, str, "Test Message!");
+						}
+						System.out.print(" ");
+					}
+				}
+				else
+				{
+					sendMessage(MsgEventType.INFO, input, "Test Message!");
+				}
 			}
 		}
     }
@@ -250,24 +283,6 @@ public class PluginEngine {
 		}
 	}
     
-    public static int processPeerMap(List<MsgEvent> disList)
-    {
-    	int processCount = 0;
-    	if(!disList.isEmpty())
-		{
-    		for(MsgEvent db : disList)
-    		{
-    			//MsgEvent dbr = db.setReturn();
-    			//db.setReturn();
-    			//System.out.println("SENDING TO INCOMING CAN: " + db.getParamsString());
-    			incomingCanidateBrokers.offer(db);
-    			processCount++;
-    		}
-			
-		}
-    	return processCount;
-    	
-    }
     
     public static boolean isLocal(String checkAddress)
     {
@@ -353,6 +368,32 @@ public class PluginEngine {
     	}
     	return isIPv6;
     }
+    
+    public static List<String> reachableAgents()
+    {
+    	List<String> rAgents = null;
+    	try
+    	{
+    		rAgents = new ArrayList<String>();
+    		
+    		ActiveMQDestination[] er = broker.broker.getBroker().getDestinations();
+			  for(ActiveMQDestination des : er)
+			  {
+				  	if(des.isQueue())
+					{
+				  		rAgents.add(des.getPhysicalName());
+					}
+			  }
+    	}
+    	catch(Exception ex)
+    	{
+    		System.out.println("PluginEngine : isReachableAgent");
+    	}
+    	
+    	
+    	return rAgents;
+    }
+    
     
     public static boolean isReachableAgent(String remoteAgentPath)
     {
