@@ -270,11 +270,11 @@ public class DiscoveryEngine implements Runnable
 		 		    
 		 		    if(inetAddr.getAddress() instanceof Inet6Address)
 		 		    {
-		 		    	
+		 		    	System.out.println("IPV6");
 		 		    }
 		 		    else
 		 		    {
-		 		    	System.out.println("NOT IPV6!!!");
+		 		    	System.out.println("IPV4");
 		 		    }
 		 		      sendSocket.bind(nsa);
 		 		      //SocketAddress sa = new InetSocketAddress(new Inet6Address(),0);
