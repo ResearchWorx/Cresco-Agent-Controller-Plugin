@@ -8,16 +8,13 @@ import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Level;
 import netdiscovery.DiscoveryClientIPv4;
-import netdiscovery.DiscoveryResponder;
 import netdiscovery.DiscoveryClientIPv6;
 import netdiscovery.DiscoveryEngine;
 import shared.MsgEvent;
 import shared.MsgEventType;
 import shared.RandomString;
 
-import java.net.Inet4Address;
 import java.net.Inet6Address;
-import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.util.*;
@@ -29,7 +26,6 @@ public class PluginEngine {
 	public static boolean clientDiscoveryActive = false;
 	public static boolean clientDiscoveryActiveIPv6 = false;
 	public static boolean DiscoveryActive = false;
-	public static boolean DiscoveryResponderActive = false;
 	public static boolean ActiveBrokerManagerActive = false;
 	public static boolean ActiveDestManagerActive = false;
 	public static boolean ConsumerThreadActive = false;
@@ -47,7 +43,6 @@ public class PluginEngine {
 	
 	public static ConcurrentHashMap<String,BrokeredAgent> brokeredAgents;
 	
-	public static ConcurrentLinkedQueue<MsgEvent> discoveryResponse;
 	public static ConcurrentLinkedQueue<MsgEvent> incomingCanidateBrokers;
 	public static ConcurrentLinkedQueue<MsgEvent> outgoingMessages;
 	
@@ -90,9 +85,7 @@ public class PluginEngine {
 	            	System.out.println("Shutting down!");
 	            	DiscoveryActive = false;
 					//Thread.sleep(500);
-	            	DiscoveryResponderActive = false;
-					//Thread.sleep(500);
-					ConsumerThreadActive = false;
+	            	ConsumerThreadActive = false;
 					//Thread.sleep(500);
 	            	ActiveDestManagerActive = false;
 					//Thread.sleep(500);
@@ -121,7 +114,6 @@ public class PluginEngine {
     	//peerList = new ArrayList<String>();
     	brokeredAgents = new ConcurrentHashMap<String,BrokeredAgent>(); 
     	
-    	discoveryResponse = new ConcurrentLinkedQueue<MsgEvent>();
     	incomingCanidateBrokers = new ConcurrentLinkedQueue<MsgEvent>();
     	
     	outgoingMessages = new ConcurrentLinkedQueue<MsgEvent>();
@@ -186,20 +178,7 @@ public class PluginEngine {
     		
     	}
         
-    	//Thread pt = new Thread(new ActiveProducer(args[2] + "_" + args[3],"tcp://localhost:32010"));
-    	//Thread pt = new Thread(new ActiveProducer(args[2],"tcp://[::1]:32010"));
-    	//pt.start();
-        
-        
-    	//Start discovery broker
-    	Thread db = new Thread(new DiscoveryResponder());
-    	db.start();
-    	while(!DiscoveryResponderActive)
-        {
-        	Thread.sleep(1000);
-        }
-        System.out.println("DiscoveryBroker Started..");
-		
+    	
         //Start IPv6 network discovery engine
     	Thread dev6 = new Thread(new DiscoveryEngine());
     	dev6.start();
