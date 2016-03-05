@@ -148,6 +148,28 @@ public class DiscoveryEngine implements Runnable
 		    }
 	  }
 
+	  private boolean sendDiscovery(DatagramPacket sendPacket)
+	  {
+		  boolean isSent = false;
+
+		     //System.out.println(getClass().getName() + "3 " + Thread.currentThread().getId());
+		      DatagramSocket sendSocket = null;
+		      try
+		      {
+		    	  sendSocket = new DatagramSocket();
+		    	  //SocketAddress sa = new InetSocketAddress(returnAddr,returnPort);
+		    	  //sendSocket.connect(sa);
+		      	  sendSocket.send(sendPacket);
+		      	  sendSocket.close();
+		      	  isSent = true;
+		      }
+		   	  catch(Exception ex)
+		      {
+	  			System.out.println(getClass().getName() + " DiscoveryEngine sendDiscovery Error : " + ex.getMessage());
+	  		  }
+		    
+		  return isSent;
+	  }
 	  public class DiscoveryResponder implements Runnable {
 
 			DatagramSocket socket = null;
@@ -216,59 +238,26 @@ public class DiscoveryEngine implements Runnable
 		 		      InetAddress returnAddr = InetAddress.getByName(me.getParam("dst_ip"));
 		 		      int returnPort = Integer.parseInt(me.getParam("dst_port"));
 	  	 		      DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
-	  	 		     //System.out.println(getClass().getName() + "3 " + Thread.currentThread().getId());
-	  	 		      DatagramSocket sendSocket = null;
-	  	 		      try
+	  	 		      boolean isSent = false;
+	  	 		      int failCount = 1;
+	  	 		      while(!isSent)
 	  	 		      {
-	  	 		    	  //netdiscovery.DiscoveryEngine$DiscoveryResponder fail to send discovery : Invalid argument
-	  	 		    	  //sendSocket = new DatagramSocket();
-	  	 		    	try
-		  	 		      {
-	  	 		    		sendSocket = new DatagramSocket();
-	  	 		    		//SocketAddress sa = sendSocket.getRemoteSocketAddress();
-	  	 		    		SocketAddress sa = new InetSocketAddress(returnAddr,returnPort);
-	  			        	 
-	  	 		    		sendSocket.connect(sa);
-	  	 		    		
-	  	 		    	  }
-	  	 		    	catch(Exception ex)
-		  	 		      {
-	  	 		    		System.out.println(getClass().getName() + " fail to create discovery socket : " + ex.getMessage());
-		  	 		      }
-	  	 		    	try
-		  	 		      {
-	  	 		    		System.out.println("sendSocket p" + sendSocket.getInetAddress());
-	  	 		    		
-	  	 		    		//System.out.println("socket p" + sendSocket.getRemoteSocketAddress());
-	  	 		    		
-	  	 		    		sendSocket.send(sendPacket);
-	  	 		    	  }
-	  	 		    	catch(Exception ex)
-		  	 		      {
-	  	 		    		System.out.println(getClass().getName() + " fail to send discovery socket : " + ex.getMessage());
-	  	 		    		System.out.println(getClass().getName() + " failed sending to address: " + returnAddr + " port " + returnPort);
-	  	 		    		System.out.println(getClass().getName() + " isconnected: " + sendSocket.isConnected());
-	  	 		    		System.out.println(getClass().getName() + " " + me.getParamsString());
-	  	 		    		
-	  	 		    
-		  	 		      }
-	  	 		    	
-	  	 		    	  try
-		  	 		      {
-	  	 		    	  sendSocket.close();
-		  	 		      }
-	  	 		    	catch(Exception ex)
-		  	 		      {
-	  	 		    		System.out.println(getClass().getName() + " fail to close discovery socket : " + ex.getMessage());
-		  	 		      }
+	  	 		    	if(sendDiscovery(sendPacket)) //try to send message
+	  	 		    	{
+	  	 		    		isSent = true;
+	  	 		    	}
+	  	 		    	else
+	  	 		    	{
+	  	 		    		if(failCount == 5)
+	  	 		    		{
+	  	 		    			isSent = true;
+	  	 		    		}
+	  	 		    		failCount++;
+	  	 		    	}
+	  	 		    	Thread.sleep(1000);
 	  	 		      }
-	  	 		      catch(Exception ex)
-	  	 		      {
-	  		  			System.out.println(getClass().getName() + " fail to create discovery response : " + ex.getMessage());
-	  		  			
-	  	 		      }
-		 		     //System.out.println(getClass().getName() + "4 " + Thread.currentThread().getId());
-			  			
+	  	 		      
+	  	 		      
 	 		        }  
 	 		        
 		  		}
