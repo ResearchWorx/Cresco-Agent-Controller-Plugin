@@ -11,10 +11,7 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -117,7 +114,7 @@ class StopListnerTask extends TimerTask {
   	 		           
 		          DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName(multiCastNetwork), 32005);
 	      	     c.send(sendPacket);
-	      	    //System.out.println(getClass().getName() + ">>> Request packet sent to: " + multiCastNetwork +  ": from : " + interfaceAddress.getAddress().getHostAddress());
+	      	     System.out.println(getClass().getName() + ">>> Request packet sent to: " + multiCastNetwork +  ": from : " + interfaceAddress.getAddress().getHostAddress());
 	      	    
 	      	  while(!c.isClosed())
 	    	  {
@@ -129,7 +126,7 @@ class StopListnerTask extends TimerTask {
 	    			  c.receive(receivePacket);
 
 	    			  //We have a response
-	    			  //System.out.println(getClass().getName() + ">>> Broadcast response from server: " + receivePacket.getAddress().getHostAddress());
+	    			  System.out.println(getClass().getName() + ">>> Broadcast response from server: " + receivePacket.getAddress().getHostAddress());
 
 	    			  //Check if the message is correct
 	    			  //System.out.println(new String(receivePacket.getData()));
