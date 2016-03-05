@@ -266,9 +266,9 @@ public class DiscoveryEngine implements Runnable
 		 		     //System.out.println("returnAddr2: " + address.getHostAddress());
 		 		     
 		 		     InetSocketAddress nsa = new InetSocketAddress(Inet6Address.getLocalHost(),0);
-		 		    InetSocketAddress inetAddr = (InetSocketAddress)nsa;
-		 		    
-		 		    if(inetAddr.getAddress() instanceof Inet6Address)
+		 		     System.out.println("local address " + Inet6Address.getLocalHost().getHostAddress());
+		 		     //InetSocketAddress inetAddr = (InetSocketAddress)nsa;
+		 		    if(nsa.getAddress() instanceof Inet6Address)
 		 		    {
 		 		    	System.out.println("IPV6");
 		 		    }
