@@ -125,6 +125,7 @@ public class DiscoveryEngine implements Runnable
 		  	 		        DatagramPacket packet = new DatagramPacket(recvBuf, recvBuf.length);
 		  	 		        
 		  	 		        socket.receive(packet); //rec broadcast packet, could be IPv6 or IPv4
+		  	 		          
 		  	 		        new Thread(new DiscoveryResponder(socket,packet)).start();
 		  	 		        
 		  	 	    		}
@@ -158,7 +159,7 @@ public class DiscoveryEngine implements Runnable
 	 		        {
 	 		         
 	 		        //Packet received
-	 		        //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
+	 		        System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
 	 		        //System.out.println(getClass().getName() + ">>>Packet received; data: " + new String(packet.getData()));
 
 	 		        //See if the packet holds the right command (message)
