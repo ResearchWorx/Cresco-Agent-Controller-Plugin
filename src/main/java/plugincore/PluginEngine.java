@@ -228,14 +228,14 @@ public class PluginEngine {
 				List<String> rAgents = reachableAgents();
 				if(rAgents.isEmpty())
 				{
-					System.out.println("No agents found...");
+					System.out.println("\tNo agents found...");
 				}
 				else
 				{
-					System.out.println("Found " + rAgents.size() + " agents");
+					System.out.println("\tFound " + rAgents.size() + " agents");
 					for(String str : rAgents)
 					{
-						System.out.println(str);
+						System.out.println("\t" + str);
 					}
 					
 				}
@@ -247,14 +247,14 @@ public class PluginEngine {
 					List<String> rAgents = reachableAgents();
 					if(rAgents.isEmpty())
 					{
-						System.out.println("No agents found...");
+						System.out.println("\tNo agents found...");
 					}
 					else
 					{
-						System.out.println("Sending message to " + rAgents.size() + " agents");
+						System.out.println("\tSending message to " + rAgents.size() + " agents");
 						for(String str : rAgents)
 						{
-							System.out.println(str);
+							System.out.println("\t"+str);
 							sendMessage(MsgEventType.INFO, str, "Test Message!");
 						}
 						
