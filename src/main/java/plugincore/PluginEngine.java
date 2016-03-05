@@ -224,7 +224,7 @@ public class PluginEngine {
 			Scanner scanner = new Scanner(System.in);
 			String input = scanner.nextLine();
 			System.out.println("*" + input + "*");
-			if(input == null)
+			if(input.length() == 0)
 			{
 				System.out.println("inout null");
 			}
