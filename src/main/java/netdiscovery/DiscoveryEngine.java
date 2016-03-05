@@ -125,7 +125,7 @@ public class DiscoveryEngine implements Runnable
 		  	 		        DatagramPacket packet = new DatagramPacket(recvBuf, recvBuf.length);
 		  	 		        
 		  	 		        socket.receive(packet); //rec broadcast packet, could be IPv6 or IPv4
-		  	 		          
+		  	 		        System.out.println("INCOMING PACKET!!!!");
 		  	 		        new Thread(new DiscoveryResponder(socket,packet)).start();
 		  	 		        
 		  	 	    		}
