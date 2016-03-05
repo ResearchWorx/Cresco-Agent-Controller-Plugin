@@ -221,7 +221,7 @@ public class DiscoveryEngine implements Runnable
 	  	 		    	  //netdiscovery.DiscoveryEngine$DiscoveryResponder fail to send discovery : Invalid argument
 	  	 		    	  DatagramSocket sendSocket = new DatagramSocket();
 	  	 		    	  sendSocket.send(sendPacket);
-	  	 		    	System.out.println(getClass().getName() + " sending to address: " + returnAddr + ":" + returnPort);
+	  	 		    	System.out.println(getClass().getName() + " sending to address: " + returnAddr + " port " + returnPort);
 	  	 		    	  sendSocket.close();
 	  	 		      }
 	  	 		      catch(Exception ex)
