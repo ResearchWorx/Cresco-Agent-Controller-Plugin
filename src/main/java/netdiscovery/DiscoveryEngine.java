@@ -167,17 +167,21 @@ public class DiscoveryEngine implements Runnable
 	 		        MsgEvent rme = null;
 		  		try
 		  		{
-		  			//check that the message can be marshaled into a MsgEvent
+		  		    System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
+	 		        //check that the message can be marshaled into a MsgEvent
 		  			rme = gson.fromJson(message, MsgEvent.class);
+		  			System.out.println(getClass().getName() + "0");
 		  			if (rme!=null) 
 	 		        {
-		  	    
+		  			  
 	 		          String remoteAddress = packet.getAddress().getHostAddress();
-	        	  if(remoteAddress.contains("%"))
-	        	  {
-	        			 String[] remoteScope = remoteAddress.split("%");
-	        			 remoteAddress = remoteScope[0];
-	        	  }
+	 		          if(remoteAddress.contains("%"))
+	 		          {
+	 		        	  String[] remoteScope = remoteAddress.split("%");
+	 		        	  remoteAddress = remoteScope[0];
+	 		          }
+	 		         System.out.println(getClass().getName() + "1");
+			  			
 	 		          MsgEvent me = new MsgEvent(MsgEventType.DISCOVER,PluginEngine.region,PluginEngine.agent,PluginEngine.plugin,"Broadcast discovery response.");
 	 		          me.setParam("dst_region",rme.getParam("src_region"));
 	 		          me.setParam("dst_agent",rme.getParam("src_agent"));
@@ -187,12 +191,18 @@ public class DiscoveryEngine implements Runnable
 	 		          me.setParam("dst_port", String.valueOf(packet.getPort()));
 	 		          //PluginEngine.discoveryResponse.offer(me);
 	 		          //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress() +  " Sent to broker. " + PluginEngine.discoveryResponse.size());
+	 		         System.out.println(getClass().getName() + "2");
+			  			
 	 		          String json = gson.toJson(me);
 					  byte[] sendData = json.getBytes();
 		 		      InetAddress returnAddr = InetAddress.getByName(me.getParam("dst_ip"));
 		 		      int returnPort = Integer.parseInt(me.getParam("dst_port"));
 	  	 		      DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
+	  	 		   System.out.println(getClass().getName() + "3");
+		  			
 		 		      socket.send(sendPacket);
+		 		     System.out.println(getClass().getName() + "4");
+			  			
 	 		        }  
 	 		        
 		  		}
