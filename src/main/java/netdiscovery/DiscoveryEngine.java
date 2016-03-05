@@ -276,7 +276,13 @@ public class DiscoveryEngine implements Runnable
 		  		{
 		  			System.out.println(getClass().getName() + " Discovery Respond Failed 0: " + ex.getMessage());
 		  			System.out.println(getClass().getName() + " Discovery Respond Failed 1: " + ex.getLocalizedMessage() );
-		  			System.out.println(getClass().getName() + " Discovery Respond Failed 2: " + ex.getStackTrace().toString());
+		  			for(StackTraceElement se : ex.getStackTrace())
+		  			{
+		  				System.out.println(getClass().getName() + "Method : " + se.getMethodName());
+		  				System.out.println(getClass().getName() + "Class : " + se.getClassName());
+		  				System.out.println(getClass().getName() + "Line : " + se.getLineNumber());
+		  			}
+		  			//ex.getStackTrace()
 			  		
 		  		}
 	 		        
