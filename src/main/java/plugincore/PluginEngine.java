@@ -206,8 +206,8 @@ public class PluginEngine {
         try{
         	System.out.println("Broker Search IPv6:");
     		dcv6.getDiscoveryMap(2000);
-        	System.out.println("Broker Search IPv4:");
-    		dc.getDiscoveryMap(2000);
+        	//System.out.println("Broker Search IPv4:");
+    		//dc.getDiscoveryMap(2000);
     		
     	}
     	catch(Exception e)
