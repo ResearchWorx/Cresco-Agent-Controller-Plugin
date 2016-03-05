@@ -289,10 +289,18 @@ public class DiscoveryEngine implements Runnable
 		  			SocketAddress sa2 = socket.getLocalSocketAddress();
 		  			InetSocketAddress inetAddr2 = (InetSocketAddress)sa2;
 		  			
-		  			System.out.println(getClass().getName() + "remote address packet: " + returnAddr.getHostAddress());
-		  			System.out.println(getClass().getName() + "remote address socket: " + inetAddr.getAddress().getHostAddress());
-		  			System.out.println(getClass().getName() + "local address: " + inetAddr2.getAddress().getHostAddress());
-		  			
+		  			if(returnAddr != null)
+		  			{
+		  				System.out.println(getClass().getName() + "remote address packet: " + returnAddr.getHostAddress());
+		  			}
+		  			if( inetAddr != null)
+		  			{
+		  				System.out.println(getClass().getName() + "remote address socket: " + inetAddr.getAddress().getHostAddress());
+		  			}
+		  			if(inetAddr2 != null)
+		  			{
+		  				System.out.println(getClass().getName() + "local address: " + inetAddr2.getAddress().getHostAddress());
+		  			}
 		  			sendDiscovery(sendPacket);
 		  		}
 		  		catch(Exception ex)
