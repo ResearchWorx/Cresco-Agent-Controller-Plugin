@@ -222,7 +222,16 @@ public class PluginEngine {
 		while (true) {
 			System.out.print("Name of Agent to message: ");
 			Scanner scanner = new Scanner(System.in);
-			sendMessage(MsgEventType.INFO, scanner.nextLine(), "Test Message!");
+			String input = scanner.nextLine();
+			System.out.println("*" + input + "*");
+			if(input == null)
+			{
+				System.out.println("inout null");
+			}
+			else
+			{
+				sendMessage(MsgEventType.INFO, input, "Test Message!");
+			}
 		}
     }
 
