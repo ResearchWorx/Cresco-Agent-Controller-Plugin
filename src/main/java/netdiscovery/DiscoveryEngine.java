@@ -249,8 +249,9 @@ public class DiscoveryEngine implements Runnable
 		 		      //socket.send(sendPacket);
 		 		      
 		 		      DatagramSocket sendSocket = new DatagramSocket(null);
-		 		      sendSocket.bind(socket.getLocalSocketAddress());
-		 		      
+		 		     InetSocketAddress nsa = new InetSocketAddress(0);
+		 		      sendSocket.bind(nsa);
+		 		      //SocketAddress sa = new InetSocketAddress(new Inet6Address(),0);
 			    	  SocketAddress sa = new InetSocketAddress(returnAddr,returnPort);
 			    	  sendSocket.connect(sa);
 			      	  sendSocket.send(sendPacket);
