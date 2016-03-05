@@ -224,8 +224,6 @@ public class DiscoveryEngine implements Runnable
 	  	 		    	try
 		  	 		      {
 	  	 		    		sendSocket = new DatagramSocket();
-	  	 		    		System.out.println("socket is bound : " + sendSocket.isBound());
-	  	 		    		System.out.println("socket is connected : " + sendSocket.isConnected());
 	  	 		    		
 	  	 		    	  }
 	  	 		    	catch(Exception ex)
@@ -234,17 +232,18 @@ public class DiscoveryEngine implements Runnable
 		  	 		      }
 	  	 		    	try
 		  	 		      {
+	  	 		    		System.out.println("sendSocket p" + sendSocket.getLocalAddress());
+  	 		    			System.out.println("socket p" + socket.getLocalAddress());
 	  	 		    		sendSocket.send(sendPacket);
 	  	 		    	  }
 	  	 		    	catch(Exception ex)
 		  	 		      {
 	  	 		    		System.out.println(getClass().getName() + " fail to send discovery socket : " + ex.getMessage());
-	  	 		    		System.out.println(getClass().getName() + " failed sending to address: " + returnAddr + ":" + returnPort);
+	  	 		    		System.out.println(getClass().getName() + " failed sending to address: " + returnAddr + " port " + returnPort);
 	  	 		    		if(sendSocket != null)
 	  	 		    		{
-	  	 		    			System.out.println("socket is bound : " + sendSocket.isBound());
-		  	 		    		System.out.println("socket is connected : " + sendSocket.isConnected());
-	  	 		    			System.out.println("socket " + sendSocket.getLocalAddress());
+	  	 		    			System.out.println("sendSocket a" + sendSocket.getLocalAddress());
+	  	 		    			System.out.println("socket a" + socket.getLocalAddress());		
 	  	 		    		}
 	  	 		    		else
 	  	 		    		{
