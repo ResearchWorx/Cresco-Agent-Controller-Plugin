@@ -31,12 +31,12 @@ public class DiscoveryClientIPv6
 			String multiCastNetwork = "ff02::1:c";
 			DiscoveryClientWorkerIPv6 dcw = new DiscoveryClientWorkerIPv6(discoveryTimeout,multiCastNetwork);
 			//populate map with possible peers
-			System.out.println("DiscoveryClientIPv6 : searching "+ multiCastNetwork +" ..");
+			System.out.println("DiscoveryClientIPv6 : searching "+ multiCastNetwork);
 			dcw.discover();
 			//Searching site network [ff05::1:c]
 			multiCastNetwork = "ff05::1:c";
 			dcw = new DiscoveryClientWorkerIPv6(discoveryTimeout,multiCastNetwork);
-			System.out.println("DiscoveryClientIPv6 : searching " + multiCastNetwork +" ..");
+			System.out.println("DiscoveryClientIPv6 : searching " + multiCastNetwork);
 			dcw.discover();
 			
 	

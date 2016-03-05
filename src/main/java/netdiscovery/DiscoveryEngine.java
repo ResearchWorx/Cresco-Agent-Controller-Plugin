@@ -218,7 +218,9 @@ public class DiscoveryEngine implements Runnable
 	  	 		     //System.out.println(getClass().getName() + "3 " + Thread.currentThread().getId());
 	  	 		      try
 	  	 		      {
-	  	 		    	  socket.send(sendPacket);
+	  	 		    	  DatagramSocket sendSocket = new DatagramSocket();
+	  	 		    	  sendSocket.send(sendPacket);
+	  	 		    	  sendSocket.close();
 	  	 		      }
 	  	 		      catch(Exception ex)
 	  	 		      {
