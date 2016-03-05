@@ -165,7 +165,8 @@ public class DiscoveryEngine implements Runnable
 		      }
 		   	  catch(Exception ex)
 		      {
-	  			System.out.println(getClass().getName() + " DiscoveryEngine sendDiscovery Error : " + ex.getMessage());
+		   		  //eat error
+	  			//System.out.println(getClass().getName() + " DiscoveryEngine sendDiscovery Error : " + ex.getMessage());
 	  		  }
 		    
 		  return isSent;
@@ -251,6 +252,7 @@ public class DiscoveryEngine implements Runnable
 	  	 		    		if(failCount == 5)
 	  	 		    		{
 	  	 		    			isSent = true;
+	  	 		    			System.out.println("Giving up on responding to host " + returnAddr.getHostAddress());
 	  	 		    		}
 	  	 		    		failCount++;
 	  	 		    	}
