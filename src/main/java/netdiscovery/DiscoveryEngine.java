@@ -10,6 +10,7 @@ import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Enumeration;
 
 import netdiscovery.DiscoveryClientWorkerIPv6.IPv6Responder;
@@ -174,6 +175,17 @@ public class DiscoveryEngine implements Runnable
 		    
 		  return isSent;
 	  }
+	  
+	  private Inet6Address getInet6AddressByName(String host) throws UnknownHostException, SecurityException
+	  {
+	      for(InetAddress addr : InetAddress.getAllByName(host))
+	      {
+	          if(addr instanceof Inet6Address)
+	              return (Inet6Address)addr;
+	      }
+	      throw new UnknownHostException("No IPv6 address found for " + host);
+	  }
+	  
 	  public class DiscoveryResponder implements Runnable {
 
 			DatagramSocket socket = null;
@@ -249,7 +261,8 @@ public class DiscoveryEngine implements Runnable
 		 		      //socket.send(sendPacket);
 		 		      
 		 		      DatagramSocket sendSocket = new DatagramSocket(null);
-		 		     InetSocketAddress nsa = new InetSocketAddress(0);
+		 		     Inet6Address address = getInet6AddressByName(returnAddr.getHostAddress());
+		 		     InetSocketAddress nsa = new InetSocketAddress(address,0);
 		 		      sendSocket.bind(nsa);
 		 		      //SocketAddress sa = new InetSocketAddress(new Inet6Address(),0);
 			    	  SocketAddress sa = new InetSocketAddress(returnAddr,returnPort);
