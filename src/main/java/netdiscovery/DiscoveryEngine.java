@@ -220,10 +220,13 @@ public class DiscoveryEngine implements Runnable
 	  	 		      try
 	  	 		      {
 	  	 		    	  //netdiscovery.DiscoveryEngine$DiscoveryResponder fail to send discovery : Invalid argument
-	  	 		    	  sendSocket = new DatagramSocket();
+	  	 		    	  //sendSocket = new DatagramSocket();
 	  	 		    	try
 		  	 		      {
 	  	 		    		sendSocket = new DatagramSocket();
+	  	 		    		System.out.println("socket is bound : " + sendSocket.isBound());
+	  	 		    		System.out.println("socket is connected : " + sendSocket.isConnected());
+	  	 		    		
 	  	 		    	  }
 	  	 		    	catch(Exception ex)
 		  	 		      {
@@ -236,13 +239,18 @@ public class DiscoveryEngine implements Runnable
 	  	 		    	catch(Exception ex)
 		  	 		      {
 	  	 		    		System.out.println(getClass().getName() + " fail to send discovery socket : " + ex.getMessage());
-	  	 		    		System.out.println(getClass().getName() + " failed rec from interface: " + socket.getInetAddress().getHostAddress());
-	  	 		    		System.out.println(getClass().getName() + " failed rec from local interface: " + socket.getLocalAddress().getHostAddress());
-	  	 		    		
-	  	 		    		System.out.println(getClass().getName() + " failed sending from interface: " + sendSocket.getInetAddress().getHostAddress());
-	  	 		    		System.out.println(getClass().getName() + " failed sending from local interface: " + sendSocket.getLocalAddress().getHostAddress());
-	  	 		    		
-		  		  		    System.out.println(getClass().getName() + " failed sending to address: " + returnAddr + ":" + returnPort);
+	  	 		    		System.out.println(getClass().getName() + " failed sending to address: " + returnAddr + ":" + returnPort);
+	  	 		    		if(sendSocket != null)
+	  	 		    		{
+	  	 		    			System.out.println("socket is bound : " + sendSocket.isBound());
+		  	 		    		System.out.println("socket is connected : " + sendSocket.isConnected());
+	  	 		    			System.out.println("socket " + sendSocket.getLocalAddress());
+	  	 		    		}
+	  	 		    		else
+	  	 		    		{
+	  	 		    			System.out.println("Socket null");
+	  	 		    		}
+	  	 		    
 		  	 		      }
 	  	 		    	
 	  	 		    	  try
