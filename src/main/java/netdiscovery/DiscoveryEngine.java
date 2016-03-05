@@ -178,8 +178,10 @@ public class DiscoveryEngine implements Runnable
 		  		{
 		  		    //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
 	 		        //check that the message can be marshaled into a MsgEvent
+		  			System.out.println(getClass().getName() + "0.0 " + Thread.currentThread().getId());
+		  			
 		  			rme = gson.fromJson(message, MsgEvent.class);
-		  			//System.out.println(getClass().getName() + "0");
+		  			System.out.println(getClass().getName() + "0.1 " + Thread.currentThread().getId());
 		  			if (rme!=null) 
 	 		        {
 		  			  
@@ -189,7 +191,7 @@ public class DiscoveryEngine implements Runnable
 	 		        	  String[] remoteScope = remoteAddress.split("%");
 	 		        	  remoteAddress = remoteScope[0];
 	 		          }
-	 		         //System.out.println(getClass().getName() + "1");
+	 		         System.out.println(getClass().getName() + "1 " + Thread.currentThread().getId());
 			  			
 	 		          MsgEvent me = new MsgEvent(MsgEventType.DISCOVER,PluginEngine.region,PluginEngine.agent,PluginEngine.plugin,"Broadcast discovery response.");
 	 		          me.setParam("dst_region",rme.getParam("src_region"));
@@ -200,17 +202,17 @@ public class DiscoveryEngine implements Runnable
 	 		          me.setParam("dst_port", String.valueOf(packet.getPort()));
 	 		          //PluginEngine.discoveryResponse.offer(me);
 	 		          //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress() +  " Sent to broker. " + PluginEngine.discoveryResponse.size());
-	 		         //System.out.println(getClass().getName() + "2");
+	 		         System.out.println(getClass().getName() + "2 " + Thread.currentThread().getId());
 			  			
 	 		          String json = gson.toJson(me);
 					  byte[] sendData = json.getBytes();
 		 		      InetAddress returnAddr = InetAddress.getByName(me.getParam("dst_ip"));
 		 		      int returnPort = Integer.parseInt(me.getParam("dst_port"));
 	  	 		      DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
-	  	 		   //System.out.println(getClass().getName() + "3");
+	  	 		     System.out.println(getClass().getName() + "3 " + Thread.currentThread().getId());
 		  			
 		 		      socket.send(sendPacket);
-		 		     //System.out.println(getClass().getName() + "4");
+		 		     System.out.println(getClass().getName() + "4 " + Thread.currentThread().getId());
 			  			
 	 		        }  
 	 		        
