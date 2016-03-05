@@ -1,13 +1,16 @@
 package netdiscovery;
 
 import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.net.SocketAddress;
 import java.util.Enumeration;
 
+import netdiscovery.DiscoveryClientWorkerIPv6.IPv6Responder;
 import plugincore.PluginEngine;
 
 import com.google.gson.Gson;
@@ -122,55 +125,10 @@ public class DiscoveryEngine implements Runnable
 		  	 		        DatagramPacket packet = new DatagramPacket(recvBuf, recvBuf.length);
 		  	 		        
 		  	 		        socket.receive(packet); //rec broadcast packet, could be IPv6 or IPv4
+		  	 		        new Thread(new DiscoveryResponder(socket,packet)).start();
 		  	 		        
-		  	 		        if(!PluginEngine.isLocal(packet.getAddress().getHostAddress()))
-		  	 		        {
-		  	 		         
-		  	 		        //Packet received
-		  	 		        //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
-		  	 		        //System.out.println(getClass().getName() + ">>>Packet received; data: " + new String(packet.getData()));
-
-		  	 		        //See if the packet holds the right command (message)
-		  	 		        String message = new String(packet.getData()).trim();
-		  	 		        
-		  	 		        MsgEvent rme = null;
-		    		  		try
-		    		  		{
-		    		  			//check that the message can be marshaled into a MsgEvent
-		    		  			rme = gson.fromJson(message, MsgEvent.class);
-		    		  		}
-		    		  		catch(Exception ex)
-		    		  		{
-		    		  			System.out.println(getClass().getName() + " fail to marshal discovery");
-		    		  		}
-		  	 		        if (rme!=null) 
-		  	 		        {
-		    		  	    
-		  	 		          String remoteAddress = packet.getAddress().getHostAddress();
-	    		        	  if(remoteAddress.contains("%"))
-	    		        	  {
-	    		        			 String[] remoteScope = remoteAddress.split("%");
-	    		        			 remoteAddress = remoteScope[0];
-	    		        	  }
-		  	 		          MsgEvent me = new MsgEvent(MsgEventType.DISCOVER,PluginEngine.region,PluginEngine.agent,PluginEngine.plugin,"Broadcast discovery response.");
-		  	 		          me.setParam("dst_region",rme.getParam("src_region"));
-		  	 		          me.setParam("dst_agent",rme.getParam("src_agent"));
-				 		      me.setParam("src_region",PluginEngine.region);
-				 		      me.setParam("src_agent",PluginEngine.agent);
-				 		      me.setParam("dst_ip", remoteAddress);
-		  	 		          me.setParam("dst_port", String.valueOf(packet.getPort()));
-		  	 		          PluginEngine.discoveryResponse.offer(me);
-		  	 		          //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress() +  " Sent to broker. " + PluginEngine.discoveryResponse.size());
-			  	 		      
-		  	 		        }
 		  	 	    		}
-		  	 	    		else
-		  	 	    		{
-		  	 	    			//local address do nothing
-		  	 	    		}
-		  	 		      }
-		  	 	   }
-		    		
+					}	
 		    	}
 		    	catch(Exception ex)
 		    	{
@@ -181,5 +139,73 @@ public class DiscoveryEngine implements Runnable
 		    }
 	  }
 
+	  public class DiscoveryResponder implements Runnable {
+
+			DatagramSocket socket = null;
+		    DatagramPacket packet = null;
+		    Gson gson;
+			
+
+		    public DiscoveryResponder(DatagramSocket socket, DatagramPacket packet) {
+		        this.socket = socket;
+		        this.packet = packet;
+		        gson = new Gson();
+		    }
+
+		    public void run() 
+		    {
+		    	if(!PluginEngine.isLocal(packet.getAddress().getHostAddress()))
+	 		        {
+	 		         
+	 		        //Packet received
+	 		        //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
+	 		        //System.out.println(getClass().getName() + ">>>Packet received; data: " + new String(packet.getData()));
+
+	 		        //See if the packet holds the right command (message)
+	 		        String message = new String(packet.getData()).trim();
+	 		        
+	 		        MsgEvent rme = null;
+		  		try
+		  		{
+		  			//check that the message can be marshaled into a MsgEvent
+		  			rme = gson.fromJson(message, MsgEvent.class);
+		  			if (rme!=null) 
+	 		        {
+		  	    
+	 		          String remoteAddress = packet.getAddress().getHostAddress();
+	        	  if(remoteAddress.contains("%"))
+	        	  {
+	        			 String[] remoteScope = remoteAddress.split("%");
+	        			 remoteAddress = remoteScope[0];
+	        	  }
+	 		          MsgEvent me = new MsgEvent(MsgEventType.DISCOVER,PluginEngine.region,PluginEngine.agent,PluginEngine.plugin,"Broadcast discovery response.");
+	 		          me.setParam("dst_region",rme.getParam("src_region"));
+	 		          me.setParam("dst_agent",rme.getParam("src_agent"));
+	 		          me.setParam("src_region",PluginEngine.region);
+	 		          me.setParam("src_agent",PluginEngine.agent);
+	 		          me.setParam("dst_ip", remoteAddress);
+	 		          me.setParam("dst_port", String.valueOf(packet.getPort()));
+	 		          //PluginEngine.discoveryResponse.offer(me);
+	 		          //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress() +  " Sent to broker. " + PluginEngine.discoveryResponse.size());
+	 		          String json = gson.toJson(me);
+					  byte[] sendData = json.getBytes();
+		 		      InetAddress returnAddr = InetAddress.getByName(me.getParam("dst_ip"));
+		 		      int returnPort = Integer.parseInt(me.getParam("dst_port"));
+	  	 		      DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
+		 		      socket.send(sendPacket);
+	 		        }  
+	 		        
+		  		}
+		  		catch(Exception ex)
+		  		{
+		  			System.out.println(getClass().getName() + " fail to marshal discovery");
+		  		}
+	 		        
+	 		      
+	 	   
+		    	
+	 		        }}
+		}
+		
 	  
 }
