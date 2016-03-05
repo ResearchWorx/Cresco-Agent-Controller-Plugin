@@ -244,10 +244,10 @@ public class DiscoveryEngine implements Runnable
 		 		      int returnPort = Integer.parseInt(me.getParam("dst_port"));
 	  	 		      //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
 		 		      sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
-	  	 		      //socket.send(sendPacket);
+	  	 		      socket.send(sendPacket);
 		 		      
 	 		        }
-	  	 		      
+	  	 		      /*
 	  	 		      boolean isSent = false;
 	  	 		      int failCount = 1;
 	  	 		      while(!isSent)
@@ -267,7 +267,7 @@ public class DiscoveryEngine implements Runnable
 	  	 		    	}
 	  	 		    	Thread.sleep(1000);
 	  	 		      }
-	  	 		      
+	  	 		      */
 	  	 		      
 	 		        //}  
 	 		        
