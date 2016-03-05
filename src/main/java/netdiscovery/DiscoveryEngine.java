@@ -216,13 +216,14 @@ public class DiscoveryEngine implements Runnable
 		 		      int returnPort = Integer.parseInt(me.getParam("dst_port"));
 	  	 		      DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
 	  	 		     //System.out.println(getClass().getName() + "3 " + Thread.currentThread().getId());
+	  	 		      DatagramSocket sendSocket = null;
 	  	 		      try
 	  	 		      {
 	  	 		    	  //netdiscovery.DiscoveryEngine$DiscoveryResponder fail to send discovery : Invalid argument
-	  	 		    	  DatagramSocket sendSocket = new DatagramSocket();
+	  	 		    	  sendSocket = new DatagramSocket();
 	  	 		    	  sendSocket.send(sendPacket);
-	  	 		    	System.out.println(getClass().getName() + " sending to address: " + returnAddr + " port " + returnPort);
-	  	 		    	try
+	  	 		    	
+	  	 		    	  try
 		  	 		      {
 	  	 		    	  sendSocket.close();
 		  	 		      }
@@ -234,6 +235,7 @@ public class DiscoveryEngine implements Runnable
 	  	 		      catch(Exception ex)
 	  	 		      {
 	  		  			System.out.println(getClass().getName() + " fail to send discovery : " + ex.getMessage());
+	  		  			System.out.println(getClass().getName() + " failed sending from interface: " + sendSocket.getInetAddress().getHostAddress());
 	  		  		    System.out.println(getClass().getName() + " failed sending to address: " + returnAddr + ":" + returnPort);
 	  	 		      }
 		 		     //System.out.println(getClass().getName() + "4 " + Thread.currentThread().getId());
