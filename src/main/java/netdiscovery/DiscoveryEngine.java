@@ -90,7 +90,11 @@ public class DiscoveryEngine implements Runnable
 		    		//if (networkInterface.getDisplayName().startsWith("em1") && !networkInterface.getDisplayName().startsWith("veth") && !networkInterface.isLoopback() && networkInterface.isUp() && networkInterface.supportsMulticast() && !networkInterface.isPointToPoint() && !networkInterface.isVirtual())
 		    		//if (networkInterface.getDisplayName().startsWith("docker") && !networkInterface.getDisplayName().startsWith("veth") && !networkInterface.isLoopback() && networkInterface.isUp() && networkInterface.supportsMulticast() && !networkInterface.isPointToPoint() && !networkInterface.isVirtual())
 		    		System.out.println("DiscoveryEngineWorkerIPv6 : Check " + this.networkInterfaceName);
-	    			
+		    		System.out.println("isLoopBack: " +networkInterface.isLoopback());
+		    		System.out.println("isUP: " + networkInterface.isUp());
+		    		System.out.println("supportsMulticast: " + networkInterface.supportsMulticast());
+		    		System.out.println("isPointToPoint: " + networkInterface.isPointToPoint());
+		    		System.out.println("isVirtual: " + networkInterface.isVirtual());
 		    		if (!networkInterface.getDisplayName().startsWith("veth") && !networkInterface.isLoopback() && networkInterface.isUp() && networkInterface.supportsMulticast() && !networkInterface.isPointToPoint() && !networkInterface.isVirtual())
 		    		//if (!networkInterface.getDisplayName().startsWith("veth") && !networkInterface.isLoopback() && networkInterface.isUp() && networkInterface.supportsMulticast())
 					{
