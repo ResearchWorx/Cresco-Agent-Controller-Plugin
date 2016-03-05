@@ -284,6 +284,15 @@ public class DiscoveryEngine implements Runnable
 	  	 		      */
 	  	 		      
 	 		        //}  
+		  			SocketAddress sa = socket.getRemoteSocketAddress();
+		  			InetSocketAddress inetAddr = (InetSocketAddress)sa;
+		  			SocketAddress sa2 = socket.getLocalSocketAddress();
+		  			InetSocketAddress inetAddr2 = (InetSocketAddress)sa2;
+		  			
+		  			System.out.println(getClass().getName() + "remote address packet: " + returnAddr.getHostAddress());
+		  			System.out.println(getClass().getName() + "remote address socket: " + inetAddr.getAddress().getHostAddress());
+		  			System.out.println(getClass().getName() + "local address: " + inetAddr2.getAddress().getHostAddress());
+		  			
 		  			sendDiscovery(sendPacket);
 		  		}
 		  		catch(Exception ex)
@@ -299,15 +308,6 @@ public class DiscoveryEngine implements Runnable
 		  			}
 		  			*/
 		  			ex.printStackTrace(System.out);
-		  			System.out.println(getClass().getName() + "socket: " + socket.isBound());
-		  			SocketAddress sa = socket.getRemoteSocketAddress();
-		  			InetSocketAddress inetAddr = (InetSocketAddress)sa;
-		  			SocketAddress sa2 = socket.getLocalSocketAddress();
-		  			InetSocketAddress inetAddr2 = (InetSocketAddress)sa2;
-		  			
-		  			System.out.println(getClass().getName() + "remote address packet: " + returnAddr.getHostAddress());
-		  			System.out.println(getClass().getName() + "remote address socket: " + inetAddr.getAddress().getHostAddress());
-		  			System.out.println(getClass().getName() + "local address: " + inetAddr2.getAddress().getHostAddress());
 		  			
 		  			//ex.getStackTrace()
 			  		
