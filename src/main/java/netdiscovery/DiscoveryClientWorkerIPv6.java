@@ -181,11 +181,11 @@ class StopListnerTask extends TimerTask {
 	    		  	catch(SocketException ex)
 	    		  	{
 	    		  		//eat message.. this should happen
-	    		  		System.out.println(ex.getMessage());
+	    		  		//System.out.println(ex.getMessage());
 	    		  	}
 	    		    catch(Exception ex)
 	    		  	{
-	    		  		System.out.println("in loop 1" + ex.toString());
+	    		  		System.out.println("DiscoveryClientWorkerIPv6 : discovery" + ex.getMessage());
 	    		  	}
 	    		  
 	    	  	}
