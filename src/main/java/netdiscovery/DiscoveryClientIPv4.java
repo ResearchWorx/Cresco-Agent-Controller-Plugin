@@ -17,10 +17,8 @@ public class DiscoveryClientIPv4
 		//discoveryTimeout = 1000;
 	}
 	
-	public List<MsgEvent> getDiscoveryMap(int discoveryTimeout)
+	public void getDiscoveryMap(int discoveryTimeout)
 	{
-		//Map<String,String> disMap = null;
-		List<MsgEvent> disList = null;
 		try
 		{
 			while(PluginEngine.clientDiscoveryActive)
@@ -30,7 +28,7 @@ public class DiscoveryClientIPv4
 			}
 			PluginEngine.clientDiscoveryActive = true;
 			DiscoveryClientWorkerIPv4 dcw = new DiscoveryClientWorkerIPv4(discoveryTimeout);
-			disList = dcw.discover();
+			dcw.discover();
 		}
 		catch(Exception ex)
 		{
@@ -38,7 +36,6 @@ public class DiscoveryClientIPv4
 		}
 		PluginEngine.clientDiscoveryActive = false;
 		
-		return disList;
 	}
 	
 	public boolean isReachable(String hostname)

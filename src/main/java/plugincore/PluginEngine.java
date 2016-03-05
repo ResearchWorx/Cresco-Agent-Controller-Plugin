@@ -204,24 +204,11 @@ public class PluginEngine {
         dc = new DiscoveryClientIPv4();
         
         try{
-        	int processCount = 0;
-        	dcv6.getDiscoveryMap(2000);
-        	/*
         	System.out.println("Broker Search IPv6:");
-    		processCount = processPeerMap(dcv6.getDiscoveryMap(2000));
-    		*/
+    		dcv6.getDiscoveryMap(2000);
+        	System.out.println("Broker Search IPv4:");
+    		dc.getDiscoveryMap(2000);
     		
-    		System.out.println("Broker Search IPv4:");
-    		processCount = processPeerMap(dc.getDiscoveryMap(2000));
-    		
-    		if(processCount > 0)
-      		{
-      			System.out.println("Neighbor Exists");
-      		}
-    		else
-    		{
-      			System.out.println("Better start something Brah");
-      		}
     	}
     	catch(Exception e)
     	{

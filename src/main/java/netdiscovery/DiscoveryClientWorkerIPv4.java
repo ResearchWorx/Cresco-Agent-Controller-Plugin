@@ -39,6 +39,63 @@ public Timer timer;
 	    timer.schedule(new StopListnerTask(), discoveryTimeout);
 	}
 	
+	public class IPv4Responder implements Runnable {
+
+		DatagramSocket socket = null;
+	    DatagramPacket packet = null;
+	    String hostAddress = null;
+	    Gson gson;
+		
+
+	    public IPv4Responder(DatagramSocket socket, DatagramPacket packet, String hostAddress) {
+	        this.socket = socket;
+	        this.packet = packet;
+	        this.hostAddress = hostAddress;
+	        gson = new Gson();
+	    }
+
+	    public void run() 
+	    {
+	    	
+	    	//We have a response
+			  //System.out.println(getClass().getName() + ">>> Broadcast response from server: " + receivePacket.getAddress().getHostAddress());
+
+			  //Check if the message is correct
+			  //System.out.println(new String(receivePacket.getData()));
+	  
+			  String json = new String(packet.getData()).trim();
+			  //String response = "region=region0,agent=agent0,recaddr=" + packet.getAddress().getHostAddress();
+		  		try
+		  		{
+		  			MsgEvent me = gson.fromJson(json, MsgEvent.class);
+		  			if(me != null)
+		  			{
+		  				 //System.out.println("RESPONCE: " + me.getParamsString());
+  		  			
+		  				 //if(!me.getParam("dst_ip").equals(receivePacket.getAddress().getHostAddress()))
+		  				 //{
+		  					//System.out.println("SAME HOST");
+		  					//System.out.println(me.getParamsString() + receivePacket.getAddress().getHostAddress());
+		  					//me.setParam("serverip", receivePacket.getAddress().getHostAddress());
+		  					me.setParam("dst_ip", packet.getAddress().getHostAddress());
+		  					me.setParam("dst_region", me.getParam("src_region"));
+		        		    me.setParam("dst_agent", me.getParam("src_agent"));
+		        		    PluginEngine.incomingCanidateBrokers.offer(me);
+		  					//discoveryList.add(me);
+		  					//System.out.println(getClass().getName() + ">>> Added server: " + receivePacket.getAddress().getHostAddress() + " to broker list");
+
+		  			}
+		  		}
+		  		catch(Exception ex)
+		  		{
+		  			System.out.println("in loop 0" + ex.toString());
+		  		}
+	    	
+	    	
+	    }
+	}
+	
+	
 class StopListnerTask extends TimerTask {
 		
 	    public void run() 
@@ -49,12 +106,11 @@ class StopListnerTask extends TimerTask {
 	    }
 	  }
 	
-	public List<MsgEvent> discover()
+	public void discover()
 	{
-		List<MsgEvent> discoveryList = null;
-	// Find the server using UDP broadcast
+	
+		// Find the server using UDP broadcast
 	try {
-		discoveryList = new ArrayList<MsgEvent>();
 	  //Open a random port to send the package
 	  c = new DatagramSocket();
 	  c.setBroadcast(true);
@@ -115,41 +171,7 @@ class StopListnerTask extends TimerTask {
 			  byte[] recvBuf = new byte[15000];
 			  DatagramPacket receivePacket = new DatagramPacket(recvBuf, recvBuf.length);
 			  c.receive(receivePacket);
-
-			  //We have a response
-			  //System.out.println(getClass().getName() + ">>> Broadcast response from server: " + receivePacket.getAddress().getHostAddress());
-
-			  //Check if the message is correct
-			  //System.out.println(new String(receivePacket.getData()));
-	  
-			  String json = new String(receivePacket.getData()).trim();
-			  //String response = "region=region0,agent=agent0,recaddr=" + packet.getAddress().getHostAddress();
-		  		try
-		  		{
-		  			MsgEvent me = gson.fromJson(json, MsgEvent.class);
-		  			if(me != null)
-		  			{
-		  				 //System.out.println("RESPONCE: " + me.getParamsString());
-    		  			
-		  				 //if(!me.getParam("dst_ip").equals(receivePacket.getAddress().getHostAddress()))
-		  				 //{
-		  					//System.out.println("SAME HOST");
-		  					//System.out.println(me.getParamsString() + receivePacket.getAddress().getHostAddress());
-		  					//me.setParam("serverip", receivePacket.getAddress().getHostAddress());
-		  					me.setParam("dst_ip", receivePacket.getAddress().getHostAddress());
-		  					me.setParam("dst_region", me.getParam("src_region"));
-		        		    me.setParam("dst_agent", me.getParam("src_agent"));
-		        		    
-		  					discoveryList.add(me);
-		  					//System.out.println(getClass().getName() + ">>> Added server: " + receivePacket.getAddress().getHostAddress() + " to broker list");
-
-		  				//}
-		  			}
-		  		}
-		  		catch(Exception ex)
-		  		{
-		  			System.out.println("in loop 0" + ex.toString());
-		  		}
+			  
 		  	}
 		  	catch(SocketException ex)
 		  	{
@@ -169,6 +191,6 @@ class StopListnerTask extends TimerTask {
 	{
 	  System.out.println("while not closed: " + ex.toString());
 	}
-	return discoveryList;
+	
 }
 }
