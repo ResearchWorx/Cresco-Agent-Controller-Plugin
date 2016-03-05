@@ -61,7 +61,7 @@ return connector;
 		
 		try
 		{
-			if(portAvailable(1099))
+			if(portAvailable(32010))
 			{
 				PolicyEntry entry = new PolicyEntry();
 		        entry.setGcInactiveDestinations(true);
@@ -75,8 +75,8 @@ return connector;
 				broker.setBrokerName(brokerName);
 				broker.setSchedulePeriodForDestinationPurge(2500);
 				broker.setDestinationPolicy(map);
-				
-			    //NetworkConnector connector = bridge
+				broker.setUseJmx(false);
+				//NetworkConnector connector = bridge
 				//connector.
 				// = new NetworkConnector();
 				//TransportConnector connectorIPv4 = new TransportConnector();
@@ -97,6 +97,10 @@ return connector;
 			    {
 			    	Thread.sleep(1000);
 			    }
+			}
+			else
+			{
+				
 			}
 		}
 		catch(Exception ex)
