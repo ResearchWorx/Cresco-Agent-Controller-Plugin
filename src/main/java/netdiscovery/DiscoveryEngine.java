@@ -95,9 +95,9 @@ public class DiscoveryEngine implements Runnable
 		    		System.out.println("supportsMulticast: " + networkInterface.supportsMulticast());
 		    		System.out.println("isPointToPoint: " + networkInterface.isPointToPoint());
 		    		System.out.println("isVirtual: " + networkInterface.isVirtual());
-		    		if (!networkInterface.getDisplayName().startsWith("veth") && !networkInterface.isLoopback() && networkInterface.isUp() && networkInterface.supportsMulticast() && !networkInterface.isPointToPoint() && !networkInterface.isVirtual())
-		    		//if (!networkInterface.getDisplayName().startsWith("veth") && !networkInterface.isLoopback() && networkInterface.isUp() && networkInterface.supportsMulticast())
-					{
+		    		//if (!networkInterface.getDisplayName().startsWith("veth") && !networkInterface.isLoopback() && networkInterface.isUp() && networkInterface.supportsMulticast() && !networkInterface.isPointToPoint() && !networkInterface.isVirtual())
+		    		if (!networkInterface.getDisplayName().startsWith("veth") && !networkInterface.isLoopback() && networkInterface.supportsMulticast() && !networkInterface.isPointToPoint() && !networkInterface.isVirtual())
+				    {
 		    			System.out.println("DiscoveryEngineWorkerIPv6 : Init " + this.networkInterfaceName);
 		    			SocketAddress sa = null;
 		    			if(PluginEngine.isIPv6)
