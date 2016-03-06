@@ -123,7 +123,7 @@ public class PluginEngine {
     	
     	
     	//disable everything related to broker
-    	/*
+    	
     	broker = new ActiveBroker(agentpath);
     	
     	Thread abm = new Thread(new ActiveBrokerManager());
@@ -178,7 +178,7 @@ public class PluginEngine {
     		ap = new ActiveProducer("tcp://localhost:32010");
     		
     	}
-        */
+        
     	
         //Start IPv6 network discovery engine
     	Thread dev6 = new Thread(new DiscoveryEngine());
