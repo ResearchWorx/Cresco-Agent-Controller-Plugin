@@ -137,7 +137,7 @@ public class DiscoveryEngine implements Runnable
 		  	 		        DatagramPacket packet = new DatagramPacket(recvBuf, recvBuf.length);
 		  	 		        
 		  	 		        socket.receive(packet); //rec broadcast packet, could be IPv6 or IPv4
-		  	 		        new Thread(new DiscoveryResponder(socket,packet)).start();
+		  	 		        new Thread(new DiscoveryResponder(socket,packet,networkInterfaceName)).start();
 		  	 		        
 		  	 	    		}
 					}	
@@ -190,12 +190,15 @@ public class DiscoveryEngine implements Runnable
 
 			DatagramSocket socket = null;
 		    DatagramPacket packet = null;
+		    String networkInterfaceName = null;
 		    Gson gson;
 			
 
-		    public DiscoveryResponder(DatagramSocket socket, DatagramPacket packet) {
+		    public DiscoveryResponder(DatagramSocket socket, DatagramPacket packet, String networkInterfaceName) {
 		        this.socket = socket;
 		        this.packet = packet;
+		        this.networkInterfaceName = networkInterfaceName;
+		        
 		        gson = new Gson();
 		    }
 
@@ -322,7 +325,8 @@ public class DiscoveryEngine implements Runnable
 		  			}
 		  			*/
 		  			ex.printStackTrace(System.out);
-		  			
+		  			System.out.println("IncomingInterface : " + networkInterfaceName);
+		  			System.out.println("Remote Address : " + packet.getAddress().getHostAddress());
 		  			//ex.getStackTrace()
 			  		
 		  		}
