@@ -76,6 +76,11 @@ public class PluginEngine {
 	public static ActiveBroker broker;
     public static void main(String[] args) throws Exception 
     {
+    	
+    	if(args.length == 1)
+    	{
+    		Thread.sleep(Integer.parseInt(args[0])*1000);
+    	}
     	//Cleanup on Shutdown
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 	        public void run() {
