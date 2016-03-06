@@ -46,10 +46,9 @@ public class PluginEngine {
 	public static ConcurrentLinkedQueue<MsgEvent> incomingCanidateBrokers;
 	public static ConcurrentLinkedQueue<MsgEvent> outgoingMessages;
 	
-	public static DiscoveryClientIPv4 dc;
+	//public static DiscoveryClientIPv4 dc;
 	public static DiscoveryClientIPv6 dcv6;
 	
-	//public static List<String> peerList;
 	
 	public String getName()
 	{
@@ -57,7 +56,7 @@ public class PluginEngine {
 	}
 	public String getVersion()
 	{
-		return "Name";
+		return "Version";
 				
 	}
 	public void msgIn(MsgEvent command)
@@ -123,6 +122,9 @@ public class PluginEngine {
     	//rootLogger.setLevel(Level.toLevel("none"));
     	rootLogger.setLevel(Level.ERROR);
     	
+    	
+    	//disable everything related to broker
+    	/*
     	broker = new ActiveBroker(agentpath);
     	
     	Thread abm = new Thread(new ActiveBrokerManager());
@@ -177,7 +179,7 @@ public class PluginEngine {
     		ap = new ActiveProducer("tcp://localhost:32010");
     		
     	}
-        
+        */
     	
         //Start IPv6 network discovery engine
     	Thread dev6 = new Thread(new DiscoveryEngine());
@@ -188,7 +190,7 @@ public class PluginEngine {
         }
         System.out.println("IPv6 DiscoveryEngine Started..");
 		
-    	/*
+    	/*//disabled ipv4 discovery
     	//Start IPv4 network discovery engine
     	Thread de = new Thread(new DiscoveryEngine());
     	de.start();
@@ -201,7 +203,7 @@ public class PluginEngine {
 		*/
         
         dcv6 = new DiscoveryClientIPv6();
-        dc = new DiscoveryClientIPv4();
+        //dc = new DiscoveryClientIPv4();
         
         try{
         	System.out.println("Broker Search IPv6:");
