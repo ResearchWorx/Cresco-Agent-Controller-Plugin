@@ -137,7 +137,8 @@ public class DiscoveryEngine implements Runnable
 		  	 		        DatagramPacket packet = new DatagramPacket(recvBuf, recvBuf.length);
 		  	 		        
 		  	 		        socket.receive(packet); //rec broadcast packet, could be IPv6 or IPv4
-		  	 		        new Thread(new DiscoveryResponder(packet)).start();
+		  	 		        sendSucka(socket,packet);
+		  	 		        //new Thread(new DiscoveryResponder(packet)).start();
 		  	 		        
 		  	 	    		}
 					}	
@@ -151,6 +152,91 @@ public class DiscoveryEngine implements Runnable
 		    }
 	  }
 
+	    public void sendSucka(MulticastSocket socket, DatagramPacket packet) 
+	    {
+	    	InetAddress returnAddr = packet.getAddress();
+	    	boolean isGlobal = !returnAddr.isSiteLocalAddress() && !returnAddr.isLinkLocalAddress();
+  			
+ 		    String remoteAddress = returnAddr.getHostAddress();
+	          if(remoteAddress.contains("%"))
+	          {
+	        	  String[] remoteScope = remoteAddress.split("%");
+	        	  remoteAddress = remoteScope[0];
+	          }
+	    	if((!PluginEngine.isLocal(remoteAddress)) && (isGlobal))
+ 		        {
+ 		         
+ 		        //Packet received
+ 		        //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
+ 		        //System.out.println(getClass().getName() + ">>>Packet received; data: " + new String(packet.getData()));
+
+ 		        //See if the packet holds the right command (message)
+ 		        String message = new String(packet.getData()).trim();
+ 		        
+ 		       MsgEvent rme = null;
+ 		       DatagramPacket sendPacket = null;
+ 		      
+	  		try
+	  		{
+	  		    //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
+ 		        //check that the message can be marshaled into a MsgEvent
+	  			//System.out.println(getClass().getName() + "0.0 " + Thread.currentThread().getId());
+	  			try
+		  		{
+	  				rme = gson.fromJson(message, MsgEvent.class);
+		  		}
+	  			catch(Exception ex)
+		  		{
+		  			System.out.println(getClass().getName() + " fail to marshal discovery " + ex.getMessage());
+		  		}
+	  			//System.out.println(getClass().getName() + "0.1 " + Thread.currentThread().getId());
+	  			if (rme!=null) 
+ 		        {
+	  			  
+ 		          
+ 		         //System.out.println(getClass().getName() + "1 " + Thread.currentThread().getId());
+		  			
+ 		          
+ 		          MsgEvent me = new MsgEvent(MsgEventType.DISCOVER,PluginEngine.region,PluginEngine.agent,PluginEngine.plugin,"Broadcast discovery response.");
+ 		          me.setParam("dst_region",rme.getParam("src_region"));
+ 		          me.setParam("dst_agent",rme.getParam("src_agent"));
+ 		          me.setParam("src_region",PluginEngine.region);
+ 		          me.setParam("src_agent",PluginEngine.agent);
+ 		          me.setParam("dst_ip", remoteAddress);
+ 		          me.setParam("dst_port", String.valueOf(packet.getPort()));
+ 		          //PluginEngine.discoveryResponse.offer(me);
+ 		          //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress() +  " Sent to broker. " + PluginEngine.discoveryResponse.size());
+ 		         //System.out.println(getClass().getName() + "2 " + Thread.currentThread().getId());
+		  			
+ 		          String json = gson.toJson(me);
+				  byte[] sendData = json.getBytes();
+	 		      //returnAddr = InetAddress.getByName(me.getParam("dst_ip"));
+	 		      int returnPort = Integer.parseInt(me.getParam("dst_port"));
+  	 		      //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
+	 		      sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
+	 		      socket.send(sendPacket);
+	 		      
+	 		      		//DatagramSocket sendSocket = new DatagramSocket();
+	 		      		//sendSocket.send(sendPacket);
+	 		    		//sendSocket.disconnect();
+	 		    		//sendSocket.close();
+	 		    		
+	 		      }
+	 		     
+	  		}
+	  		catch(Exception ex)
+	  		{
+	  			
+	  			ex.printStackTrace(System.out);
+	  			
+	  		}
+ 		        
+ 		      
+ 	   
+	    	
+ 		        }}
+	
+	    
 	  private boolean sendDiscovery(DatagramPacket sendPacket) throws IOException
 	  {
 		  boolean isSent = false;
@@ -262,26 +348,10 @@ public class DiscoveryEngine implements Runnable
 		 		      //socket.send(sendPacket);
 		 		      
 		 		      		DatagramSocket sendSocket = new DatagramSocket();
-		 		      		synchronized (sendSocket) {
-		 		      			while(PluginEngine.sendingTest)
-		 		      			{
-		 		      				
-		 		      			}
-		 		      			PluginEngine.sendingTest = true;
-		 		      			sendSocket.send(sendPacket);
-		 		    			//sendSocket.disconnect();
-		 		    			sendSocket.close();
-		 		    			int count = 0;
-		 		    			while(sendSocket.isConnected())
-		 		    			{
-		 		    				System.out.println("Connected After Close!! " + count);
-		 		    				count++;
-		 		    				Thread.sleep(500);
-		 		    			}
-		 		    			PluginEngine.sendingTest = false;
-		 		      		}
-			        	 
-		 		    	 
+		 		      		sendSocket.send(sendPacket);
+		 		    		//sendSocket.disconnect();
+		 		    		sendSocket.close();
+		 		    		
 		 		      }
 		 		     
 		  		}
@@ -296,7 +366,8 @@ public class DiscoveryEngine implements Runnable
 	 	   
 		    	
 	 		        }}
-		}
+		
+	  }
 		
 	  
 }

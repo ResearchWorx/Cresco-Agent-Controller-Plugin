@@ -29,7 +29,6 @@ public class PluginEngine {
 	public static boolean ActiveBrokerManagerActive = false;
 	public static boolean ActiveDestManagerActive = false;
 	public static boolean ConsumerThreadActive = false;
-	public static boolean sendingTest = false;
 	public static ActiveProducer ap;
 	
 	public static boolean isIPv6 = false;
