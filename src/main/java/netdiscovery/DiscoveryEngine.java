@@ -160,7 +160,7 @@ public class DiscoveryEngine implements Runnable
 		    }
 	  }
 
-	    public synchronized DatagramPacket sendSucka(DatagramPacket packet) 
+	    private synchronized DatagramPacket sendSucka(DatagramPacket packet) 
 	    {
 	    	synchronized (packet) {
 	    	InetAddress returnAddr = packet.getAddress();

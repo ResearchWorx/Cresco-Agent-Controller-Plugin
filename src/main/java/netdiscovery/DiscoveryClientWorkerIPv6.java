@@ -92,6 +92,7 @@ public String multiCastNetwork;
 		  		}
 	    	
 	    }
+	
 	}
 	
 class StopListnerTask extends TimerTask {
@@ -103,6 +104,48 @@ class StopListnerTask extends TimerTask {
 	    	timer.cancel();
 	    }
 	  }
+
+	private synchronized void processIncoming(DatagramPacket packet)
+	{
+		synchronized (packet)
+		{
+    //byte[] data = makeResponse(); // code not shown
+	
+	//We have a response
+	  System.out.println(getClass().getName() + ">>> Broadcast response from server: " + packet.getAddress().getHostAddress());
+
+	  //Check if the message is correct
+	  //System.out.println(new String(receivePacket.getData()));
+
+	  String json = new String(packet.getData()).trim();
+	  //String response = "region=region0,agent=agent0,recaddr=" + packet.getAddress().getHostAddress();
+  		try
+  		{
+  			MsgEvent me = gson.fromJson(json, MsgEvent.class);
+  			if(me != null)
+  			{
+  				//System.out.println("RESPONCE: " + me.getParamsString());
+	  			
+  				 String remoteAddress = packet.getAddress().getHostAddress();
+        		 if(remoteAddress.contains("%"))
+        		 {
+        			 String[] remoteScope = remoteAddress.split("%");
+        			 remoteAddress = remoteScope[0];
+        		 }
+        		    me.setParam("dst_ip", remoteAddress);
+        		    me.setParam("dst_region", me.getParam("src_region"));
+        		    me.setParam("dst_agent", me.getParam("src_agent"));
+        		    PluginEngine.incomingCanidateBrokers.offer(me);
+  			}
+  		}
+  		catch(Exception ex)
+  		{
+  			System.out.println("DiscoveryClientWorker in loop 0" + ex.toString());
+  		}
+		}
+	
+}
+
 
 	public void discover()
 	{
@@ -187,7 +230,10 @@ class StopListnerTask extends TimerTask {
   	 		         byte[] sendData = sendJson.getBytes();
   	 		           
 		          DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName(multiCastNetwork), 32005);
+		          synchronized (c)
+		          {
 	      	     c.send(sendPacket);
+		          }
 	      	     System.out.println(getClass().getName() + ">>> Request packet sent to: " + multiCastNetwork +  ": from : " + interfaceAddress.getAddress().getHostAddress());
 	      	    
 	      	  while(!c.isClosed())
@@ -197,9 +243,15 @@ class StopListnerTask extends TimerTask {
 	    		  {
 	    			  byte[] recvBuf = new byte[15000];
 	    			  DatagramPacket receivePacket = new DatagramPacket(recvBuf, recvBuf.length);
+	    			  synchronized (c)
+	    			  {
 	    			  c.receive(receivePacket);
-
-	    			  new Thread(new IPv6Responder(c,receivePacket,hostAddress)).start();
+	    			  }
+	    			  synchronized (receivePacket)
+	    			  {
+	    				  processIncoming(receivePacket);
+	    			  }
+	    			  //new Thread(new IPv6Responder(c,receivePacket,hostAddress)).start();
 	  	              
 	    		  	}
 	    		  	catch(SocketException ex)
