@@ -137,6 +137,7 @@ public class DiscoveryEngine implements Runnable
 		  	 		        DatagramPacket packet = new DatagramPacket(recvBuf, recvBuf.length);
 		  	 		        
 		  	 		        socket.receive(packet); //rec broadcast packet, could be IPv6 or IPv4
+		  	 		        
 		  	 		        new Thread(new DiscoveryResponder(socket,packet,networkInterfaceName)).start();
 		  	 		        
 		  	 	    		}
@@ -204,7 +205,16 @@ public class DiscoveryEngine implements Runnable
 
 		    public void run() 
 		    {
-		    	if(!PluginEngine.isLocal(packet.getAddress().getHostAddress()))
+		    	InetAddress returnAddr = packet.getAddress();
+		    	boolean isGlobal = !returnAddr.isSiteLocalAddress() && !returnAddr.isLinkLocalAddress();
+	  			
+	 		    String remoteAddress = returnAddr.getHostAddress();
+		          if(remoteAddress.contains("%"))
+		          {
+		        	  String[] remoteScope = remoteAddress.split("%");
+		        	  remoteAddress = remoteScope[0];
+		          }
+		    	if((!PluginEngine.isLocal(remoteAddress)) && (isGlobal))
 	 		        {
 	 		         
 	 		        //Packet received
@@ -216,7 +226,6 @@ public class DiscoveryEngine implements Runnable
 	 		        
 	 		       MsgEvent rme = null;
 	 		       DatagramPacket sendPacket = null;
-	 		       InetAddress returnAddr = null;
 	 		       
 		  		try
 		  		{
@@ -235,12 +244,7 @@ public class DiscoveryEngine implements Runnable
 		  			if (rme!=null) 
 	 		        {
 		  			  
-	 		          String remoteAddress = packet.getAddress().getHostAddress();
-	 		          if(remoteAddress.contains("%"))
-	 		          {
-	 		        	  String[] remoteScope = remoteAddress.split("%");
-	 		        	  remoteAddress = remoteScope[0];
-	 		          }
+	 		          
 	 		         //System.out.println(getClass().getName() + "1 " + Thread.currentThread().getId());
 			  			
 	 		          
@@ -257,7 +261,7 @@ public class DiscoveryEngine implements Runnable
 			  			
 	 		          String json = gson.toJson(me);
 					  byte[] sendData = json.getBytes();
-		 		      returnAddr = InetAddress.getByName(me.getParam("dst_ip"));
+		 		      //returnAddr = InetAddress.getByName(me.getParam("dst_ip"));
 		 		      int returnPort = Integer.parseInt(me.getParam("dst_port"));
 	  	 		      //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
 		 		      sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
@@ -331,7 +335,6 @@ public class DiscoveryEngine implements Runnable
 		        	{
 		  				isIPv6 = true;
 		        	}
-		  			boolean isGlobal = !returnAddr.isSiteLocalAddress() && !returnAddr.isLinkLocalAddress();
 		  			System.out.println("Remote Address : "  + packet.getAddress().getHostAddress() + " Global: " + isGlobal + " isIPv6: " + isIPv6);
 		  			//Inet6Address addr = new Inet6Address(str);
 		  			
