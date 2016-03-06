@@ -137,7 +137,10 @@ public class DiscoveryEngine implements Runnable
 		  	 		        DatagramPacket packet = new DatagramPacket(recvBuf, recvBuf.length);
 		  	 		     synchronized (socket) {
 		  	 		        socket.receive(packet); //rec broadcast packet, could be IPv6 or IPv4
-		  	 		        socket.send(sendSucka(packet));
+		  	 		     }
+		  	 		     
+		  	 		     synchronized (socket) {
+			  	 		        socket.send(sendSucka(packet));
 		  	 		     }
 		  	 		        //sendSucka(socket,packet);
 		  	 		        //new Thread(new DiscoveryResponder(packet)).start();
