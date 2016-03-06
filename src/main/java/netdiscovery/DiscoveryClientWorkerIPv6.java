@@ -158,10 +158,6 @@ class StopListnerTask extends TimerTask {
 	  while (interfaces.hasMoreElements()) {
 	    NetworkInterface networkInterface = (NetworkInterface) interfaces.nextElement();
 
-	    while(!networkInterface.isUp())
-	    {
-	    	Thread.sleep(1000);
-	    }
 	    
 	    System.out.println("Start Discovery...1" + networkInterface.getDisplayName());
 	    System.out.println("multicast: " + networkInterface.supportsMulticast());
