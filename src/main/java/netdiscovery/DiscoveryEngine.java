@@ -135,9 +135,11 @@ public class DiscoveryEngine implements Runnable
 		  	 		        //Receive a packet
 		  	 		        byte[] recvBuf = new byte[15000];
 		  	 		        DatagramPacket packet = new DatagramPacket(recvBuf, recvBuf.length);
-		  	 		        
+		  	 		     synchronized (socket) {
 		  	 		        socket.receive(packet); //rec broadcast packet, could be IPv6 or IPv4
-		  	 		        sendSucka(socket,packet);
+		  	 		        socket.send(sendSucka(packet));
+		  	 		     }
+		  	 		        //sendSucka(socket,packet);
 		  	 		        //new Thread(new DiscoveryResponder(packet)).start();
 		  	 		        
 		  	 	    		}
@@ -152,8 +154,9 @@ public class DiscoveryEngine implements Runnable
 		    }
 	  }
 
-	    public void sendSucka(MulticastSocket socket, DatagramPacket packet) 
+	    public synchronized DatagramPacket sendSucka(DatagramPacket packet) 
 	    {
+	    	synchronized (packet) {
 	    	InetAddress returnAddr = packet.getAddress();
 	    	boolean isGlobal = !returnAddr.isSiteLocalAddress() && !returnAddr.isLinkLocalAddress();
   			
@@ -174,7 +177,7 @@ public class DiscoveryEngine implements Runnable
  		        String message = new String(packet.getData()).trim();
  		        
  		       MsgEvent rme = null;
- 		       DatagramPacket sendPacket = null;
+ 		       //DatagramPacket sendPacket = null;
  		      
 	  		try
 	  		{
@@ -213,8 +216,12 @@ public class DiscoveryEngine implements Runnable
 	 		      //returnAddr = InetAddress.getByName(me.getParam("dst_ip"));
 	 		      int returnPort = Integer.parseInt(me.getParam("dst_port"));
   	 		      //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
-	 		      sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
-	 		      socket.send(sendPacket);
+	 		      packet.setData(sendData);
+	 		      packet.setLength(sendData.length);
+	 		      packet.setAddress(returnAddr);
+	 		      packet.setPort(returnPort);
+	 		      //sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
+	 		      //socket.send(sendPacket);
 	 		      
 	 		      		//DatagramSocket sendSocket = new DatagramSocket();
 	 		      		//sendSocket.send(sendPacket);
@@ -234,8 +241,11 @@ public class DiscoveryEngine implements Runnable
  		      
  	   
 	    	
- 		        }}
-	
+ 		        }
+	    	return packet;
+		      
+	    	}
+	    }
 	    
 	  private boolean sendDiscovery(DatagramPacket sendPacket) throws IOException
 	  {
