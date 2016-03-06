@@ -272,93 +272,12 @@ public class DiscoveryEngine implements Runnable
 	  	 		      //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
 		 		      sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
 		 		      //socket.send(sendPacket);
-		 		      
-		 		      boolean isSent = false;
-		 		      for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) 
-		 		      {
-		 		    	  InetAddress outAddr = interfaceAddress.getAddress();
-		 		    	  boolean isGlobalLocal = !outAddr.isSiteLocalAddress() && !outAddr.isLinkLocalAddress();
-		 		    	 if((outAddr instanceof Inet6Address) && isGlobalLocal)
-			        	 {
-		 		    		if(!isSent)
-		 		    		{
-		 		    			//DatagramSocket sendSocket = new DatagramSocket();
-		 		    			/*
-		 		    			DatagramSocket sendSocket = new DatagramSocket(null);
-		 		    			SocketAddress sab = new InetSocketAddress(outAddr,0);
-		 		    			sendSocket.bind(sab);
-		 		    			SocketAddress sac = new InetSocketAddress(returnAddr,returnPort);
-		 		    			sendSocket.connect(sac);
-		 		    			sendSocket.send(sendPacket);
-		 		    			sendSocket.close();
-		 		    			isSent = true;
-		 		    			*/
-		 		    			
-		 		    			sendSocket = new DatagramSocket(null);
-		 		    			sab = new InetSocketAddress(outAddr,0);
-		 		    			sendSocket.bind(sab);
-		 		    			sac = new InetSocketAddress(returnAddr,returnPort);
-		 		    			sendSocket.connect(sac);
-		 		    			sendSocket.send(sendPacket);
-		 		    			sendSocket.disconnect();
-		 		    			sendSocket.close();
-		 		    			isSent = true;
-		 		    			int count = 0;
-		 		    			while(sendSocket.isConnected())
-		 		    			{
-		 		    				System.out.println("Connected After Close!! " + count);
-		 		    				count++;
-		 		    				Thread.sleep(500);
-		 		    			}
-		 		    			
-		 		    		}
-				 		     
-			        	 }
-		 		    	 
-		 		      }
-		 		          
-		 		     
-		 		      
-		 		      /*
-	  	 		   else {
-	  	                // we're connected
-	  	                packetAddress = p.getAddress();
-	  	                if (packetAddress == null) {
-	  	                    p.setAddress(connectedAddress);
-	  	                    p.setPort(connectedPort);
-	  	                } else if ((!packetAddress.equals(connectedAddress)) ||
-	  	                           p.getPort() != connectedPort) {
-	  	                    throw new IllegalArgumentException("connected address " +
-	  	                                                       "and packet address" +
-	  	                                                       " differ");
-	  	                }
-	  	 		      */
+		 		     synchronized (socket) 
+		 		     {
+		 		    	 socket.send(sendPacket);
+		 		     }
 	 		        }
-	  	 		      /*
-	  	 		      boolean isSent = false;
-	  	 		      int failCount = 1;
-	  	 		      while(!isSent)
-	  	 		      {
-	  	 		    	if(sendDiscovery(sendPacket)) //try to send message
-	  	 		    	{
-	  	 		    		isSent = true;
-	  	 		    	}
-	  	 		    	else
-	  	 		    	{
-	  	 		    		if(failCount == 5)
-	  	 		    		{
-	  	 		    			isSent = true;
-	  	 		    			//System.out.println("Giving up on responding to host " + returnAddr.getHostAddress());
-	  	 		    		}
-	  	 		    		failCount++;
-	  	 		    	}
-	  	 		    	Thread.sleep(1000);
-	  	 		      }
-	  	 		      */
-	  	 		      
-	 		        //}  
-		  			
-		  			//sendDiscovery(sendPacket);
+		 		      
 		  		}
 		  		catch(Exception ex)
 		  		{
