@@ -135,6 +135,9 @@ public class DiscoveryEngine implements Runnable
 		  	 		        //Receive a packet
 		  	 		        byte[] recvBuf = new byte[15000];
 		  	 		        DatagramPacket packet = new DatagramPacket(recvBuf, recvBuf.length);
+		  	 		        
+		  	 		        PluginEngine.responds++;
+		  	 		        
 		  	 		     synchronized (socket) {
 		  	 		        socket.receive(packet); //rec broadcast packet, could be IPv6 or IPv4
 		  	 		     }

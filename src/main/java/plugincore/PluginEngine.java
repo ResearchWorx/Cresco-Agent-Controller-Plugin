@@ -35,6 +35,8 @@ public class PluginEngine {
 	
 	public static boolean isActive = true;
 	
+	public static int responds = 0;
+	
 	public static String region = "reg";
 	public static String agent = "agent";
 	public static String plugin = "pl";
@@ -123,7 +125,7 @@ public class PluginEngine {
     	
     	
     	//disable everything related to broker
-    	
+    	/*
     	broker = new ActiveBroker(agentpath);
     	
     	Thread abm = new Thread(new ActiveBrokerManager());
@@ -178,17 +180,8 @@ public class PluginEngine {
     		ap = new ActiveProducer("tcp://localhost:32010");
     		
     	}
-        
+        */
     	
-        //Start IPv6 network discovery engine
-    	Thread dev6 = new Thread(new DiscoveryEngine());
-    	dev6.start();
-    	while(!DiscoveryActive)
-        {
-        	Thread.sleep(1000);
-        }
-        System.out.println("IPv6 DiscoveryEngine Started..");
-		
     	/*//disabled ipv4 discovery
     	//Start IPv4 network discovery engine
     	Thread de = new Thread(new DiscoveryEngine());
@@ -209,6 +202,19 @@ public class PluginEngine {
     		dcv6.getDiscoveryMap(2000);
         	//System.out.println("Broker Search IPv4:");
     		//dc.getDiscoveryMap(2000);
+    		if(incomingCanidateBrokers.isEmpty())
+    		{
+    			//Start IPv6 network discovery engine
+    	    	Thread dev6 = new Thread(new DiscoveryEngine());
+    	    	dev6.start();
+    	    	while(!DiscoveryActive)
+    	        {
+    	        	Thread.sleep(1000);
+    	        }
+    	        System.out.println("IPv6 DiscoveryEngine Started..");
+    			
+    		}
+    		
     		
     	}
     	catch(Exception e)
@@ -229,7 +235,7 @@ public class PluginEngine {
 				List<String> rAgents = reachableAgents();
 				if(rAgents.isEmpty())
 				{
-					System.out.println("\tNo agents found...");
+					System.out.println("\tNo agents found... " + responds);
 				}
 				else
 				{
