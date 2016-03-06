@@ -6,6 +6,7 @@ import java.net.DatagramSocket;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.InterfaceAddress;
 import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.net.SocketAddress;
@@ -71,10 +72,9 @@ public class DiscoveryEngine implements Runnable
 	  {
 		  private NetworkInterface networkInterface;
 		  private MulticastSocket socket;
-		  private String networkInterfaceName;
-		    public DiscoveryEngineWorker(NetworkInterface networkInterface)
+		  
+		  public DiscoveryEngineWorker(NetworkInterface networkInterface)
 		    {
-		    	this.networkInterfaceName = networkInterface.getDisplayName();
 		    	this.networkInterface = networkInterface;
 		    	
 		    }
@@ -103,7 +103,7 @@ public class DiscoveryEngine implements Runnable
 		    		//if (!networkInterface.getDisplayName().startsWith("veth") && !networkInterface.isLoopback() && networkInterface.isUp() && networkInterface.supportsMulticast() && !networkInterface.isPointToPoint() && !networkInterface.isVirtual())
 		    		if (!networkInterface.getDisplayName().startsWith("veth") && !networkInterface.isLoopback() && networkInterface.supportsMulticast() && !networkInterface.isPointToPoint() && !networkInterface.isVirtual())
 				    {
-		    			System.out.println("DiscoveryEngineWorkerIPv6 : Init " + this.networkInterfaceName);
+		    			System.out.println("DiscoveryEngineWorkerIPv6 : Init " + networkInterface.getDisplayName());
 		    			SocketAddress sa = null;
 		    			if(PluginEngine.isIPv6)
 		    			{
@@ -115,15 +115,15 @@ public class DiscoveryEngine implements Runnable
 		    			}
 		  	 	        socket = new MulticastSocket(null);
 		  	 	        socket.bind(sa);
-		  	 	        System.out.println("Bound to interface : " + networkInterfaceName + " address: [::]");
+		  	 	        System.out.println("Bound to interface : " + networkInterface.getDisplayName() + " address: [::]");
 		  	 	        			
 			  			 
 		  	 	    	
 		  	 	        if(PluginEngine.isIPv6)
 		    			{
 		  	 	        	//find to network and site multicast addresses
-		    				SocketAddress saj = new InetSocketAddress(Inet6Address.getByName("ff05::1:c"),32005);
-		  	 	    	    socket.joinGroup(saj, networkInterface);
+		    				//SocketAddress saj = new InetSocketAddress(Inet6Address.getByName("ff05::1:c"),32005);
+		  	 	    	    //socket.joinGroup(saj, networkInterface);
 		  	 	    	    SocketAddress saj2 = new InetSocketAddress(Inet6Address.getByName("ff02::1:c"),32005);
 		  	 	    		socket.joinGroup(saj2, networkInterface);
 		    			}
@@ -137,15 +137,14 @@ public class DiscoveryEngine implements Runnable
 		  	 		        DatagramPacket packet = new DatagramPacket(recvBuf, recvBuf.length);
 		  	 		        
 		  	 		        socket.receive(packet); //rec broadcast packet, could be IPv6 or IPv4
-		  	 		        
-		  	 		        new Thread(new DiscoveryResponder(socket,packet,networkInterfaceName)).start();
+		  	 		        new Thread(new DiscoveryResponder(socket,packet,networkInterface)).start();
 		  	 		        
 		  	 	    		}
 					}	
 		    	}
 		    	catch(Exception ex)
 		    	{
-		    		System.out.println("DiscoveryEngineIPv6 : DiscoveryEngineWorkerIPv6 : Interface = "+ networkInterfaceName + " : Run Error " + ex.toString());
+		    		System.out.println("DiscoveryEngineIPv6 : DiscoveryEngineWorkerIPv6 : Interface = "+ networkInterface.getDisplayName() + " : Run Error " + ex.toString());
 		    		System.out.println("Thread = " + Thread.currentThread().toString());
   	 		        
 		    	}
@@ -191,14 +190,14 @@ public class DiscoveryEngine implements Runnable
 
 			DatagramSocket socket = null;
 		    DatagramPacket packet = null;
-		    String networkInterfaceName = null;
+		    NetworkInterface networkInterface = null;
 		    Gson gson;
 			
 
-		    public DiscoveryResponder(DatagramSocket socket, DatagramPacket packet, String networkInterfaceName) {
+		    public DiscoveryResponder(DatagramSocket socket, DatagramPacket packet, NetworkInterface networkInterface) {
 		        this.socket = socket;
 		        this.packet = packet;
-		        this.networkInterfaceName = networkInterfaceName;
+		        this.networkInterface = networkInterface;
 		        
 		        gson = new Gson();
 		    }
@@ -267,13 +266,31 @@ public class DiscoveryEngine implements Runnable
 		 		      sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
 		 		      //socket.send(sendPacket);
 		 		      
-		 		     DatagramSocket sendSocket = new DatagramSocket();
-		 		      
-		 		      //DatagramSocket sendSocket = new DatagramSocket(null);
-		 		      //SocketAddress sa = new InetSocketAddress(returnAddr,returnPort);
-			    	  //sendSocket.connect(sa);
-			      	  sendSocket.send(sendPacket);
-			      	  sendSocket.close();
+		 		      boolean isSent = false;
+		 		      for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) 
+		 		      {
+		 		    	  InetAddress outAddr = interfaceAddress.getAddress();
+		 		    	  boolean isGlobalLocal = !outAddr.isSiteLocalAddress() && !outAddr.isLinkLocalAddress();
+		 		    	 if((outAddr instanceof Inet6Address) && isGlobalLocal)
+			        	 {
+		 		    		if(!isSent)
+		 		    		{
+		 		    			//DatagramSocket sendSocket = new DatagramSocket();
+		 		    			DatagramSocket sendSocket = new DatagramSocket(null);
+		 		    			SocketAddress sab = new InetSocketAddress(outAddr,0);
+		 		    			sendSocket.bind(sab);
+		 		    			SocketAddress sac = new InetSocketAddress(returnAddr,returnPort);
+		 		    			sendSocket.connect(sac);
+		 		    			sendSocket.send(sendPacket);
+		 		    			sendSocket.close();
+		 		    			isSent = true;
+		 		    		}
+				 		     
+			        	 }
+		 		    	 
+		 		      }
+		 		          
+		 		     
 		 		      
 		 		      /*
 	  	 		   else {
@@ -329,7 +346,7 @@ public class DiscoveryEngine implements Runnable
 		  			}
 		  			*/
 		  			ex.printStackTrace(System.out);
-		  			System.out.println("IncomingInterface : " + networkInterfaceName);
+		  			System.out.println("IncomingInterface : " + networkInterface.getDisplayName());
 		  			boolean isIPv6 = false;
 		  			if(returnAddr instanceof Inet6Address)
 		        	{
