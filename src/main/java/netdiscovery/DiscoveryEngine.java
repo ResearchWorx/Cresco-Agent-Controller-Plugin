@@ -302,7 +302,11 @@ public class DiscoveryEngine implements Runnable
 		 		    			sendSocket.send(sendPacket);
 		 		    			sendSocket.close();
 		 		    			isSent = true;
-		 		    			
+		 		    			while(sendSocket.isConnected())
+		 		    			{
+		 		    				System.out.println("Connected After Close!!");
+		 		    				Thread.sleep(500);
+		 		    			}
 		 		    			
 		 		    		}
 				 		     
