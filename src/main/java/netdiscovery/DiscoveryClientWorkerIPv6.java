@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
@@ -125,7 +126,10 @@ class StopListnerTask extends TimerTask {
 	          try {
 	        	  
 	        	  //if((interfaceAddress.getAddress() instanceof Inet6Address) && !interfaceAddress.getAddress().isLinkLocalAddress())
-	        	  if((interfaceAddress.getAddress() instanceof Inet6Address))
+	        	  InetAddress inAddr = interfaceAddress.getAddress();
+	        	  boolean isGlobal = !inAddr.isSiteLocalAddress() && !inAddr.isLinkLocalAddress();
+		  			
+	        	  if((inAddr instanceof Inet6Address) && isGlobal)
 	        	  {  
 	        		  
 	        		 //c = new MulticastSocket(null);
