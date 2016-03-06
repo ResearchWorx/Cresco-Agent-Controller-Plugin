@@ -115,12 +115,13 @@ class StopListnerTask extends TimerTask {
 	  while (interfaces.hasMoreElements()) {
 	    NetworkInterface networkInterface = (NetworkInterface) interfaces.nextElement();
 
+	    System.out.println("Start Discovery...1" + networkInterface.getDisplayName());
+	    System.out.println("multicast: " + networkInterface.supportsMulticast());
+	    
 	    //if (networkInterface.isLoopback() || !networkInterface.isUp()) {
 	    if (networkInterface.getDisplayName().startsWith("veth") || networkInterface.isLoopback() || !networkInterface.isUp() || !networkInterface.supportsMulticast() || networkInterface.isPointToPoint() || networkInterface.isVirtual()) {
 		continue; // Don't want to broadcast to the loopback interface
 	    }
-	    System.out.println("Start Discovery...1" + networkInterface.getDisplayName());
-	    System.out.println("multicast: " + networkInterface.supportsMulticast());
 	    
     	
 	    if(networkInterface.supportsMulticast())
