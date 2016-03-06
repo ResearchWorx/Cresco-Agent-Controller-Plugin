@@ -129,8 +129,9 @@ class StopListnerTask extends TimerTask {
 	        	  InetAddress inAddr = interfaceAddress.getAddress();
 	        	  boolean isGlobal = !inAddr.isSiteLocalAddress() && !inAddr.isLinkLocalAddress();
 		  			
-	        	  if((inAddr instanceof Inet6Address) && isGlobal)
-	        	  {  
+	        	  //if((inAddr instanceof Inet6Address) && isGlobal)
+	        		if(inAddr instanceof Inet6Address)
+	    	        {  
 	        		  
 	        		 //c = new MulticastSocket(null);
 	        		 c = new DatagramSocket(null);
