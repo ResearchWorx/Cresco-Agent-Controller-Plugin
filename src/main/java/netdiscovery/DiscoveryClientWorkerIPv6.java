@@ -123,8 +123,9 @@ class StopListnerTask extends TimerTask {
 	    
 	    
 	    //if (networkInterface.isLoopback() || !networkInterface.isUp()) {
-	    if (networkInterface.getDisplayName().startsWith("veth") || networkInterface.isLoopback() || !networkInterface.isUp() || !networkInterface.supportsMulticast() || networkInterface.isPointToPoint() || networkInterface.isVirtual()) {
-		continue; // Don't want to broadcast to the loopback interface
+	    //if (networkInterface.getDisplayName().startsWith("veth") || networkInterface.isLoopback() || !networkInterface.isUp() || !networkInterface.supportsMulticast() || networkInterface.isPointToPoint() || networkInterface.isVirtual()) {
+	    if (networkInterface.getDisplayName().startsWith("veth") || networkInterface.isLoopback() || !networkInterface.supportsMulticast() || networkInterface.isPointToPoint() || networkInterface.isVirtual()) {
+	    	continue; // Don't want to broadcast to the loopback interface
 	    }
 	    
     	
