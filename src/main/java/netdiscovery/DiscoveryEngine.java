@@ -263,7 +263,12 @@ public class DiscoveryEngine implements Runnable
 		 		      
 		 		      		DatagramSocket sendSocket = new DatagramSocket();
 		 		      		synchronized (sendSocket) {
-		 		    			sendSocket.send(sendPacket);
+		 		      			while(PluginEngine.sendingTest)
+		 		      			{
+		 		      				
+		 		      			}
+		 		      			PluginEngine.sendingTest = true;
+		 		      			sendSocket.send(sendPacket);
 		 		    			//sendSocket.disconnect();
 		 		    			sendSocket.close();
 		 		    			int count = 0;
@@ -273,6 +278,7 @@ public class DiscoveryEngine implements Runnable
 		 		    				count++;
 		 		    				Thread.sleep(500);
 		 		    			}
+		 		    			PluginEngine.sendingTest = false;
 		 		      		}
 			        	 
 		 		    	 
