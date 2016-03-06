@@ -326,7 +326,15 @@ public class DiscoveryEngine implements Runnable
 		  			*/
 		  			ex.printStackTrace(System.out);
 		  			System.out.println("IncomingInterface : " + networkInterfaceName);
-		  			System.out.println("Remote Address : " + packet.getAddress().getHostAddress());
+		  			boolean isIPv6 = false;
+		  			if(returnAddr instanceof Inet6Address)
+		        	{
+		  				isIPv6 = true;
+		        	}
+		  			boolean isGlobal = !returnAddr.isSiteLocalAddress() && !returnAddr.isLinkLocalAddress();
+		  			System.out.println("Remote Address : "  + packet.getAddress().getHostAddress() + " Global: " + isGlobal + " isIPv6: " + isIPv6);
+		  			//Inet6Address addr = new Inet6Address(str);
+		  			
 		  			//ex.getStackTrace()
 			  		
 		  		}
