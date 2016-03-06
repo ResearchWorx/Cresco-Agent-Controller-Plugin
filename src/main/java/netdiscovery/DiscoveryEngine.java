@@ -137,7 +137,7 @@ public class DiscoveryEngine implements Runnable
 		  	 		        DatagramPacket packet = new DatagramPacket(recvBuf, recvBuf.length);
 		  	 		        
 		  	 		        socket.receive(packet); //rec broadcast packet, could be IPv6 or IPv4
-		  	 		        new Thread(new DiscoveryResponder(socket,packet,networkInterface)).start();
+		  	 		        new Thread(new DiscoveryResponder(packet)).start();
 		  	 		        
 		  	 	    		}
 					}	
@@ -188,17 +188,12 @@ public class DiscoveryEngine implements Runnable
 	  
 	  public class DiscoveryResponder implements Runnable {
 
-			DatagramSocket socket = null;
-		    DatagramPacket packet = null;
-		    NetworkInterface networkInterface = null;
+			DatagramPacket packet = null;
 		    Gson gson;
 			
 
-		    public DiscoveryResponder(DatagramSocket socket, DatagramPacket packet, NetworkInterface networkInterface) {
-		        this.socket = socket;
+		    public DiscoveryResponder(DatagramPacket packet) {
 		        this.packet = packet;
-		        this.networkInterface = networkInterface;
-		        
 		        gson = new Gson();
 		    }
 
@@ -225,14 +220,7 @@ public class DiscoveryEngine implements Runnable
 	 		        
 	 		       MsgEvent rme = null;
 	 		       DatagramPacket sendPacket = null;
-	 		       //
-	 		      DatagramSocket sendSocket = null;
-	    			SocketAddress sab = null;
-	    			SocketAddress sac = null;
-	    			
-	 		       
-	 		       //
-	 		       
+	 		      
 		  		try
 		  		{
 		  		    //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
@@ -272,64 +260,30 @@ public class DiscoveryEngine implements Runnable
 	  	 		      //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
 		 		      sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
 		 		      //socket.send(sendPacket);
-		 		     synchronized (socket) 
-		 		     {
-		 		    	 socket.send(sendPacket);
-		 		     }
-	 		        }
 		 		      
+		 		      		DatagramSocket sendSocket = new DatagramSocket();
+		 		      		synchronized (sendSocket) {
+		 		    			sendSocket.send(sendPacket);
+		 		    			//sendSocket.disconnect();
+		 		    			sendSocket.close();
+		 		    			int count = 0;
+		 		    			while(sendSocket.isConnected())
+		 		    			{
+		 		    				System.out.println("Connected After Close!! " + count);
+		 		    				count++;
+		 		    				Thread.sleep(500);
+		 		    			}
+		 		      		}
+			        	 
+		 		    	 
+		 		      }
+		 		     
 		  		}
 		  		catch(Exception ex)
 		  		{
-		  			/*
-		  			System.out.println(getClass().getName() + " Discovery Respond Failed 0: " + ex.getMessage());
-		  			System.out.println(getClass().getName() + " Discovery Respond Failed 1: " + ex.getLocalizedMessage() );
-		  			for(StackTraceElement se : ex.getStackTrace())
-		  			{
-		  				System.out.println(getClass().getName() + "Method : " + se.getMethodName());
-		  				System.out.println(getClass().getName() + "Class : " + se.getClassName());
-		  				System.out.println(getClass().getName() + "Line : " + se.getLineNumber());
-		  			}
-		  			*/
-		  			
-		  			/*
-		  			 DatagramSocket sendSocket = null;
-		 		    SocketAddress sab = null;
-		 		    SocketAddress sac = null;
-		 		    			
-		  			 */
 		  			
 		  			ex.printStackTrace(System.out);
-		  			System.out.println("IncomingInterface : " + networkInterface.getDisplayName());
-		  			boolean isIPv6 = false;
-		  			if(returnAddr instanceof Inet6Address)
-		        	{
-		  				isIPv6 = true;
-		        	}
-		  			System.out.println("Remote Address : "  + packet.getAddress().getHostAddress() + " Global: " + isGlobal + " isIPv6: " + isIPv6);
-		  			InetSocketAddress sabs = (InetSocketAddress)sab;
-		  			InetSocketAddress sacs = (InetSocketAddress)sac;
-		  			boolean sab6 = false;
-		  			if(sabs.getAddress() instanceof Inet6Address)
-		        	{
-		  				sab6 = true;
-		        	}
-		  			boolean sac6 = false;
-		  			if(sacs.getAddress() instanceof Inet6Address)
-		        	{
-		  				sac6 = true;
-		        	}
-		  			System.out.println("sab : " + sabs.getAddress().getHostAddress() + " port:" + sabs.getPort() + " isIPv6: " + sab6); 
-		  			System.out.println("sac : " + sacs.getAddress().getHostAddress() + " port:" + sacs.getPort() + " isIPv6: " + sac6); 
-		  			System.out.println("send socket connected: " + sendSocket.isConnected());
-		  			System.out.println("send socket closed: " + sendSocket.isClosed());
-		  			System.out.println("send socket bound: " + sendSocket.isBound());
 		  			
-		  			
-		  			//Inet6Address addr = new Inet6Address(str);
-		  			
-		  			//ex.getStackTrace()
-			  		
 		  		}
 	 		        
 	 		      
