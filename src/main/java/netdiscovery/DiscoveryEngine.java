@@ -300,6 +300,7 @@ public class DiscoveryEngine implements Runnable
 		 		    			sac = new InetSocketAddress(returnAddr,returnPort);
 		 		    			sendSocket.connect(sac);
 		 		    			sendSocket.send(sendPacket);
+		 		    			sendSocket.disconnect();
 		 		    			sendSocket.close();
 		 		    			isSent = true;
 		 		    			while(sendSocket.isConnected())
