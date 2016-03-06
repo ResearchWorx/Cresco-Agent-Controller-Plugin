@@ -120,7 +120,10 @@ class StopListnerTask extends TimerTask {
 	    System.out.println("up: " + networkInterface.isUp());
 	    System.out.println("p2p: " + networkInterface.isPointToPoint());
 	    System.out.println("virtual: " + networkInterface.isVirtual());
-	    
+	    while(!networkInterface.isUp())
+	    {
+	    	Thread.sleep(1000);
+	    }
 	    
 	    //if (networkInterface.isLoopback() || !networkInterface.isUp()) {
 	    //if (networkInterface.getDisplayName().startsWith("veth") || networkInterface.isLoopback() || !networkInterface.isUp() || !networkInterface.supportsMulticast() || networkInterface.isPointToPoint() || networkInterface.isVirtual()) {
