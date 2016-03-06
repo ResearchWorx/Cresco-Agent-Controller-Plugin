@@ -225,6 +225,13 @@ public class DiscoveryEngine implements Runnable
 	 		        
 	 		       MsgEvent rme = null;
 	 		       DatagramPacket sendPacket = null;
+	 		       //
+	 		      DatagramSocket sendSocket = null;
+	    			SocketAddress sab = null;
+	    			SocketAddress sac = null;
+	    			
+	 		       
+	 		       //
 	 		       
 		  		try
 		  		{
@@ -276,6 +283,7 @@ public class DiscoveryEngine implements Runnable
 		 		    		if(!isSent)
 		 		    		{
 		 		    			//DatagramSocket sendSocket = new DatagramSocket();
+		 		    			/*
 		 		    			DatagramSocket sendSocket = new DatagramSocket(null);
 		 		    			SocketAddress sab = new InetSocketAddress(outAddr,0);
 		 		    			sendSocket.bind(sab);
@@ -284,6 +292,18 @@ public class DiscoveryEngine implements Runnable
 		 		    			sendSocket.send(sendPacket);
 		 		    			sendSocket.close();
 		 		    			isSent = true;
+		 		    			*/
+		 		    			
+		 		    			sendSocket = new DatagramSocket(null);
+		 		    			sab = new InetSocketAddress(outAddr,0);
+		 		    			sendSocket.bind(sab);
+		 		    			sac = new InetSocketAddress(returnAddr,returnPort);
+		 		    			sendSocket.connect(sac);
+		 		    			sendSocket.send(sendPacket);
+		 		    			sendSocket.close();
+		 		    			isSent = true;
+		 		    			
+		 		    			
 		 		    		}
 				 		     
 			        	 }
@@ -345,6 +365,14 @@ public class DiscoveryEngine implements Runnable
 		  				System.out.println(getClass().getName() + "Line : " + se.getLineNumber());
 		  			}
 		  			*/
+		  			
+		  			/*
+		  			 DatagramSocket sendSocket = null;
+		 		    SocketAddress sab = null;
+		 		    SocketAddress sac = null;
+		 		    			
+		  			 */
+		  			
 		  			ex.printStackTrace(System.out);
 		  			System.out.println("IncomingInterface : " + networkInterface.getDisplayName());
 		  			boolean isIPv6 = false;
@@ -353,6 +381,25 @@ public class DiscoveryEngine implements Runnable
 		  				isIPv6 = true;
 		        	}
 		  			System.out.println("Remote Address : "  + packet.getAddress().getHostAddress() + " Global: " + isGlobal + " isIPv6: " + isIPv6);
+		  			InetSocketAddress sabs = (InetSocketAddress)sab;
+		  			InetSocketAddress sacs = (InetSocketAddress)sac;
+		  			boolean sab6 = false;
+		  			if(sabs.getAddress() instanceof Inet6Address)
+		        	{
+		  				sab6 = true;
+		        	}
+		  			boolean sac6 = false;
+		  			if(sacs.getAddress() instanceof Inet6Address)
+		        	{
+		  				sac6 = true;
+		        	}
+		  			System.out.println("sab : " + sabs.getAddress().getHostAddress() + " port:" + sabs.getPort() + " isIPv6: " + sab6); 
+		  			System.out.println("sac : " + sacs.getAddress().getHostAddress() + " port:" + sacs.getPort() + " isIPv6: " + sac6); 
+		  			System.out.println("send socket connected: " + sendSocket.isConnected());
+		  			System.out.println("send socket closed: " + sendSocket.isClosed());
+		  			System.out.println("send socket bound: " + sendSocket.isBound());
+		  			
+		  			
 		  			//Inet6Address addr = new Inet6Address(str);
 		  			
 		  			//ex.getStackTrace()
