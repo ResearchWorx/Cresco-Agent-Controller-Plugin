@@ -60,7 +60,7 @@ public String multiCastNetwork;
 	        //byte[] data = makeResponse(); // code not shown
 	    	
 	    	//We have a response
-			  //System.out.println(getClass().getName() + ">>> Broadcast response from server: " + packet.getAddress().getHostAddress());
+			  System.out.println(getClass().getName() + ">>> Broadcast response from server: " + packet.getAddress().getHostAddress());
 
 			  //Check if the message is correct
 			  //System.out.println(new String(receivePacket.getData()));
@@ -107,6 +107,7 @@ class StopListnerTask extends TimerTask {
 	public void discover()
 	{
 	// Find the server using UDP broadcast
+		System.out.println("Start Discovery...0");
 	try {
 		
 	  // Broadcast the message over all the network interfaces
@@ -121,6 +122,7 @@ class StopListnerTask extends TimerTask {
 	    
 	    if(networkInterface.supportsMulticast())
 	    {
+	    	System.out.println("Start Discovery...1");
 	    	 for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
 	         {
 	          try {
