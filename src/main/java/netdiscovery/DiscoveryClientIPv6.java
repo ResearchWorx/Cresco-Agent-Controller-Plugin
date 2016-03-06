@@ -33,11 +33,13 @@ public class DiscoveryClientIPv6
 			//populate map with possible peers
 			System.out.println("DiscoveryClientIPv6 : searching "+ multiCastNetwork);
 			dcw.discover();
+			
+			//limit discovery for the moment
 			//Searching site network [ff05::1:c]
-			multiCastNetwork = "ff05::1:c";
-			dcw = new DiscoveryClientWorkerIPv6(discoveryTimeout,multiCastNetwork);
-			System.out.println("DiscoveryClientIPv6 : searching " + multiCastNetwork);
-			dcw.discover();
+			//multiCastNetwork = "ff05::1:c";
+			//dcw = new DiscoveryClientWorkerIPv6(discoveryTimeout,multiCastNetwork);
+			//System.out.println("DiscoveryClientIPv6 : searching " + multiCastNetwork);
+			//dcw.discover();
 			
 	
 		}
