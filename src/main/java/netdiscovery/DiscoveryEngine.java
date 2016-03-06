@@ -260,22 +260,14 @@ public class DiscoveryEngine implements Runnable
 		 		      sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
 		 		      //socket.send(sendPacket);
 		 		      
-		 		      try{
-		 		      DatagramSocket sendSocket = new DatagramSocket(null);
-		 		      SocketAddress sa = new InetSocketAddress(returnAddr,returnPort);
-			    	  sendSocket.connect(sa);
+		 		     DatagramSocket sendSocket = new DatagramSocket();
+		 		      
+		 		      //DatagramSocket sendSocket = new DatagramSocket(null);
+		 		      //SocketAddress sa = new InetSocketAddress(returnAddr,returnPort);
+			    	  //sendSocket.connect(sa);
 			      	  sendSocket.send(sendPacket);
 			      	  sendSocket.close();
-		 		      }
-		 		      catch(Exception ex)
-		 		      {
-		 		    	 DatagramSocket sendSocket = new DatagramSocket(null);
-			 		      SocketAddress sa = new InetSocketAddress(returnAddr,returnPort);
-				    	  sendSocket.connect(sa);
-				      	  sendSocket.send(sendPacket);
-				      	  sendSocket.close();
-			 		       
-		 		      }
+		 		      
 		 		      /*
 	  	 		   else {
 	  	                // we're connected
