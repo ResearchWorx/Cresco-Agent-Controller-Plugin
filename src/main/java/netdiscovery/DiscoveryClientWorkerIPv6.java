@@ -132,14 +132,18 @@ class StopListnerTask extends TimerTask {
 	    if (networkInterface.getDisplayName().startsWith("veth") || networkInterface.isLoopback() || !networkInterface.supportsMulticast() || networkInterface.isPointToPoint() || networkInterface.isVirtual()) {
 	    	continue; // Don't want to broadcast to the loopback interface
 	    }
+	    System.out.println("Start Discovery...2" + networkInterface.getDisplayName());
 	    
     	
 	    if(networkInterface.supportsMulticast())
 	    {
+	    	System.out.println("Start Discovery...3" + networkInterface.getDisplayName());
+		    
 	    	 for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
 	         {
 	          try {
-	        	  
+	        	  System.out.println("Start Discovery...4" + networkInterface.getDisplayName());
+	      	    
 	        	  //if((interfaceAddress.getAddress() instanceof Inet6Address) && !interfaceAddress.getAddress().isLinkLocalAddress())
 	        	  InetAddress inAddr = interfaceAddress.getAddress();
 	        	  boolean isGlobal = !inAddr.isSiteLocalAddress() && !inAddr.isLinkLocalAddress();
