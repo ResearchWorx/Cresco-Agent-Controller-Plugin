@@ -353,7 +353,10 @@ public class PluginEngine {
 			sme.setParam("src_region", region);
 			sme.setParam("src_agent", agent);
 			sme.setParam("dst_region", str[0]);
-			sme.setParam("dst_agent", str[1]);
+			if(str.length == 2) //send to region if agent does not exist
+			{
+				sme.setParam("dst_agent", str[1]);
+			}
 			ap.sendMessage(sme);
 		} else {
 			System.out.println("Cannot reach Agent [" + targetAgent + "]");
