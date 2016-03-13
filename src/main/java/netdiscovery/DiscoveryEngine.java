@@ -13,6 +13,8 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 
 import netdiscovery.DiscoveryClientWorkerIPv6.IPv6Responder;
 import plugincore.PluginEngine;
@@ -143,7 +145,11 @@ public class DiscoveryEngine implements Runnable
 		  	 		     }
 		  	 		     
 		  	 		     synchronized (socket) {
-			  	 		        socket.send(sendSucka(packet));
+		  	 		    	 	packet = sendPacket(packet);
+		  	 		    	 	if(packet != null)
+		  	 		    	 	{
+		  	 		    	 		socket.send(packet);
+		  	 		    	 	}
 		  	 		     }
 		  	 		        //sendSucka(socket,packet);
 		  	 		        //new Thread(new DiscoveryResponder(packet)).start();
@@ -158,101 +164,144 @@ public class DiscoveryEngine implements Runnable
   	 		        
 		    	}
 		    }
-	  }
-
-	    private synchronized DatagramPacket sendSucka(DatagramPacket packet) 
-	    {
-	    	synchronized (packet) {
-	    	InetAddress returnAddr = packet.getAddress();
-	    	boolean isGlobal = !returnAddr.isSiteLocalAddress() && !returnAddr.isLinkLocalAddress();
-  			
- 		    String remoteAddress = returnAddr.getHostAddress();
-	          if(remoteAddress.contains("%"))
-	          {
-	        	  String[] remoteScope = remoteAddress.split("%");
-	        	  remoteAddress = remoteScope[0];
-	          }
-	    	if((!PluginEngine.isLocal(remoteAddress)) && (isGlobal))
- 		        {
- 		         
- 		        //Packet received
- 		        //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
- 		        //System.out.println(getClass().getName() + ">>>Packet received; data: " + new String(packet.getData()));
-
- 		        //See if the packet holds the right command (message)
- 		        String message = new String(packet.getData()).trim();
- 		        
- 		       MsgEvent rme = null;
- 		       //DatagramPacket sendPacket = null;
- 		      
-	  		try
-	  		{
-	  		    //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
- 		        //check that the message can be marshaled into a MsgEvent
-	  			//System.out.println(getClass().getName() + "0.0 " + Thread.currentThread().getId());
-	  			try
+		  	private String stripIPv6Address(InetAddress address)
+		  	{
+		  		String sAddress = null;
+		  		try
 		  		{
-	  				rme = gson.fromJson(message, MsgEvent.class);
+		  			sAddress = address.getHostAddress();
+			        if(sAddress.contains("%"))
+			        {
+			        	  String[] aScope = sAddress.split("%");
+			        	  sAddress = aScope[0];
+			          }
 		  		}
-	  			catch(Exception ex)
+		  		catch(Exception ex)
 		  		{
-		  			System.out.println(getClass().getName() + " fail to marshal discovery " + ex.getMessage());
+		  			System.out.println("DiscoveryEngine : stripIPv6Address Error " + ex.getMessage());
 		  		}
-	  			//System.out.println(getClass().getName() + "0.1 " + Thread.currentThread().getId());
-	  			if (rme!=null) 
- 		        {
-	  			  
- 		          
- 		         //System.out.println(getClass().getName() + "1 " + Thread.currentThread().getId());
-		  			
- 		          
- 		          MsgEvent me = new MsgEvent(MsgEventType.DISCOVER,PluginEngine.region,PluginEngine.agent,PluginEngine.plugin,"Broadcast discovery response.");
- 		          me.setParam("dst_region",rme.getParam("src_region"));
- 		          me.setParam("dst_agent",rme.getParam("src_agent"));
- 		          me.setParam("src_region",PluginEngine.region);
- 		          me.setParam("src_agent",PluginEngine.agent);
- 		          me.setParam("dst_ip", remoteAddress);
- 		          me.setParam("dst_port", String.valueOf(packet.getPort()));
- 		          //PluginEngine.discoveryResponse.offer(me);
- 		          //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress() +  " Sent to broker. " + PluginEngine.discoveryResponse.size());
- 		         //System.out.println(getClass().getName() + "2 " + Thread.currentThread().getId());
-		  			
- 		          String json = gson.toJson(me);
-				  byte[] sendData = json.getBytes();
-	 		      //returnAddr = InetAddress.getByName(me.getParam("dst_ip"));
-	 		      int returnPort = Integer.parseInt(me.getParam("dst_port"));
-  	 		      //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
-	 		      packet.setData(sendData);
-	 		      packet.setLength(sendData.length);
-	 		      packet.setAddress(returnAddr);
-	 		      packet.setPort(returnPort);
-	 		      //sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
-	 		      //socket.send(sendPacket);
+		  		return sAddress;
+		  		
+		  	}
+		  	private Map<String,Boolean> getInterfaceAddresses()
+		  	{
+		  		Map<String, Boolean> intAddr = null;
+		  		try
+		  		{
+		  			intAddr = new HashMap<String,Boolean>();
+		  			for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) 
+		  		    {
+		  				InetAddress inAddr = interfaceAddress.getAddress();
+		  				String hostAddress = stripIPv6Address(interfaceAddress.getAddress());
+		  				boolean isIPv6 = false;
+		  				if(inAddr instanceof Inet6Address)
+		  				{
+		  					isIPv6 = true;
+		  				}
+		  				intAddr.put(hostAddress, isIPv6);
+		  		    }
+		  		}
+		  		catch(Exception ex)
+		  		{
+		  			System.out.println("DiscoveryEngine : stripIPv6Address Error " + ex.getMessage());
+		  		}
+		  		return intAddr;
+		  		
+		  	}
+		  	private synchronized DatagramPacket sendPacket(DatagramPacket packet) 
+		    {
+		    	synchronized (packet) 
+		    	{
+		    		Map<String,Boolean> intAddr = getInterfaceAddresses();
+		    		InetAddress returnAddr = packet.getAddress();
+		    	
+		    		String remoteAddress = stripIPv6Address(returnAddr);
+		    		boolean isGlobal = !returnAddr.isSiteLocalAddress() && !returnAddr.isLinkLocalAddress();
+	 		   
+	 		  //if((!PluginEngine.isLocal(remoteAddress)) && (isGlobal))
+		    		if(!(intAddr.containsKey(remoteAddress)) && (isGlobal))
+			 		{
+	 		         
+	 		        //Packet received
+	 		        //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
+	 		        //System.out.println(getClass().getName() + ">>>Packet received; data: " + new String(packet.getData()));
+
+	 		        //See if the packet holds the right command (message)
+	 		        String message = new String(packet.getData()).trim();
+	 		        
+	 		       MsgEvent rme = null;
+	 		       //DatagramPacket sendPacket = null;
 	 		      
-	 		      		//DatagramSocket sendSocket = new DatagramSocket();
-	 		      		//sendSocket.send(sendPacket);
-	 		    		//sendSocket.disconnect();
-	 		    		//sendSocket.close();
-	 		    		
-	 		      }
-	 		     
-	  		}
-	  		catch(Exception ex)
-	  		{
-	  			
-	  			ex.printStackTrace(System.out);
-	  			
-	  		}
- 		        
- 		      
- 	   
-	    	
- 		        }
-	    	return packet;
-		      
-	    	}
-	    }
-	    
+		  		try
+		  		{
+		  		    //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
+	 		        //check that the message can be marshaled into a MsgEvent
+		  			//System.out.println(getClass().getName() + "0.0 " + Thread.currentThread().getId());
+		  			try
+			  		{
+		  				rme = gson.fromJson(message, MsgEvent.class);
+			  		}
+		  			catch(Exception ex)
+			  		{
+			  			System.out.println(getClass().getName() + " fail to marshal discovery " + ex.getMessage());
+			  		}
+		  			//System.out.println(getClass().getName() + "0.1 " + Thread.currentThread().getId());
+		  			if (rme!=null) 
+	 		        {
+		  			  
+	 		          
+	 		         //System.out.println(getClass().getName() + "1 " + Thread.currentThread().getId());
+			  			
+	 		          
+	 		          MsgEvent me = new MsgEvent(MsgEventType.DISCOVER,PluginEngine.region,PluginEngine.agent,PluginEngine.plugin,"Broadcast discovery response.");
+	 		          me.setParam("dst_region",rme.getParam("src_region"));
+	 		          me.setParam("dst_agent",rme.getParam("src_agent"));
+	 		          me.setParam("src_region",PluginEngine.region);
+	 		          me.setParam("src_agent",PluginEngine.agent);
+	 		          me.setParam("dst_ip", remoteAddress);
+	 		          me.setParam("dst_port", String.valueOf(packet.getPort()));
+	 		          //PluginEngine.discoveryResponse.offer(me);
+	 		          //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress() +  " Sent to broker. " + PluginEngine.discoveryResponse.size());
+	 		         //System.out.println(getClass().getName() + "2 " + Thread.currentThread().getId());
+			  			
+	 		          String json = gson.toJson(me);
+					  byte[] sendData = json.getBytes();
+		 		      //returnAddr = InetAddress.getByName(me.getParam("dst_ip"));
+		 		      int returnPort = Integer.parseInt(me.getParam("dst_port"));
+	  	 		      //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
+		 		      packet.setData(sendData);
+		 		      packet.setLength(sendData.length);
+		 		      packet.setAddress(returnAddr);
+		 		      packet.setPort(returnPort);
+		 		      //sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
+		 		      //socket.send(sendPacket);
+		 		      
+		 		      		//DatagramSocket sendSocket = new DatagramSocket();
+		 		      		//sendSocket.send(sendPacket);
+		 		    		//sendSocket.disconnect();
+		 		    		//sendSocket.close();
+		 		    		
+		 		      }
+		 		     
+		  		}
+		  		catch(Exception ex)
+		  		{
+		  			
+		  			ex.printStackTrace(System.out);
+		  			
+		  		}
+	 		        
+	 		      
+	 	   
+		    	
+	 		        }
+		    	return packet;
+			      
+		    	}
+		    }
+		    
+	  }
+	  	
 	  private boolean sendDiscovery(DatagramPacket sendPacket) throws IOException
 	  {
 		  boolean isSent = false;
@@ -277,7 +326,7 @@ public class DiscoveryEngine implements Runnable
 		    
 		  return isSent;
 	  }
-	  
+ 
 	  private Inet6Address getInet6AddressByName(String host) throws UnknownHostException, SecurityException
 	  {
 	      for(InetAddress addr : InetAddress.getAllByName(host))
