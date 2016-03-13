@@ -31,6 +31,8 @@ public class PluginEngine {
 	public static boolean ActiveBrokerManagerActive = false;
 	public static boolean ActiveDestManagerActive = false;
 	public static boolean ConsumerThreadActive = false;
+	public static boolean ConsumerThreadRegionActive = false;
+	
 	public static ActiveProducer ap;
 	
 	public static String brokerAddress;
@@ -245,6 +247,17 @@ public class PluginEngine {
     	    	{
     	    		brokerAddress = "localhost";
     	    	}
+    	        
+    	        //consumer region 
+    	        Thread ct = null;
+    	    	ct = new Thread(new ActiveConsumer(region,"tcp://" + brokerAddress + ":32010"));
+    	    	ct.start();
+    	    	while(!ConsumerThreadRegionActive)
+    	        {
+    	        	Thread.sleep(1000);
+    	        }
+    	        System.out.println("Region ConsumerThread Started..");
+        		
     	        isBroker = true;
     		}
     		else
@@ -272,7 +285,7 @@ public class PluginEngine {
     			}
     		}
     		
-    		//consumer 
+    		//consumer agent 
 	        Thread ct = null;
 	    	ct = new Thread(new ActiveConsumer(agentpath,"tcp://" + brokerAddress + ":32010"));
 	    	ct.start();
@@ -280,7 +293,7 @@ public class PluginEngine {
 	        {
 	        	Thread.sleep(1000);
 	        }
-	        System.out.println("ConsumerThread Started..");
+	        System.out.println("Agent ConsumerThread Started..");
     		
 	        ap = new ActiveProducer("tcp://" + brokerAddress + ":32010");
 	        System.out.println("Producer Started..");

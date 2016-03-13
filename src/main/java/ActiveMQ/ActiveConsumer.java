@@ -22,11 +22,16 @@ public class ActiveConsumer implements Runnable
 	private Queue RXqueue; 
 	private Session sess;
 	private ActiveMQConnection conn;
+	private boolean isRegionalConsumer = false;
 	
 	public ActiveConsumer(String RXQueueName, String URI)
 	{
 		try
 		{
+			if(RXQueueName.contains("_"))
+			{
+				isRegionalConsumer = true;
+			}
 			//ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory("discovery:(multicast://default?group=test)?reconnectDelay=1000&maxReconnectAttempts=30&useExponentialBackOff=false");
 			//ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(URI);
 			//conn = factory.createConnection();
@@ -54,7 +59,15 @@ public class ActiveConsumer implements Runnable
 		//new Thread(new Sender(sess, TXqueue, RXQueueName)).start();
 		try
 		{
-			PluginEngine.ConsumerThreadActive = true;
+			if(isRegionalConsumer)
+			{
+				PluginEngine.ConsumerThreadRegionActive = true;
+			}
+			else
+			{
+				PluginEngine.ConsumerThreadActive = true;
+			}
+			
 			MessageConsumer consumer = sess.createConsumer(RXqueue);
 			int count = 0;
 			while (PluginEngine.ConsumerThreadActive) 
