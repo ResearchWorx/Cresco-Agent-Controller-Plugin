@@ -291,6 +291,7 @@ public class PluginEngine {
     			
     		}
     		
+    		System.out.println("START CONSUMER INIT");
     		//consumer agent 
 	        Thread ct = null;
 	    	ct = new Thread(new ActiveConsumer(agentpath,"tcp://" + brokerAddress + ":32010"));
