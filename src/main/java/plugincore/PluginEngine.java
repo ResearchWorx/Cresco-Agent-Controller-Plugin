@@ -247,7 +247,7 @@ public class PluginEngine {
     	    	{
     	    		brokerAddress = "localhost";
     	    	}
-    	        
+    	        /*
     	        //consumer region 
     	        Thread ct = null;
     	    	ct = new Thread(new ActiveConsumer(region,"tcp://" + brokerAddress + ":32010"));
@@ -257,7 +257,7 @@ public class PluginEngine {
     	        	Thread.sleep(1000);
     	        }
     	        System.out.println("Region ConsumerThread Started..");
-        		
+        		*/
     	        isBroker = true;
     		}
     		else
