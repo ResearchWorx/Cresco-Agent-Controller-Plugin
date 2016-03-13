@@ -249,6 +249,8 @@ public class PluginEngine {
     		}
     		else
     		{
+    			//determine least loaded broker
+    			//need to use additional metrics to determine best fit broker
     			String cbrokerAddress = null;
     			int brokerCount = -1;
     			for(MsgEvent bm : incomingCanidateBrokers)
@@ -279,6 +281,9 @@ public class PluginEngine {
 	        	Thread.sleep(1000);
 	        }
 	        System.out.println("ConsumerThread Started..");
+    		
+	        ap = new ActiveProducer("tcp://" + brokerAddress + ":32010");
+	        System.out.println("Producer Started..");
     		
     		
     	}
