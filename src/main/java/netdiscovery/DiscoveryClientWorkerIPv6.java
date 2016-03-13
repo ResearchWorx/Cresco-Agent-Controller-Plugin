@@ -60,7 +60,7 @@ public String multiCastNetwork;
 	        //byte[] data = makeResponse(); // code not shown
 	    	
 	    	//We have a response
-			  System.out.println(getClass().getName() + ">>> Broadcast response from server: " + packet.getAddress().getHostAddress());
+			  //System.out.println(getClass().getName() + ">>> Broadcast response from server: " + packet.getAddress().getHostAddress());
 
 			  //Check if the message is correct
 			  //System.out.println(new String(receivePacket.getData()));
@@ -112,7 +112,7 @@ class StopListnerTask extends TimerTask {
     //byte[] data = makeResponse(); // code not shown
 	
 	//We have a response
-	  System.out.println(getClass().getName() + ">>> Broadcast response from server: " + packet.getAddress().getHostAddress());
+	  //System.out.println(getClass().getName() + ">>> Broadcast response from server: " + packet.getAddress().getHostAddress());
 
 	  //Check if the message is correct
 	  //System.out.println(new String(receivePacket.getData()));
@@ -216,7 +216,7 @@ class StopListnerTask extends TimerTask {
 		          {
 	      	     c.send(sendPacket);
 		          }
-	      	     System.out.println(getClass().getName() + ">>> Request packet sent to: " + multiCastNetwork +  ": from : " + interfaceAddress.getAddress().getHostAddress());
+	      	     //System.out.println(getClass().getName() + ">>> Request packet sent to: " + multiCastNetwork +  ": from : " + interfaceAddress.getAddress().getHostAddress());
 	      	    
 	      	  while(!c.isClosed())
 	    	  {
