@@ -137,7 +137,6 @@ public class DiscoveryEngine implements Runnable
 		  	 		        byte[] recvBuf = new byte[15000];
 		  	 		        DatagramPacket recPacket = new DatagramPacket(recvBuf, recvBuf.length);
 		  	 		        
-		  	 		        PluginEngine.responds++;
 		  	 		        
 		  	 		     synchronized (socket) {
 		  	 		        socket.receive(recPacket); //rec broadcast packet, could be IPv6 or IPv4
@@ -148,6 +147,8 @@ public class DiscoveryEngine implements Runnable
 		  	 		    	 	if(sendPacket != null)
 		  	 		    	 	{
 		  	 		    	 		socket.send(sendPacket);
+		  	 		    	 		PluginEngine.responds++;
+			  	 		        
 		  	 		    	 	}
 		  	 		     }
 		  	 		        //sendSucka(socket,packet);
