@@ -2,6 +2,7 @@ package plugincore;
 
 
 import ActiveMQ.*;
+
 import org.apache.activemq.command.ActiveMQDestination;
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ import shared.MsgEventType;
 import shared.RandomString;
 
 import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.util.*;
@@ -30,6 +32,8 @@ public class PluginEngine {
 	public static boolean ActiveDestManagerActive = false;
 	public static boolean ConsumerThreadActive = false;
 	public static ActiveProducer ap;
+	
+	public static String brokerAddress;
 	
 	public static boolean isIPv6 = false;
 	
@@ -233,30 +237,48 @@ public class PluginEngine {
     	        }
     	        System.out.println("ActiveBrokerManager Started..");
     	        
-    	        //consumer 
-    	        Thread ct = null;
-    	    	if(isIPv6)
+    	        if(isIPv6) //set broker address for consumers and producers
     	    	{
-    	    		ct = new Thread(new ActiveConsumer(agentpath,"tcp://[::1]:32010"));
+    	    		brokerAddress = "[::1]";
+    	    		
     	    	}
     	    	else
     	    	{
-    	    		ct = new Thread(new ActiveConsumer(agentpath,"tcp://localhost:32010"));
+    	    		brokerAddress = "localhost";
     	    	}
-    	    	ct.start();
-    	    	while(!ConsumerThreadActive)
-    	        {
-    	        	Thread.sleep(1000);
-    	        }
-    	        System.out.println("ConsumerThread Started..");
     		}
     		else
     		{
+    			String cbrokerAddress = null;
+    			int brokerCount = -1;
     			for(MsgEvent bm : incomingCanidateBrokers)
     			{
-    				System.out.println(bm.getParamsString());
+    				int tmpBrokerCount = Integer.parseInt(bm.getParam("agent_count"));
+    				if(brokerCount < tmpBrokerCount)
+    				{
+    					cbrokerAddress = bm.getParam("dst_ip");
+    				}
+    			}
+    			if(cbrokerAddress != null)
+    			{
+    				InetAddress remoteAddress = InetAddress.getByName(brokerAddress);
+    				if(remoteAddress instanceof Inet6Address)
+    				{
+    					cbrokerAddress = "[" + cbrokerAddress + "]";
+    				}
+    				brokerAddress = cbrokerAddress;
     			}
     		}
+    		
+    		//consumer 
+	        Thread ct = null;
+	    	ct = new Thread(new ActiveConsumer(agentpath,"tcp://" + brokerAddress + ":32010"));
+	    	ct.start();
+	    	while(!ConsumerThreadActive)
+	        {
+	        	Thread.sleep(1000);
+	        }
+	        System.out.println("ConsumerThread Started..");
     		
     		
     	}
@@ -318,7 +340,7 @@ public class PluginEngine {
 		}
     }
 
-	public static void sendMessage(MsgEventType type, String targetAgent, String msg) {
+    public static void sendMessage(MsgEventType type, String targetAgent, String msg) {
 		if (isReachableAgent(targetAgent)) {
 			System.out.println("Sending to Agent [" + targetAgent + "]");
 			String[] str = targetAgent.split("_");
