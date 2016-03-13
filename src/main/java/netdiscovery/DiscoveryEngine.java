@@ -236,9 +236,9 @@ public class DiscoveryEngine implements Runnable
 		    	
 		    		String remoteAddress = stripIPv6Address(returnAddr);
 		    		boolean isGlobal = !returnAddr.isSiteLocalAddress() && !returnAddr.isLinkLocalAddress();
-		    		String sourceAddress = getSourceAddress(intAddr,remoteAddress);
+		    		String sourceAddress = getSourceAddress(intAddr,remoteAddress); //determine send address
 		    		
-	 		  //if((!PluginEngine.isLocal(remoteAddress)) && (isGlobal))
+		    		//if((!PluginEngine.isLocal(remoteAddress)) && (isGlobal))
 		    		if(!(intAddr.containsKey(remoteAddress)) && (isGlobal) && (sourceAddress != null))
 			 		{
 		    		//Packet received
@@ -248,7 +248,7 @@ public class DiscoveryEngine implements Runnable
 	 		        //See if the packet holds the right command (message)
 	 		        String message = new String(packet.getData()).trim();
 	 		        
-	 		       MsgEvent rme = null;
+	 		        MsgEvent rme = null;
 	 		       //DatagramPacket sendPacket = null;
 	 		      
 		  		try
