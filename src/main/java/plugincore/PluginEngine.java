@@ -462,7 +462,12 @@ public class PluginEngine {
 			  {
 				  	if(des.isQueue())
 					{
-				  		rAgents.add(des.getPhysicalName());
+				  		String physicalName = des.getPhysicalName();
+				  		if(!physicalName.equals(region + "_" + agent))
+				  		{
+				  			rAgents.add(physicalName);
+				  		}
+				  		
 					}
 			  }
         	}
