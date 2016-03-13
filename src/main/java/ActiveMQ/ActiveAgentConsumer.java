@@ -1,7 +1,6 @@
 package ActiveMQ;
 
 
-import javax.jms.Connection;
 import javax.jms.MessageConsumer;
 import javax.jms.Queue;
 import javax.jms.Session;
@@ -17,25 +16,17 @@ import shared.MsgEvent;
 import java.sql.Timestamp;
 
 
-public class ActiveConsumer implements Runnable
+public class ActiveAgentConsumer implements Runnable
 {
 	private Queue RXqueue; 
 	private Session sess;
 	private ActiveMQConnection conn;
-	private boolean isRegionalConsumer;
 	
-	public ActiveConsumer(String RXQueueName, String URI)
+	public ActiveAgentConsumer(String RXQueueName, String URI)
 	{
 		try
 		{
-			if(RXQueueName.contains("_"))
-			{
-				isRegionalConsumer = true;
-			}
-			else
-			{
-				isRegionalConsumer = false;
-			}
+			
 			//ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory("discovery:(multicast://default?group=test)?reconnectDelay=1000&maxReconnectAttempts=30&useExponentialBackOff=false");
 			//ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(URI);
 			//conn = factory.createConnection();
@@ -63,17 +54,9 @@ public class ActiveConsumer implements Runnable
 		//new Thread(new Sender(sess, TXqueue, RXQueueName)).start();
 		try
 		{
-			if(isRegionalConsumer)
-			{
-				PluginEngine.ConsumerThreadRegionActive = true;
-			}
-			else
-			{
 				PluginEngine.ConsumerThreadActive = true;
-			}
 			
 			MessageConsumer consumer = sess.createConsumer(RXqueue);
-			int count = 0;
 			while (PluginEngine.ConsumerThreadActive) 
 			{
 				TextMessage msg = (TextMessage) consumer.receive(1000);
@@ -98,9 +81,7 @@ public class ActiveConsumer implements Runnable
 						System.out.println("\n[" + new Timestamp(date.getTime()) + "] " + me.getParam("src_region") + "_" + me.getParam("src_agent") + " sent a message.");
 						System.out.print("Name of Agent to message: ");
 					}
-					//System.out.println("");
-					count = 0;
-					//}
+					
 				}
 			}
 			System.out.println("Cleaning up ActiveConsumer");
