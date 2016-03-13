@@ -145,10 +145,17 @@ public class DiscoveryEngine implements Runnable
 		  	 		     }
 		  	 		     
 		  	 		     synchronized (socket) {
-		  	 		    	 	packet = sendPacket(packet);
-		  	 		    	 	if(packet != null)
+		  	 		    	 	System.out.println("whut0");
+		  	 		    	 	DatagramPacket packet2 = sendPacket(packet);
+		  	 		    	 System.out.println("whut1");
+		  	 		    	 	
+		  	 		    	 	if(packet2 != null)
 		  	 		    	 	{
-		  	 		    	 		socket.send(packet);
+		  	 		    	 	System.out.println("whut2");
+		  	 		    	 	
+		  	 		    	 		socket.send(packet2);
+		  	 		    	 	System.out.println("whut3");
+		  	 		    	 	
 		  	 		    	 	}
 		  	 		     }
 		  	 		        //sendSucka(socket,packet);
@@ -159,7 +166,7 @@ public class DiscoveryEngine implements Runnable
 		    	}
 		    	catch(Exception ex)
 		    	{
-		    		System.out.println("DiscoveryEngineIPv6 : DiscoveryEngineWorkerIPv6 : Interface = "+ networkInterface.getDisplayName() + " : Run Error " + ex.toString());
+		    		System.out.println("DiscoveryEngineIPv6 : DiscoveryEngineWorkerIPv6 Run : Interface = "+ networkInterface.getDisplayName() + " : Run Error " + ex.toString());
 		    		System.out.println("Thread = " + Thread.currentThread().toString());
   	 		        
 		    	}
