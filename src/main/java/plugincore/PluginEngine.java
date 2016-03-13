@@ -261,7 +261,7 @@ public class PluginEngine {
     			}
     			if(cbrokerAddress != null)
     			{
-    				InetAddress remoteAddress = InetAddress.getByName(brokerAddress);
+    				InetAddress remoteAddress = InetAddress.getByName(cbrokerAddress);
     				if(remoteAddress instanceof Inet6Address)
     				{
     					cbrokerAddress = "[" + cbrokerAddress + "]";
