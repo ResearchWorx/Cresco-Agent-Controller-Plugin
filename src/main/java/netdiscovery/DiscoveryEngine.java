@@ -10,13 +10,12 @@ import java.net.InterfaceAddress;
 import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.net.SocketAddress;
-import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
-import netdiscovery.DiscoveryClientWorkerIPv6.IPv6Responder;
 import plugincore.PluginEngine;
 
 import com.google.gson.Gson;
@@ -136,26 +135,19 @@ public class DiscoveryEngine implements Runnable
 		  	 			        
 		  	 		        //Receive a packet
 		  	 		        byte[] recvBuf = new byte[15000];
-		  	 		        DatagramPacket packet = new DatagramPacket(recvBuf, recvBuf.length);
+		  	 		        DatagramPacket recPacket = new DatagramPacket(recvBuf, recvBuf.length);
 		  	 		        
 		  	 		        PluginEngine.responds++;
 		  	 		        
 		  	 		     synchronized (socket) {
-		  	 		        socket.receive(packet); //rec broadcast packet, could be IPv6 or IPv4
+		  	 		        socket.receive(recPacket); //rec broadcast packet, could be IPv6 or IPv4
 		  	 		     }
 		  	 		     
 		  	 		     synchronized (socket) {
-		  	 		    	 	System.out.println("whut0");
-		  	 		    	 	DatagramPacket packet2 = sendPacket(packet);
-		  	 		    	 System.out.println("whut1");
-		  	 		    	 	
-		  	 		    	 	if(packet2 != null)
+		  	 		    	 	DatagramPacket sendPacket = sendPacket(recPacket);
+		  	 		    	 	if(sendPacket != null)
 		  	 		    	 	{
-		  	 		    	 	System.out.println("whut2");
-		  	 		    	 	
-		  	 		    	 		socket.send(packet2);
-		  	 		    	 	System.out.println("whut3");
-		  	 		    	 	
+		  	 		    	 		socket.send(sendPacket);
 		  	 		    	 	}
 		  	 		     }
 		  	 		        //sendSucka(socket,packet);
@@ -173,6 +165,7 @@ public class DiscoveryEngine implements Runnable
 		    }
 		  	private String stripIPv6Address(InetAddress address)
 		  	{
+		  		
 		  		String sAddress = null;
 		  		try
 		  		{
@@ -190,22 +183,40 @@ public class DiscoveryEngine implements Runnable
 		  		return sAddress;
 		  		
 		  	}
-		  	private Map<String,Boolean> getInterfaceAddresses()
+		  	private String getSourceAddress(Map<String,String> intAddr, String remoteAddress)
 		  	{
-		  		Map<String, Boolean> intAddr = null;
+		  		String sAddress = null;
 		  		try
 		  		{
-		  			intAddr = new HashMap<String,Boolean>();
+		  			for (Entry<String, String> entry : intAddr.entrySet())
+		  			{
+		  				String cdirAddress = entry.getKey() + "/" + entry.getValue();
+		  				CIDRUtils cutil = new CIDRUtils(cdirAddress);
+		  				if(cutil.isInRange(remoteAddress))
+		  				{
+		  					sAddress = entry.getKey();
+		  				}
+		  			}
+		  			
+		  		}
+		  		catch(Exception ex)
+		  		{
+		  			System.out.println("DiscoveryEngine : getSourceAddress Error " + ex.getMessage());
+		  		}
+		  		return sAddress;
+		  		
+		  	}
+		  	private Map<String,String> getInterfaceAddresses()
+		  	{
+		  		Map<String, String> intAddr = null;
+		  		try
+		  		{
+		  			intAddr = new HashMap<String,String>();
 		  			for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) 
 		  		    {
-		  				InetAddress inAddr = interfaceAddress.getAddress();
+		  				Short aPrefix = interfaceAddress.getNetworkPrefixLength();
 		  				String hostAddress = stripIPv6Address(interfaceAddress.getAddress());
-		  				boolean isIPv6 = false;
-		  				if(inAddr instanceof Inet6Address)
-		  				{
-		  					isIPv6 = true;
-		  				}
-		  				intAddr.put(hostAddress, isIPv6);
+		  				intAddr.put(hostAddress, aPrefix.toString());
 		  		    }
 		  		}
 		  		catch(Exception ex)
@@ -219,7 +230,7 @@ public class DiscoveryEngine implements Runnable
 		    {
 		    	synchronized (packet) 
 		    	{
-		    		Map<String,Boolean> intAddr = getInterfaceAddresses();
+		    		Map<String,String> intAddr = getInterfaceAddresses();
 		    		InetAddress returnAddr = packet.getAddress();
 		    	
 		    		String remoteAddress = stripIPv6Address(returnAddr);
@@ -228,7 +239,16 @@ public class DiscoveryEngine implements Runnable
 	 		  //if((!PluginEngine.isLocal(remoteAddress)) && (isGlobal))
 		    		if(!(intAddr.containsKey(remoteAddress)) && (isGlobal))
 			 		{
-	 		         
+		    		
+		    		String sAddress = getSourceAddress(intAddr,remoteAddress);
+		    		if(sAddress != null)
+		    		{
+		    			System.out.println("SOURCE ADDRESS = " + sAddress + " REMOTE ADDRESS: " + remoteAddress);
+		    		}
+		    		else
+		    		{
+		    			System.out.println("DROP PACKET!");
+		    		}
 	 		        //Packet received
 	 		        //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
 	 		        //System.out.println(getClass().getName() + ">>>Packet received; data: " + new String(packet.getData()));
