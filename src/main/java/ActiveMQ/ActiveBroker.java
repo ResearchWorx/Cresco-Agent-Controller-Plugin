@@ -66,9 +66,11 @@ return connector;
 				PolicyEntry entry = new PolicyEntry();
 		        entry.setGcInactiveDestinations(true);
 		        entry.setInactiveTimeoutBeforeGC(5000);
+		        //entry.setMemoryLimit(memoryLimit);
 		        PolicyMap map = new PolicyMap();
 		        map.setDefaultEntry(entry);
 				
+		        
 				broker = new BrokerService();
 				broker.setUseShutdownHook(false);
 				broker.setPersistent(false);
@@ -76,6 +78,7 @@ return connector;
 				broker.setSchedulePeriodForDestinationPurge(2500);
 				broker.setDestinationPolicy(map);
 				broker.setUseJmx(false);
+				
 				//NetworkConnector connector = bridge
 				//connector.
 				// = new NetworkConnector();
