@@ -235,21 +235,12 @@ public class DiscoveryEngine implements Runnable
 		    	
 		    		String remoteAddress = stripIPv6Address(returnAddr);
 		    		boolean isGlobal = !returnAddr.isSiteLocalAddress() && !returnAddr.isLinkLocalAddress();
-	 		   
-	 		  //if((!PluginEngine.isLocal(remoteAddress)) && (isGlobal))
-		    		if(!(intAddr.containsKey(remoteAddress)) && (isGlobal))
-			 		{
+		    		String sourceAddress = getSourceAddress(intAddr,remoteAddress);
 		    		
-		    		String sAddress = getSourceAddress(intAddr,remoteAddress);
-		    		if(sAddress != null)
-		    		{
-		    			System.out.println("SOURCE ADDRESS = " + sAddress + " REMOTE ADDRESS: " + remoteAddress);
-		    		}
-		    		else
-		    		{
-		    			System.out.println("DROP PACKET!");
-		    		}
-	 		        //Packet received
+	 		  //if((!PluginEngine.isLocal(remoteAddress)) && (isGlobal))
+		    		if(!(intAddr.containsKey(remoteAddress)) && (isGlobal) && (sourceAddress != null))
+			 		{
+		    		//Packet received
 	 		        //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
 	 		        //System.out.println(getClass().getName() + ">>>Packet received; data: " + new String(packet.getData()));
 
@@ -322,6 +313,10 @@ public class DiscoveryEngine implements Runnable
 	 	   
 		    	
 	 		        }
+		    		else
+		    		{
+		    			packet = null;
+		    		}
 		    	return packet;
 			      
 		    	}
