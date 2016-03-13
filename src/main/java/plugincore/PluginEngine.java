@@ -349,7 +349,7 @@ public class PluginEngine {
 						for(String str : rAgents)
 						{
 							System.out.println("\t"+str);
-							sendMessage(MsgEventType.INFO, str, "Test Message!");
+							sendMessage(MsgEventType.INFO, str, "ping");
 						}
 						System.out.println("\tSent message to " + rAgents.size() + " agents");
 						
@@ -358,7 +358,7 @@ public class PluginEngine {
 				}
 				else
 				{
-					sendMessage(MsgEventType.INFO, input, "Test Message!");
+					sendMessage(MsgEventType.INFO, input, "ping");
 				}
 			}
 		}
