@@ -73,7 +73,15 @@ public boolean sendMessage(MsgEvent sm)
 	try
 	{
 		ActiveProducerWorker apw = null;
-		String dstPath = sm.getParam("dst_region") + "_" + sm.getParam("dst_agent");
+		String dstPath = null;
+		if(PluginEngine.isBroker)
+		{
+			dstPath = sm.getParam("dst_region") + "_" + sm.getParam("dst_agent");
+		}
+		else
+		{
+			dstPath = sm.getParam("dst_region"); //send to broker for routing
+		}
 		if(producerWorkers.containsKey(dstPath))
 		{
 			if(PluginEngine.isReachableAgent(dstPath))
