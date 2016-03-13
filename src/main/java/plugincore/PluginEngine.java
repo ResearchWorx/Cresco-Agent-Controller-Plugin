@@ -202,15 +202,16 @@ public class PluginEngine {
         dcv6 = new DiscoveryClientIPv6();
         //dc = new DiscoveryClientIPv4();
         
-        try{
+        try
+        {
         	System.out.println("Broker Search IPv6:");
     		dcv6.getDiscoveryMap(2000);
         	//System.out.println("Broker Search IPv4:");
     		//dc.getDiscoveryMap(2000);
     		if(incomingCanidateBrokers.isEmpty())
     		{
-    			//Start IPv6 network discovery engine
-    	    	Thread dev6 = new Thread(new DiscoveryEngine());
+    			//Start controller services
+    			Thread dev6 = new Thread(new DiscoveryEngine());
     	    	dev6.start();
     	    	while(!DiscoveryActive)
     	        {
@@ -218,6 +219,14 @@ public class PluginEngine {
     	        }
     	        System.out.println("IPv6 DiscoveryEngine Started..");
     			
+    	        Thread abm = new Thread(new ActiveBrokerManager());
+    	    	abm.start();
+    	    	while(!ActiveBrokerManagerActive)
+    	        {
+    	        	Thread.sleep(1000);
+    	        }
+    	        System.out.println("ActiveBrokerManager Started..");
+    	        
     		}
     		
     		
@@ -405,7 +414,6 @@ public class PluginEngine {
     	
     	return rAgents;
     }
-    
     
     public static boolean isReachableAgent(String remoteAgentPath)
     {
