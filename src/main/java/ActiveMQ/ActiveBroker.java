@@ -4,13 +4,10 @@ import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.broker.TransportConnector;
 import org.apache.activemq.broker.region.policy.PolicyEntry;
 import org.apache.activemq.broker.region.policy.PolicyMap;
-import org.apache.activemq.command.ActiveMQDestination;
 import org.apache.activemq.network.NetworkConnector;
 import org.apache.activemq.util.ServiceStopper;
-import org.slf4j.LoggerFactory;
 
 import shared.RandomString;
-import ch.qos.logback.classic.Level;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
@@ -23,6 +20,7 @@ public class ActiveBroker {
 	public static BrokerService broker;
 	public static TransportConnector connector;
 	
+	/*
 	private NetworkConnector bridge(BrokerService from, BrokerService to) throws Exception {
 		   TransportConnector toConnector = to.getTransportConnectors().get(0);
 		   NetworkConnector bridge = from.addNetworkConnector("static://" + toConnector.getPublishableConnectString());
@@ -30,6 +28,7 @@ public class ActiveBroker {
 		   //bridge.addStaticallyIncludedDestination(replyQWildcard);
 		   return bridge;
 		}
+		*/
 	/*
 	protected NetworkConnector bridgeBrokers(String localBrokerName,
             String remoteBrokerName,

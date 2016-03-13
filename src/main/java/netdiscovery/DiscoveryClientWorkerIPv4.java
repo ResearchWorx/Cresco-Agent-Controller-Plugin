@@ -8,13 +8,7 @@ import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -133,7 +127,7 @@ class StopListnerTask extends TimerTask {
 	  }
 
 	  // Broadcast the message over all the network interfaces
-	  Enumeration interfaces = NetworkInterface.getNetworkInterfaces();
+	  Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
 	  while (interfaces.hasMoreElements()) {
 	    NetworkInterface networkInterface = (NetworkInterface) interfaces.nextElement();
 

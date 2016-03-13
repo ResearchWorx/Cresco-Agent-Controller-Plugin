@@ -328,41 +328,6 @@ public class DiscoveryEngine implements Runnable
 		    
 	  }
 	  	
-	  private boolean sendDiscovery(DatagramPacket sendPacket) throws IOException
-	  {
-		  boolean isSent = false;
-
-		     //System.out.println(getClass().getName() + "3 " + Thread.currentThread().getId());
-		      DatagramSocket sendSocket = null;
-		      //try
-		      //{
-		    	  sendSocket = new DatagramSocket();
-		    	  
-		    	  //SocketAddress sa = new InetSocketAddress(returnAddr,returnPort);
-		    	  //sendSocket.connect(sa);
-		      	  sendSocket.send(sendPacket);
-		      	  sendSocket.close();
-		      	  isSent = true;
-		      //}
-		   	  //catch(Exception ex)
-		      //{
-		   		  //eat error
-	  			//System.out.println(getClass().getName() + " DiscoveryEngine sendDiscovery Error : " + ex.getMessage());
-	  		  //}
-		    
-		  return isSent;
-	  }
- 
-	  private Inet6Address getInet6AddressByName(String host) throws UnknownHostException, SecurityException
-	  {
-	      for(InetAddress addr : InetAddress.getAllByName(host))
-	      {
-	          if(addr instanceof Inet6Address)
-	              return (Inet6Address)addr;
-	      }
-	      throw new UnknownHostException("No IPv6 address found for " + host);
-	  }
-	  
 	  public class DiscoveryResponder implements Runnable {
 
 			DatagramPacket packet = null;

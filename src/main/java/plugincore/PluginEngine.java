@@ -8,7 +8,6 @@ import org.apache.commons.configuration.SubnodeConfiguration;
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Level;
-import netdiscovery.DiscoveryClientIPv4;
 import netdiscovery.DiscoveryClientIPv6;
 import netdiscovery.DiscoveryEngine;
 import shared.MsgEvent;
@@ -314,6 +313,7 @@ public class PluginEngine {
 
 		while (true) {
 			System.out.print("Name of Agent to message: ");
+			@SuppressWarnings("resource")
 			Scanner scanner = new Scanner(System.in);
 			String input = scanner.nextLine();
 			if(input.length() == 0)

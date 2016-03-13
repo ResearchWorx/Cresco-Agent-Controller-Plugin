@@ -1,11 +1,8 @@
 package netdiscovery;
 
 import java.net.Inet6Address;
-import java.util.List;
-import java.util.Map;
 
 import plugincore.PluginEngine;
-import shared.MsgEvent;
 
 public class DiscoveryClientIPv6 
 {
