@@ -279,6 +279,9 @@ public class DiscoveryEngine implements Runnable
 	 		          me.setParam("src_agent",PluginEngine.agent);
 	 		          me.setParam("dst_ip", remoteAddress);
 	 		          me.setParam("dst_port", String.valueOf(packet.getPort()));
+	 		          me.setParam("agent_count", String.valueOf(PluginEngine.reachableAgents().size()));
+	 		          
+	 		          
 	 		          //PluginEngine.discoveryResponse.offer(me);
 	 		          //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress() +  " Sent to broker. " + PluginEngine.discoveryResponse.size());
 	 		         //System.out.println(getClass().getName() + "2 " + Thread.currentThread().getId());
