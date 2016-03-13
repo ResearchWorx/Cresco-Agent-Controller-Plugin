@@ -100,6 +100,7 @@ public class PluginEngine {
 	            	ActiveDestManagerActive = false;
 					//Thread.sleep(500);
 	            	ActiveBrokerManagerActive = false;
+	            	
 					Thread.sleep(1000);
 	            	 
 	            	
@@ -324,11 +325,12 @@ public class PluginEngine {
 				}
 				else
 				{
-					System.out.println("\tFound " + rAgents.size() + " agents");
 					for(String str : rAgents)
 					{
 						System.out.println("\t" + str);
 					}
+					System.out.println("\tFound " + rAgents.size() + " agents");
+					
 					
 				}
 			}
@@ -349,6 +351,8 @@ public class PluginEngine {
 							System.out.println("\t"+str);
 							sendMessage(MsgEventType.INFO, str, "Test Message!");
 						}
+						System.out.println("\tSent message to " + rAgents.size() + " agents");
+						
 						
 					}
 				}
