@@ -211,6 +211,8 @@ public class PluginEngine {
     		if(incomingCanidateBrokers.isEmpty())
     		{
     			//Start controller services
+    			
+    			//discovery engine
     			Thread dev6 = new Thread(new DiscoveryEngine());
     	    	dev6.start();
     	    	while(!DiscoveryActive)
@@ -219,6 +221,10 @@ public class PluginEngine {
     	        }
     	        System.out.println("IPv6 DiscoveryEngine Started..");
     			
+    	        //broker 
+    	        broker = new ActiveBroker(agentpath);
+    	        
+    	        //broker manager
     	        Thread abm = new Thread(new ActiveBrokerManager());
     	    	abm.start();
     	    	while(!ActiveBrokerManagerActive)
