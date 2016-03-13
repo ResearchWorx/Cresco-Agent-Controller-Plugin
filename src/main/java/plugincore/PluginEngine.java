@@ -215,8 +215,6 @@ public class PluginEngine {
     		//dc.getDiscoveryMap(2000);
     		if(incomingCanidateBrokers.isEmpty())
     		{
-    			System.out.println("START BROKER INIT");
-    			
     			//Start controller services
     			
     			//discovery engine
@@ -249,23 +247,22 @@ public class PluginEngine {
     	    	{
     	    		brokerAddress = "localhost";
     	    	}
-    	        /*
+    	        
     	        //consumer region 
     	        Thread ct = null;
-    	    	ct = new Thread(new ActiveConsumer(region,"tcp://" + brokerAddress + ":32010"));
+    	    	ct = new Thread(new ActiveRegionConsumer(region,"tcp://" + brokerAddress + ":32010"));
     	    	ct.start();
     	    	while(!ConsumerThreadRegionActive)
     	        {
     	        	Thread.sleep(1000);
     	        }
     	        System.out.println("Region ConsumerThread Started..");
-        		*/
+        		
     	        isBroker = true;
-    	        System.out.println("BROKER INI COMPLETE");
+    	        
     		}
     		else
     		{
-    			System.out.println("START SLAVE INIT");
     			//determine least loaded broker
     			//need to use additional metrics to determine best fit broker
     			String cbrokerAddress = null;
@@ -287,11 +284,9 @@ public class PluginEngine {
     				}
     				brokerAddress = cbrokerAddress;
     			}
-    			System.out.println("SLAVE INIT COMPLETE");
     			
     		}
     		
-    		System.out.println("START CONSUMER INIT");
     		//consumer agent 
 	        Thread ct = null;
 	    	ct = new Thread(new ActiveAgentConsumer(agentpath,"tcp://" + brokerAddress + ":32010"));
