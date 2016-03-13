@@ -34,9 +34,8 @@ public class PluginEngine {
 	public static ActiveProducer ap;
 	
 	public static String brokerAddress;
-	
+	public static boolean isBroker = false;
 	public static boolean isIPv6 = false;
-	
 	public static boolean isActive = true;
 	
 	public static int responds = 0;
@@ -246,6 +245,7 @@ public class PluginEngine {
     	    	{
     	    		brokerAddress = "localhost";
     	    	}
+    	        isBroker = true;
     		}
     		else
     		{
@@ -449,9 +449,13 @@ public class PluginEngine {
     public static List<String> reachableAgents()
     {
     	List<String> rAgents = null;
+    	
     	try
     	{
     		rAgents = new ArrayList<String>();
+    		
+    		if(isBroker)
+        	{
     		
     		ActiveMQDestination[] er = broker.broker.getBroker().getDestinations();
 			  for(ActiveMQDestination des : er)
@@ -461,12 +465,16 @@ public class PluginEngine {
 				  		rAgents.add(des.getPhysicalName());
 					}
 			  }
+        	}
+    		else
+    		{
+    			rAgents.add(region); //just return regional controller
+    		}
     	}
     	catch(Exception ex)
     	{
     		System.out.println("PluginEngine : isReachableAgent");
     	}
-    	
     	
     	return rAgents;
     }
@@ -474,6 +482,8 @@ public class PluginEngine {
     public static boolean isReachableAgent(String remoteAgentPath)
     {
     	boolean isReachableAgent = false;
+    	if(isBroker)
+    	{
     	try
     	{
     		ActiveMQDestination[] er = broker.broker.getBroker().getDestinations();
@@ -502,10 +512,14 @@ public class PluginEngine {
     	}
     	catch(Exception ex)
     	{
-    		System.out.println("PluginEngine : isReachableAgent");
+    		System.out.println("PluginEngine : isReachableAgent Error " + ex.getMessage());
     	}
-    	
-    	
+    	}
+    	else
+    	{
+    		//send all messages to regional controller if not broker
+    		isReachableAgent = true;
+    	}
     	return isReachableAgent;
     }
     
