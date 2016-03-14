@@ -55,7 +55,7 @@ public ActiveProducer(String URI)
 	
 	try
 	{
-		producerWorkers = new ConcurrentHashMap<String,ActiveProducerWorker>();
+		producerWorkers = new ConcurrentHashMap<>();
 		this.URI = URI;
 		timer = new Timer();
 		timer.scheduleAtFixedRate(new ClearProducerTask(), 5000, 5000);//start at 5000 end at 5000
@@ -73,7 +73,7 @@ public boolean sendMessage(MsgEvent sm)
 	try
 	{
 		ActiveProducerWorker apw = null;
-		String dstPath = null;
+		String dstPath;
 		if(PluginEngine.isBroker)
 		{
 			dstPath = sm.getParam("dst_region") + "_" + sm.getParam("dst_agent");

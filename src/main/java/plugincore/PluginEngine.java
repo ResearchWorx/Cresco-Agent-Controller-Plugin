@@ -1,15 +1,15 @@
 package plugincore;
 
-
 import ActiveMQ.*;
 
 import org.apache.activemq.command.ActiveMQDestination;
 import org.apache.commons.configuration.SubnodeConfiguration;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.qos.logback.classic.Level;
 import netdiscovery.DiscoveryClientIPv6;
 import netdiscovery.DiscoveryEngine;
+//import shared.Clogger;
 import shared.MsgEvent;
 import shared.MsgEventType;
 import shared.RandomString;
@@ -33,13 +33,13 @@ public class PluginEngine {
 	public static boolean ConsumerThreadRegionActive = false;
 	
 	public static boolean restartOnShutdown = false;
-	
+
 	public static Thread discoveryEngineThread;
 	public static Thread activeBrokerManagerThread;
 	public static Thread consumerRegionThread;
 	public static Thread consumerAgentThread;
 	public static WatchDog watchDogProcess;
-	
+
 	public static ActiveProducer ap;
 	
 	public static String brokerAddress;
@@ -61,26 +61,24 @@ public class PluginEngine {
 	
 	//public static DiscoveryClientIPv4 dc;
 	public static DiscoveryClientIPv6 dcv6;
+
+	//public static Clogger logger;
+	private static final Logger logger = LoggerFactory.getLogger(PluginEngine.class);
 	
-	
-	public String getName()
-	{
+	public String getName() {
 		return "Name";	
 	}
-	public String getVersion()
-	{
+	public String getVersion() {
 		return "Version";
-				
 	}
-	public void msgIn(MsgEvent command)
-	{
+	public void msgIn(MsgEvent command) {
 		
 	}
 	public static void shutdown()
 	{
 		try
 		{
-			
+
 			System.out.println("Shutting down!");
 			if(watchDogProcess != null)
 			{
@@ -88,7 +86,7 @@ public class PluginEngine {
 				watchDogProcess = null;
 			}
 			System.out.println("WatchDog stopped..");
-			
+
 			DiscoveryActive = false;
 			if(discoveryEngineThread != null)
 			{
@@ -96,7 +94,7 @@ public class PluginEngine {
 				discoveryEngineThread.join();
 				isActive = false;
 				System.out.println("discoveryEngineThread shutdown");
-				
+
 			}
 			ConsumerThreadRegionActive = false;
 			if(consumerRegionThread != null)
@@ -104,32 +102,32 @@ public class PluginEngine {
 				System.out.println("consumerRegionThread start");
 				consumerRegionThread.join();
 				System.out.println("consumerRegionThread shutdown");
-				
+
 			}
-			
+
 			ConsumerThreadActive = false;
 			if(consumerAgentThread != null)
 			{
 				System.out.println("consumerAgentThread start");
 				consumerAgentThread.join();
 				System.out.println("consumerAgentThread shutdown");
-				
+
 			}
-			
+
 			ActiveBrokerManagerActive = false;
 			if(activeBrokerManagerThread != null)
 			{
 				System.out.println("activeBrokerManagerThread start");
 				activeBrokerManagerThread.join();
 				System.out.println("activeBrokerManagerThread shutdown");
-				
+
 			}
 			if(broker != null)
 			{
 				System.out.println("broker start");
 				broker.stopBroker();
 				System.out.println("broker shutdown");
-				
+
 			}
 			if(restartOnShutdown)
 			{
@@ -143,23 +141,22 @@ public class PluginEngine {
 		}
 		
 	}
-	public boolean initialize(ConcurrentLinkedQueue<MsgEvent> msgOutQueue,ConcurrentLinkedQueue<MsgEvent> msgInQueue, SubnodeConfiguration configObj, String region,String agent, String plugin)  
-	{
+	public boolean initialize(ConcurrentLinkedQueue<MsgEvent> msgOutQueue, ConcurrentLinkedQueue<MsgEvent> msgInQueue, SubnodeConfiguration configObj, String region, String agent, String plugin) {
+		//logger = new Clogger(msgOutQueue, region, agent, plugin);
 		return true;
 	}
 	
 	public static ActiveBroker broker;
-	
-	
-	
-    public static void main(String[] args) throws Exception 
+
+
+
+    public static void main(String[] args) throws Exception
     {
     	
     	if(args.length == 1)
     	{
     		Thread.sleep(Integer.parseInt(args[0])*1000);
     	}
-    	//Cleanup on Shutdown
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 	        public void run() {
 	            try
@@ -172,18 +169,13 @@ public class PluginEngine {
 	            }
 	        }
 	    }, "Shutdown-thread"));
-		
-    	
+
+		logger.debug("Generating Agent identity");
     	region = "region0";
     	RandomString rs = new RandomString(4);
 		agent = "agent-" + rs.nextString();
 		agentpath = region + "_" + agent;
-    	
-    	ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger)LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
-    	//rootLogger.setLevel(Level.toLevel("debug"));
-    	//rootLogger.setLevel(Level.toLevel("none"));
-    	rootLogger.setLevel(Level.ERROR);
-    	
+
     	/*//disabled ipv4 discovery
     	//Start IPv4 network discovery engine
     	Thread de = new Thread(new DiscoveryEngine());
@@ -197,10 +189,10 @@ public class PluginEngine {
 		*/
         
         commInit(); //initial init
-        
+
 		System.out.println("Agent [" + agentpath + "] running...");
 
-		
+
 		while (true) {
 			System.out.print("Name of Agent to message: ");
 			@SuppressWarnings("resource")
@@ -220,8 +212,8 @@ public class PluginEngine {
 						System.out.println("\t" + str);
 					}
 					System.out.println("\tFound " + rAgents.size() + " agents");
-					
-					
+
+
 				}
 			}
 			else
@@ -242,8 +234,8 @@ public class PluginEngine {
 							sendMessage(MsgEventType.INFO, str, "ping");
 						}
 						System.out.println("\tSent message to " + rAgents.size() + " agents");
-						
-						
+
+
 					}
 				}
 				else
@@ -256,21 +248,21 @@ public class PluginEngine {
 
     public static void commInit()
     {
-    	PluginEngine.isActive = true; 
+    	PluginEngine.isActive = true;
         try
         {
-        	brokeredAgents = new ConcurrentHashMap<String,BrokeredAgent>(); 
-        	incomingCanidateBrokers = new ConcurrentLinkedQueue<MsgEvent>();
-        	outgoingMessages = new ConcurrentLinkedQueue<MsgEvent>();
+        	brokeredAgents = new ConcurrentHashMap<>();
+        	incomingCanidateBrokers = new ConcurrentLinkedQueue<>();
+        	outgoingMessages = new ConcurrentLinkedQueue<>();
         	brokerAddress = null;
         	isIPv6 = isIPv6();
-        	
+
         	dcv6 = new DiscoveryClientIPv6();
             //dc = new DiscoveryClientIPv4();
-            
+
         	System.out.println("Broker Search...");
     		dcv6.getDiscoveryMap(2000);
-        	//System.out.println("Broker Search IPv4:");
+			//logger.info("Broker search IPv4:");
     		//dc.getDiscoveryMap(2000);
     		if(incomingCanidateBrokers.isEmpty())
     		{
@@ -285,7 +277,7 @@ public class PluginEngine {
     	        }
     	        System.out.println("IPv6 DiscoveryEngine Started..");
     			
-    	        //broker 
+    	        logger.info("Starting ActiveBroker");
     	        broker = new ActiveBroker(agentpath);
     	        
     	        
@@ -298,17 +290,14 @@ public class PluginEngine {
     	        }
     	        System.out.println("ActiveBrokerManager Started..");
     	        
-    	        if(isIPv6) //set broker address for consumers and producers
-    	    	{
-    	    		brokerAddress = "[::1]";	
-    	    	}
-    	    	else
-    	    	{
+    	        if(isIPv6) { //set broker address for consumers and producers
+    	    		brokerAddress = "[::1]";
+    	    	} else {
     	    		brokerAddress = "localhost";
     	    	}
     	        
     	        //consumer region 
-    	        consumerRegionThread = new Thread(new ActiveRegionConsumer(region,"tcp://" + brokerAddress + ":32010"));
+    	        consumerRegionThread = new Thread(new ActiveRegionConsumer(region, "tcp://" + brokerAddress + ":32010"));
     	        consumerRegionThread.start();
     	    	while(!ConsumerThreadRegionActive)
     	        {
@@ -318,26 +307,20 @@ public class PluginEngine {
         		
     	        isBroker = true;
     	        
-    		}
-    		else
-    		{
+    		} else {
     			//determine least loaded broker
     			//need to use additional metrics to determine best fit broker
     			String cbrokerAddress = null;
     			int brokerCount = -1;
-    			for(MsgEvent bm : incomingCanidateBrokers)
-    			{
+    			for (MsgEvent bm : incomingCanidateBrokers) {
     				int tmpBrokerCount = Integer.parseInt(bm.getParam("agent_count"));
-    				if(brokerCount < tmpBrokerCount)
-    				{
+    				if(brokerCount < tmpBrokerCount) {
     					cbrokerAddress = bm.getParam("dst_ip");
     				}
     			}
-    			if(cbrokerAddress != null)
-    			{
+    			if (cbrokerAddress != null) {
     				InetAddress remoteAddress = InetAddress.getByName(cbrokerAddress);
-    				if(remoteAddress instanceof Inet6Address)
-    				{
+    				if(remoteAddress instanceof Inet6Address) {
     					cbrokerAddress = "[" + cbrokerAddress + "]";
     				}
     				brokerAddress = cbrokerAddress;
@@ -359,195 +342,136 @@ public class PluginEngine {
     		
 	        watchDogProcess = new WatchDog();
 	        System.out.println("Watchdog Started");
-	        
-    		
+
+
     	}
     	catch(Exception e)
     	{
     		System.out.println("PluginEngine : commInit Error " + e.toString());
     	}
     }
+
     
-    
-    public static void sendMessage(MsgEventType type, String targetAgent, String msg) {
+    public static boolean sendMessage(MsgEventType type, String targetAgent, String msg) {
 		if (isReachableAgent(targetAgent)) {
-			System.out.println("Sending to Agent [" + targetAgent + "]");
+			logger.debug("Sending message to Agent [{}]", targetAgent);
 			String[] str = targetAgent.split("_");
 			MsgEvent sme = new MsgEvent(type, region, agent, plugin, msg);
 			sme.setParam("src_region", region);
 			sme.setParam("src_agent", agent);
 			sme.setParam("dst_region", str[0]);
-			if(str.length == 2) //send to region if agent does not exist
-			{
-				sme.setParam("dst_agent", str[1]);
+			if(str.length == 2) {
+				sme.setParam("dst_agent", str[1]); //send to region if agent does not exist
 			}
 			ap.sendMessage(sme);
+			return true;
 		} else {
-			System.out.println("Cannot reach Agent [" + targetAgent + "]");
+			logger.error("Attempted to send message to unreachable agent [{}]", targetAgent);
+			return false;
 		}
 	}
     
     
-    public static boolean isLocal(String checkAddress)
-    {
+    public static boolean isLocal(String checkAddress) {
     	boolean isLocal = false;
-    	
-    	if(checkAddress.contains("%"))
-    	{
+    	if(checkAddress.contains("%")) {
     		String[] checkScope = checkAddress.split("%");
     		checkAddress = checkScope[0];
     	}
-    	
     	List<String> localAddressList = localAddresses();
-    	for(String localAddress : localAddressList)
-    	{
-    		//System.out.println("Checking: " + checkAddress + " localAddress: " + localAddress);
-    		if(localAddress.contains(checkAddress))
-    		{
+    	for(String localAddress : localAddressList) {
+    		if(localAddress.contains(checkAddress)) {
     			isLocal = true;
     		}
     	}
     	return isLocal;
     }
-    public static List<String> localAddresses()
-    {
-    	List<String> localAddressList = new ArrayList<String>();
-    	try
-    	{
-    	Enumeration<NetworkInterface> inter = NetworkInterface.getNetworkInterfaces();
-		  while (inter.hasMoreElements()) 
-		  {
-		    NetworkInterface networkInter = (NetworkInterface) inter.nextElement();
-		    for (InterfaceAddress interfaceAddress : networkInter.getInterfaceAddresses()) 
-		    {
-		    	String localAddress = interfaceAddress.getAddress().getHostAddress();
-		    	if(localAddress.contains("%"))
-		    	{
-		    		String[] localScope = localAddress.split("%");
-		    		localAddress = localScope[0];
-		    	}
-		    	if(!localAddressList.contains(localAddress))
-		    	{
-		    		localAddressList.add(localAddress);
-		    	}
-		    }
-		  }
-    	}
-    	catch(Exception ex)
-    	{
-    		System.out.println("PluginEngine : localAddresses Error " + ex.toString());
+
+    public static List<String> localAddresses() {
+    	List<String> localAddressList = new ArrayList<>();
+    	try {
+			Enumeration<NetworkInterface> inter = NetworkInterface.getNetworkInterfaces();
+			while (inter.hasMoreElements()) {
+				NetworkInterface networkInter = inter.nextElement();
+				for (InterfaceAddress interfaceAddress : networkInter.getInterfaceAddresses()) {
+					String localAddress = interfaceAddress.getAddress().getHostAddress();
+					if(localAddress.contains("%")) {
+						String[] localScope = localAddress.split("%");
+						localAddress = localScope[0];
+					}
+					if(!localAddressList.contains(localAddress)) {
+						localAddressList.add(localAddress);
+					}
+				}
+			}
+    	} catch(Exception ex) {
+			logger.error("localAddresses Error: {}", ex.getMessage());
     	}
     	return localAddressList;
     }
     
-    public static boolean isIPv6()
-    {
+    public static boolean isIPv6() {
     	boolean isIPv6 = false;
-    	try
-    	{
+    	try {
     		Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-  	 	  	while (interfaces.hasMoreElements()) 
-  	 	  	{
-  	 	  		NetworkInterface networkInterface = (NetworkInterface) interfaces.nextElement();
+  	 	  	while (interfaces.hasMoreElements()) {
+  	 	  		NetworkInterface networkInterface = interfaces.nextElement();
   	 	  		if (networkInterface.getDisplayName().startsWith("veth") || networkInterface.isLoopback() || !networkInterface.isUp() || !networkInterface.supportsMulticast() || networkInterface.isPointToPoint() || networkInterface.isVirtual()) {
   	 	  			continue; // Don't want to broadcast to the loopback interface
   	 	  		}
-  		    
-  	 	  		if(networkInterface.supportsMulticast())
-  	 	  		{
-  	 	  			for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses())
-  	 	  			{
-  	 	  				if((interfaceAddress.getAddress() instanceof Inet6Address))
-  	 	  				{
+  	 	  		if(networkInterface.supportsMulticast()) {
+  	 	  			for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
+  	 	  				if ((interfaceAddress.getAddress() instanceof Inet6Address)) {
   		        		  isIPv6 = true;
   	 	  				}
-  		        	 }
+					}
   	 	  		}
-    		
   	 	  	}
-    	}
-    	catch(Exception ex)
-    	{
-    		System.out.println("PluginEngine : isIPv6 Error " + ex.toString());
+    	} catch(Exception ex) {
+			logger.error("isIPv6 Error: {}", ex.getMessage());
     	}
     	return isIPv6;
     }
     
-    public static List<String> reachableAgents()
-    {
+    public static List<String> reachableAgents() {
     	List<String> rAgents = null;
-    	
-    	try
-    	{
-    		rAgents = new ArrayList<String>();
-    		
-    		if(isBroker)
-        	{
-    		
-    		ActiveMQDestination[] er = broker.broker.getBroker().getDestinations();
-			  for(ActiveMQDestination des : er)
-			  {
-				  	if(des.isQueue())
-					{
-				  			rAgents.add(des.getPhysicalName());	
+    	try {
+    		rAgents = new ArrayList<>();
+    		if(isBroker) {
+    			ActiveMQDestination[] er = ActiveBroker.broker.getBroker().getDestinations();
+				for(ActiveMQDestination des : er) {
+					if(des.isQueue()) {
+						rAgents.add(des.getPhysicalName());
 					}
-			  }
-        	}
-    		else
-    		{
+				}
+        	} else {
     			rAgents.add(region); //just return regional controller
     		}
+    	} catch(Exception ex) {
+			logger.error("isReachableAgent Error: {}", ex.getMessage());
     	}
-    	catch(Exception ex)
-    	{
-    		System.out.println("PluginEngine : isReachableAgent");
-    	}
-    	
     	return rAgents;
     }
     
-    public static boolean isReachableAgent(String remoteAgentPath)
-    {
+    public static boolean isReachableAgent(String remoteAgentPath) {
     	boolean isReachableAgent = false;
-    	if(isBroker)
-    	{
-    	try
-    	{
-    		ActiveMQDestination[] er = broker.broker.getBroker().getDestinations();
-			  for(ActiveMQDestination des : er)
-			  {
-				  	if(des.isQueue())
-					{
-				  		String testPath = des.getPhysicalName();
-				  		if(testPath.equals(remoteAgentPath))
-				  		{
-				  			isReachableAgent = true;				  			
-			  				
-				  			/*
-				  			if(brokeredAgents.containsKey(remoteAgentPath))
-				  			{
-				  				if(brokeredAgents.get(remoteAgentPath).brokerStatus == BrokerStatusType.ACTIVE)
-				  				{
-				  					isReachableAgent = true;				  			
-				  				}
-				  			}
-				  			*/
-				  		}
-				  		
-					}
-			  }
-    	}
-    	catch(Exception ex)
-    	{
-    		System.out.println("PluginEngine : isReachableAgent Error " + ex.getMessage());
-    	}
-    	}
-    	else
-    	{
-    		//send all messages to regional controller if not broker
-    		isReachableAgent = true;
+    	if(isBroker) {
+			try {
+				ActiveMQDestination[] er = ActiveBroker.broker.getBroker().getDestinations();
+				  for(ActiveMQDestination des : er) {
+						if(des.isQueue()) {
+							String testPath = des.getPhysicalName();
+							if(testPath.equals(remoteAgentPath)) {
+								isReachableAgent = true;
+							}
+						}
+				  }
+			} catch(Exception ex) {
+				logger.error("isReachableAgent Error: {}", ex.getMessage());
+			}
+    	} else {
+    		isReachableAgent = true; //send all messages to regional controller if not broker
     	}
     	return isReachableAgent;
     }
-    
 }

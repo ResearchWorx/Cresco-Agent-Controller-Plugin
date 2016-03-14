@@ -1,6 +1,5 @@
 package ActiveMQ;
 
-
 import javax.jms.MessageConsumer;
 import javax.jms.Queue;
 import javax.jms.Session;
@@ -10,64 +9,45 @@ import com.google.gson.Gson;
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import plugincore.PluginEngine;
 import shared.MsgEvent;
 
+import java.util.Date;
 import java.sql.Timestamp;
 
-
-public class ActiveAgentConsumer implements Runnable
-{
+public class ActiveAgentConsumer implements Runnable {
 	private Queue RXqueue; 
 	private Session sess;
 	private ActiveMQConnection conn;
-	
-	public ActiveAgentConsumer(String RXQueueName, String URI)
-	{
-		try
-		{
-			
-			//ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory("discovery:(multicast://default?group=test)?reconnectDelay=1000&maxReconnectAttempts=30&useExponentialBackOff=false");
-			//ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(URI);
-			//conn = factory.createConnection();
-			conn = (ActiveMQConnection) new    ActiveMQConnectionFactory(URI).createConnection();
-			
+	private static final Logger logger = LoggerFactory.getLogger(ActiveAgentConsumer.class);
+
+	public ActiveAgentConsumer(String RXQueueName, String URI) {
+		try {
+			conn = (ActiveMQConnection)new ActiveMQConnectionFactory(URI).createConnection();
 			conn.start();
 			this.sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
-			//this.RXqueue = sess.createQueue(RXQueueName);
 			this.RXqueue = sess.createQueue(RXQueueName);
-			
-			//Queue TXqueue = sess.createQueue(TXQueueName);
+		} catch(Exception ex) {
+			logger.error("Init {}", ex.getMessage());
 		}
-		catch(Exception ex)
-		{
-			System.out.println("ActiveConsumer Init " + ex.toString());
-		}
-		
 	}
 
 	@Override
 	public void run() 
 	{
 		Gson gson = new Gson();
-		// TODO Auto-generated method stub
-		//new Thread(new Sender(sess, TXqueue, RXQueueName)).start();
-		try
-		{
-				PluginEngine.ConsumerThreadActive = true;
-			
+		try {
+			PluginEngine.ConsumerThreadActive = true;
 			MessageConsumer consumer = sess.createConsumer(RXqueue);
 			while (PluginEngine.ConsumerThreadActive) 
 			{
 				TextMessage msg = (TextMessage) consumer.receive(1000);
-				
+
 				if (msg != null) 
 				{
 					MsgEvent me = gson.fromJson(msg.getText(), MsgEvent.class);
-					//count++;
-					//if(count++ == 10)
-					//{
-					//System.out.println("");
 					if (me.getMsgBody().toLowerCase().equals("ping")) {
 						String pingAgent = me.getParam("src_region") + "_" + me.getParam("src_agent");
 						System.out.println("Sending to Agent [" + pingAgent + "]");
@@ -78,27 +58,20 @@ public class ActiveAgentConsumer implements Runnable
 						sme.setParam("dst_agent", me.getParam("src_agent"));
 						PluginEngine.ap.sendMessage(sme);
 					} else {
-						java.util.Date date = new java.util.Date();
-						System.out.println("\n[" + new Timestamp(date.getTime()) + "] " + me.getParam("src_region") + "_" + me.getParam("src_agent") + " sent a message.");
+						logger.debug("[{}] {}_{} sent a message.", new Timestamp(new Date().getTime()), me.getParam("src_region"), me.getParam("src_agent"));
 						System.out.print("Name of Agent to message: ");
 					}
-					
 				}
+				System.out.println("2WAITING FOR MESSAGE!!!!");
 				
 			}
-			System.out.println("Cleaning up ActiveConsumer");
+			logger.debug("Cleaning up ActiveConsumer");
 			sess.close();
 			conn.cleanup();
 			conn.close();
-		}
-		catch(Exception ex)
-		{
-			System.out.println("Activeconsumer Run : " + ex.toString());
-			//javax.jms.JMSException: java.io.EOFException
+		} catch(Exception ex) {
+			logger.error("run Error: {}", ex.getMessage());
 			PluginEngine.ConsumerThreadActive = false;
 		}
-
 	}
-	
-
 }
