@@ -45,7 +45,7 @@ public class PluginEngine {
 	public static String brokerAddress;
 	public static boolean isBroker = false;
 	public static boolean isIPv6 = false;
-	public static boolean isActive = true;
+	public static boolean isActive = false;
 	
 	public static int responds = 0;
 	
@@ -94,6 +94,7 @@ public class PluginEngine {
 			{
 				System.out.println("discoveryEngineThread start");
 				discoveryEngineThread.join();
+				isActive = false;
 				System.out.println("discoveryEngineThread shutdown");
 				
 			}
@@ -255,7 +256,7 @@ public class PluginEngine {
 
     public static void commInit()
     {
-    	
+    	PluginEngine.isActive = true; 
         try
         {
         	brokeredAgents = new ConcurrentHashMap<String,BrokeredAgent>(); 
