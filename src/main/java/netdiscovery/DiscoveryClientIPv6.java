@@ -2,25 +2,24 @@ package netdiscovery;
 
 import java.net.Inet6Address;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import plugincore.PluginEngine;
 
 public class DiscoveryClientIPv6 
 {
+	private static final Logger logger = LoggerFactory.getLogger(DiscoveryClientIPv6.class);
 	//private int discoveryTimeout;
-	public DiscoveryClientIPv6()
-	{
+	public DiscoveryClientIPv6() {
 		//discoveryTimeout = Integer.parseInt(PluginEngine.config.getParam("discoverytimeout")); 
 		//System.out.println("DiscoveryClient : discoveryTimeout = " + discoveryTimeout);
 		//discoveryTimeout = 1000;
 	}
 	
-	public void getDiscoveryMap(int discoveryTimeout)
-	{
-		try
-		{
-			while(PluginEngine.clientDiscoveryActiveIPv6)
-			{
-				System.out.println("DiscoveryClientIPv6 : Discovery already underway : waiting..");
+	public void getDiscoveryMap(int discoveryTimeout) {
+		try {
+			while(PluginEngine.clientDiscoveryActiveIPv6) {
+				logger.debug("Discovery already underway, waiting..");
 				Thread.sleep(2500);
 			}
 			PluginEngine.clientDiscoveryActiveIPv6 = true;
@@ -28,7 +27,7 @@ public class DiscoveryClientIPv6
 			String multiCastNetwork = "ff02::1:c";
 			DiscoveryClientWorkerIPv6 dcw = new DiscoveryClientWorkerIPv6(discoveryTimeout,multiCastNetwork);
 			//populate map with possible peers
-			System.out.println("DiscoveryClientIPv6 : searching "+ multiCastNetwork);
+			logger.debug("Searching {}", multiCastNetwork);
 			dcw.discover();
 			
 			//limit discovery for the moment
@@ -37,39 +36,25 @@ public class DiscoveryClientIPv6
 			//dcw = new DiscoveryClientWorkerIPv6(discoveryTimeout,multiCastNetwork);
 			//System.out.println("DiscoveryClientIPv6 : searching " + multiCastNetwork);
 			//dcw.discover();
-			
-	
-		}
-		catch(Exception ex)
-		{
-			System.out.println("DiscoveryClientIPv6 Error : " + ex.toString());
+		} catch(Exception ex) {
+			logger.error("getDiscoveryMap {}", ex.getMessage());
 		}
 		PluginEngine.clientDiscoveryActiveIPv6 = false;
-		
 	}
 	
-	public boolean isReachable(String hostname)
-	{
+	public boolean isReachable(String hostname) {
 		boolean reachable = false;
-		try
-		{
+		try {
 		   //also, this fails for an invalid address, like "www.sjdosgoogle.com1234sd" 
 	       //InetAddress[] addresses = InetAddress.getAllByName("www.google.com");
 			Inet6Address address =  (Inet6Address) Inet6Address.getByName(hostname);
-	      
-	        if (address.isReachable(10000))
-	        {   
+	        if (address.isReachable(10000)) {
 	        	reachable = true;
-	        }
-	        else
-	        {
+	        } else {
 	           reachable = false;
 	        }
-	      
-		}
-		catch(Exception ex)
-		{
-			System.out.println("DiscoveryClientIPv6 : isReachable : Error " + ex.toString());
+		} catch(Exception ex) {
+			logger.error("isReachable {}", ex.getMessage());
 		}
 		return reachable;
 	}

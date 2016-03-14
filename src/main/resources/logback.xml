@@ -20,6 +20,16 @@
         <appender-ref ref="STDOUT" />
     </logger>
 
+    <logger name="netdiscovery.DiscoveryClientWorkerIPv6" level="debug" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
+    <logger name="netdiscovery.DiscoveryClientIPv6" level="debug" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
+    <logger name="netdiscovery.DiscoveryEngine" level="debug" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
+
     <logger name="plugincore.PluginEngine" level="debug" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
