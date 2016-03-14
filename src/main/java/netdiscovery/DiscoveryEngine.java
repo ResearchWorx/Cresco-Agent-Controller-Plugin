@@ -27,6 +27,9 @@ public class DiscoveryEngine implements Runnable
 	//private MulticastSocket socket;
 	
 	private Gson gson;
+	
+	
+	
 	public DiscoveryEngine()
 	{
 		gson = new Gson();
@@ -127,7 +130,7 @@ public class DiscoveryEngine implements Runnable
 		  	 	    		socket.joinGroup(saj2, networkInterface);
 		    			}
 		  	 	    		
-		  	 	    		while (PluginEngine.isActive) 
+		  	 	    		while (PluginEngine.DiscoveryActive) 
 		  	 	    		{
 		  	 		    	  //System.out.println(getClass().getName() + ">>>Ready to receive broadcast packets!");
 		  	 			        
