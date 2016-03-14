@@ -178,19 +178,10 @@ public class PluginEngine {
 		agent = "agent-" + rs.nextString();
 		agentpath = region + "_" + agent;
     	
-		//peerList = new ArrayList<String>();
-    	brokeredAgents = new ConcurrentHashMap<String,BrokeredAgent>(); 
-    	
-    	incomingCanidateBrokers = new ConcurrentLinkedQueue<MsgEvent>();
-    	
-    	outgoingMessages = new ConcurrentLinkedQueue<MsgEvent>();
-    	
     	ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger)LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
     	//rootLogger.setLevel(Level.toLevel("debug"));
     	//rootLogger.setLevel(Level.toLevel("none"));
     	rootLogger.setLevel(Level.ERROR);
-    	
-    	
     	
     	/*//disabled ipv4 discovery
     	//Start IPv4 network discovery engine
@@ -267,6 +258,10 @@ public class PluginEngine {
     	
         try
         {
+        	brokeredAgents = new ConcurrentHashMap<String,BrokeredAgent>(); 
+        	incomingCanidateBrokers = new ConcurrentLinkedQueue<MsgEvent>();
+        	outgoingMessages = new ConcurrentLinkedQueue<MsgEvent>();
+        	brokerAddress = null;
         	isIPv6 = isIPv6();
         	
         	dcv6 = new DiscoveryClientIPv6();
