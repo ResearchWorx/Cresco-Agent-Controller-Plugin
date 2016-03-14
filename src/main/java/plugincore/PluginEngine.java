@@ -79,54 +79,54 @@ public class PluginEngine {
 		try
 		{
 
-			System.out.println("Shutting down!");
+			logger.info("Shutting down!");
 			if(watchDogProcess != null)
 			{
 				watchDogProcess.timer.cancel();
 				watchDogProcess = null;
 			}
-			System.out.println("WatchDog stopped..");
+			logger.debug("WatchDog stopped..");
 
 			DiscoveryActive = false;
 			if(discoveryEngineThread != null)
 			{
-				System.out.println("discoveryEngineThread start");
+				logger.debug("discoveryEngineThread start");
 				discoveryEngineThread.join();
 				isActive = false;
-				System.out.println("discoveryEngineThread shutdown");
+				logger.debug("discoveryEngineThread shutdown");
 
 			}
 			ConsumerThreadRegionActive = false;
 			if(consumerRegionThread != null)
 			{
-				System.out.println("consumerRegionThread start");
+				logger.debug("consumerRegionThread start");
 				consumerRegionThread.join();
-				System.out.println("consumerRegionThread shutdown");
+				logger.debug("consumerRegionThread shutdown");
 
 			}
 
 			ConsumerThreadActive = false;
 			if(consumerAgentThread != null)
 			{
-				System.out.println("consumerAgentThread start");
+				logger.debug("consumerAgentThread start");
 				consumerAgentThread.join();
-				System.out.println("consumerAgentThread shutdown");
+				logger.debug("consumerAgentThread shutdown");
 
 			}
 
 			ActiveBrokerManagerActive = false;
 			if(activeBrokerManagerThread != null)
 			{
-				System.out.println("activeBrokerManagerThread start");
+				logger.debug("activeBrokerManagerThread start");
 				activeBrokerManagerThread.join();
-				System.out.println("activeBrokerManagerThread shutdown");
+				logger.debug("activeBrokerManagerThread shutdown");
 
 			}
 			if(broker != null)
 			{
-				System.out.println("broker start");
+				logger.debug("broker start");
 				broker.stopBroker();
-				System.out.println("broker shutdown");
+				logger.debug("broker shutdown");
 
 			}
 			if(restartOnShutdown)
@@ -137,7 +137,7 @@ public class PluginEngine {
 		}
 		catch(Exception ex)
 		{
-			System.out.println("PluginEngine : shutdown Error " + ex.getMessage());
+			logger.error("shutdown {}", ex.getMessage());
 		}
 		
 	}
