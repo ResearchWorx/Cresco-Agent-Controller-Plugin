@@ -36,6 +36,7 @@ public class PluginEngine {
 	public static Thread activeBrokerManagerThread;
 	public static Thread consumerRegionThread;
 	public static Thread consumerAgentThread;
+	public static WatchDog watchDogProcess;
 	
 	public static ActiveProducer ap;
 	
@@ -77,7 +78,15 @@ public class PluginEngine {
 	{
 		try
 		{
+			
 			System.out.println("Shutting down!");
+			if(watchDogProcess != null)
+			{
+				watchDogProcess.timer.cancel();
+				watchDogProcess = null;
+			}
+			System.out.println("WatchDog stopped..");
+			
 			DiscoveryActive = false;
 			if(discoveryEngineThread != null)
 			{
@@ -298,7 +307,7 @@ public class PluginEngine {
 	        ap = new ActiveProducer("tcp://" + brokerAddress + ":32010");
 	        System.out.println("Producer Started..");
     		
-	        WatchDog wd = new WatchDog();
+	        watchDogProcess = new WatchDog();
 	        System.out.println("Watchdog Started");
 	        
     		
