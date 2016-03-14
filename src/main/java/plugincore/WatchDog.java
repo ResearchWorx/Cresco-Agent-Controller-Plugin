@@ -51,6 +51,8 @@ public class WatchDog {
 	    			{
 	    				isHealthy = false;
 	    				System.out.println("1");
+	    				System.out.println("DA " + PluginEngine.DiscoveryActive);
+	    				System.out.println("DT " + PluginEngine.discoveryEngineThread.isAlive());
 	    			}
 	    		
 	    			if(!(PluginEngine.ConsumerThreadRegionActive) || !(PluginEngine.consumerRegionThread.isAlive()))
