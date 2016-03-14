@@ -240,8 +240,7 @@ public class PluginEngine {
     	        
     	        if(isIPv6) //set broker address for consumers and producers
     	    	{
-    	    		brokerAddress = "[::1]";
-    	    		
+    	    		brokerAddress = "[::1]";	
     	    	}
     	    	else
     	    	{

@@ -92,6 +92,7 @@ public class ActiveAgentConsumer implements Runnable
 		catch(Exception ex)
 		{
 			System.out.println("Activeconsumer Run : " + ex.toString());
+			//javax.jms.JMSException: java.io.EOFException
 		}
 
 	}
