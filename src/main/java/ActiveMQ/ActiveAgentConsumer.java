@@ -62,7 +62,7 @@ public class ActiveAgentConsumer implements Runnable {
 					}
 				}
 			}
-			logger.debug("Cleaning up ActiveConsumer");
+			logger.debug("Cleaning up ActiveAgentConsumer");
 			sess.close();
 			conn.cleanup();
 			conn.close();

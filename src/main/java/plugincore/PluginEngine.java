@@ -190,7 +190,7 @@ public class PluginEngine {
         
         commInit(); //initial init
 
-		System.out.println("Agent [" + agentpath + "] running...");
+		logger.info("Agent [{}] running...", agentpath);
 
 
 		while (true) {
@@ -248,6 +248,7 @@ public class PluginEngine {
 
     public static void commInit()
     {
+		logger.info("commInit triggered");
     	PluginEngine.isActive = true;
         try
         {
@@ -260,7 +261,7 @@ public class PluginEngine {
         	dcv6 = new DiscoveryClientIPv6();
             //dc = new DiscoveryClientIPv4();
 
-        	System.out.println("Broker Search...");
+        	logger.debug("Broker Search...");
     		dcv6.getDiscoveryMap(2000);
 			//logger.info("Broker search IPv4:");
     		//dc.getDiscoveryMap(2000);
@@ -275,9 +276,9 @@ public class PluginEngine {
     	        {
     	        	Thread.sleep(1000);
     	        }
-    	        System.out.println("IPv6 DiscoveryEngine Started..");
+    	        logger.debug("IPv6 DiscoveryEngine Started..");
     			
-    	        logger.info("Starting ActiveBroker");
+    	        logger.debug("Starting ActiveBroker");
     	        broker = new ActiveBroker(agentpath);
     	        
     	        
@@ -288,7 +289,7 @@ public class PluginEngine {
     	        {
     	        	Thread.sleep(1000);
     	        }
-    	        System.out.println("ActiveBrokerManager Started..");
+    	        logger.debug("ActiveBrokerManager Started..");
     	        
     	        if(isIPv6) { //set broker address for consumers and producers
     	    		brokerAddress = "[::1]";
@@ -303,7 +304,7 @@ public class PluginEngine {
     	        {
     	        	Thread.sleep(1000);
     	        }
-    	        System.out.println("Region ConsumerThread Started..");
+    	        logger.debug("Region ConsumerThread Started..");
         		
     	        isBroker = true;
     	        
@@ -335,19 +336,15 @@ public class PluginEngine {
 	        {
 	        	Thread.sleep(1000);
 	        }
-	        System.out.println("Agent ConsumerThread Started..");
+	        logger.debug("Agent ConsumerThread Started..");
     		
 	        ap = new ActiveProducer("tcp://" + brokerAddress + ":32010");
-	        System.out.println("Producer Started..");
+	        logger.debug("Producer Started..");
     		
 	        watchDogProcess = new WatchDog();
-	        System.out.println("Watchdog Started");
-
-
-    	}
-    	catch(Exception e)
-    	{
-    		System.out.println("PluginEngine : commInit Error " + e.toString());
+	        logger.debug("Watchdog Started");
+    	} catch(Exception e) {
+    		logger.error("commInit {}", e.getMessage());
     	}
     }
 

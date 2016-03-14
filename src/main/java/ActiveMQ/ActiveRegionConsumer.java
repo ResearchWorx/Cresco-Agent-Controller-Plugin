@@ -59,7 +59,7 @@ public class ActiveRegionConsumer implements Runnable {
 					}
 				}
 			}
-			logger.debug("Cleaning up ActiveConsumer");
+			logger.debug("Cleaning up ActiveRegionConsumer");
 			sess.close();
 			conn.cleanup();
 			conn.close();
