@@ -74,6 +74,7 @@ public class WatchDog {
 	    		}
 	    		if(!isHealthy)
 	    		{
+	    			PluginEngine.restartOnShutdown = true;
 	    			PluginEngine.shutdown();
 	    			System.out.println("5");
 	    		}

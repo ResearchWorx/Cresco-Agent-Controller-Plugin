@@ -32,6 +32,8 @@ public class PluginEngine {
 	public static boolean ConsumerThreadActive = false;
 	public static boolean ConsumerThreadRegionActive = false;
 	
+	public static boolean restartOnShutdown = false;
+	
 	public static Thread discoveryEngineThread;
 	public static Thread activeBrokerManagerThread;
 	public static Thread consumerRegionThread;
@@ -128,6 +130,11 @@ public class PluginEngine {
 				System.out.println("broker shutdown");
 				
 			}
+			if(restartOnShutdown)
+			{
+				commInit(); //reinit everything
+				restartOnShutdown = false;
+			}
 		}
 		catch(Exception ex)
 		{
@@ -156,21 +163,7 @@ public class PluginEngine {
 	        public void run() {
 	            try
 	            {
-					System.out.println("");
-	            	System.out.println("Shutting down!");
-	            	DiscoveryActive = false;
-					//Thread.sleep(500);
-	            	ConsumerThreadActive = false;
-					//Thread.sleep(500);
-	            	ActiveDestManagerActive = false;
-					//Thread.sleep(500);
-	            	ActiveBrokerManagerActive = false;
-	            	
-					Thread.sleep(1000);
-	            	 
-	            	
-	            	broker.stopBroker();
-	            	
+					shutdown();
 	            }
 	            catch(Exception ex)
 	            {
@@ -213,12 +206,73 @@ public class PluginEngine {
         System.out.println("IPv4 DiscoveryEngine Started..");
 		*/
         
-        dcv6 = new DiscoveryClientIPv6();
-        //dc = new DiscoveryClientIPv4();
+        commInit(); //initial init
         
+		System.out.println("Agent [" + agentpath + "] running...");
+
+		
+		while (true) {
+			System.out.print("Name of Agent to message: ");
+			@SuppressWarnings("resource")
+			Scanner scanner = new Scanner(System.in);
+			String input = scanner.nextLine();
+			if(input.length() == 0)
+			{
+				List<String> rAgents = reachableAgents();
+				if(rAgents.isEmpty())
+				{
+					System.out.println("\tNo agents found... " + responds);
+				}
+				else
+				{
+					for(String str : rAgents)
+					{
+						System.out.println("\t" + str);
+					}
+					System.out.println("\tFound " + rAgents.size() + " agents");
+					
+					
+				}
+			}
+			else
+			{
+				if(input.toLowerCase().equals("all"))
+				{
+					List<String> rAgents = reachableAgents();
+					if(rAgents.isEmpty())
+					{
+						System.out.println("\tNo agents found...");
+					}
+					else
+					{
+						System.out.println("\tSending message to " + rAgents.size() + " agents");
+						for(String str : rAgents)
+						{
+							System.out.println("\t"+str);
+							sendMessage(MsgEventType.INFO, str, "ping");
+						}
+						System.out.println("\tSent message to " + rAgents.size() + " agents");
+						
+						
+					}
+				}
+				else
+				{
+					sendMessage(MsgEventType.INFO, input, "ping");
+				}
+			}
+		}
+    }
+
+    public static void commInit()
+    {
+    	
         try
         {
-        	System.out.println("Broker Search IPv6:");
+        	dcv6 = new DiscoveryClientIPv6();
+            //dc = new DiscoveryClientIPv4();
+            
+        	System.out.println("Broker Search...");
     		dcv6.getDiscoveryMap(2000);
         	//System.out.println("Broker Search IPv4:");
     		//dc.getDiscoveryMap(2000);
@@ -314,77 +368,10 @@ public class PluginEngine {
     	}
     	catch(Exception e)
     	{
-    		System.out.println("PluginEngine : Main Error " + e.toString());
-    	}
-
-		System.out.println("Agent [" + agentpath + "] running...");
-
-		
-		while (true) {
-			System.out.print("Name of Agent to message: ");
-			@SuppressWarnings("resource")
-			Scanner scanner = new Scanner(System.in);
-			String input = scanner.nextLine();
-			if(input.length() == 0)
-			{
-				List<String> rAgents = reachableAgents();
-				if(rAgents.isEmpty())
-				{
-					System.out.println("\tNo agents found... " + responds);
-				}
-				else
-				{
-					for(String str : rAgents)
-					{
-						System.out.println("\t" + str);
-					}
-					System.out.println("\tFound " + rAgents.size() + " agents");
-					
-					
-				}
-			}
-			else
-			{
-				if(input.toLowerCase().equals("all"))
-				{
-					List<String> rAgents = reachableAgents();
-					if(rAgents.isEmpty())
-					{
-						System.out.println("\tNo agents found...");
-					}
-					else
-					{
-						System.out.println("\tSending message to " + rAgents.size() + " agents");
-						for(String str : rAgents)
-						{
-							System.out.println("\t"+str);
-							sendMessage(MsgEventType.INFO, str, "ping");
-						}
-						System.out.println("\tSent message to " + rAgents.size() + " agents");
-						
-						
-					}
-				}
-				else
-				{
-					sendMessage(MsgEventType.INFO, input, "ping");
-				}
-			}
-		}
-    }
-
-    public static void commInit()
-    {
-    	//repeatable 
-    	try
-    	{
-    		
-    	}
-    	catch(Exception ex)
-    	{
-    		
+    		System.out.println("PluginEngine : commInit Error " + e.toString());
     	}
     }
+    
     
     public static void sendMessage(MsgEventType type, String targetAgent, String msg) {
 		if (isReachableAgent(targetAgent)) {
