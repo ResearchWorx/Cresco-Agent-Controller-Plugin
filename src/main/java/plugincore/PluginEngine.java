@@ -100,7 +100,6 @@ public class PluginEngine {
 			if(consumerAgentThread != null)
 			{
 				System.out.println("consumerAgentThread start");
-				
 				consumerAgentThread.join();
 				System.out.println("consumerAgentThread shutdown");
 				

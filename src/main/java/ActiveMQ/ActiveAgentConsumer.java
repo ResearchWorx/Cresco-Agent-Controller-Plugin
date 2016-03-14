@@ -59,6 +59,7 @@ public class ActiveAgentConsumer implements Runnable
 			MessageConsumer consumer = sess.createConsumer(RXqueue);
 			while (PluginEngine.ConsumerThreadActive) 
 			{
+				System.out.println("WAITING FOR MESSAGE!!!!");
 				TextMessage msg = (TextMessage) consumer.receive(1000);
 				if (msg != null) 
 				{
