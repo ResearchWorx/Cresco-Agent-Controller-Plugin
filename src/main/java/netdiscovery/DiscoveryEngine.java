@@ -130,7 +130,7 @@ public class DiscoveryEngine implements Runnable
 		  	 	    		socket.joinGroup(saj2, networkInterface);
 		    			}
 		  	 	    		
-		  	 	    		while (PluginEngine.DiscoveryActive) 
+		  	 	    		while (PluginEngine.isActive) 
 		  	 	    		{
 		  	 		    	  //System.out.println(getClass().getName() + ">>>Ready to receive broadcast packets!");
 		  	 			        
