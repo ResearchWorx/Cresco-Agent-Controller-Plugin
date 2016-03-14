@@ -62,8 +62,6 @@ public class ActiveAgentConsumer implements Runnable {
 						System.out.print("Name of Agent to message: ");
 					}
 				}
-				System.out.println("2WAITING FOR MESSAGE!!!!");
-				
 			}
 			logger.debug("Cleaning up ActiveConsumer");
 			sess.close();
