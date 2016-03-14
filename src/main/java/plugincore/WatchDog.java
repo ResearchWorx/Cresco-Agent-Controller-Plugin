@@ -42,6 +42,7 @@ public class WatchDog {
 	    		if((!PluginEngine.ConsumerThreadActive) || !(PluginEngine.consumerAgentThread.isAlive()))
 	    		{
 	    			isHealthy = false;
+	    			System.out.println("0");
 	    		}
 				
 	    		if(PluginEngine.isBroker)
@@ -49,26 +50,31 @@ public class WatchDog {
 	    			if(!(PluginEngine.DiscoveryActive) || !(PluginEngine.discoveryEngineThread.isAlive()))
 	    			{
 	    				isHealthy = false;
+	    				System.out.println("1");
 	    			}
 	    		
 	    			if(!(PluginEngine.ConsumerThreadRegionActive) || !(PluginEngine.consumerRegionThread.isAlive()))
 		    		{
 		    			isHealthy = false;
+		    			System.out.println("2");
 		    		}
 	    			
 	    			if(!(PluginEngine.ActiveBrokerManagerActive) || !(PluginEngine.activeBrokerManagerThread.isAlive()))
 	    			{
 	    				isHealthy = false;
+	    				System.out.println("3");
 	    			}
 	    			
 	    			if(PluginEngine.broker.isHealthy())
 	    			{
 	    				isHealthy = false;
+	    				System.out.println("4");
 	    			}
 	    		}
 	    		if(!isHealthy)
 	    		{
 	    			PluginEngine.shutdown();
+	    			System.out.println("5");
 	    		}
 	    	}
 	    	catch(Exception ex)
