@@ -47,12 +47,11 @@ public class WatchDog {
 				
 	    		if(PluginEngine.isBroker)
 	    		{
-	    			if(!(PluginEngine.DiscoveryActive) || !(PluginEngine.discoveryEngineThread.isAlive()))
+	    			if(!PluginEngine.DiscoveryActive)
 	    			{
 	    				isHealthy = false;
 	    				System.out.println("1");
-	    				System.out.println("DA " + PluginEngine.DiscoveryActive);
-	    				System.out.println("DT " + PluginEngine.discoveryEngineThread.isAlive());
+	    				
 	    			}
 	    		
 	    			if(!(PluginEngine.ConsumerThreadRegionActive) || !(PluginEngine.consumerRegionThread.isAlive()))
