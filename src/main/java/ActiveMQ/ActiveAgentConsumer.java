@@ -59,10 +59,7 @@ public class ActiveAgentConsumer implements Runnable
 			MessageConsumer consumer = sess.createConsumer(RXqueue);
 			while (PluginEngine.ConsumerThreadActive) 
 			{
-				System.out.println("0WAITING FOR MESSAGE!!!!");
-				
 				TextMessage msg = (TextMessage) consumer.receive(1000);
-				System.out.println("1WAITING FOR MESSAGE!!!!");
 				
 				if (msg != null) 
 				{
@@ -87,7 +84,6 @@ public class ActiveAgentConsumer implements Runnable
 					}
 					
 				}
-				System.out.println("2WAITING FOR MESSAGE!!!!");
 				
 			}
 			System.out.println("Cleaning up ActiveConsumer");

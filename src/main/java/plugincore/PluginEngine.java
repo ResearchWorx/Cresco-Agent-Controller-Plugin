@@ -220,7 +220,7 @@ public class PluginEngine {
     			//discovery engine
     			discoveryEngineThread = new Thread(new DiscoveryEngine());
     			discoveryEngineThread.start();
-    	    	while(!DiscoveryActive)
+    	    	while(!DiscoveryActive && discoveryEngineThread.isAlive())
     	        {
     	        	Thread.sleep(1000);
     	        }
@@ -232,7 +232,7 @@ public class PluginEngine {
     	        //broker manager
     	        activeBrokerManagerThread = new Thread(new ActiveBrokerManager());
     	        activeBrokerManagerThread.start();
-    	    	while(!ActiveBrokerManagerActive)
+    	    	while(!ActiveBrokerManagerActive && activeBrokerManagerThread.isAlive())
     	        {
     	        	Thread.sleep(1000);
     	        }
@@ -250,7 +250,7 @@ public class PluginEngine {
     	        //consumer region 
     	        consumerRegionThread = new Thread(new ActiveRegionConsumer(region,"tcp://" + brokerAddress + ":32010"));
     	        consumerRegionThread.start();
-    	    	while(!ConsumerThreadRegionActive)
+    	    	while(!ConsumerThreadRegionActive && consumerRegionThread.isAlive())
     	        {
     	        	Thread.sleep(1000);
     	        }
@@ -288,7 +288,7 @@ public class PluginEngine {
     		//consumer agent 
 	        consumerAgentThread = new Thread(new ActiveAgentConsumer(agentpath,"tcp://" + brokerAddress + ":32010"));
 	        consumerAgentThread.start();
-	    	while(!ConsumerThreadActive)
+	    	while(!ConsumerThreadActive && consumerAgentThread.isAlive())
 	        {
 	        	Thread.sleep(1000);
 	        }
