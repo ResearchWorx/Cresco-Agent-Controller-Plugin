@@ -27,16 +27,14 @@ public class ActiveRegionConsumer implements Runnable {
 			this.sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
 			this.RXqueue = sess.createQueue(RXQueueName);
 		} catch(Exception ex) {
-			logger.error("Init {}", ex.toString());
+			logger.error("Init {}", ex.getMessage());
 		}
-		
 	}
 
 	@Override
 	public void run() 
 	{
 		Gson gson = new Gson();
-		//new Thread(new Sender(sess, TXqueue, RXQueueName)).start();
 		try {
 			PluginEngine.ConsumerThreadRegionActive = true;
 			MessageConsumer consumer = sess.createConsumer(RXqueue);
@@ -48,7 +46,7 @@ public class ActiveRegionConsumer implements Runnable {
 					MsgEvent me = gson.fromJson(msg.getText(), MsgEvent.class);
 					if (me.getMsgBody().toLowerCase().equals("ping")) {
 						String pingAgent = me.getParam("src_region") + "_" + me.getParam("src_agent");
-						logger.info("Sending to Agent [" + pingAgent + "]");
+						logger.info("Sending to Agent [{}]", pingAgent);
 						MsgEvent sme = new MsgEvent(me.getMsgType(), PluginEngine.region, PluginEngine.agent, PluginEngine.plugin, "pong");
 						sme.setParam("src_region", me.getParam("dst_region"));
 						sme.setParam("src_agent", me.getParam("dst_agent"));
@@ -67,6 +65,7 @@ public class ActiveRegionConsumer implements Runnable {
 			conn.close();
 		} catch (Exception ex) {
 			logger.error("Run {}", ex.toString());
+			PluginEngine.ConsumerThreadRegionActive = false;
 		}
 	}
 }

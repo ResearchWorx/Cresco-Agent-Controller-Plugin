@@ -44,13 +44,12 @@ public class ActiveAgentConsumer implements Runnable {
 			while (PluginEngine.ConsumerThreadActive) 
 			{
 				TextMessage msg = (TextMessage) consumer.receive(1000);
-
 				if (msg != null) 
 				{
 					MsgEvent me = gson.fromJson(msg.getText(), MsgEvent.class);
 					if (me.getMsgBody().toLowerCase().equals("ping")) {
 						String pingAgent = me.getParam("src_region") + "_" + me.getParam("src_agent");
-						System.out.println("Sending to Agent [" + pingAgent + "]");
+						logger.info("Sending to Agent [{}]", pingAgent);
 						MsgEvent sme = new MsgEvent(me.getMsgType(), PluginEngine.region, PluginEngine.agent, PluginEngine.plugin, "pong");
 						sme.setParam("src_region", me.getParam("dst_region"));
 						sme.setParam("src_agent", me.getParam("dst_agent"));
@@ -67,8 +66,8 @@ public class ActiveAgentConsumer implements Runnable {
 			sess.close();
 			conn.cleanup();
 			conn.close();
-		} catch(Exception ex) {
-			logger.error("run Error: {}", ex.getMessage());
+		} catch (Exception ex) {
+			logger.error("Run {}", ex.getMessage());
 			PluginEngine.ConsumerThreadActive = false;
 		}
 	}
