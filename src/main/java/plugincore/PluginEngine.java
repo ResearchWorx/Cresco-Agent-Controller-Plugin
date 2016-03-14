@@ -178,9 +178,7 @@ public class PluginEngine {
 		agent = "agent-" + rs.nextString();
 		agentpath = region + "_" + agent;
     	
-		isIPv6 = isIPv6();
-    	
-    	//peerList = new ArrayList<String>();
+		//peerList = new ArrayList<String>();
     	brokeredAgents = new ConcurrentHashMap<String,BrokeredAgent>(); 
     	
     	incomingCanidateBrokers = new ConcurrentLinkedQueue<MsgEvent>();
@@ -269,6 +267,8 @@ public class PluginEngine {
     	
         try
         {
+        	isIPv6 = isIPv6();
+        	
         	dcv6 = new DiscoveryClientIPv6();
             //dc = new DiscoveryClientIPv4();
             
@@ -346,7 +346,7 @@ public class PluginEngine {
     				}
     				brokerAddress = cbrokerAddress;
     			}
-    			
+    			isBroker = false;
     		}
     		
     		//consumer agent 
