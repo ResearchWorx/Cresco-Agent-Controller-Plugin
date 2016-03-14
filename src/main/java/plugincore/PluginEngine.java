@@ -32,6 +32,11 @@ public class PluginEngine {
 	public static boolean ConsumerThreadActive = false;
 	public static boolean ConsumerThreadRegionActive = false;
 	
+	public static Thread discoveryEngineThread;
+	public static Thread activeBrokerManagerThread;
+	public static Thread consumerRegionThread;
+	public static Thread consumerAgentThread;
+	
 	public static ActiveProducer ap;
 	
 	public static String brokerAddress;
@@ -68,8 +73,53 @@ public class PluginEngine {
 	{
 		
 	}
-	public void shutdown()
+	public static void shutdown()
 	{
+		try
+		{
+			System.out.println("Shutting down!");
+			DiscoveryActive = false;
+			if(discoveryEngineThread != null)
+			{
+				discoveryEngineThread.join();
+				System.out.println("discoveryEngineThread shutdown");
+				
+			}
+			
+			ConsumerThreadRegionActive = false;
+			if(consumerRegionThread != null)
+			{
+				consumerRegionThread.join();
+				System.out.println("consumerRegionThread shutdown");
+				
+			}
+			
+			ConsumerThreadActive = false;
+			if(consumerAgentThread != null)
+			{
+				consumerAgentThread.join();
+				System.out.println("consumerAgentThread shutdown");
+				
+			}
+			
+			ActiveBrokerManagerActive = false;
+			if(activeBrokerManagerThread != null)
+			{
+				activeBrokerManagerThread.join();
+				System.out.println("activeBrokerManagerThread shutdown");
+				
+			}
+			if(broker != null)
+			{
+				broker.stopBroker();
+				System.out.println("broker shutdown");
+				
+			}
+		}
+		catch(Exception ex)
+		{
+			System.out.println("PluginEngine : shutdown Error " + ex.getMessage());
+		}
 		
 	}
 	public boolean initialize(ConcurrentLinkedQueue<MsgEvent> msgOutQueue,ConcurrentLinkedQueue<MsgEvent> msgInQueue, SubnodeConfiguration configObj, String region,String agent, String plugin)  
@@ -78,6 +128,9 @@ public class PluginEngine {
 	}
 	
 	public static ActiveBroker broker;
+	
+	
+	
     public static void main(String[] args) throws Exception 
     {
     	
@@ -134,63 +187,6 @@ public class PluginEngine {
     	rootLogger.setLevel(Level.ERROR);
     	
     	
-    	//disable everything related to broker
-    	/*
-    	broker = new ActiveBroker(agentpath);
-    	
-    	Thread abm = new Thread(new ActiveBrokerManager());
-    	abm.start();
-    	while(!ActiveBrokerManagerActive)
-        {
-        	Thread.sleep(1000);
-        }
-        System.out.println("ActiveBrokerManager Started..");
-        
-        
-        Thread adm;
-        if(isIPv6)
-    	{
-        	adm = new Thread(new ActiveDestManager("tcp://[::1]:32010"));
-    	}
-    	else
-    	{
-    		adm = new Thread(new ActiveDestManager("tcp://localhost:32010"));
-    	}
-        adm.start();
-        while(!ActiveDestManagerActive)
-        {
-        	Thread.sleep(1000);
-        }
-        System.out.println("ActiveDestManager Started..");
-        
-        
-        
-        Thread ct = null;
-    	if(isIPv6)
-    	{
-    		ct = new Thread(new ActiveConsumer(agentpath,"tcp://[::1]:32010"));
-    	}
-    	else
-    	{
-    		ct = new Thread(new ActiveConsumer(agentpath,"tcp://localhost:32010"));
-    	}
-    	ct.start();
-    	while(!ConsumerThreadActive)
-        {
-        	Thread.sleep(1000);
-        }
-        System.out.println("ConsumerThread Started..");
-        
-        if(isIPv6)
-    	{
-    		ap = new ActiveProducer("tcp://[::1]:32010");
-    	}
-    	else
-    	{
-    		ap = new ActiveProducer("tcp://localhost:32010");
-    		
-    	}
-        */
     	
     	/*//disabled ipv4 discovery
     	//Start IPv4 network discovery engine
@@ -218,8 +214,8 @@ public class PluginEngine {
     			//Start controller services
     			
     			//discovery engine
-    			Thread dev6 = new Thread(new DiscoveryEngine());
-    	    	dev6.start();
+    			discoveryEngineThread = new Thread(new DiscoveryEngine());
+    			discoveryEngineThread.start();
     	    	while(!DiscoveryActive)
     	        {
     	        	Thread.sleep(1000);
@@ -230,8 +226,8 @@ public class PluginEngine {
     	        broker = new ActiveBroker(agentpath);
     	        
     	        //broker manager
-    	        Thread abm = new Thread(new ActiveBrokerManager());
-    	    	abm.start();
+    	        activeBrokerManagerThread = new Thread(new ActiveBrokerManager());
+    	        activeBrokerManagerThread.start();
     	    	while(!ActiveBrokerManagerActive)
     	        {
     	        	Thread.sleep(1000);
@@ -248,9 +244,8 @@ public class PluginEngine {
     	    	}
     	        
     	        //consumer region 
-    	        Thread ct = null;
-    	    	ct = new Thread(new ActiveRegionConsumer(region,"tcp://" + brokerAddress + ":32010"));
-    	    	ct.start();
+    	        consumerRegionThread = new Thread(new ActiveRegionConsumer(region,"tcp://" + brokerAddress + ":32010"));
+    	        consumerRegionThread.start();
     	    	while(!ConsumerThreadRegionActive)
     	        {
     	        	Thread.sleep(1000);
@@ -287,9 +282,8 @@ public class PluginEngine {
     		}
     		
     		//consumer agent 
-	        Thread ct = null;
-	    	ct = new Thread(new ActiveAgentConsumer(agentpath,"tcp://" + brokerAddress + ":32010"));
-	    	ct.start();
+	        consumerAgentThread = new Thread(new ActiveAgentConsumer(agentpath,"tcp://" + brokerAddress + ":32010"));
+	        consumerAgentThread.start();
 	    	while(!ConsumerThreadActive)
 	        {
 	        	Thread.sleep(1000);
@@ -363,6 +357,19 @@ public class PluginEngine {
 		}
     }
 
+    public static void commInit()
+    {
+    	//repeatable 
+    	try
+    	{
+    		
+    	}
+    	catch(Exception ex)
+    	{
+    		
+    	}
+    }
+    
     public static void sendMessage(MsgEventType type, String targetAgent, String msg) {
 		if (isReachableAgent(targetAgent)) {
 			System.out.println("Sending to Agent [" + targetAgent + "]");
