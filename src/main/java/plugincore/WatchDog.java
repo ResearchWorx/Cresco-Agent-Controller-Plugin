@@ -66,7 +66,7 @@ public class WatchDog {
 	    				System.out.println("3");
 	    			}
 	    			
-	    			if(PluginEngine.broker.isHealthy())
+	    			if(!PluginEngine.broker.isHealthy())
 	    			{
 	    				isHealthy = false;
 	    				System.out.println("4");

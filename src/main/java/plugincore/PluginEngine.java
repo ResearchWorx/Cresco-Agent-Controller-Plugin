@@ -229,6 +229,7 @@ public class PluginEngine {
     	        //broker 
     	        broker = new ActiveBroker(agentpath);
     	        
+    	        
     	        //broker manager
     	        activeBrokerManagerThread = new Thread(new ActiveBrokerManager());
     	        activeBrokerManagerThread.start();
