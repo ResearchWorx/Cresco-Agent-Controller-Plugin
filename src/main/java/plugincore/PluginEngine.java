@@ -81,6 +81,7 @@ public class PluginEngine {
 			DiscoveryActive = false;
 			if(discoveryEngineThread != null)
 			{
+				System.out.println("discoveryEngineThread start");
 				discoveryEngineThread.join();
 				System.out.println("discoveryEngineThread shutdown");
 				
@@ -89,6 +90,7 @@ public class PluginEngine {
 			ConsumerThreadRegionActive = false;
 			if(consumerRegionThread != null)
 			{
+				System.out.println("consumerRegionThread start");
 				consumerRegionThread.join();
 				System.out.println("consumerRegionThread shutdown");
 				
@@ -97,6 +99,8 @@ public class PluginEngine {
 			ConsumerThreadActive = false;
 			if(consumerAgentThread != null)
 			{
+				System.out.println("consumerAgentThread start");
+				
 				consumerAgentThread.join();
 				System.out.println("consumerAgentThread shutdown");
 				
@@ -105,12 +109,14 @@ public class PluginEngine {
 			ActiveBrokerManagerActive = false;
 			if(activeBrokerManagerThread != null)
 			{
+				System.out.println("activeBrokerManagerThread start");
 				activeBrokerManagerThread.join();
 				System.out.println("activeBrokerManagerThread shutdown");
 				
 			}
 			if(broker != null)
 			{
+				System.out.println("broker start");
 				broker.stopBroker();
 				System.out.println("broker shutdown");
 				
