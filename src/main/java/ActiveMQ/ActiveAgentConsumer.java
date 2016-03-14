@@ -99,7 +99,7 @@ public class ActiveAgentConsumer implements Runnable
 		{
 			System.out.println("Activeconsumer Run : " + ex.toString());
 			//javax.jms.JMSException: java.io.EOFException
-			PluginEngine.shutdown();
+			PluginEngine.ConsumerThreadActive = false;
 		}
 
 	}

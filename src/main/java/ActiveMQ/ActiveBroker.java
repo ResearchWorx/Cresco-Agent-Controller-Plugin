@@ -112,6 +112,25 @@ return connector;
 		
 	}	
 
+	public boolean isHealthy()
+	{
+		boolean isHealthy = false;
+		try 
+		{
+			if(broker.isStarted())
+			{
+				isHealthy = true;
+			}
+			
+		} 
+		catch (Exception e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return isHealthy;
+	}
+	
 	public void stopBroker()
 	{
 		try {

@@ -86,7 +86,6 @@ public class PluginEngine {
 				System.out.println("discoveryEngineThread shutdown");
 				
 			}
-			
 			ConsumerThreadRegionActive = false;
 			if(consumerRegionThread != null)
 			{
@@ -298,6 +297,9 @@ public class PluginEngine {
 	        ap = new ActiveProducer("tcp://" + brokerAddress + ":32010");
 	        System.out.println("Producer Started..");
     		
+	        WatchDog wd = new WatchDog();
+	        System.out.println("Watchdog Started");
+	        
     		
     	}
     	catch(Exception e)
@@ -307,8 +309,7 @@ public class PluginEngine {
 
 		System.out.println("Agent [" + agentpath + "] running...");
 
-		Thread.sleep(2000);
-
+		
 		while (true) {
 			System.out.print("Name of Agent to message: ");
 			@SuppressWarnings("resource")
