@@ -28,6 +28,7 @@ public class DiscoveryEngine implements Runnable {
 	
 	private Gson gson;
 	private static Map<NetworkInterface,MulticastSocket> workers = new HashMap<>();
+	private static Map<NetworkInterface,Thread> workerThreads = new HashMap<>();
 
 	private static final Logger logger = LoggerFactory.getLogger(DiscoveryEngine.class);
 
@@ -40,6 +41,15 @@ public class DiscoveryEngine implements Runnable {
 	public static void shutdown() {
 		for (Map.Entry<NetworkInterface,MulticastSocket> entry : workers.entrySet()) {
 			entry.getValue().close();
+			if (workerThreads.containsKey(entry.getKey()) && workerThreads.get(entry.getKey()).isAlive()) {
+				try {
+					logger.trace("Joining [{}]", entry.getKey().getDisplayName());
+					workerThreads.get(entry.getKey()).join();
+					logger.trace("Ended [{}]", entry.getKey().getDisplayName());
+				} catch (InterruptedException e) {
+					logger.error("Worker thread failed to die {}", e.getMessage());
+				}
+			}
 		}
 	}
 
@@ -48,7 +58,9 @@ public class DiscoveryEngine implements Runnable {
 			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
 			while (interfaces.hasMoreElements()) {
 				NetworkInterface networkInterface = interfaces.nextElement();
-				new Thread(new DiscoveryEngineWorker(networkInterface)).start();
+				Thread thread = new Thread(new DiscoveryEngineWorker(networkInterface));
+				thread.start();
+				workerThreads.put(networkInterface, thread);
 			}
 			PluginEngine.DiscoveryActive = true;
 			logger.debug("Discovery Engine has shutdown");
@@ -57,13 +69,13 @@ public class DiscoveryEngine implements Runnable {
 	    }
 	}
 
-	public static DiscoveryEngine getInstance() {
+	/*public static DiscoveryEngine getInstance() {
 	    return DiscoveryThreadHolder.INSTANCE;
 	}
 
 	private static class DiscoveryThreadHolder {
 		private static final DiscoveryEngine INSTANCE = new DiscoveryEngine();
-	}
+	}*/
 
 	class DiscoveryEngineWorker implements Runnable {
 		private NetworkInterface networkInterface;
@@ -79,7 +91,7 @@ public class DiscoveryEngine implements Runnable {
 
 		public void run() {
 			try {
-				
+				logger.trace("Creating worker [{}]", networkInterface.getDisplayName());
 				if (!networkInterface.getDisplayName().startsWith("veth") && !networkInterface.isLoopback() && networkInterface.supportsMulticast() && !networkInterface.isPointToPoint() && !networkInterface.isVirtual()) {
 					logger.debug("Discovery Engine Worker [" + networkInterface.getDisplayName() + "] initialized");
 					logger.info("Init [{}]", networkInterface.getDisplayName());

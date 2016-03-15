@@ -21,7 +21,7 @@ public class ActiveBrokerManager implements Runnable  {
 	}
 	  
 	public void shutdown() {
-		logger.debug("Active Broker Manager shudown initialized");
+		logger.debug("Active Broker Manager shutdown initialized");
 	}
 
 	public void addBroker(String agentPath) {
@@ -78,6 +78,7 @@ public class ActiveBrokerManager implements Runnable  {
 				logger.error("Run {}", ex.getMessage());
 			}
 		}
+		timer.cancel();
 		logger.debug("Broker Manager has shutdown");
 	}
 

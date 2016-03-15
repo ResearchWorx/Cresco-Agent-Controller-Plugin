@@ -45,8 +45,8 @@ public class ActiveBroker {
 				broker.addConnector(connector);
 
 				broker.start();
-				broker.getManagementContext().start();
-				while(!broker.isStarted() || !broker.getManagementContext().isConnectorStarted()) {
+				//broker.getManagementContext().start();
+				while(!broker.isStarted() /*|| !broker.getManagementContext().isConnectorStarted()*/) {
 			    	Thread.sleep(1000);
 			    }
 			} else {
@@ -73,6 +73,7 @@ public class ActiveBroker {
 		try {
 			connector.stop();
 			ServiceStopper stopper = new ServiceStopper();
+			//broker.getManagementContext().stop();
             broker.stopAllConnectors(stopper);
             broker.stop();
 

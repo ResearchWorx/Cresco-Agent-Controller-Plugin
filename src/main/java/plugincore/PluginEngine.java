@@ -39,6 +39,7 @@ public class PluginEngine {
 	public static Thread activeBrokerManagerThread;
 	public static Thread consumerRegionThread;
 	public static Thread consumerAgentThread;
+	public static Thread shutdownHook;
 	public static WatchDog watchDogProcess;
 
 	public static ActiveProducer ap;
@@ -75,78 +76,59 @@ public class PluginEngine {
 	public void msgIn(MsgEvent command) {
 		
 	}
-	public static void shutdown()
-	{
-		try
-		{
-
+	public static void shutdown() {
+		try {
 			logger.info("Shutting down");
-			if(watchDogProcess != null)
-			{
+			if(watchDogProcess != null) {
 				watchDogProcess.shutdown();
-				//watchDogProcess.timer.cancel();
 				watchDogProcess = null;
 			}
-			//logger.debug("WatchDog has stopped");
 
 			DiscoveryActive = false;
-			if(discoveryEngineThread != null)
-			{
+			if(discoveryEngineThread != null) {
 				logger.trace("Discovery Engine shutting down");
 				DiscoveryEngine.shutdown();
 				discoveryEngineThread.join();
+				discoveryEngineThread = null;
 				isActive = false;
-				//logger.debug("Discover Engine has shutdown");
 
 			}
 			ConsumerThreadRegionActive = false;
-			if(consumerRegionThread != null)
-			{
+			if(consumerRegionThread != null) {
 				logger.trace("Region Consumer shutting down");
 				consumerRegionThread.join();
-				//logger.debug("Region Consumer has shutdown");
-
+				consumerRegionThread = null;
 			}
 
 			ConsumerThreadActive = false;
-			if(consumerAgentThread != null)
-			{
+			if(consumerAgentThread != null) {
 				logger.trace("Agent Consumer shutting down");
 				consumerAgentThread.join();
-				//logger.debug("Agent Consumer has shutdown");
-
+				consumerAgentThread = null;
 			}
 
 			ActiveBrokerManagerActive = false;
-			if(activeBrokerManagerThread != null)
-			{
+			if(activeBrokerManagerThread != null) {
 				logger.trace("Active Broker Manager shutting down");
 				activeBrokerManagerThread.join();
-				//logger.debug("Active Broker Manager has shutdown");
-
+				activeBrokerManagerThread = null;
 			}
 			if (ap != null) {
 				logger.trace("Producer shutting down");
 				ap.shutdown();
 				ap = null;
-				//logger.debug("Producer has shutdown");
 			}
-			if(broker != null)
-			{
+			if(broker != null) {
 				logger.trace("Broker shutting down");
 				broker.stopBroker();
 				broker = null;
-				//logger.debug("Broker has shutdown");
 
 			}
-			if(restartOnShutdown)
-			{
+			if(restartOnShutdown) {
 				commInit(); //reinit everything
 				restartOnShutdown = false;
 			}
-		}
-		catch(Exception ex)
-		{
+		} catch(Exception ex) {
 			logger.error("shutdown {}", ex.getMessage());
 		}
 		
@@ -167,15 +149,16 @@ public class PluginEngine {
     	{
     		Thread.sleep(Integer.parseInt(args[0])*1000);
     	}
-		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-	        public void run() {
+		shutdownHook = new Thread(new Runnable() {
+			public void run() {
 				try {
 					shutdown();
-	            } catch(Exception ex) {
-	            	logger.error("Run {}", ex.getMessage());
-	            }
-	        }
-	    }, "Shutdown-thread"));
+				} catch(Exception ex) {
+					logger.error("Run {}", ex.getMessage());
+				}
+			}
+		}, "Shutdown-thread");
+		Runtime.getRuntime().addShutdownHook(shutdownHook);
 
 		
     	RandomString rs = new RandomString(4);
