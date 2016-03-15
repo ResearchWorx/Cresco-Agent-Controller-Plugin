@@ -198,48 +198,30 @@ public class PluginEngine {
 			@SuppressWarnings("resource")
 			Scanner scanner = new Scanner(System.in);
 			String input = scanner.nextLine();
-			if(input.length() == 0)
-			{
+			if(input.length() == 0) {
 				List<String> rAgents = reachableAgents();
-				if(rAgents.isEmpty())
-				{
-					System.out.println("\tNo agents found... " + responds);
-				}
-				else
-				{
-					for(String str : rAgents)
-					{
-						System.out.println("\t" + str);
+				if(rAgents.isEmpty()) {
+					logger.info("\tNo agents found... " + responds);
+				} else {
+					for(String str : rAgents) {
+						logger.info("\t" + str);
 					}
-					System.out.println("\tFound " + rAgents.size() + " agents");
-
-
+					logger.info("\tFound " + rAgents.size() + " agents");
 				}
-			}
-			else
-			{
-				if(input.toLowerCase().equals("all"))
-				{
+			} else {
+				if(input.toLowerCase().equals("all")) {
 					List<String> rAgents = reachableAgents();
-					if(rAgents.isEmpty())
-					{
-						System.out.println("\tNo agents found...");
-					}
-					else
-					{
-						System.out.println("\tSending message to " + rAgents.size() + " agents");
-						for(String str : rAgents)
-						{
-							System.out.println("\t"+str);
+					if(rAgents.isEmpty()) {
+						logger.info("\tNo agents found...");
+					} else {
+						logger.info("\tSending message to " + rAgents.size() + " agents");
+						for(String str : rAgents) {
+							logger.info("\t"+str);
 							sendMessage(MsgEventType.INFO, str, "ping");
 						}
-						System.out.println("\tSent message to " + rAgents.size() + " agents");
-
-
+						logger.info("\tSent message to " + rAgents.size() + " agents");
 					}
-				}
-				else
-				{
+				} else {
 					sendMessage(MsgEventType.INFO, input, "ping");
 				}
 			}
