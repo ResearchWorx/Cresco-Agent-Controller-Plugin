@@ -289,7 +289,7 @@ public class DiscoveryEngine implements Runnable {
 				}
 				else
 				{
-					if((rme.getParam("src_region").equals(PluginEngine.region)) && PluginEngine.isBroker)
+					if((rme.getParam("src_region").equals(PluginEngine.region)) && PluginEngine.isRegionalController)
 					{
 						logger.error("{}", "!reconnect attempt!");
 					}
@@ -309,7 +309,7 @@ public class DiscoveryEngine implements Runnable {
 			MsgEvent me = null;
 			try
 			{
-				if(PluginEngine.isBroker)
+				if(PluginEngine.isRegionalController)
 				{
 					//System.out.println(getClass().getName() + "1 " + Thread.currentThread().getId());
 					me = new MsgEvent(MsgEventType.DISCOVER,PluginEngine.region,PluginEngine.agent,PluginEngine.plugin,"Broadcast discovery response.");
