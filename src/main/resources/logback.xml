@@ -16,6 +16,9 @@
     <logger name="ActiveMQ.ActiveBroker" level="debug" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
+    <logger name="ActiveMQ.ActiveBrokerManager" level="debug" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
     <logger name="ActiveMQ.ActiveRegionConsumer" level="debug" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>

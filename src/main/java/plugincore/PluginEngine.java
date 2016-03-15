@@ -265,6 +265,9 @@ public class PluginEngine {
     	        //broker manager
     	        activeBrokerManagerThread = new Thread(new ActiveBrokerManager());
     	        activeBrokerManagerThread.start();
+				/*synchronized (activeBrokerManagerThread) {
+					activeBrokerManagerThread.wait();
+				}*/
     	    	while(!ActiveBrokerManagerActive)
     	        {
     	        	Thread.sleep(1000);
