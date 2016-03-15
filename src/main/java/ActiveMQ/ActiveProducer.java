@@ -26,7 +26,7 @@ public class ActiveProducer {
 		
 	    public void run() 
 	    {
-	    	
+	    	logger.trace("Tick");
 	    	for (Entry<String, ActiveProducerWorker> entry : producerWorkers.entrySet())
 	    	{
 	    	    //System.out.println("Cleanup: " + entry.getKey() + "/" + entry.getValue());
@@ -69,6 +69,15 @@ public ActiveProducer(String URI)
 		System.out.println("ActiveProducer Init " + ex.toString());
 	}
 }
+
+	public void shutdown() {
+		for (Entry<String, ActiveProducerWorker> entry : producerWorkers.entrySet())
+		{
+			entry.getValue().shutdown();
+		}
+		timer.cancel();
+		logger.debug("Producer has shutdown");
+	}
 
 public boolean sendMessage(MsgEvent sm)
 {

@@ -22,6 +22,7 @@ public class ActiveBroker {
 	private static final Logger logger = LoggerFactory.getLogger(ActiveBroker.class);
 
 	public ActiveBroker(String brokerName) {
+		logger.debug("Broker initialized");
 		try {
 			if(portAvailable(32010)) {
 				PolicyEntry entry = new PolicyEntry();
@@ -78,6 +79,7 @@ public class ActiveBroker {
 			while(!broker.isStopped()) {
 				Thread.sleep(1000);
 			}
+			logger.debug("Broker has shutdown");
 		} catch (Exception e) {
 			logger.error("stopBroker {}", e.getMessage());
 		}

@@ -63,7 +63,7 @@ public boolean shutdown()
 		conn.cleanup();
 		conn.close();
         System.out.println("Destroyed ActiveProducerTask [" + queueName + "]");
-		System.out.print("Name of Agent to message: ");
+		System.out.print("Name of Agent to message [q to quit]: ");
         isShutdown = true;
     } catch (JMSException jmse) {
 		jmse.printStackTrace();

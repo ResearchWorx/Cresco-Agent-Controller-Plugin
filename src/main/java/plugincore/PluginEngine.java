@@ -91,6 +91,7 @@ public class PluginEngine {
 			if(discoveryEngineThread != null)
 			{
 				logger.trace("Discovery Engine shutting down");
+				DiscoveryEngine.shutdown();
 				discoveryEngineThread.join();
 				isActive = false;
 				logger.debug("Discover Engine has shutdown");
@@ -101,7 +102,7 @@ public class PluginEngine {
 			{
 				logger.trace("Region Consumer shutting down");
 				consumerRegionThread.join();
-				logger.debug("Region Consumer has shutdown");
+				//logger.debug("Region Consumer has shutdown");
 
 			}
 
@@ -110,7 +111,7 @@ public class PluginEngine {
 			{
 				logger.trace("Agent Consumer shutting down");
 				consumerAgentThread.join();
-				logger.debug("Agent Consumer has shutdown");
+				//logger.debug("Agent Consumer has shutdown");
 
 			}
 
@@ -119,14 +120,19 @@ public class PluginEngine {
 			{
 				logger.trace("Active Broker Manager shutting down");
 				activeBrokerManagerThread.join();
-				logger.debug("Active Broker Manager has shutdown");
+				//logger.debug("Active Broker Manager has shutdown");
 
+			}
+			if (ap != null) {
+				logger.trace("Producer shutting down");
+				ap.shutdown();
+				//logger.debug("Producer has shutdown");
 			}
 			if(broker != null)
 			{
 				logger.trace("Broker shutting down");
 				broker.stopBroker();
-				logger.debug("Broker has shutdown");
+				//logger.debug("Broker has shutdown");
 
 			}
 			if(restartOnShutdown)
@@ -188,15 +194,15 @@ public class PluginEngine {
 
 		logger.info("Agent [{}] running...", agentpath);
 
+		System.out.print("Name of Agent to message [q to quit]: ");
+		@SuppressWarnings("resource")
+		Scanner scanner = new Scanner(System.in);
+		String input = scanner.nextLine();
 
-		while (true) {
-			System.out.print("Name of Agent to message: ");
-			@SuppressWarnings("resource")
-			Scanner scanner = new Scanner(System.in);
-			String input = scanner.nextLine();
-			if(input.length() == 0) {
+		while (!input.toLowerCase().equals("q")) {
+			if (input.length() == 0) {
 				List<String> rAgents = reachableAgents();
-				if(rAgents.isEmpty()) {
+				if (rAgents.isEmpty()) {
 					logger.info("No agents found... " + responds);
 				} else {
 					logger.info("Sending message to {} agents", rAgents.size());
@@ -222,7 +228,10 @@ public class PluginEngine {
 					sendMessage(MsgEventType.INFO, input, "ping");
 				}
 			}
+			System.out.print("Name of Agent to message [q to quit]: ");
+			input = scanner.nextLine();
 		}
+		shutdown();
     }
 
     public static void commInit()
@@ -261,9 +270,9 @@ public class PluginEngine {
     	        {
     	        	Thread.sleep(1000);
     	        }
-    	        logger.debug("IPv6 DiscoveryEngine Started..");
+    	        //logger.debug("IPv6 DiscoveryEngine Started..");
     			
-    	        logger.debug("Starting ActiveBroker");
+    	        //logger.debug("Starting ActiveBroker");
     	        broker = new ActiveBroker(agentpath);
     	        
     	        

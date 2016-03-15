@@ -57,7 +57,7 @@ public class ActiveAgentConsumer implements Runnable {
 						PluginEngine.ap.sendMessage(sme);
 					} else {
 						logger.debug("[{}] {}_{} sent a message.", new Timestamp(new Date().getTime()), me.getParam("src_region"), me.getParam("src_agent"));
-						System.out.print("Name of Agent to message: ");
+						System.out.print("Name of Agent to message [q to quit]: ");
 					}
 				}
 			}
@@ -65,6 +65,7 @@ public class ActiveAgentConsumer implements Runnable {
 			sess.close();
 			conn.cleanup();
 			conn.close();
+			logger.debug("Agent Consumer has shutdown");
 		} catch (Exception ex) {
 			logger.error("Run {}", ex.getMessage());
 			PluginEngine.ConsumerThreadActive = false;

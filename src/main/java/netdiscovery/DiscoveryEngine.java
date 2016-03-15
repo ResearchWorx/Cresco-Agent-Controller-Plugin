@@ -1,5 +1,6 @@
 package netdiscovery;
 
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -25,15 +26,20 @@ import shared.MsgEventType;
 public class DiscoveryEngine implements Runnable {
 	
 	private Gson gson;
+	private static Map<NetworkInterface,MulticastSocket> workers = new HashMap<>();
+
 	private static final Logger logger = LoggerFactory.getLogger(DiscoveryEngine.class);
 
 	public DiscoveryEngine()
 	{
+		logger.debug("Discovery Engine initialized");
 		gson = new Gson();
 	}
 	  
-	public void shutdown() {
-		
+	public static void shutdown() {
+		for (Map.Entry<NetworkInterface,MulticastSocket> entry : workers.entrySet()) {
+			entry.getValue().close();
+		}
 	}
 
 	public void run() {
@@ -44,6 +50,7 @@ public class DiscoveryEngine implements Runnable {
 				new Thread(new DiscoveryEngineWorker(networkInterface)).start();
 			}
 			PluginEngine.DiscoveryActive = true;
+			logger.debug("Discovery Engine has shutdown");
 		} catch (Exception ex) {
 	    	logger.error("Run {}", ex.getMessage());
 	    }
@@ -73,6 +80,7 @@ public class DiscoveryEngine implements Runnable {
 			try {
 				
 				if (!networkInterface.getDisplayName().startsWith("veth") && !networkInterface.isLoopback() && networkInterface.supportsMulticast() && !networkInterface.isPointToPoint() && !networkInterface.isVirtual()) {
+					logger.debug("Discovery Engine Worker [" + networkInterface.getDisplayName() + "] initialized");
 					logger.info("Init [{}]", networkInterface.getDisplayName());
 		    		SocketAddress sa;
 		    		if(PluginEngine.isIPv6) {
@@ -82,6 +90,7 @@ public class DiscoveryEngine implements Runnable {
 					}
 					socket = new MulticastSocket(null);
 					socket.bind(sa);
+					workers.put(networkInterface, socket);
 					logger.debug("Bound to interface [{}] address [::]", networkInterface.getDisplayName());
 
 					if(PluginEngine.isIPv6) {
@@ -92,27 +101,31 @@ public class DiscoveryEngine implements Runnable {
 						socket.joinGroup(saj2, networkInterface);
 					}
 		  	 	    		
-					while (PluginEngine.isActive) {
+					while (!workers.get(networkInterface).isClosed()) {
+						logger.debug("[" + networkInterface.getDisplayName() + "] receive");
 						//System.out.println(getClass().getName() + ">>>Ready to receive broadcast packets!");
 
 						//Receive a packet
 						byte[] recvBuf = new byte[15000];
 						DatagramPacket recPacket = new DatagramPacket(recvBuf, recvBuf.length);
 		  	 		        
-		  	 		        
-		  	 		    synchronized (socket) {
-							socket.receive(recPacket); //rec broadcast packet, could be IPv6 or IPv4
-						}
+		  	 		      try {
+							  synchronized (socket) {
+								  socket.receive(recPacket); //rec broadcast packet, could be IPv6 or IPv4
+							  }
 
-						synchronized (socket) {
-							DatagramPacket sendPacket = sendPacket(recPacket);
-							if(sendPacket != null) {
-								socket.send(sendPacket);
-								PluginEngine.responds++;
-							}
-						}
-						
+							  synchronized (socket) {
+								  DatagramPacket sendPacket = sendPacket(recPacket);
+								  if(sendPacket != null) {
+									  socket.send(sendPacket);
+									  PluginEngine.responds++;
+								  }
+							  }
+						  } catch (IOException e) {
+							  logger.trace("Socket closed");
+						  }
 					}
+					logger.debug("Discovery Engine Worker [" + networkInterface.getDisplayName() + "] has shutdown");
 				}
 			} catch(Exception ex) {
 				logger.error("Run : Interface = {} : Error = {}", networkInterface.getDisplayName(), ex.getMessage());

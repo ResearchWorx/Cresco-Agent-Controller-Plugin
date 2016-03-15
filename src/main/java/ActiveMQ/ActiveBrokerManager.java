@@ -78,6 +78,7 @@ public class ActiveBrokerManager implements Runnable  {
 				logger.error("Run {}", ex.getMessage());
 			}
 		}
+		logger.debug("Broker Manager has shutdown");
 	}
 
 	class BrokerWatchDog extends TimerTask {
