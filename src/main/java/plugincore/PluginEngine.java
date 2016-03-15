@@ -178,18 +178,7 @@ public class PluginEngine {
     	RandomString rs = new RandomString(4);
 		agent = "agent-" + rs.nextString();
 
-    	/*//disabled ipv4 discovery
-    	//Start IPv4 network discovery engine
-    	Thread de = new Thread(new DiscoveryEngine());
-    	de.start();
-    	while(!DiscoveryActive)
-        {
-        	//System.out.println("Wating on Discovery Server to start...");
-        	Thread.sleep(1000);
-        }
-        System.out.println("IPv4 DiscoveryEngine Started..");
-		*/
-        
+		
         commInit(); //initial init
 
 		logger.info("Agent [{}] running...", agentpath);
@@ -259,8 +248,10 @@ public class PluginEngine {
     			//generate regional ident
     			RandomString rs = new RandomString(4);
     			region = "region-" + rs.nextString();
+    			logger.debug("Generated regionid=" + region);
     			agentpath = region + "_" + agent;
-
+    			logger.debug("AgentPath=" + agentpath);
+    			
     			//Start controller services
     			
     			//discovery engine
@@ -328,8 +319,10 @@ public class PluginEngine {
     				}
     				brokerAddress = cbrokerAddress;
     				region = cRegion;
-    				agentpath = region + "_" + agent;
-
+    				logger.debug("Assigned regionid=" + region);
+        			agentpath = region + "_" + agent;
+    				logger.debug("AgentPath=" + agentpath);
+        			
     				
     			}
     			isBroker = false;
