@@ -49,9 +49,9 @@ public class PluginEngine {
 	
 	public static int responds = 0;
 	
-	public static String region = "reg";
-	public static String agent = "agent";
-	public static String plugin = "pl";
+	public static String region;
+	public static String agent;
+	public static String plugin;
 	public static String agentpath;
 	
 	public static ConcurrentHashMap<String,BrokeredAgent> brokeredAgents;
