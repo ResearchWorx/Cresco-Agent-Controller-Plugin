@@ -28,42 +28,32 @@ public class DiscoveryEngine implements Runnable {
 	
 	private Gson gson;
 	private static Map<NetworkInterface,MulticastSocket> workers = new HashMap<>();
-	private static Map<NetworkInterface,Thread> workerThreads = new HashMap<>();
 
 	private static final Logger logger = LoggerFactory.getLogger(DiscoveryEngine.class);
 
 	public DiscoveryEngine()
 	{
-		logger.debug("Discovery Engine initialized");
+		logger.trace("Discovery Engine initialized");
 		gson = new Gson();
 	}
 	  
 	public static void shutdown() {
 		for (Map.Entry<NetworkInterface,MulticastSocket> entry : workers.entrySet()) {
 			entry.getValue().close();
-			if (workerThreads.containsKey(entry.getKey()) && workerThreads.get(entry.getKey()).isAlive()) {
-				try {
-					logger.trace("Joining [{}]", entry.getKey().getDisplayName());
-					workerThreads.get(entry.getKey()).join();
-					logger.trace("Ended [{}]", entry.getKey().getDisplayName());
-				} catch (InterruptedException e) {
-					logger.error("Worker thread failed to die {}", e.getMessage());
-				}
-			}
 		}
 	}
 
 	public void run() {
+		logger.info("Discovery Engine started");
 	    try {
 			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
 			while (interfaces.hasMoreElements()) {
 				NetworkInterface networkInterface = interfaces.nextElement();
 				Thread thread = new Thread(new DiscoveryEngineWorker(networkInterface));
 				thread.start();
-				workerThreads.put(networkInterface, thread);
 			}
 			PluginEngine.DiscoveryActive = true;
-			logger.debug("Discovery Engine has shutdown");
+			logger.trace("Discovery Engine has shutdown");
 		} catch (Exception ex) {
 	    	logger.error("Run {}", ex.getMessage());
 	    }
@@ -90,11 +80,11 @@ public class DiscoveryEngine implements Runnable {
 		}
 
 		public void run() {
+			logger.debug("Creating worker [{}]", networkInterface.getDisplayName());
 			try {
-				logger.trace("Creating worker [{}]", networkInterface.getDisplayName());
 				if (!networkInterface.getDisplayName().startsWith("veth") && !networkInterface.isLoopback() && networkInterface.supportsMulticast() && !networkInterface.isPointToPoint() && !networkInterface.isVirtual()) {
-					logger.debug("Discovery Engine Worker [" + networkInterface.getDisplayName() + "] initialized");
-					logger.info("Init [{}]", networkInterface.getDisplayName());
+					logger.trace("Discovery Engine Worker [" + networkInterface.getDisplayName() + "] initialized");
+					//logger.trace("Init [{}]", networkInterface.getDisplayName());
 		    		SocketAddress sa;
 		    		if(PluginEngine.isIPv6) {
 						sa = new InetSocketAddress("[::]",32005);
@@ -104,7 +94,7 @@ public class DiscoveryEngine implements Runnable {
 					socket = new MulticastSocket(null);
 					socket.bind(sa);
 					workers.put(networkInterface, socket);
-					logger.debug("Bound to interface [{}] address [::]", networkInterface.getDisplayName());
+					logger.trace("Bound to interface [{}] address [::]", networkInterface.getDisplayName());
 
 					if(PluginEngine.isIPv6) {
 						//find to network and site multicast addresses
@@ -137,7 +127,7 @@ public class DiscoveryEngine implements Runnable {
 							  logger.trace("Socket closed");
 						  }
 					}
-					logger.debug("Discovery Engine Worker [" + networkInterface.getDisplayName() + "] has shutdown");
+					logger.trace("Discovery Engine Worker [" + networkInterface.getDisplayName() + "] has shutdown");
 				}
 			} catch(Exception ex) {
 				logger.error("Run : Interface = {} : Error = {}", networkInterface.getDisplayName(), ex.getMessage());

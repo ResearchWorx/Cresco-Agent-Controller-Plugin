@@ -152,7 +152,8 @@ public class PluginEngine {
 		shutdownHook = new Thread(new Runnable() {
 			public void run() {
 				try {
-					shutdown();
+					if (isActive)
+						shutdown();
 				} catch(Exception ex) {
 					logger.error("Run {}", ex.getMessage());
 				}
@@ -255,7 +256,7 @@ public class PluginEngine {
     	        }
     	        //logger.debug("IPv6 DiscoveryEngine Started..");
     			
-    	        //logger.debug("Starting ActiveBroker");
+    	        logger.info("Broker started");
     	        broker = new ActiveBroker(agentpath);
     	        
     	        
@@ -341,10 +342,10 @@ public class PluginEngine {
 	        //logger.debug("Agent ConsumerThread Started..");
     		
 	        ap = new ActiveProducer("tcp://" + brokerAddress + ":32010");
-	        //logger.debug("Producer Started..");
-    		
+	        logger.info("Producer started");
+
 	        watchDogProcess = new WatchDog();
-	        //logger.debug("Watchdog Started");
+			logger.info("WatchDog started");
     	} catch(Exception e) {
     		e.printStackTrace();
     		logger.error("commInit " + e.getMessage());

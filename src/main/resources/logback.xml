@@ -10,36 +10,42 @@
         </layout>
     </appender>
 
-    <logger name="ActiveMQ.ActiveAgentConsumer" level="debug" additivity="false">
+    <logger name="ActiveMQ.ActiveAgentConsumer" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="ActiveMQ.ActiveBroker" level="debug" additivity="false">
+    <logger name="ActiveMQ.ActiveBroker" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="ActiveMQ.ActiveProducer" level="debug" additivity="false">
+    <logger name="ActiveMQ.ActiveProducer" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="ActiveMQ.ActiveBrokerManager" level="debug" additivity="false">
+    <logger name="ActiveMQ.ActiveBrokerManager" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="ActiveMQ.ActiveRegionConsumer" level="debug" additivity="false">
+    <logger name="ActiveMQ.ActiveRegionConsumer" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-
-    <logger name="netdiscovery.DiscoveryClientWorkerIPv6" level="debug" additivity="false">
+    <logger name="ActiveMQ.BrokeredAgent" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="netdiscovery.DiscoveryClientIPv6" level="debug" additivity="false">
-        <appender-ref ref="STDOUT" />
-    </logger>
-    <logger name="netdiscovery.DiscoveryEngine" level="debug" additivity="false">
+    <logger name="ActiveMQ.BrokerMonitor" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
 
-    <logger name="plugincore.PluginEngine" level="debug" additivity="false">
+    <logger name="netdiscovery.DiscoveryClientWorkerIPv6" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="plugincore.WatchDog" level="debug" additivity="false">
+    <logger name="netdiscovery.DiscoveryClientIPv6" level="info" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
+    <logger name="netdiscovery.DiscoveryEngine" level="info" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
+
+    <logger name="plugincore.PluginEngine" level="info" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
+    <logger name="plugincore.WatchDog" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
 

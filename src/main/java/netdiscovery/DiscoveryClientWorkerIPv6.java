@@ -106,9 +106,9 @@ public class DiscoveryClientWorkerIPv6  {
 
 	public List<MsgEvent> discover() {
 		// Find the server using UDP broadcast
-		logger.debug("Start Discovery...");
+		logger.info("Discovery started");
 		try {
-			discoveredList = new ArrayList<MsgEvent>();
+			discoveredList = new ArrayList<>();
 			// Broadcast the message over all the network interfaces
 			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
 			while (interfaces.hasMoreElements()) {

@@ -75,10 +75,22 @@
         <configuration>
           <source>1.7</source>
           <target>1.7</target>
-          <checkModificationExcludes>
-            <checkModificationExclude>pom.xml</checkModificationExclude>
-        </checkModificationExcludes>
         </configuration>
+      </plugin>
+      <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>exec-maven-plugin</artifactId>
+          <version>1.2.1</version>
+          <executions>
+              <execution>
+                  <goals>
+                      <goal>java</goal>
+                  </goals>
+              </execution>
+          </executions>
+          <configuration>
+              <mainClass>plugincore.PluginEngine</mainClass>
+          </configuration>
       </plugin>
               
     </plugins>

@@ -18,7 +18,7 @@ public class WatchDog {
 	private static final Logger logger = LoggerFactory.getLogger(WatchDog.class);
 
 	public WatchDog() {
-		logger.info("Watchdog TimerTask initialized");
+		logger.debug("Watchdog initialized");
 		wdTimer = 1000;
 		startTS = System.currentTimeMillis();
 		timer = new Timer();

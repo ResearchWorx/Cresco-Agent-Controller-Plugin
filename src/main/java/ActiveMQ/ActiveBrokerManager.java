@@ -32,7 +32,7 @@ public class ActiveBrokerManager implements Runnable  {
 		}
 	}
 	public void run() {
-		logger.debug("Active Broker Manager started");
+		logger.info("Active Broker Manager started");
 		PluginEngine.ActiveBrokerManagerActive = true;
 		while(PluginEngine.ActiveBrokerManagerActive) {
 			try {

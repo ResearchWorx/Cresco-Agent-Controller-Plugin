@@ -37,7 +37,7 @@ public class ActiveAgentConsumer implements Runnable {
 
 	@Override
 	public void run() {
-		logger.debug("Agent Consumer started");
+		logger.info("Agent Consumer started");
 		Gson gson = new Gson();
 		try {
 			PluginEngine.ConsumerThreadActive = true;

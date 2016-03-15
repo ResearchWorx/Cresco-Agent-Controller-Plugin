@@ -34,7 +34,7 @@ public class ActiveRegionConsumer implements Runnable {
 
 	@Override
 	public void run() {
-		logger.debug("Region Consumer started");
+		logger.info("Region Consumer started");
 		Gson gson = new Gson();
 		try {
 			PluginEngine.ConsumerThreadRegionActive = true;
@@ -53,7 +53,7 @@ public class ActiveRegionConsumer implements Runnable {
 						sme.setParam("dst_agent", me.getParam("src_agent"));
 						PluginEngine.ap.sendMessage(sme);
 					} else {
-						logger.debug("[{}] {}_{} sent a message.", new Timestamp(new Date().getTime()), me.getParam("src_region"), me.getParam("src_agent"));
+						logger.trace("[{}] {}_{} sent a message.", new Timestamp(new Date().getTime()), me.getParam("src_region"), me.getParam("src_agent"));
 						System.out.print("Name of Agent to message [q to quit]: ");
 					}
 				}
