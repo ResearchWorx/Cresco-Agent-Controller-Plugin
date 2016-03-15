@@ -3,6 +3,7 @@ package shared;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -53,93 +54,6 @@ public class MsgEvent {
 		  setParam("dst_region",region);
 		  setParam("dst_agent",agent);
 		  setParam("dst_plugin",plugin);	  
-	  }
-	  /*
-	  public void swapSrcDst()
-	  {
-		  String src_region = getParam("src_region");
-		  String src_agent = getParam("src_agent");
-		  String src_plugin = getParam("src_plugin");
-		  setParam("src_region",getParam("dst_region"));
-		  setParam("src_agent",getParam("dst_region"));
-		  setParam("src_plugin",getParam("dst_region"));
-		  setParam("dst_region",getParam(src_region));
-		  setParam("dst_agent",getParam(src_agent));
-		  setParam("dst_plugin",getParam(src_plugin));
-	  }
-	  */
-	  public void setReturn2()
-	  {
-		  
-		String src_region = null;
-		String src_agent = null;
-		String src_plugin = null;
-		if(getParam("src_region") != null) //plugin
-		{
-			setMsgRegion(src_region);
-			src_region = new String(getParam("src_region"));
-			
-			if(getParam("src_agent") != null) //plugin
-			{
-				src_agent = new String(getParam("src_agent"));
-				setMsgAgent(src_agent);
-				
-				if(getParam("src_plugin") != null) //plugin
-				{
-					src_plugin = new String(getParam("src_plugin"));
-				}
-				else
-				{
-					setMsgPlugin(null);
-				}
-					
-			}
-			else
-			{
-				setMsgAgent(null);
-				setMsgPlugin(null);
-			}
-		}
-		else
-		{
-			setMsgRegion(null);
-			setMsgAgent(null);
-			setMsgPlugin(null);
-		}
-		  params.remove("src_region");
-		  params.remove("src_agent");
-		  params.remove("src_plugin");
-		
-		  if(getParam("dst_region") != null) //plugin
-		  {
-			  	params.put("src_region", params.get("dst_region"));
-			  	  
-			    if(getParam("dst_agent") != null) //plugin
-				{
-			    	params.put("src_agent", params.get("dst_agent"));
-			    	
-			    	if(getParam("dst_plugin") != null) //plugin
-					{
-						params.put("src_plugin", params.get("dst_plugin"));
-					}
-					else
-					{
-						params.remove("dst_plugin");
-					}
-				}
-			    else
-			    {
-			    	params.remove("dst_agent");
-					params.remove("dst_plugin");
-			    }
-		  }
-		  else
-		  {
-			  params.remove("dst_region");
-			  params.remove("dst_agent");
-			  params.remove("dst_plugin");
-		  }
-		 
 	  }
 	
 	public void setReturn()
@@ -261,7 +175,7 @@ public class MsgEvent {
 		  
 		  StringBuilder sb = new StringBuilder();
 		  
-		    Iterator it = tmpMap.entrySet().iterator();
+		    Iterator<Entry<String, String>> it = tmpMap.entrySet().iterator();
 		    while (it.hasNext()) {
 		        Map.Entry pairs = (Map.Entry)it.next();
 		        sb.append(pairs.getKey() + " = " + pairs.getValue() + "\n");

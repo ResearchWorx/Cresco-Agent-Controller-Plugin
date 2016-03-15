@@ -304,6 +304,12 @@ public class PluginEngine {
     	        //logger.debug("Region ConsumerThread Started..");
         		
     	        isBroker = true;
+    	        //start regional discovery
+    	        dcv6.getDiscoveryMap(DiscoveryType.REGION,2000);
+    	        if(!incomingCanidateBrokers.isEmpty())
+        		{
+    	        	logger.debug("Regions Found");
+        		}
     	        
     		} else {
     			//determine least loaded broker

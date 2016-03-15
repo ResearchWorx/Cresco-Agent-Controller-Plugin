@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import plugincore.PluginEngine;
 
 import com.google.gson.Gson;
@@ -224,7 +225,8 @@ public class DiscoveryEngine implements Runnable {
 								}
 								else if(rme.getParam("discovery_type").equals(DiscoveryType.REGION.name()))
 								{
-									logger.debug("{}", "regional discovery");
+									//logger.debug("{}", "regional discovery");
+									me = getRegionMsg(rme);
 								}
 								else if(rme.getParam("discovery_type").equals(DiscoveryType.GLOBAL.name()))
 								{
@@ -275,6 +277,7 @@ public class DiscoveryEngine implements Runnable {
 					me.setParam("dst_ip", rme.getParam("src_ip"));
 					me.setParam("dst_port", rme.getParam("src_port"));
 					me.setParam("agent_count", String.valueOf(PluginEngine.reachableAgents().size()));
+					me.setParam("discovery_type",DiscoveryType.AGENT.name());
 				}
 				else
 				{
@@ -282,6 +285,33 @@ public class DiscoveryEngine implements Runnable {
 					{
 						logger.error("{}", "!reconnect attempt!");
 					}
+				}
+						
+			}
+			catch(Exception ex)
+			{
+				logger.error("{}", ex.getMessage());
+			}
+			return me;
+	}
+		
+		private MsgEvent getRegionMsg(MsgEvent rme)
+		{
+			MsgEvent me = null;
+			try
+			{
+				if(PluginEngine.isBroker)
+				{
+					//System.out.println(getClass().getName() + "1 " + Thread.currentThread().getId());
+					me = new MsgEvent(MsgEventType.DISCOVER,PluginEngine.region,PluginEngine.agent,PluginEngine.plugin,"Broadcast discovery response.");
+					me.setParam("dst_region",PluginEngine.region);
+					me.setParam("dst_agent",rme.getParam("src_agent"));
+					me.setParam("src_region",PluginEngine.region);
+					me.setParam("src_agent",PluginEngine.agent);
+					me.setParam("dst_ip", rme.getParam("src_ip"));
+					me.setParam("dst_port", rme.getParam("src_port"));
+					me.setParam("agent_count", String.valueOf(PluginEngine.reachableAgents().size()));
+					me.setParam("discovery_type",DiscoveryType.REGION.name());
 				}
 						
 			}
