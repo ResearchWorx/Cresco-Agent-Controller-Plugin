@@ -230,7 +230,7 @@ public class DiscoveryClientWorkerIPv6  {
 											logger.debug("discovery {}", "cacnel count : " + cancelCount);
 											if(cancelCount == 0)
 											{
-												timer.cancel(); //reset timer on new discovery packet
+												//timer.cancel(); //reset timer on new discovery packet
 												timer.schedule(new StopListnerTask(), discoveryTimeout);
 											}
 										}
