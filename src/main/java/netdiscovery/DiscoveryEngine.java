@@ -208,7 +208,6 @@ public class DiscoveryEngine implements Runnable {
 								{
 									logger.debug("{}", "agent discovery");
 									me = getAgentMsg(rme); //generate payload
-									logger.debug("{}", me.getParamsString());
 								}
 								else if(rme.getParam("discovery_type").equals("region"))
 								{
@@ -220,7 +219,7 @@ public class DiscoveryEngine implements Runnable {
 							
 							if(me != null)
 							{
-								
+							logger.debug("{}", me.getParamsString());
 							String json = gson.toJson(me);
 							byte[] sendData = json.getBytes();
 							//returnAddr = InetAddress.getByName(me.getParam("dst_ip"));
