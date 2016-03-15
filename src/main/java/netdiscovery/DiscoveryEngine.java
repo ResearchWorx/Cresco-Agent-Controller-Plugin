@@ -206,6 +206,7 @@ public class DiscoveryEngine implements Runnable {
 						//System.out.println(getClass().getName() + "0.0 " + Thread.currentThread().getId());
 						try {
 							rme = gson.fromJson(message, MsgEvent.class);
+							logger.error(message);
 						} catch(Exception ex) {
 							logger.error(getClass().getName() + " failed to marshal discovery {}" + ex.getMessage());
 						}
