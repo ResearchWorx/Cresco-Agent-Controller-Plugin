@@ -177,6 +177,14 @@ public class DiscoveryClientWorkerIPv6  {
 								sme.setParam("broadcast_ip",multiCastNetwork);
 								sme.setParam("src_region",PluginEngine.region);
 								sme.setParam("src_agent",PluginEngine.agent);
+								if(PluginEngine.isBroker)
+								{
+									sme.setParam("discovery_type","region");
+								}
+								else
+								{
+									sme.setParam("discovery_type","agent");
+								}
 
 								//me.setParam("clientip", packet.getAddress().getHostAddress());
 
