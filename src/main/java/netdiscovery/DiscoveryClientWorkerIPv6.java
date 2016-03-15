@@ -72,9 +72,6 @@ public class DiscoveryClientWorkerIPv6  {
 
 			//We have a response
 			//System.out.println(getClass().getName() + ">>> Broadcast response from server: " + packet.getAddress().getHostAddress());
-			logger.error("processIncoming IP : " + packet.getAddress().getHostAddress());
-			InetSocketAddress isa = (InetSocketAddress) packet.getSocketAddress();
-			logger.error("processIncoming IP2 : " + isa.getAddress().getHostAddress());
 			
 			//Check if the message is correct
 			//System.out.println(new String(receivePacket.getData()));
@@ -87,8 +84,7 @@ public class DiscoveryClientWorkerIPv6  {
 				logger.error(json); //pull out
 				if(me != null)
 				{
-					System.out.println("DCW RESPONCE FROM REMOTE: " + me.getParamsString());
-
+					
 					 String remoteAddress = packet.getAddress().getHostAddress();
 					 if(remoteAddress.contains("%"))
 					 {
