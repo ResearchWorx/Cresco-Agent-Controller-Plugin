@@ -266,6 +266,8 @@ public class DiscoveryEngine implements Runnable {
 			MsgEvent me = null;
 			try
 			{
+				if(PluginEngine.reachableAgents().size() < 2)
+				{
 				if(rme.getParam("src_region") == null)
 				{
 					//System.out.println(getClass().getName() + "1 " + Thread.currentThread().getId());
@@ -285,6 +287,7 @@ public class DiscoveryEngine implements Runnable {
 					{
 						logger.error("{}", "!reconnect attempt!");
 					}
+				}
 				}
 						
 			}
