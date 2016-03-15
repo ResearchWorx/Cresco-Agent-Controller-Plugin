@@ -81,7 +81,6 @@ public class DiscoveryClientWorkerIPv6  {
 			//String response = "region=region0,agent=agent0,recaddr=" + packet.getAddress().getHostAddress();
   			try {
 				MsgEvent me = gson.fromJson(json, MsgEvent.class);
-				logger.error(json); //pull out
 				if(me != null)
 				{
 					
