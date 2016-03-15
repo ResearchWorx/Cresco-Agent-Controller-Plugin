@@ -1,7 +1,5 @@
 package plugincore;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -15,7 +13,7 @@ import shared.MsgEventType;
 public class WatchDog {
 	public Timer timer;
 	private long startTS;
-	private Map<String,String> wdMap;
+	//private Map<String,String> wdMap;
 	private int wdTimer;
 	private static final Logger logger = LoggerFactory.getLogger(WatchDog.class);
 
@@ -25,7 +23,7 @@ public class WatchDog {
 		  startTS = System.currentTimeMillis();
 		  timer = new Timer();
 	      timer.scheduleAtFixedRate(new WatchDogTask(), 500, wdTimer);
-	      wdMap = new HashMap<>(); //for sending future WD messages
+	      //wdMap = new HashMap<>(); //for sending future WD messages
 	      	  
 	      MsgEvent le = new MsgEvent(MsgEventType.INFO,PluginEngine.region,null,null,"WatchDog timer set to " + wdTimer + " milliseconds");
 	      le.setParam("src_region", PluginEngine.region);
