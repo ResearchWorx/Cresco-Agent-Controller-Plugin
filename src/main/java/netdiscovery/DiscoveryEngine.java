@@ -1,7 +1,6 @@
 package netdiscovery;
 
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -24,7 +23,7 @@ import shared.MsgEvent;
 import shared.MsgEventType;
 
 public class DiscoveryEngine implements Runnable {
-	//private MulticastSocket socket;
+	
 	private Gson gson;
 	private static final Logger logger = LoggerFactory.getLogger(DiscoveryEngine.class);
 
@@ -34,7 +33,7 @@ public class DiscoveryEngine implements Runnable {
 	}
 	  
 	public void shutdown() {
-		//socket.close();
+		
 	}
 
 	public void run() {
@@ -72,20 +71,7 @@ public class DiscoveryEngine implements Runnable {
 
 		public void run() {
 			try {
-				//if (!networkInterface.getDisplayName().startsWith("docker") && !networkInterface.getDisplayName().startsWith("veth") && !networkInterface.isLoopback() && networkInterface.isUp() && networkInterface.supportsMulticast()  && !networkInterface.isPointToPoint() && !networkInterface.isVirtual())
-				//if (!networkInterface.getDisplayName().startsWith("docker") && !networkInterface.getDisplayName().startsWith("veth"))
-				//if (!networkInterface.getDisplayName().startsWith("veth"))
-				//if (networkInterface.getDisplayName().startsWith("em1") && !networkInterface.getDisplayName().startsWith("veth") && !networkInterface.isLoopback() && networkInterface.isUp() && networkInterface.supportsMulticast() && !networkInterface.isPointToPoint() && !networkInterface.isVirtual())
-				//if (networkInterface.getDisplayName().startsWith("docker") && !networkInterface.getDisplayName().startsWith("veth") && !networkInterface.isLoopback() && networkInterface.isUp() && networkInterface.supportsMulticast() && !networkInterface.isPointToPoint() && !networkInterface.isVirtual())
-				/*
-				System.out.println("DiscoveryEngineWorkerIPv6 : Check " + this.networkInterfaceName);
-				System.out.println("isLoopBack: " +networkInterface.isLoopback());
-				System.out.println("isUP: " + networkInterface.isUp());
-				System.out.println("supportsMulticast: " + networkInterface.supportsMulticast());
-				System.out.println("isPointToPoint: " + networkInterface.isPointToPoint());
-				System.out.println("isVirtual: " + networkInterface.isVirtual());
-				*/
-				//if (!networkInterface.getDisplayName().startsWith("veth") && !networkInterface.isLoopback() && networkInterface.isUp() && networkInterface.supportsMulticast() && !networkInterface.isPointToPoint() && !networkInterface.isVirtual())
+				
 				if (!networkInterface.getDisplayName().startsWith("veth") && !networkInterface.isLoopback() && networkInterface.supportsMulticast() && !networkInterface.isPointToPoint() && !networkInterface.isVirtual()) {
 					logger.info("Init [{}]", networkInterface.getDisplayName());
 		    		SocketAddress sa;
@@ -125,8 +111,7 @@ public class DiscoveryEngine implements Runnable {
 								PluginEngine.responds++;
 							}
 						}
-						//sendSucka(socket,packet);
-						//new Thread(new DiscoveryResponder(packet)).start();
+						
 					}
 				}
 			} catch(Exception ex) {
@@ -180,8 +165,10 @@ public class DiscoveryEngine implements Runnable {
 			return intAddr;
 		}
 
-		private synchronized DatagramPacket sendPacket(DatagramPacket packet) {
-			synchronized (packet) {
+		private synchronized DatagramPacket sendPacket(DatagramPacket packet) 
+		{
+			synchronized (packet) 
+			{
 				Map<String,String> intAddr = getInterfaceAddresses();
 				InetAddress returnAddr = packet.getAddress();
 
@@ -189,7 +176,6 @@ public class DiscoveryEngine implements Runnable {
 				boolean isGlobal = !returnAddr.isSiteLocalAddress() && !returnAddr.isLinkLocalAddress();
 				String sourceAddress = getSourceAddress(intAddr,remoteAddress); //determine send address
 
-				//if((!PluginEngine.isLocal(remoteAddress)) && (isGlobal))
 				if(!(intAddr.containsKey(remoteAddress)) && (isGlobal) && (sourceAddress != null)) {
 					//Packet received
 					//System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
@@ -199,9 +185,9 @@ public class DiscoveryEngine implements Runnable {
 					String message = new String(packet.getData()).trim();
 
 					MsgEvent rme = null;
-					//DatagramPacket sendPacket = null;
-	 		      
-		  			try {
+				  
+		  			try 
+		  			{
 						//System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
 						//check that the message can be marshaled into a MsgEvent
 						//System.out.println(getClass().getName() + "0.0 " + Thread.currentThread().getId());
@@ -211,21 +197,28 @@ public class DiscoveryEngine implements Runnable {
 							logger.error(getClass().getName() + " failed to marshal discovery {}" + ex.getMessage());
 						}
 						//System.out.println(getClass().getName() + "0.1 " + Thread.currentThread().getId());
-						if (rme!=null) {
-							//System.out.println(getClass().getName() + "1 " + Thread.currentThread().getId());
-							MsgEvent me = new MsgEvent(MsgEventType.DISCOVER,PluginEngine.region,PluginEngine.agent,PluginEngine.plugin,"Broadcast discovery response.");
-							me.setParam("dst_region",rme.getParam("src_region"));
-							me.setParam("dst_agent",rme.getParam("src_agent"));
-							me.setParam("src_region",PluginEngine.region);
-							me.setParam("src_agent",PluginEngine.agent);
-							me.setParam("dst_ip", remoteAddress);
-							me.setParam("dst_port", String.valueOf(packet.getPort()));
-							me.setParam("agent_count", String.valueOf(PluginEngine.reachableAgents().size()));
-
-							//PluginEngine.discoveryResponse.offer(me);
-							//System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress() +  " Sent to broker. " + PluginEngine.discoveryResponse.size());
-							//System.out.println(getClass().getName() + "2 " + Thread.currentThread().getId());
-
+						if (rme!=null) 
+						{
+							rme.setParam("src_ip", remoteAddress);
+							rme.setParam("src_port", String.valueOf(packet.getPort()));
+							MsgEvent me = null;
+							if(rme.getParam("discovery_type") != null)
+							{
+								if(rme.getParam("discovery_type").equals("agent"))
+								{
+									logger.error("{}", "agent discovery");
+									me = getAgentMsg(rme); //generate payload
+								}
+								else if(rme.getParam("discovery_type").equals("region"))
+								{
+									logger.error("{}", "regional discovery");
+								}
+								
+							}
+								
+							
+							if(me != null)
+							{
 							String json = gson.toJson(me);
 							byte[] sendData = json.getBytes();
 							//returnAddr = InetAddress.getByName(me.getParam("dst_ip"));
@@ -235,18 +228,13 @@ public class DiscoveryEngine implements Runnable {
 							packet.setLength(sendData.length);
 							packet.setAddress(returnAddr);
 							packet.setPort(returnPort);
-							//sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
-							//socket.send(sendPacket);
-
-							//DatagramSocket sendSocket = new DatagramSocket();
-							//sendSocket.send(sendPacket);
-							//sendSocket.disconnect();
-							//sendSocket.close();
+							}
 						}
 
-					} catch(Exception ex) {
+		  			} 
+		  			catch(Exception ex) 
+		  			{
 						logger.error("{}", ex.getMessage());
-						//ex.printStackTrace(System.out);
 					}
 				} else {
 					packet = null;
@@ -254,79 +242,39 @@ public class DiscoveryEngine implements Runnable {
 				return packet;
 			}
 		}
-	}
-
-	public class DiscoveryResponder implements Runnable {
-		DatagramPacket packet = null;
-		Gson gson;
-
-		public DiscoveryResponder(DatagramPacket packet) {
-			this.packet = packet;
-			gson = new Gson();
-		}
-
-		public void run() {
-			InetAddress returnAddr = packet.getAddress();
-			boolean isGlobal = !returnAddr.isSiteLocalAddress() && !returnAddr.isLinkLocalAddress();
-
-			String remoteAddress = returnAddr.getHostAddress();
-			if(remoteAddress.contains("%")) {
-				String[] remoteScope = remoteAddress.split("%");
-				remoteAddress = remoteScope[0];
-			}
-			if((!PluginEngine.isLocal(remoteAddress)) && (isGlobal)) {
-				//Packet received
-				//System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
-				//System.out.println(getClass().getName() + ">>>Packet received; data: " + new String(packet.getData()));
-
-				//See if the packet holds the right command (message)
-				String message = new String(packet.getData()).trim();
-
-				MsgEvent rme = null;
-				DatagramPacket sendPacket;
-	 		      
-		  		try {
-		  		    //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
-	 		        //check that the message can be marshaled into a MsgEvent
-		  			//System.out.println(getClass().getName() + "0.0 " + Thread.currentThread().getId());
-		  			try {
-		  				rme = gson.fromJson(message, MsgEvent.class);
-			  		} catch(Exception ex) {
-			  			logger.error(getClass().getName() + " failed to marshal discovery " + ex.getMessage());
-			  		}
-		  			//System.out.println(getClass().getName() + "0.1 " + Thread.currentThread().getId());
-		  			if (rme!=null) {
-						//System.out.println(getClass().getName() + "1 " + Thread.currentThread().getId());
-
-						MsgEvent me = new MsgEvent(MsgEventType.DISCOVER,PluginEngine.region,PluginEngine.agent,PluginEngine.plugin,"Broadcast discovery response.");
-						me.setParam("dst_region",rme.getParam("src_region"));
-						me.setParam("dst_agent",rme.getParam("src_agent"));
-						me.setParam("src_region",PluginEngine.region);
-						me.setParam("src_agent",PluginEngine.agent);
-						me.setParam("dst_ip", remoteAddress);
-						me.setParam("dst_port", String.valueOf(packet.getPort()));
-						//PluginEngine.discoveryResponse.offer(me);
-						//System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress() +  " Sent to broker. " + PluginEngine.discoveryResponse.size());
-						//System.out.println(getClass().getName() + "2 " + Thread.currentThread().getId());
-
-						String json = gson.toJson(me);
-						byte[] sendData = json.getBytes();
-						//returnAddr = InetAddress.getByName(me.getParam("dst_ip"));
-						int returnPort = Integer.parseInt(me.getParam("dst_port"));
-						//DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
-						sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
-						//socket.send(sendPacket);
-
-						DatagramSocket sendSocket = new DatagramSocket();
-						sendSocket.send(sendPacket);
-						//sendSocket.disconnect();
-						sendSocket.close();
-		 		    }
-		  		} catch(Exception ex) {
-					logger.error("{}", ex.getMessage());
-					//ex.printStackTrace(System.out);
+		private MsgEvent getAgentMsg(MsgEvent rme)
+		{
+			MsgEvent me = null;
+			try
+			{
+				if(rme.getParam("src_region") == null)
+				{
+					//System.out.println(getClass().getName() + "1 " + Thread.currentThread().getId());
+					me = new MsgEvent(MsgEventType.DISCOVER,PluginEngine.region,PluginEngine.agent,PluginEngine.plugin,"Broadcast discovery response.");
+					me.setParam("dst_region",PluginEngine.region);
+					me.setParam("dst_agent",rme.getParam("src_agent"));
+					me.setParam("src_region",PluginEngine.region);
+					me.setParam("src_agent",PluginEngine.agent);
+					me.setParam("dst_ip", rme.getParam("src_ip"));
+					me.setParam("dst_port", rme.getParam("src_port"));
+					me.setParam("agent_count", String.valueOf(PluginEngine.reachableAgents().size()));
 				}
+				else
+				{
+					if((rme.getParam("src_region").equals(PluginEngine.region)) && PluginEngine.isBroker)
+					{
+						logger.error("{}", "!reconnect attempt!");
+					}
+				}
+						
 			}
-		}
+			catch(Exception ex)
+			{
+				logger.error("{}", ex.getMessage());
+			}
+			return me;
 	}
+		
+	}
+
 }
