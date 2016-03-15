@@ -206,7 +206,7 @@ public class DiscoveryEngine implements Runnable {
 						//System.out.println(getClass().getName() + "0.0 " + Thread.currentThread().getId());
 						try {
 							rme = gson.fromJson(message, MsgEvent.class);
-							logger.error(message);
+							logger.error("INCOMING " + message);
 						} catch(Exception ex) {
 							logger.error(getClass().getName() + " failed to marshal discovery {}" + ex.getMessage());
 						}
@@ -240,6 +240,7 @@ public class DiscoveryEngine implements Runnable {
 							{
 							
 							String json = gson.toJson(me);
+							logger.error("OUTGOING " + message);
 							byte[] sendData = json.getBytes();
 							//returnAddr = InetAddress.getByName(me.getParam("dst_ip"));
 							int returnPort = Integer.parseInt(me.getParam("dst_port"));
