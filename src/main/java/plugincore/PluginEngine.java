@@ -245,13 +245,15 @@ public class PluginEngine {
     		if(incomingCanidateBrokers.isEmpty())
     		{
     			
-    			//generate regional ident
-    			RandomString rs = new RandomString(4);
-    			region = "region-" + rs.nextString();
-    			logger.debug("Generated regionid=" + region);
-    			agentpath = region + "_" + agent;
-    			logger.debug("AgentPath=" + agentpath);
-    			
+    			//generate regional ident if not assigned
+    			if(region == null)
+    			{
+    				RandomString rs = new RandomString(4);
+    				region = "region-" + rs.nextString();
+    				logger.debug("Generated regionid=" + region);
+    				agentpath = region + "_" + agent;
+    				logger.debug("AgentPath=" + agentpath);
+    			}
     			//Start controller services
     			
     			//discovery engine
