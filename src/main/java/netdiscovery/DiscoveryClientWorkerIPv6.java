@@ -16,6 +16,7 @@ import java.util.TimerTask;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import plugincore.PluginEngine;
 
 import com.google.gson.Gson;
@@ -30,14 +31,17 @@ public class DiscoveryClientWorkerIPv6  {
 	public Timer timer;
 	public int discoveryTimeout;
 	public String multiCastNetwork;
+	public DiscoveryType disType;
+	
 	public static final Logger logger = LoggerFactory.getLogger(DiscoveryClientWorkerIPv6.class);
 
-	public DiscoveryClientWorkerIPv6(int discoveryTimeout, String multiCastNetwork) {
+	public DiscoveryClientWorkerIPv6(DiscoveryType disType, int discoveryTimeout, String multiCastNetwork) {
 		gson = new Gson();
 		//timer = new Timer();
 	    //timer.scheduleAtFixedRate(new StopListnerTask(), 1000, discoveryTimeout);
 		this.discoveryTimeout = discoveryTimeout;
 		this.multiCastNetwork = multiCastNetwork;
+		this.disType = disType;
 	}
 	
 	public class IPv6Responder implements Runnable {
@@ -176,19 +180,24 @@ public class DiscoveryClientWorkerIPv6  {
 								sme.setParam("broadcast_ip",multiCastNetwork);
 								sme.setParam("src_region",PluginEngine.region);
 								sme.setParam("src_agent",PluginEngine.agent);
-								if(PluginEngine.isBroker)
+								if(disType == DiscoveryType.AGENT)
 								{
-									sme.setParam("discovery_type","region");
+									sme.setParam("discovery_type",DiscoveryType.AGENT.name());
+								}
+								else if(disType == DiscoveryType.REGION)
+								{
+									sme.setParam("discovery_type",DiscoveryType.REGION.name());
 								}
 								else
 								{
-									sme.setParam("discovery_type","agent");
+									sme = null;
 								}
-
 								//me.setParam("clientip", packet.getAddress().getHostAddress());
 
 								//convert java object to JSON format,
 								// and returned as JSON formatted string
+								if(sme != null)
+								{
 						 		String sendJson = gson.toJson(sme);
 
 								byte[] sendData = sendJson.getBytes();
@@ -220,6 +229,8 @@ public class DiscoveryClientWorkerIPv6  {
 									}
 								}
 					  			//Close the port!
+								}
+								
 					  		}
 				  		} catch (IOException ie) {
 							//eat exception we are closing port

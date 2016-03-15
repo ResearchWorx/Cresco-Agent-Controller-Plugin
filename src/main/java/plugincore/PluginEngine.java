@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import netdiscovery.DiscoveryClientIPv6;
 import netdiscovery.DiscoveryEngine;
+import netdiscovery.DiscoveryType;
 //import shared.Clogger;
 import shared.MsgEvent;
 import shared.MsgEventType;
@@ -242,7 +243,7 @@ public class PluginEngine {
             //dc = new DiscoveryClientIPv4();
 
         	logger.debug("Broker Search...");
-    		dcv6.getDiscoveryMap(2000);
+    		dcv6.getDiscoveryMap(DiscoveryType.AGENT,2000);
 			//logger.info("Broker search IPv4:");
     		//dc.getDiscoveryMap(2000);
     		if(incomingCanidateBrokers.isEmpty())

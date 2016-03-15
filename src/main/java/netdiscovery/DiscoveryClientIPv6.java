@@ -16,7 +16,7 @@ public class DiscoveryClientIPv6
 		//discoveryTimeout = 1000;
 	}
 	
-	public void getDiscoveryMap(int discoveryTimeout) {
+	public void getDiscoveryMap(DiscoveryType disType, int discoveryTimeout) {
 		try {
 			while(PluginEngine.clientDiscoveryActiveIPv6) {
 				logger.debug("Discovery already underway, waiting..");
@@ -25,7 +25,7 @@ public class DiscoveryClientIPv6
 			PluginEngine.clientDiscoveryActiveIPv6 = true;
 			//Searching local network [ff02::1:c]
 			String multiCastNetwork = "ff02::1:c";
-			DiscoveryClientWorkerIPv6 dcw = new DiscoveryClientWorkerIPv6(discoveryTimeout,multiCastNetwork);
+			DiscoveryClientWorkerIPv6 dcw = new DiscoveryClientWorkerIPv6(disType, discoveryTimeout,multiCastNetwork);
 			//populate map with possible peers
 			logger.debug("Searching {}", multiCastNetwork);
 			dcw.discover();
