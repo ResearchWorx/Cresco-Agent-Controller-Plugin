@@ -262,6 +262,10 @@ public class DiscoveryEngine implements Runnable {
 							packet.setAddress(returnAddr);
 							packet.setPort(returnPort);
 							}
+							else
+							{
+								packet = null; //make sure packet is null
+							}
 						}
 
 		  			} 
