@@ -224,9 +224,13 @@ public class DiscoveryClientWorkerIPv6  {
 										DatagramPacket receivePacket = new DatagramPacket(recvBuf, recvBuf.length);
 										synchronized (c) {
 											c.receive(receivePacket);
-											timer.purge();
-											timer.cancel(); //reset timer on new discovery packet
-									 		timer.schedule(new StopListnerTask(), discoveryTimeout);
+											int cancelCount = timer.purge();
+											logger.debug("discovery {}", "cacnel count : " + cancelCount);
+											if(cancelCount == 0)
+											{
+												timer.cancel(); //reset timer on new discovery packet
+												timer.schedule(new StopListnerTask(), discoveryTimeout);
+											}
 										}
 										synchronized (receivePacket) {
 											processIncoming(receivePacket);
