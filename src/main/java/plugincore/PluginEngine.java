@@ -305,8 +305,9 @@ public class PluginEngine {
     			for (MsgEvent bm : incomingCanidateBrokers) {
     				int tmpBrokerCount = Integer.parseInt(bm.getParam("agent_count"));
     				if(brokerCount < tmpBrokerCount) {
-    					logger.debug("commInit {}", bm.getParam("dst_ip"));
-    					logger.debug("commInit {}", bm.getParam("src_region"));
+    					
+    					//logger.debug("commInit {}", bm.getParam("dst_ip"));
+    					logger.debug("commInit {}", bm.getParams());
     					
     					cbrokerAddress = bm.getParam("dst_ip");
     					cRegion = bm.getParam("src_region");
