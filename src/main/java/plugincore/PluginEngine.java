@@ -168,10 +168,9 @@ public class PluginEngine {
 	    }, "Shutdown-thread"));
 
 		logger.debug("Generating Agent identity");
-    	region = "region0";
+    	
     	RandomString rs = new RandomString(4);
 		agent = "agent-" + rs.nextString();
-		agentpath = region + "_" + agent;
 
     	/*//disabled ipv4 discovery
     	//Start IPv4 network discovery engine
@@ -247,6 +246,12 @@ public class PluginEngine {
     		//dc.getDiscoveryMap(2000);
     		if(incomingCanidateBrokers.isEmpty())
     		{
+    			
+    			//generate regional ident
+    			RandomString rs = new RandomString(4);
+    			region = "region-" + rs.nextString();
+    			agentpath = region + "_" + agent;
+
     			//Start controller services
     			
     			//discovery engine
@@ -295,11 +300,16 @@ public class PluginEngine {
     			//determine least loaded broker
     			//need to use additional metrics to determine best fit broker
     			String cbrokerAddress = null;
+    			String cRegion = null;
     			int brokerCount = -1;
     			for (MsgEvent bm : incomingCanidateBrokers) {
     				int tmpBrokerCount = Integer.parseInt(bm.getParam("agent_count"));
     				if(brokerCount < tmpBrokerCount) {
+    					logger.debug("commInit {}", bm.getParam("dst_ip"));
+    					logger.debug("commInit {}", bm.getParam("src_region"));
+    					
     					cbrokerAddress = bm.getParam("dst_ip");
+    					cRegion = bm.getParam("src_region");
     				}
     			}
     			if (cbrokerAddress != null) {
@@ -308,6 +318,10 @@ public class PluginEngine {
     					cbrokerAddress = "[" + cbrokerAddress + "]";
     				}
     				brokerAddress = cbrokerAddress;
+    				region = cRegion;
+    				agentpath = region + "_" + agent;
+
+    				
     			}
     			isBroker = false;
     		}
