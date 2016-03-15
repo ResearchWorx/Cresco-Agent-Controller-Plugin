@@ -217,16 +217,19 @@ public class DiscoveryEngine implements Runnable {
 							MsgEvent me = null;
 							if(rme.getParam("discovery_type") != null)
 							{
-								if(rme.getParam("discovery_type").equals("agent"))
+								if(rme.getParam("discovery_type").equals(DiscoveryType.AGENT.name()))
 								{
 									//logger.debug("{}", "agent discovery");
 									me = getAgentMsg(rme); //generate payload
 								}
-								else if(rme.getParam("discovery_type").equals("region"))
+								else if(rme.getParam("discovery_type").equals(DiscoveryType.REGION.name()))
 								{
-									//logger.debug("{}", "regional discovery");
+									logger.debug("{}", "regional discovery");
 								}
-								
+								else if(rme.getParam("discovery_type").equals(DiscoveryType.GLOBAL.name()))
+								{
+									logger.debug("{}", "regional global");
+								}
 							}
 								
 							
