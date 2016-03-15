@@ -83,7 +83,7 @@ public class DiscoveryClientWorkerIPv6  {
 				logger.error(json); //pull out
 				if(me != null)
 				{
-					//System.out.println("RESPONCE: " + me.getParamsString());
+					System.out.println("DCW RESPONCE FROM REMOTE: " + me.getParamsString());
 
 					 String remoteAddress = packet.getAddress().getHostAddress();
 					 if(remoteAddress.contains("%"))

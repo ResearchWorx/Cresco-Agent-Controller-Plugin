@@ -318,7 +318,7 @@ public class PluginEngine {
     			String cRegion = null;
     			int brokerCount = -1;
     			for (MsgEvent bm : incomingCanidateBrokers) {
-    				logger.debug("commInit {}", bm.getParams());
+    				logger.debug("RESPONSE IN PLIGIN ENGINE ", bm.getParams());
 					
     				int tmpBrokerCount = Integer.parseInt(bm.getParam("agent_count"));
     				if(brokerCount < tmpBrokerCount) {
