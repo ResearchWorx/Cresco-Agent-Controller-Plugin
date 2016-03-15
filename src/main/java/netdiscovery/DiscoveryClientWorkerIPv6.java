@@ -32,6 +32,8 @@ public class DiscoveryClientWorkerIPv6  {
 	public int discoveryTimeout;
 	public String multiCastNetwork;
 	public DiscoveryType disType;
+	private boolean timerActive = false;
+	
 	
 	public static final Logger logger = LoggerFactory.getLogger(DiscoveryClientWorkerIPv6.class);
 
@@ -42,6 +44,7 @@ public class DiscoveryClientWorkerIPv6  {
 		this.discoveryTimeout = discoveryTimeout;
 		this.multiCastNetwork = multiCastNetwork;
 		this.disType = disType;
+		
 	}
 	
 	public class IPv6Responder implements Runnable {
@@ -96,15 +99,12 @@ public class DiscoveryClientWorkerIPv6  {
 	    	//user timer to close socket
 	    	c.close();
 	    	timer.cancel();
-	    	logger.debug("StopListnerTask {}", "Boom STOPPED");
-    		
+	    	timerActive = false;
+	    	
 	    	}
 	    	catch(Exception ex)
 	    	{
-	    		logger.error("stopped {}", timer.purge());
-	    		
 	    		logger.error("StopListnerTask {}", ex.getMessage());
-	    		
 	    	}
 	    }
 	}
@@ -188,6 +188,7 @@ public class DiscoveryClientWorkerIPv6  {
 								//start timer to clost discovery
 								timer = new Timer();
 								timer.schedule(new StopListnerTask(), discoveryTimeout);
+								timerActive = true;
 								MsgEvent sme = new MsgEvent(MsgEventType.DISCOVER,PluginEngine.region,PluginEngine.agent,PluginEngine.plugin,"Discovery request.");
 								sme.setParam("broadcast_ip",multiCastNetwork);
 								sme.setParam("src_region",PluginEngine.region);
@@ -226,9 +227,7 @@ public class DiscoveryClientWorkerIPv6  {
 										DatagramPacket receivePacket = new DatagramPacket(recvBuf, recvBuf.length);
 										synchronized (c) {
 											c.receive(receivePacket);
-											int cancelCount = timer.purge();
-											logger.debug("discovery {}", "cacnel count : " + cancelCount);
-											if(cancelCount == 0)
+											if(timerActive)
 											{
 												//timer.cancel(); //reset timer on new discovery packet
 												timer.schedule(new StopListnerTask(), discoveryTimeout);
