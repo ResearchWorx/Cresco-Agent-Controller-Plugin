@@ -177,11 +177,11 @@ public class PluginEngine {
 	        }
 	    }, "Shutdown-thread"));
 
-		logger.debug("Generating Agent identity");
-    	
+		
     	RandomString rs = new RandomString(4);
 		agent = "agent-" + rs.nextString();
-
+		logger.debug("Generating Agent identity = [" + agent + "]");
+    	
 		
         commInit(); //initial init
 
