@@ -45,7 +45,7 @@ public class PluginEngine {
 	public static ActiveProducer ap;
 	
 	public static String brokerAddress;
-	public static boolean isBroker = false;
+	public static boolean isRegionalController = false;
 	public static boolean isIPv6 = false;
 	public static boolean isActive = false;
 	
@@ -286,7 +286,7 @@ public class PluginEngine {
     	        }
     	        //logger.debug("Region ConsumerThread Started..");
         		
-    	        isBroker = true;
+    	        isRegionalController = true;
     	        //start regional discovery
     	        discoveryList.clear();
     	        discoveryList = dcv6.getDiscoveryResponse(DiscoveryType.REGION,2000);
@@ -328,7 +328,7 @@ public class PluginEngine {
         			
     				
     			}
-    			isBroker = false;
+    			isRegionalController = false;
     		}
     		
     		//consumer agent 
@@ -437,7 +437,7 @@ public class PluginEngine {
     	List<String> rAgents = null;
     	try {
     		rAgents = new ArrayList<>();
-    		if(isBroker) {
+    		if(isRegionalController) {
     			ActiveMQDestination[] er = ActiveBroker.broker.getBroker().getDestinations();
 				for(ActiveMQDestination des : er) {
 					if(des.isQueue()) {
@@ -455,7 +455,7 @@ public class PluginEngine {
     
     public static boolean isReachableAgent(String remoteAgentPath) {
     	boolean isReachableAgent = false;
-    	if(isBroker) {
+    	if(isRegionalController) {
 			try {
 				ActiveMQDestination[] er = ActiveBroker.broker.getBroker().getDestinations();
 				  for(ActiveMQDestination des : er) {

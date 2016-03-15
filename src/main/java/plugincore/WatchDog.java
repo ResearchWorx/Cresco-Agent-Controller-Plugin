@@ -48,7 +48,7 @@ public class WatchDog {
 					logger.debug("Agent Consumer shutdown detected");
 	    		}
 				
-	    		if(PluginEngine.isBroker) {
+	    		if(PluginEngine.isRegionalController) {
 	    			if(!PluginEngine.DiscoveryActive) {
 	    				isHealthy = false;
 						logger.debug("Discovery shutdown detected");
