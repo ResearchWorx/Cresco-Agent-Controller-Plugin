@@ -72,10 +72,11 @@ public class DiscoveryClientWorkerIPv6  {
 
 			//We have a response
 			//System.out.println(getClass().getName() + ">>> Broadcast response from server: " + packet.getAddress().getHostAddress());
-
+			logger.error("processIncoming IP : " + packet.getAddress().getHostAddress());
 			//Check if the message is correct
 			//System.out.println(new String(receivePacket.getData()));
 
+			
 			String json = new String(packet.getData()).trim();
 			//String response = "region=region0,agent=agent0,recaddr=" + packet.getAddress().getHostAddress();
   			try {
