@@ -342,6 +342,7 @@ public class PluginEngine {
 	        watchDogProcess = new WatchDog();
 	        //logger.debug("Watchdog Started");
     	} catch(Exception e) {
+    		e.printStackTrace();
     		logger.error("commInit " + e.getMessage());
     	}
     }
