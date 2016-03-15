@@ -96,6 +96,8 @@ public class DiscoveryClientWorkerIPv6  {
 	    	//user timer to close socket
 	    	c.close();
 	    	timer.cancel();
+	    	logger.debug("StopListnerTask {}", "Boom STOPPED");
+    		
 	    	}
 	    	catch(Exception ex)
 	    	{
