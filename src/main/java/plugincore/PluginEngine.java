@@ -243,10 +243,10 @@ public class PluginEngine {
             //dc = new DiscoveryClientIPv4();
 
         	logger.debug("Broker Search...");
-    		dcv6.getDiscoveryMap(DiscoveryType.AGENT,2000);
+    		List<MsgEvent> discoveryList = dcv6.getDiscoveryResponse(DiscoveryType.AGENT,2000);
 			//logger.info("Broker search IPv4:");
     		//dc.getDiscoveryMap(2000);
-    		if(incomingCanidateBrokers.isEmpty())
+    		if(discoveryList.isEmpty())
     		{
     			
     			//generate regional ident if not assigned
@@ -305,8 +305,8 @@ public class PluginEngine {
         		
     	        isBroker = true;
     	        //start regional discovery
-    	        dcv6.getDiscoveryMap(DiscoveryType.REGION,2000);
-    	        if(!incomingCanidateBrokers.isEmpty())
+    	        dcv6.getDiscoveryResponse(DiscoveryType.REGION,2000);
+    	        if(!discoveryList.isEmpty())
         		{
     	        	logger.debug("Regions Found");
         		}

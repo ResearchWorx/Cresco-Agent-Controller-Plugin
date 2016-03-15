@@ -10,7 +10,9 @@ import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -33,7 +35,7 @@ public class DiscoveryClientWorkerIPv6  {
 	public String multiCastNetwork;
 	public DiscoveryType disType;
 	private boolean timerActive = false;
-	
+	private List<MsgEvent> discoveredList;
 	
 	public static final Logger logger = LoggerFactory.getLogger(DiscoveryClientWorkerIPv6.class);
 
@@ -45,51 +47,6 @@ public class DiscoveryClientWorkerIPv6  {
 		this.multiCastNetwork = multiCastNetwork;
 		this.disType = disType;
 		
-	}
-	
-	public class IPv6Responder implements Runnable {
-		DatagramSocket socket = null;
-	    DatagramPacket packet = null;
-	    String hostAddress = null;
-	    Gson gson;
-
-	    public IPv6Responder(DatagramSocket socket, DatagramPacket packet, String hostAddress) {
-	        this.socket = socket;
-	        this.packet = packet;
-	        this.hostAddress = hostAddress;
-	        gson = new Gson();
-	    }
-
-	    public void run() {
-			//byte[] data = makeResponse(); // code not shown
-
-			//We have a response
-			//System.out.println(getClass().getName() + ">>> Broadcast response from server: " + packet.getAddress().getHostAddress());
-
-			//Check if the message is correct
-			//System.out.println(new String(receivePacket.getData()));
-
-			String json = new String(packet.getData()).trim();
-			//String response = "region=region0,agent=agent0,recaddr=" + packet.getAddress().getHostAddress();
-			try {
-				MsgEvent me = gson.fromJson(json, MsgEvent.class);
-				if(me != null) {
-					//System.out.println("RESPONCE: " + me.getParamsString());
-
-					String remoteAddress = packet.getAddress().getHostAddress();
-					if(remoteAddress.contains("%")) {
-						String[] remoteScope = hostAddress.split("%");
-						remoteAddress = remoteScope[0];
-					}
-					me.setParam("dst_ip", remoteAddress);
-					me.setParam("dst_region", me.getParam("src_region"));
-					me.setParam("dst_agent", me.getParam("src_agent"));
-					PluginEngine.incomingCanidateBrokers.offer(me);
-				}
-			} catch(Exception ex) {
-				logger.error("DiscoveryClientWorker in loop {}", ex.getMessage());
-			}
-	    }
 	}
 	
 	class StopListnerTask extends TimerTask {
@@ -138,7 +95,8 @@ public class DiscoveryClientWorkerIPv6  {
 						me.setParam("dst_region", me.getParam("src_region"));
 						me.setParam("dst_agent", me.getParam("src_agent"));
 						
-						PluginEngine.incomingCanidateBrokers.offer(me);
+						//PluginEngine.incomingCanidateBrokers.offer(me);
+						discoveredList.add(me);
 				}
 			} catch(Exception ex) {
 				logger.error("DiscoveryClientWorker in loop {}", ex.getMessage());
@@ -147,10 +105,11 @@ public class DiscoveryClientWorkerIPv6  {
 	}
 
 
-	public void discover() {
+	public List<MsgEvent> discover() {
 		// Find the server using UDP broadcast
 		logger.debug("Start Discovery...");
 		try {
+			discoveredList = new ArrayList<MsgEvent>();
 			// Broadcast the message over all the network interfaces
 			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
 			while (interfaces.hasMoreElements()) {
@@ -270,5 +229,6 @@ public class DiscoveryClientWorkerIPv6  {
 		} catch (Exception ex) {
 		  logger.error("while not closed: " + ex.getMessage());
 		}
+		return discoveredList;
 	}
 }

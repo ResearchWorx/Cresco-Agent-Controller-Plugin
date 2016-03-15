@@ -1,10 +1,14 @@
 package netdiscovery;
 
 import java.net.Inet6Address;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import plugincore.PluginEngine;
+import shared.MsgEvent;
 
 public class DiscoveryClientIPv6 
 {
@@ -16,8 +20,11 @@ public class DiscoveryClientIPv6
 		//discoveryTimeout = 1000;
 	}
 	
-	public void getDiscoveryMap(DiscoveryType disType, int discoveryTimeout) {
+	public  List<MsgEvent> getDiscoveryResponse(DiscoveryType disType, int discoveryTimeout) {
+			List<MsgEvent> discoveryList = new ArrayList<MsgEvent>();
 		try {
+			
+			
 			while(PluginEngine.clientDiscoveryActiveIPv6) {
 				logger.debug("Discovery already underway, waiting..");
 				Thread.sleep(2500);
@@ -28,7 +35,7 @@ public class DiscoveryClientIPv6
 			DiscoveryClientWorkerIPv6 dcw = new DiscoveryClientWorkerIPv6(disType, discoveryTimeout,multiCastNetwork);
 			//populate map with possible peers
 			logger.debug("Searching {}", multiCastNetwork);
-			dcw.discover();
+			discoveryList.addAll(dcw.discover());
 			
 			//limit discovery for the moment
 			//Searching site network [ff05::1:c]
@@ -38,8 +45,10 @@ public class DiscoveryClientIPv6
 			//dcw.discover();
 		} catch(Exception ex) {
 			logger.error("getDiscoveryMap {}", ex.getMessage());
+			
 		}
 		PluginEngine.clientDiscoveryActiveIPv6 = false;
+		return discoveryList;
 	}
 	
 	public boolean isReachable(String hostname) {
