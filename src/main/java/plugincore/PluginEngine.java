@@ -250,14 +250,17 @@ public class PluginEngine {
     		{
     			
     			//generate regional ident if not assigned
-    			if(region == null)
+    			String oldRegion = region; //keep old region if assigned
+    			
+    			RandomString rs = new RandomString(4);
+    			region = "region-" + rs.nextString();
+    			if(oldRegion != null)
     			{
-    				RandomString rs = new RandomString(4);
-    				region = "region-" + rs.nextString();
-    				logger.debug("Generated regionid=" + region);
-    				agentpath = region + "_" + agent;
-    				logger.debug("AgentPath=" + agentpath);
+    				logger.warn("Agent region changed from :" + oldRegion + " to " + region);
     			}
+    			logger.debug("Generated regionid=" + region);
+    			agentpath = region + "_" + agent;
+    			logger.debug("AgentPath=" + agentpath);
     			//Start controller services
     			
     			//discovery engine
