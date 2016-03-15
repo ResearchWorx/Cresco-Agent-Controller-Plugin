@@ -6,18 +6,21 @@ import java.util.Map.Entry;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import plugincore.PluginEngine;
 import shared.MsgEvent;
 
 
-public class ActiveProducer
-{
+public class ActiveProducer {
 
 	public Map<String,ActiveProducerWorker> producerWorkers;
 	
 	private String URI;
 	private Timer timer;
-	  
+
+	private static final Logger logger = LoggerFactory.getLogger(ActiveProducer.class);
+
 	class ClearProducerTask extends TimerTask 
 	{
 		
@@ -52,7 +55,7 @@ public class ActiveProducer
 	
 public ActiveProducer(String URI) 
 {
-	
+	logger.debug("Producer initialized");
 	try
 	{
 		producerWorkers = new ConcurrentHashMap<>();

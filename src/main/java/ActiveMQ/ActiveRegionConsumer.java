@@ -21,6 +21,7 @@ public class ActiveRegionConsumer implements Runnable {
 	private static final Logger logger = LoggerFactory.getLogger(ActiveRegionConsumer.class);
 	
 	public ActiveRegionConsumer(String RXQueueName, String URI) {
+		logger.debug("Region Consumer initialized");
 		try {
 			conn = (ActiveMQConnection)new ActiveMQConnectionFactory(URI).createConnection();
 			conn.start();
@@ -32,17 +33,15 @@ public class ActiveRegionConsumer implements Runnable {
 	}
 
 	@Override
-	public void run() 
-	{
+	public void run() {
+		logger.debug("Region Consumer started");
 		Gson gson = new Gson();
 		try {
 			PluginEngine.ConsumerThreadRegionActive = true;
 			MessageConsumer consumer = sess.createConsumer(RXqueue);
-			while (PluginEngine.ConsumerThreadRegionActive) 
-			{
+			while (PluginEngine.ConsumerThreadRegionActive) {
 				TextMessage msg = (TextMessage) consumer.receive(1000);
-				if (msg != null) 
-				{
+				if (msg != null) {
 					MsgEvent me = gson.fromJson(msg.getText(), MsgEvent.class);
 					if (me.getMsgBody().toLowerCase().equals("ping")) {
 						String pingAgent = me.getParam("src_region") + "_" + me.getParam("src_agent");

@@ -272,7 +272,7 @@ public class PluginEngine {
     	        {
     	        	Thread.sleep(1000);
     	        }
-    	        logger.debug("ActiveBrokerManager Started..");
+    	        //logger.debug("ActiveBrokerManager Started..");
     	        
     	        if(isIPv6) { //set broker address for consumers and producers
     	    		brokerAddress = "[::1]";
@@ -287,7 +287,7 @@ public class PluginEngine {
     	        {
     	        	Thread.sleep(1000);
     	        }
-    	        logger.debug("Region ConsumerThread Started..");
+    	        //logger.debug("Region ConsumerThread Started..");
         		
     	        isBroker = true;
     	        
@@ -319,13 +319,13 @@ public class PluginEngine {
 	        {
 	        	Thread.sleep(1000);
 	        }
-	        logger.debug("Agent ConsumerThread Started..");
+	        //logger.debug("Agent ConsumerThread Started..");
     		
 	        ap = new ActiveProducer("tcp://" + brokerAddress + ":32010");
-	        logger.debug("Producer Started..");
+	        //logger.debug("Producer Started..");
     		
 	        watchDogProcess = new WatchDog();
-	        logger.debug("Watchdog Started");
+	        //logger.debug("Watchdog Started");
     	} catch(Exception e) {
     		logger.error("commInit {}", e.getMessage());
     	}

@@ -71,10 +71,10 @@ public class WatchDog {
 	    			}
 	    		}
 	    		if(!isHealthy) {
+					logger.debug("System has become unhealthy, rebooting services");
 	    			PluginEngine.restartOnShutdown = true;
 	    			PluginEngine.shutdown();
 	    			//System.out.println("5");
-					logger.debug("System has become unhealthy, rebooting services");
 	    		}
 	    	} catch(Exception ex) {
 	    		//System.out.println("WathcDog : Error : " + ex.getMessage());
