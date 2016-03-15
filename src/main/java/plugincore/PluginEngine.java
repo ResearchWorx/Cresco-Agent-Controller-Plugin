@@ -292,7 +292,12 @@ public class PluginEngine {
     	        discoveryList = dcv6.getDiscoveryResponse(DiscoveryType.REGION,2000);
     	        if(!discoveryList.isEmpty())
         		{
-    	        	logger.debug("Regions Found");
+    	        	for(MsgEvent ime : discoveryList)
+    	        	{
+    	        		incomingCanidateBrokers.offer(ime);
+    	        		logger.debug("Region Found: " + ime.getParams());
+        	        	
+    	        	}
         		}
     	        
     		} else {
