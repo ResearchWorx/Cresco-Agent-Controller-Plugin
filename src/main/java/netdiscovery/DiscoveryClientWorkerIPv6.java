@@ -172,8 +172,7 @@ public class DiscoveryClientWorkerIPv6  {
 								//start timer to clost discovery
 								timer = new Timer();
 								timer.schedule(new StopListnerTask(), discoveryTimeout);
-
-						 		MsgEvent sme = new MsgEvent(MsgEventType.DISCOVER,PluginEngine.region,PluginEngine.agent,PluginEngine.plugin,"Discovery request.");
+								MsgEvent sme = new MsgEvent(MsgEventType.DISCOVER,PluginEngine.region,PluginEngine.agent,PluginEngine.plugin,"Discovery request.");
 								sme.setParam("broadcast_ip",multiCastNetwork);
 								sme.setParam("src_region",PluginEngine.region);
 								sme.setParam("src_agent",PluginEngine.agent);
@@ -206,6 +205,8 @@ public class DiscoveryClientWorkerIPv6  {
 										DatagramPacket receivePacket = new DatagramPacket(recvBuf, recvBuf.length);
 										synchronized (c) {
 											c.receive(receivePacket);
+											timer.cancel(); //reset timer on new discovery packet
+									 		timer.schedule(new StopListnerTask(), discoveryTimeout);
 										}
 										synchronized (receivePacket) {
 											processIncoming(receivePacket);
