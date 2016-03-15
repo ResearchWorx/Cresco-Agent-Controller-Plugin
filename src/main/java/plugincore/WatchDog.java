@@ -38,7 +38,7 @@ public class WatchDog {
 	
 	class WatchDogTask extends TimerTask {
 	    public void run() {
-			logger.debug("Watchdog tick");
+			logger.trace("Watchdog tick");
 	    	boolean isHealthy = true;
 	    	try {
 	    		if((!PluginEngine.ConsumerThreadActive) || !(PluginEngine.consumerAgentThread.isAlive())) {

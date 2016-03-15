@@ -79,54 +79,54 @@ public class PluginEngine {
 		try
 		{
 
-			logger.info("Shutting down!");
+			logger.info("Shutting down");
 			if(watchDogProcess != null)
 			{
 				watchDogProcess.timer.cancel();
 				watchDogProcess = null;
 			}
-			logger.debug("WatchDog stopped..");
+			logger.debug("WatchDog has stopped");
 
 			DiscoveryActive = false;
 			if(discoveryEngineThread != null)
 			{
-				logger.debug("discoveryEngineThread start");
+				logger.trace("Discovery Engine shutting down");
 				discoveryEngineThread.join();
 				isActive = false;
-				logger.debug("discoveryEngineThread shutdown");
+				logger.debug("Discover Engine has shutdown");
 
 			}
 			ConsumerThreadRegionActive = false;
 			if(consumerRegionThread != null)
 			{
-				logger.debug("consumerRegionThread start");
+				logger.trace("Region Consumer shutting down");
 				consumerRegionThread.join();
-				logger.debug("consumerRegionThread shutdown");
+				logger.debug("Region Consumer has shutdown");
 
 			}
 
 			ConsumerThreadActive = false;
 			if(consumerAgentThread != null)
 			{
-				logger.debug("consumerAgentThread start");
+				logger.trace("Agent Consumer shutting down");
 				consumerAgentThread.join();
-				logger.debug("consumerAgentThread shutdown");
+				logger.debug("Agent Consumer has shutdown");
 
 			}
 
 			ActiveBrokerManagerActive = false;
 			if(activeBrokerManagerThread != null)
 			{
-				logger.debug("activeBrokerManagerThread start");
+				logger.trace("Active Broker Manager shutting down");
 				activeBrokerManagerThread.join();
-				logger.debug("activeBrokerManagerThread shutdown");
+				logger.debug("Active Broker Manager has shutdown");
 
 			}
 			if(broker != null)
 			{
-				logger.debug("broker start");
+				logger.trace("Broker shutting down");
 				broker.stopBroker();
-				logger.debug("broker shutdown");
+				logger.debug("Broker has shutdown");
 
 			}
 			if(restartOnShutdown)
@@ -159,13 +159,10 @@ public class PluginEngine {
     	}
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 	        public void run() {
-	            try
-	            {
+				try {
 					shutdown();
-	            }
-	            catch(Exception ex)
-	            {
-	            	System.out.println("Exception Shutting Down:" + ex.toString());
+	            } catch(Exception ex) {
+	            	logger.error("Run {}", ex.getMessage());
 	            }
 	        }
 	    }, "Shutdown-thread"));
@@ -201,25 +198,26 @@ public class PluginEngine {
 			if(input.length() == 0) {
 				List<String> rAgents = reachableAgents();
 				if(rAgents.isEmpty()) {
-					logger.info("\tNo agents found... " + responds);
+					logger.info("No agents found... " + responds);
 				} else {
+					logger.info("Sending message to {} agents", rAgents.size());
 					for(String str : rAgents) {
 						logger.info("\t" + str);
 					}
-					logger.info("\tFound " + rAgents.size() + " agents");
+					logger.info("Found {} agents", rAgents.size());
 				}
 			} else {
 				if(input.toLowerCase().equals("all")) {
 					List<String> rAgents = reachableAgents();
 					if(rAgents.isEmpty()) {
-						logger.info("\tNo agents found...");
+						logger.info("No agents found...");
 					} else {
-						logger.info("\tSending message to " + rAgents.size() + " agents");
-						for(String str : rAgents) {
-							logger.info("\t"+str);
-							sendMessage(MsgEventType.INFO, str, "ping");
+						logger.info("Sending message to {} agents", rAgents.size());
+						for(String agent : rAgents) {
+							logger.info("\t" + agent);
+							sendMessage(MsgEventType.INFO, agent, "ping");
 						}
-						logger.info("\tSent message to " + rAgents.size() + " agents");
+						logger.info("Found {} agents", rAgents.size());
 					}
 				} else {
 					sendMessage(MsgEventType.INFO, input, "ping");
@@ -230,7 +228,7 @@ public class PluginEngine {
 
     public static void commInit()
     {
-		logger.info("commInit triggered");
+		logger.info("Initializing services");
     	PluginEngine.isActive = true;
         try
         {
