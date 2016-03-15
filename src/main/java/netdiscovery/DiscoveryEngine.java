@@ -201,6 +201,9 @@ public class DiscoveryEngine implements Runnable {
 						{
 							rme.setParam("src_ip", remoteAddress);
 							rme.setParam("src_port", String.valueOf(packet.getPort()));
+							
+							logger.debug("{}", "REC " + rme.getParamsString());
+							
 							MsgEvent me = null;
 							if(rme.getParam("discovery_type") != null)
 							{
@@ -219,7 +222,7 @@ public class DiscoveryEngine implements Runnable {
 							
 							if(me != null)
 							{
-							logger.debug("{}", me.getParamsString());
+							logger.debug("{}", "RETURN " + me.getParamsString());
 							String json = gson.toJson(me);
 							byte[] sendData = json.getBytes();
 							//returnAddr = InetAddress.getByName(me.getParam("dst_ip"));
