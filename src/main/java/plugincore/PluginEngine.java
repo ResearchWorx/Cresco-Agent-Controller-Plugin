@@ -82,10 +82,11 @@ public class PluginEngine {
 			logger.info("Shutting down");
 			if(watchDogProcess != null)
 			{
-				watchDogProcess.timer.cancel();
+				watchDogProcess.shutdown();
+				//watchDogProcess.timer.cancel();
 				watchDogProcess = null;
 			}
-			logger.debug("WatchDog has stopped");
+			//logger.debug("WatchDog has stopped");
 
 			DiscoveryActive = false;
 			if(discoveryEngineThread != null)
@@ -94,7 +95,7 @@ public class PluginEngine {
 				DiscoveryEngine.shutdown();
 				discoveryEngineThread.join();
 				isActive = false;
-				logger.debug("Discover Engine has shutdown");
+				//logger.debug("Discover Engine has shutdown");
 
 			}
 			ConsumerThreadRegionActive = false;
@@ -126,12 +127,14 @@ public class PluginEngine {
 			if (ap != null) {
 				logger.trace("Producer shutting down");
 				ap.shutdown();
+				ap = null;
 				//logger.debug("Producer has shutdown");
 			}
 			if(broker != null)
 			{
 				logger.trace("Broker shutting down");
 				broker.stopBroker();
+				broker = null;
 				//logger.debug("Broker has shutdown");
 
 			}

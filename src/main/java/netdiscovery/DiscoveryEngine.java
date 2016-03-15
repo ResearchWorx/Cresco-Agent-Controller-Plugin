@@ -102,7 +102,6 @@ public class DiscoveryEngine implements Runnable {
 					}
 		  	 	    		
 					while (!workers.get(networkInterface).isClosed()) {
-						logger.debug("[" + networkInterface.getDisplayName() + "] receive");
 						//System.out.println(getClass().getName() + ">>>Ready to receive broadcast packets!");
 
 						//Receive a packet

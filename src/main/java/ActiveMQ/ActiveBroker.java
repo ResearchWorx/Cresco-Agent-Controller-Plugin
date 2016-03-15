@@ -75,7 +75,7 @@ public class ActiveBroker {
 			ServiceStopper stopper = new ServiceStopper();
             broker.stopAllConnectors(stopper);
             broker.stop();
-			
+
 			while(!broker.isStopped()) {
 				Thread.sleep(1000);
 			}

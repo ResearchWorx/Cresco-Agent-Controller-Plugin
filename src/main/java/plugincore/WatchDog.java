@@ -35,7 +35,12 @@ public class WatchDog {
 		  //PluginEngine.clog.log(le);
 	  }
 
-	
+
+	public void shutdown() {
+		timer.cancel();
+		logger.debug("WatchDog has shutdown");
+	}
+
 	class WatchDogTask extends TimerTask {
 	    public void run() {
 			logger.trace("Watchdog tick");
