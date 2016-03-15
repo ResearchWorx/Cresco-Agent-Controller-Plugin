@@ -288,7 +288,8 @@ public class PluginEngine {
         		
     	        isBroker = true;
     	        //start regional discovery
-    	        dcv6.getDiscoveryResponse(DiscoveryType.REGION,2000);
+    	        discoveryList.clear();
+    	        discoveryList = dcv6.getDiscoveryResponse(DiscoveryType.REGION,2000);
     	        if(!discoveryList.isEmpty())
         		{
     	        	logger.debug("Regions Found");
