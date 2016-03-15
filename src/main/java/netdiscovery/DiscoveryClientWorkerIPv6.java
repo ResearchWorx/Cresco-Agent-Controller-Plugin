@@ -123,6 +123,7 @@ public class DiscoveryClientWorkerIPv6  {
 			//String response = "region=region0,agent=agent0,recaddr=" + packet.getAddress().getHostAddress();
   			try {
 				MsgEvent me = gson.fromJson(json, MsgEvent.class);
+				logger.error(json); //pull out
 				if(me != null)
 				{
 					//System.out.println("RESPONCE: " + me.getParamsString());
@@ -136,6 +137,7 @@ public class DiscoveryClientWorkerIPv6  {
 						me.setParam("dst_ip", remoteAddress);
 						me.setParam("dst_region", me.getParam("src_region"));
 						me.setParam("dst_agent", me.getParam("src_agent"));
+						
 						PluginEngine.incomingCanidateBrokers.offer(me);
 				}
 			} catch(Exception ex) {
@@ -200,6 +202,10 @@ public class DiscoveryClientWorkerIPv6  {
 								else if(disType == DiscoveryType.REGION)
 								{
 									sme.setParam("discovery_type",DiscoveryType.REGION.name());
+								}
+								else if(disType == DiscoveryType.GLOBAL)
+								{
+									sme.setParam("discovery_type",DiscoveryType.GLOBAL.name());
 								}
 								else
 								{
