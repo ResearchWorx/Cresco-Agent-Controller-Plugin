@@ -91,9 +91,19 @@ public class DiscoveryClientWorkerIPv6  {
 	
 	class StopListnerTask extends TimerTask {
 	    public void run() {
+	    	try
+	    	{
 	    	//user timer to close socket
 	    	c.close();
 	    	timer.cancel();
+	    	}
+	    	catch(Exception ex)
+	    	{
+	    		logger.error("stopped {}", timer.purge());
+	    		
+	    		logger.error("StopListnerTask {}", ex.getMessage());
+	    		
+	    	}
 	    }
 	}
 
@@ -214,6 +224,7 @@ public class DiscoveryClientWorkerIPv6  {
 										DatagramPacket receivePacket = new DatagramPacket(recvBuf, recvBuf.length);
 										synchronized (c) {
 											c.receive(receivePacket);
+											timer.purge();
 											timer.cancel(); //reset timer on new discovery packet
 									 		timer.schedule(new StopListnerTask(), discoveryTimeout);
 										}
