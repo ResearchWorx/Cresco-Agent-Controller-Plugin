@@ -88,11 +88,16 @@ public class PluginEngine {
 		try
 		{
 			File jarLocation = new File(PluginEngine.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+			
 			pluginName = getPluginName(jarLocation.getAbsolutePath());
+			System.out.println("GOT NAMNE");
 			pluginVersion = getPluginVersion(jarLocation.getAbsolutePath());
+			System.out.println("GOT VERSioN");
+			
 		}
 		catch(Exception ex)
 		{
+			ex.printStackTrace();
 			System.out.println("PluginEngine: Could not set plugin name: " + ex.toString());
 			pluginName="cresco-agent-dummy-plugin";
 			pluginVersion="unknown";

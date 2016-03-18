@@ -69,12 +69,12 @@
   <configuration>
     <archive>
       <manifest>
-        <mainClass>core.AgentEngine</mainClass>
+        <mainClass>plugincore.PluginEngine</mainClass>
         <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
         <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>	
       </manifest>
       <manifestEntries>
-      		  <artifactId>cresco-agent-ampqchannel-plugin</artifactId>
+      		  <artifactId>cresco-agent-controller-plugin</artifactId>
               <Implementation-Version>${project.version}.${buildNumber}.${maven.build.timestamp}</Implementation-Version>
       </manifestEntries>
     </archive>
