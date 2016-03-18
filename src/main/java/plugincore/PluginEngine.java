@@ -26,6 +26,18 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class PluginEngine {
     
 	
+	public static String pluginName;
+	public static String pluginVersion;
+	public static String plugin;
+	public static String agent;
+	public static String region;
+	public static String agentpath;
+	
+	public static HashMap<String,Long> rpcMap;
+	public static CommandExec commandExec;
+	public static PluginConfig config;
+	
+	
 	public static boolean clientDiscoveryActive = false;
 	public static boolean clientDiscoveryActiveIPv6 = false;
 	public static boolean DiscoveryActive = false;
@@ -52,10 +64,6 @@ public class PluginEngine {
 	
 	public static int responds = 0;
 	
-	public static String region;
-	public static String agent;
-	public static String plugin;
-	public static String agentpath;
 	
 	public static ConcurrentHashMap<String,BrokeredAgent> brokeredAgents;
 	
@@ -69,10 +77,10 @@ public class PluginEngine {
 	private static final Logger logger = LoggerFactory.getLogger(PluginEngine.class);
 	
 	public String getName() {
-		return "Name";	
+		return "ControllerPlugin";	
 	}
 	public String getVersion() {
-		return "Version";
+		return "0.5-custom";
 	}
 	public void msgIn(MsgEvent command) {
 		
@@ -136,6 +144,30 @@ public class PluginEngine {
 	}
 	public boolean initialize(ConcurrentLinkedQueue<MsgEvent> msgOutQueue, ConcurrentLinkedQueue<MsgEvent> msgInQueue, SubnodeConfiguration configObj, String region, String agent, String plugin) {
 		//logger = new Clogger(msgOutQueue, region, agent, plugin);
+		commandExec = new CommandExec();
+		
+		try
+		{
+			rpcMap = new HashMap<String,Long>();
+			pluginName = getPluginName();
+			pluginVersion = getPluginVersion();
+		
+		}
+		catch(Exception ex)
+		{
+			logger.error("Could not create plugin object: " + ex,getMessage());
+		}
+		
+		this.agent = agent;
+		this.plugin = plugin;
+		
+		this.region = region;
+		
+		this.config = new PluginConfig(configObj);
+		
+		
+		commInit(); //initial init
+		
 		return true;
 	}
 	
