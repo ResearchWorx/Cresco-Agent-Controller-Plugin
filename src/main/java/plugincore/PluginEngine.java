@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class PluginEngine {
     
+	
 	public static boolean clientDiscoveryActive = false;
 	public static boolean clientDiscoveryActiveIPv6 = false;
 	public static boolean DiscoveryActive = false;
