@@ -36,6 +36,7 @@ public class PluginEngine {
 	public static HashMap<String,Long> rpcMap;
 	public static CommandExec commandExec;
 	public static PluginConfig config;
+	public static ConcurrentLinkedQueue<MsgEvent> msgInQueue;
 	
 	
 	public static boolean clientDiscoveryActive = false;
@@ -82,7 +83,37 @@ public class PluginEngine {
 	public String getVersion() {
 		return "0.5-custom";
 	}
-	public void msgIn(MsgEvent command) {
+	public void msgIn(MsgEvent me)
+	{
+		
+		final MsgEvent ce = me;
+		try
+		{
+		Thread thread = new Thread(){
+		    public void run(){
+		
+		    	try 
+		        {
+					MsgEvent re = commandExec.cmdExec(ce);
+					if(re != null)
+					{
+						re.setReturn(); //reverse to-from for return
+						msgInQueue.offer(re); //send message back to queue
+					}
+					
+				} 
+		        catch(Exception ex)
+		        {
+		        	System.out.println("Controller : PluginEngine : msgIn Thread: " + ex.toString());
+		        }
+		    }
+		  };
+		  thread.start();
+		}
+		catch(Exception ex)
+		{
+			System.out.println("Controller : PluginEngine : msgIn Thread: " + ex.toString());        	
+		}
 		
 	}
 	public static void shutdown() {
@@ -149,21 +180,21 @@ public class PluginEngine {
 		try
 		{
 			rpcMap = new HashMap<String,Long>();
-			pluginName = getPluginName();
-			pluginVersion = getPluginVersion();
+			pluginName = getName();
+			pluginVersion = getVersion();
+			this.agent = agent;
+			this.plugin = plugin;
+			this.region = region;
+			this.config = new PluginConfig(configObj);
+			this.msgInQueue = msgInQueue; //messages to agent should go here
+			
 		
 		}
 		catch(Exception ex)
 		{
-			logger.error("Could not create plugin object: " + ex,getMessage());
+			logger.error("Could not create plugin object: " + ex.getMessage());
 		}
 		
-		this.agent = agent;
-		this.plugin = plugin;
-		
-		this.region = region;
-		
-		this.config = new PluginConfig(configObj);
 		
 		
 		commInit(); //initial init

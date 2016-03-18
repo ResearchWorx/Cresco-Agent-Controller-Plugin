@@ -1,5 +1,6 @@
 package plugincore;
 
+import ch.qos.logback.classic.Logger;
 import shared.MsgEvent;
 import shared.MsgEventType;
 
@@ -20,7 +21,7 @@ public class CommandExec {
 			String callId = ce.getParam("callId-" + PluginEngine.region + "-" + PluginEngine.agent + "-" + PluginEngine.plugin); //unique callId
 			if(callId != null) //this is a callback put in RPC hashmap
 			{
-				PluginEngine.rpcMap.put(callId, ce);
+				//PluginEngine.rpcMap.put(callId, ce);
 				return null;
 			}
 			else if((ce.getParam("dst_region") != null) && (ce.getParam("dst_agent") != null) && (ce.getParam("dst_plugin") != null)) //its a message for this plugin
@@ -94,11 +95,15 @@ public class CommandExec {
 		}
 		catch(Exception ex)
 		 {
+			/*
 			 MsgEvent ee = PluginEngine.clog.getError("Agent : CommandExec : Error" + ex.toString());
 			 System.out.println("MsgType=" + ce.getMsgType().toString());
 			 System.out.println("Region=" + ce.getMsgRegion() + " Agent=" + ce.getMsgAgent() + " plugin=" + ce.getMsgPlugin());
 			 System.out.println("params=" + ce.getParamsString()); 
 			 return ee;
+			 */
+			System.out.println("MsgType=" + ce.getMsgType().toString());
+			 return null;
 		 }
 	}
 	
