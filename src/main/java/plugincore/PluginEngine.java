@@ -13,7 +13,6 @@ import netdiscovery.DiscoveryType;
 //import shared.Clogger;
 import shared.MsgEvent;
 import shared.MsgEventType;
-import shared.PluginImplementation;
 import shared.RandomString;
 
 import java.io.File;
@@ -87,19 +86,16 @@ public class PluginEngine {
 	{
 		try
 		{
-			File jarLocation = new File(PluginEngine.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
-			
-			pluginName = getPluginName(jarLocation.getAbsolutePath());
-			System.out.println("GOT NAMNE");
-			pluginVersion = getPluginVersion(jarLocation.getAbsolutePath());
-			System.out.println("GOT VERSioN");
+			rpcMap = new HashMap<String,Long>();
+			pluginName = getName();
+			pluginVersion = getVersion();
 			
 		}
 		catch(Exception ex)
 		{
 			ex.printStackTrace();
 			System.out.println("PluginEngine: Could not set plugin name: " + ex.toString());
-			pluginName="cresco-agent-dummy-plugin";
+			pluginName="cresco-agent-controller-plugin";
 			pluginVersion="unknown";
 		}
 		
@@ -107,33 +103,12 @@ public class PluginEngine {
 	
 	public String getName()
 	{
-		   return pluginName; 
+		   return "ControllerPlugin"; 
 	}
-	public String getVersion() //This should pull the version information from jar Meta data
-    {
-		   String version;
-		   try{
-		   String jarFile = PluginImplementation.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-		   File file = new File(jarFile.substring(5, (jarFile.length() -2)));
-           FileInputStream fis = new FileInputStream(file);
-           @SuppressWarnings("resource")
-		   JarInputStream jarStream = new JarInputStream(fis);
-		   Manifest mf = jarStream.getManifest();
-		   
-		   Attributes mainAttribs = mf.getMainAttributes();
-           version = mainAttribs.getValue("Implementation-Version");
-		   }
-		   catch(Exception ex)
-		   {
-			   String msg = "Unable to determine Plugin Version " + ex.toString();
-			   //clog.error(msg);
-			   version = "Unable to determine Version";
-			   logger.error(msg);
-		   }
-		   
-		   return pluginName + "." + version;
-	   }
-	
+	public String getVersion()
+	{
+		   return "0.5-custom"; 
+	}
 	public void msgIn(MsgEvent me)
 	{
 		
@@ -231,15 +206,11 @@ public class PluginEngine {
 		
 		try
 		{
-			rpcMap = new HashMap<String,Long>();
-			pluginName = getName();
-			pluginVersion = getVersion();
 			this.agent = agent;
 			this.plugin = plugin;
 			this.region = region;
 			this.config = new PluginConfig(configObj);
 			this.msgInQueue = msgInQueue; //messages to agent should go here
-			
 		
 		}
 		catch(Exception ex)
@@ -255,9 +226,7 @@ public class PluginEngine {
 	}
 	
 	public static ActiveBroker broker;
-
-
-
+/*
     public static void main(String[] args) throws Exception
     {
     	
@@ -326,7 +295,7 @@ public class PluginEngine {
 		}
 		shutdown();
     }
-
+*/
     public static void commInit()
     {
 		logger.info("Initializing services");
