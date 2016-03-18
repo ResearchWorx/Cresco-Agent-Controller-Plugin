@@ -94,6 +94,7 @@ public class PluginEngine {
 		
 		    	try 
 		        {
+		    		logger.debug(ce.getParams().toString());
 					MsgEvent re = commandExec.cmdExec(ce);
 					if(re != null)
 					{
