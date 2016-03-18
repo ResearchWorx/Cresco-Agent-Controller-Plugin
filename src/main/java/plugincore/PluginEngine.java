@@ -13,8 +13,11 @@ import netdiscovery.DiscoveryType;
 //import shared.Clogger;
 import shared.MsgEvent;
 import shared.MsgEventType;
+import shared.PluginImplementation;
 import shared.RandomString;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
@@ -22,6 +25,9 @@ import java.net.NetworkInterface;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.jar.Attributes;
+import java.util.jar.JarInputStream;
+import java.util.jar.Manifest;
 
 public class PluginEngine {
     
@@ -77,12 +83,52 @@ public class PluginEngine {
 	//public static Clogger logger;
 	private static final Logger logger = LoggerFactory.getLogger(PluginEngine.class);
 	
-	public String getName() {
-		return "ControllerPlugin";	
+	public PluginEngine()
+	{
+		try
+		{
+			File jarLocation = new File(PluginEngine.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+			pluginName = getPluginName(jarLocation.getAbsolutePath());
+			pluginVersion = getPluginVersion(jarLocation.getAbsolutePath());
+		}
+		catch(Exception ex)
+		{
+			System.out.println("PluginEngine: Could not set plugin name: " + ex.toString());
+			pluginName="cresco-agent-dummy-plugin";
+			pluginVersion="unknown";
+		}
+		
 	}
-	public String getVersion() {
-		return "0.5-custom";
+	
+	public String getName()
+	{
+		   return pluginName; 
 	}
+	public String getVersion() //This should pull the version information from jar Meta data
+    {
+		   String version;
+		   try{
+		   String jarFile = PluginImplementation.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		   File file = new File(jarFile.substring(5, (jarFile.length() -2)));
+           FileInputStream fis = new FileInputStream(file);
+           @SuppressWarnings("resource")
+		   JarInputStream jarStream = new JarInputStream(fis);
+		   Manifest mf = jarStream.getManifest();
+		   
+		   Attributes mainAttribs = mf.getMainAttributes();
+           version = mainAttribs.getValue("Implementation-Version");
+		   }
+		   catch(Exception ex)
+		   {
+			   String msg = "Unable to determine Plugin Version " + ex.toString();
+			   //clog.error(msg);
+			   version = "Unable to determine Version";
+			   logger.error(msg);
+		   }
+		   
+		   return pluginName + "." + version;
+	   }
+	
 	public void msgIn(MsgEvent me)
 	{
 		
@@ -540,4 +586,54 @@ public class PluginEngine {
     	}
     	return isReachableAgent;
     }
+    
+    public static String getPluginName(String jarFile) //This should pull the version information from jar Meta data
+	{
+			   String version;
+			   try{
+			   //String jarFile = AgentEngine.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+			   //System.out.println("JARFILE:" + jarFile);
+			   //File file = new File(jarFile.substring(5, (jarFile.length() )));
+			   File file = new File(jarFile);
+	          FileInputStream fis = new FileInputStream(file);
+	          @SuppressWarnings("resource")
+			   JarInputStream jarStream = new JarInputStream(fis);
+			   Manifest mf = jarStream.getManifest();
+			   
+			   Attributes mainAttribs = mf.getMainAttributes();
+	          version = mainAttribs.getValue("artifactId");
+			   }
+			   catch(Exception ex)
+			   {
+				   String msg = "Unable to determine Plugin Version " + ex.toString();
+				   System.err.println(msg);
+				   version = "Unable to determine Version";
+			   }
+			   return version;
+	}
+	
+	public static String getPluginVersion(String jarFile) //This should pull the version information from jar Meta data
+	{
+			   String version;
+			   try{
+			   //String jarFile = AgentEngine.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+			   //System.out.println("JARFILE:" + jarFile);
+			   //File file = new File(jarFile.substring(5, (jarFile.length() )));
+			   File file = new File(jarFile);
+	          FileInputStream fis = new FileInputStream(file);
+	          @SuppressWarnings("resource")
+			   JarInputStream jarStream = new JarInputStream(fis);
+			   Manifest mf = jarStream.getManifest();
+			   
+			   Attributes mainAttribs = mf.getMainAttributes();
+	          version = mainAttribs.getValue("Implementation-Version");
+			   }
+			   catch(Exception ex)
+			   {
+				   String msg = "Unable to determine Plugin Version " + ex.toString();
+				   System.err.println(msg);
+				   version = "Unable to determine Version";
+			   }
+			   return version;
+	}
 }
