@@ -25,6 +25,9 @@ public class CommandExec {
 						PluginEngine.commInit(); //initial init
 						ce.setParam("set_region", PluginEngine.region);
 						ce.setParam("set_agent", PluginEngine.agent);
+						ce.setParam("is_regional_controller", Boolean.toString(PluginEngine.isRegionalController));
+						ce.setParam("is_active", Boolean.toString(PluginEngine.isActive));
+						
 					}
 					return ce;
 				}
