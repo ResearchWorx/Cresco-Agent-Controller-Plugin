@@ -206,19 +206,17 @@ public class PluginEngine {
 		
 		try
 		{
-			this.agent = agent;
-			this.plugin = plugin;
-			this.region = region;
-			this.config = new PluginConfig(configObj);
-			this.msgInQueue = msgInQueue; //messages to agent should go here
+			PluginEngine.agent = agent;
+			PluginEngine.plugin = plugin;
+			PluginEngine.region = region;
+			PluginEngine.config = new PluginConfig(configObj);
+			PluginEngine.msgInQueue = msgInQueue; //messages to agent should go here
 		
 		}
 		catch(Exception ex)
 		{
 			logger.error("Could not create plugin object: " + ex.getMessage());
 		}
-		
-		
 		
 		commInit(); //initial init
 		

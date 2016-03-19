@@ -1,6 +1,5 @@
 package plugincore;
 
-import ch.qos.logback.classic.Logger;
 import shared.MsgEvent;
 import shared.MsgEventType;
 
@@ -17,7 +16,18 @@ public class CommandExec {
 	{
 		try
 		{
-			
+			if(ce.getMsgType() == MsgEventType.CONFIG) //for init
+			{
+				if(ce.getParam("comminit") != null)
+				{
+					//public MsgEvent(MsgEventType msgType, String msgRegion, String msgAgent, String msgPlugin, String msgBody)
+					ce.setParam("set_region", PluginEngine.region);
+					ce.setParam("set_agent", PluginEngine.agent);
+					
+					return ce;
+				}
+				
+			}
 			String callId = ce.getParam("callId-" + PluginEngine.region + "-" + PluginEngine.agent + "-" + PluginEngine.plugin); //unique callId
 			if(callId != null) //this is a callback put in RPC hashmap
 			{
