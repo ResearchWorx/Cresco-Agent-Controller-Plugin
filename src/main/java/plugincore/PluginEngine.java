@@ -120,10 +120,8 @@ public class PluginEngine {
 		
 		    	try 
 		        {
-		    		logger.error("beofre" + ce.getParams().toString());
-					MsgEvent re = commandExec.cmdExec(ce);
-		    		logger.error("after" + re.getParams().toString());
-					if(re != null)
+		    		MsgEvent re = commandExec.cmdExec(ce);
+		    		if(re != null)
 					{
 						re.setReturn(); //reverse to-from for return
 						msgInQueue.offer(re); //send message back to queue
@@ -144,63 +142,7 @@ public class PluginEngine {
 		}
 		
 	}
-	public static void shutdown() {
-		try {
-			logger.info("Shutting down");
-			if(watchDogProcess != null) {
-				watchDogProcess.shutdown();
-				watchDogProcess = null;
-			}
-
-			DiscoveryActive = false;
-			if(discoveryEngineThread != null) {
-				logger.trace("Discovery Engine shutting down");
-				DiscoveryEngine.shutdown();
-				discoveryEngineThread.join();
-				discoveryEngineThread = null;
-				isActive = false;
-
-			}
-			ConsumerThreadRegionActive = false;
-			if(consumerRegionThread != null) {
-				logger.trace("Region Consumer shutting down");
-				consumerRegionThread.join();
-				consumerRegionThread = null;
-			}
-
-			ConsumerThreadActive = false;
-			if(consumerAgentThread != null) {
-				logger.trace("Agent Consumer shutting down");
-				consumerAgentThread.join();
-				consumerAgentThread = null;
-			}
-
-			ActiveBrokerManagerActive = false;
-			if(activeBrokerManagerThread != null) {
-				logger.trace("Active Broker Manager shutting down");
-				activeBrokerManagerThread.join();
-				activeBrokerManagerThread = null;
-			}
-			if (ap != null) {
-				logger.trace("Producer shutting down");
-				ap.shutdown();
-				ap = null;
-			}
-			if(broker != null) {
-				logger.trace("Broker shutting down");
-				broker.stopBroker();
-				broker = null;
-
-			}
-			if(restartOnShutdown) {
-				commInit(); //reinit everything
-				restartOnShutdown = false;
-			}
-		} catch(Exception ex) {
-			logger.error("shutdown {}", ex.getMessage());
-		}
-		
-	}
+	
 	public boolean initialize(ConcurrentLinkedQueue<MsgEvent> msgOutQueue, ConcurrentLinkedQueue<MsgEvent> msgInQueue, SubnodeConfiguration configObj, String region, String agent, String plugin) {
 		//logger = new Clogger(msgOutQueue, region, agent, plugin);
 		commandExec = new CommandExec();
@@ -218,8 +160,6 @@ public class PluginEngine {
 		{
 			logger.error("Could not create plugin object: " + ex.getMessage());
 		}
-		
-		commInit(); //initial init
 		
 		return true;
 	}
@@ -299,13 +239,14 @@ public class PluginEngine {
     {
 		logger.info("Initializing services");
     	PluginEngine.isActive = true;
-        try
+    	try
         {
         	brokeredAgents = new ConcurrentHashMap<>();
         	incomingCanidateBrokers = new ConcurrentLinkedQueue<>();
         	outgoingMessages = new ConcurrentLinkedQueue<>();
         	brokerAddress = null;
         	isIPv6 = isIPv6();
+        	
 
         	dcv6 = new DiscoveryClientIPv6();
             //dc = new DiscoveryClientIPv4();
@@ -316,15 +257,15 @@ public class PluginEngine {
     		//dc.getDiscoveryMap(2000);
     		if(discoveryList.isEmpty())
     		{
-    			
     			//generate regional ident if not assigned
-    			String oldRegion = region; //keep old region if assigned
+    			//String oldRegion = region; //keep old region if assigned
     			
-    			RandomString rs = new RandomString(4);
-    			region = "region-" + rs.nextString();
-    			if(oldRegion != null)
+    			if((region == "init") && (agent == "init"))
     			{
-    				logger.warn("Agent region changed from :" + oldRegion + " to " + region);
+    				RandomString rs = new RandomString(4);
+        			region = "region-" + rs.nextString();
+        			agent = "agent-" + rs.nextString();
+        			//logger.warn("Agent region changed from :" + oldRegion + " to " + region);
     			}
     			logger.debug("Generated regionid=" + region);
     			agentpath = region + "_" + agent;
@@ -434,9 +375,67 @@ public class PluginEngine {
     		e.printStackTrace();
     		logger.error("commInit " + e.getMessage());
     	}
+      
     }
 
-    
+    public static void shutdown() {
+		try {
+			logger.info("Shutting down");
+			if(watchDogProcess != null) {
+				watchDogProcess.shutdown();
+				watchDogProcess = null;
+			}
+
+			DiscoveryActive = false;
+			if(discoveryEngineThread != null) {
+				logger.trace("Discovery Engine shutting down");
+				DiscoveryEngine.shutdown();
+				discoveryEngineThread.join();
+				discoveryEngineThread = null;
+				isActive = false;
+
+			}
+			ConsumerThreadRegionActive = false;
+			if(consumerRegionThread != null) {
+				logger.trace("Region Consumer shutting down");
+				consumerRegionThread.join();
+				consumerRegionThread = null;
+			}
+
+			ConsumerThreadActive = false;
+			if(consumerAgentThread != null) {
+				logger.trace("Agent Consumer shutting down");
+				consumerAgentThread.join();
+				consumerAgentThread = null;
+			}
+
+			ActiveBrokerManagerActive = false;
+			if(activeBrokerManagerThread != null) {
+				logger.trace("Active Broker Manager shutting down");
+				activeBrokerManagerThread.join();
+				activeBrokerManagerThread = null;
+			}
+			if (ap != null) {
+				logger.trace("Producer shutting down");
+				ap.shutdown();
+				ap = null;
+			}
+			if(broker != null) {
+				logger.trace("Broker shutting down");
+				broker.stopBroker();
+				broker = null;
+
+			}
+			if(restartOnShutdown) {
+				commInit(); //reinit everything
+				restartOnShutdown = false;
+			}
+		} catch(Exception ex) {
+			logger.error("shutdown {}", ex.getMessage());
+		}
+		
+	}
+	
     public static boolean sendMessage(MsgEventType type, String targetAgent, String msg) {
 		if (isReachableAgent(targetAgent)) {
 			logger.debug("Sending message to Agent [{}]", targetAgent);
@@ -455,7 +454,6 @@ public class PluginEngine {
 			return false;
 		}
 	}
-    
     
     public static boolean isLocal(String checkAddress) {
     	boolean isLocal = false;

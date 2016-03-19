@@ -22,7 +22,7 @@ public class CommandExec {
 				{
 					if(ce.getMsgBody().equals("comminit"))
 					{
-						//public MsgEvent(MsgEventType msgType, String msgRegion, String msgAgent, String msgPlugin, String msgBody)
+						PluginEngine.commInit(); //initial init
 						ce.setParam("set_region", PluginEngine.region);
 						ce.setParam("set_agent", PluginEngine.agent);
 					}
