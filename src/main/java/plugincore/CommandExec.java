@@ -18,12 +18,14 @@ public class CommandExec {
 		{
 			if(ce.getMsgType() == MsgEventType.CONFIG) //for init
 			{
-				if(ce.getParam("comminit") != null)
+				if(ce.getMsgBody() != null)
 				{
-					//public MsgEvent(MsgEventType msgType, String msgRegion, String msgAgent, String msgPlugin, String msgBody)
-					ce.setParam("set_region", PluginEngine.region);
-					ce.setParam("set_agent", PluginEngine.agent);
-					
+					if(ce.getMsgBody().equals("comminit"))
+					{
+						//public MsgEvent(MsgEventType msgType, String msgRegion, String msgAgent, String msgPlugin, String msgBody)
+						ce.setParam("set_region", PluginEngine.region);
+						ce.setParam("set_agent", PluginEngine.agent);
+					}
 					return ce;
 				}
 				

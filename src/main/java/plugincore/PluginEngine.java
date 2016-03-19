@@ -120,8 +120,9 @@ public class PluginEngine {
 		
 		    	try 
 		        {
-		    		logger.debug(ce.getParams().toString());
+		    		logger.error("beofre" + ce.getParams().toString());
 					MsgEvent re = commandExec.cmdExec(ce);
+		    		logger.error("after" + re.getParams().toString());
 					if(re != null)
 					{
 						re.setReturn(); //reverse to-from for return
@@ -131,7 +132,7 @@ public class PluginEngine {
 				} 
 		        catch(Exception ex)
 		        {
-		        	System.out.println("Controller : PluginEngine : msgIn Thread: " + ex.toString());
+		        	logger.error("msgIn Thread run: " + ex.getMessage());
 		        }
 		    }
 		  };
@@ -139,7 +140,7 @@ public class PluginEngine {
 		}
 		catch(Exception ex)
 		{
-			System.out.println("Controller : PluginEngine : msgIn Thread: " + ex.toString());        	
+			logger.error("msgIn Thread: " + ex.getMessage());        	
 		}
 		
 	}
