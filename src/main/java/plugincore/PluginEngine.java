@@ -254,7 +254,7 @@ public class PluginEngine {
 
         	logger.debug("Broker Search...");
     		List<MsgEvent> discoveryList = dcv6.getDiscoveryResponse(DiscoveryType.AGENT,2000);
-			logger.info("discoverylist count= " + discoveryList.size());
+			logger.debug("discoverylist count= " + discoveryList.size());
 			//logger.info("Broker search IPv4:");
     		//dc.getDiscoveryMap(2000);
     		if(discoveryList.isEmpty())
@@ -348,6 +348,12 @@ public class PluginEngine {
     				if(remoteAddress instanceof Inet6Address) {
     					cbrokerAddress = "[" + cbrokerAddress + "]";
     				}
+					if((region == "init") && (agent == "init"))
+					{
+						RandomString rs = new RandomString(4);
+						agent = "agent-" + rs.nextString();
+						//logger.warn("Agent region changed from :" + oldRegion + " to " + region);
+					}
     				brokerAddress = cbrokerAddress;
     				region = cRegion;
     				logger.debug("Assigned regionid=" + region);

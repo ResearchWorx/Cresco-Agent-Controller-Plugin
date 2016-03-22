@@ -38,11 +38,11 @@
     <logger name="netdiscovery.DiscoveryClientIPv6" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="netdiscovery.DiscoveryEngine" level="debug" additivity="false">
+    <logger name="netdiscovery.DiscoveryEngine" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
 
-    <logger name="plugincore.PluginEngine" level="debug" additivity="false">
+    <logger name="plugincore.PluginEngine" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
     <logger name="plugincore.WatchDog" level="info" additivity="false">
