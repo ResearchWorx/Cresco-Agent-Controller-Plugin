@@ -274,18 +274,20 @@ public class DiscoveryEngine implements Runnable {
 			{
 				if(PluginEngine.reachableAgents().size() < 25)
 				{
-				if(rme.getParam("src_region") == null)
+				if(rme.getParam("src_region") != null)
 				{
-					//System.out.println(getClass().getName() + "1 " + Thread.currentThread().getId());
-					me = new MsgEvent(MsgEventType.DISCOVER,PluginEngine.region,PluginEngine.agent,PluginEngine.plugin,"Broadcast discovery response.");
-					me.setParam("dst_region",PluginEngine.region);
-					me.setParam("dst_agent",rme.getParam("src_agent"));
-					me.setParam("src_region",PluginEngine.region);
-					me.setParam("src_agent",PluginEngine.agent);
-					me.setParam("dst_ip", rme.getParam("src_ip"));
-					me.setParam("dst_port", rme.getParam("src_port"));
-					me.setParam("agent_count", String.valueOf(PluginEngine.reachableAgents().size()));
-					me.setParam("discovery_type",DiscoveryType.AGENT.name());
+					if(rme.getParam("src_region").equals("init")) {
+						//System.out.println(getClass().getName() + "1 " + Thread.currentThread().getId());
+						me = new MsgEvent(MsgEventType.DISCOVER, PluginEngine.region, PluginEngine.agent, PluginEngine.plugin, "Broadcast discovery response.");
+						me.setParam("dst_region", PluginEngine.region);
+						me.setParam("dst_agent", rme.getParam("src_agent"));
+						me.setParam("src_region", PluginEngine.region);
+						me.setParam("src_agent", PluginEngine.agent);
+						me.setParam("dst_ip", rme.getParam("src_ip"));
+						me.setParam("dst_port", rme.getParam("src_port"));
+						me.setParam("agent_count", String.valueOf(PluginEngine.reachableAgents().size()));
+						me.setParam("discovery_type", DiscoveryType.AGENT.name());
+					}
 				}
 				else
 				{
