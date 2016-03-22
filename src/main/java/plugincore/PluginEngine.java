@@ -435,7 +435,15 @@ public class PluginEngine {
 
 			}
 			if(restartOnShutdown) {
+				MsgEvent ce = new MsgEvent(MsgEventType.CONFIG,region,agent,null,"comminit");
 				commInit(); //reinit everything
+				//notify agent of change
+				ce.setParam("set_region", PluginEngine.region);
+				ce.setParam("set_agent", PluginEngine.agent);
+				ce.setParam("is_regional_controller", Boolean.toString(PluginEngine.isRegionalController));
+				ce.setParam("is_active", Boolean.toString(PluginEngine.isActive));
+				PluginEngine.msgInQueue.offer(ce);
+				
 				restartOnShutdown = false;
 			}
 		} catch(Exception ex) {
