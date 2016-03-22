@@ -99,9 +99,6 @@
         <configuration>
           <source>1.7</source>
           <target>1.7</target>
-          <checkModificationExcludes>
-            <checkModificationExclude>pom.xml</checkModificationExclude>
-        </checkModificationExcludes>
         </configuration>
       </plugin>
               

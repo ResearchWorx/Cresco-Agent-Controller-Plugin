@@ -254,6 +254,7 @@ public class PluginEngine {
 
         	logger.debug("Broker Search...");
     		List<MsgEvent> discoveryList = dcv6.getDiscoveryResponse(DiscoveryType.AGENT,2000);
+			logger.info("discoverylist = " + discoveryList);
 			//logger.info("Broker search IPv4:");
     		//dc.getDiscoveryMap(2000);
     		if(discoveryList.isEmpty())
