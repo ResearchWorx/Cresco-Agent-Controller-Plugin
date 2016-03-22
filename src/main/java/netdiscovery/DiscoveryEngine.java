@@ -222,13 +222,12 @@ public class DiscoveryEngine implements Runnable {
 							{
 								if(rme.getParam("discovery_type").equals(DiscoveryType.AGENT.name()))
 								{
-									logger.info("{}", "agent discovery");
+									logger.debug("{}", "agent discovery");
 									me = getAgentMsg(rme); //generate payload
 								}
-
 								else if(rme.getParam("discovery_type").equals(DiscoveryType.REGION.name()))
 								{
-									logger.info("{}", "regional discovery");
+									logger.debug("{}", "regional discovery");
 									me = getRegionMsg(rme);
 								}
 								else if(rme.getParam("discovery_type").equals(DiscoveryType.GLOBAL.name()))
@@ -273,7 +272,7 @@ public class DiscoveryEngine implements Runnable {
 			MsgEvent me = null;
 			try
 			{
-				if(PluginEngine.reachableAgents().size() < 2)
+				if(PluginEngine.reachableAgents().size() < 25)
 				{
 				if(rme.getParam("src_region") == null)
 				{
