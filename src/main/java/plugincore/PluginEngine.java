@@ -254,7 +254,7 @@ public class PluginEngine {
 
         	logger.debug("Broker Search...");
     		List<MsgEvent> discoveryList = dcv6.getDiscoveryResponse(DiscoveryType.AGENT,2000);
-			logger.info("discoverylist = " + discoveryList);
+			//logger.info("discoverylist count= " + discoveryList.size());
 			//logger.info("Broker search IPv4:");
     		//dc.getDiscoveryMap(2000);
     		if(discoveryList.isEmpty())
@@ -338,8 +338,8 @@ public class PluginEngine {
     				
     				int tmpBrokerCount = Integer.parseInt(bm.getParam("agent_count"));
     				if(brokerCount < tmpBrokerCount) {
-    					//logger.debug("commInit {}", bm.getParam("dst_ip"));
-    					cbrokerAddress = bm.getParam("dst_ip");
+    					logger.debug("commInit {}", bm.getParams().toString());
+						cbrokerAddress = bm.getParam("dst_ip");
     					cRegion = bm.getParam("src_region");
     				}
     			}

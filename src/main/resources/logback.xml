@@ -42,7 +42,7 @@
         <appender-ref ref="STDOUT" />
     </logger>
 
-    <logger name="plugincore.PluginEngine" level="info" additivity="false">
+    <logger name="plugincore.PluginEngine" level="debug" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
     <logger name="plugincore.WatchDog" level="info" additivity="false">
