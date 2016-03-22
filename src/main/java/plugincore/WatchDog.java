@@ -45,22 +45,22 @@ public class WatchDog {
 	    	try {
 	    		if((!PluginEngine.ConsumerThreadActive) || !(PluginEngine.consumerAgentThread.isAlive())) {
 	    			isHealthy = false;
-					logger.debug("Agent Consumer shutdown detected");
+					logger.info("Agent Consumer shutdown detected");
 	    		}
 				
 	    		if(PluginEngine.isRegionalController) {
 	    			if(!PluginEngine.DiscoveryActive) {
 	    				isHealthy = false;
-						logger.debug("Discovery shutdown detected");
+						logger.info("Discovery shutdown detected");
 	    				
 	    			}
 					if(!(PluginEngine.ConsumerThreadRegionActive) || !(PluginEngine.consumerRegionThread.isAlive())) {
 		    			isHealthy = false;
-						logger.debug("Region Consumer shutdown detected");
+						logger.info("Region Consumer shutdown detected");
 		    		}
 	    			if(!(PluginEngine.ActiveBrokerManagerActive) || !(PluginEngine.activeBrokerManagerThread.isAlive())) {
 	    				isHealthy = false;
-						logger.debug("Active Broker Manager shutdown detected");
+						logger.info("Active Broker Manager shutdown detected");
 	    			}
 	    			if(!PluginEngine.broker.isHealthy()) {
 	    				isHealthy = false;
