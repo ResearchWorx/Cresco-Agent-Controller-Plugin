@@ -334,7 +334,7 @@ public class PluginEngine {
     			String cbrokerAddress = null;
     			String cRegion = null;
     			int brokerCount = -1;
-    			for (MsgEvent bm : incomingCanidateBrokers) {
+    			for (MsgEvent bm : discoveryList) {
     				
     				int tmpBrokerCount = Integer.parseInt(bm.getParam("agent_count"));
     				if(brokerCount < tmpBrokerCount) {
