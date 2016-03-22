@@ -1,5 +1,7 @@
 package plugincore;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import shared.MsgEvent;
 import shared.MsgEventType;
 
@@ -11,7 +13,8 @@ public class CommandExec {
 	{
 		//toats
 	}
-	
+	private static final Logger logger = LoggerFactory.getLogger(CommandExec.class);
+
 	public MsgEvent cmdExec(MsgEvent ce) 
 	{
 		try
@@ -94,6 +97,11 @@ public class CommandExec {
 						ce.setMsgBody("Dummy Plugin Command [" + ce.getMsgType().toString() + "] unknown");
 					}
 				}
+				else if((ce.getParam("dst_region").equals(PluginEngine.region)) && (ce.getParam("dst_agent").equals(PluginEngine.agent)) && (!ce.getParam("dst_plugin").equals(PluginEngine.plugin)))
+				{
+					//message for plugin send to agent
+					PluginEngine.msgInQueue.offer(ce);
+				}
 				else
 				{
 					ce.setMsgPlugin(ce.getParam("dst_plugin"));
@@ -105,7 +113,24 @@ public class CommandExec {
 				}
 			
 			}
-			return ce;
+			else if((ce.getParam("dst_region") != null) && (ce.getParam("dst_agent") != null)) //its a message for this plugin
+			{
+				//(isReachableAgent(targetAgent))
+				//String dst_region = ce.getParam("dst_region");
+				//String dst_agent = ce.getParam("dst_region");
+				String targetAgent = ce.getParam("dst_region") + "_" + ce.getParam("dst_region");
+				if(PluginEngine.isReachableAgent(targetAgent))
+				{
+					PluginEngine.ap.sendMessage(ce);
+					return null;
+				}
+				else
+				{
+					logger.error("Unreachable External Agent : " + targetAgent);
+					return null;
+				}
+			}
+				return ce;
 			
 		}
 		catch(Exception ex)
