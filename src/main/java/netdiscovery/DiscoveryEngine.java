@@ -68,6 +68,8 @@ public class DiscoveryEngine implements Runnable {
 	}*/
 
 	class DiscoveryEngineWorker implements Runnable {
+		private final Logger logger = LoggerFactory.getLogger(DiscoveryEngine.class);
+
 		private NetworkInterface networkInterface;
 		private MulticastSocket socket;
 
@@ -131,7 +133,6 @@ public class DiscoveryEngine implements Runnable {
 				}
 			} catch(Exception ex) {
 				logger.error("Run : Interface = {} : Error = {}", networkInterface.getDisplayName(), ex.getMessage());
-				logger.error("Thread {}" + Thread.currentThread().toString());
 			}
 		}
 

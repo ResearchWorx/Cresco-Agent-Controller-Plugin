@@ -41,6 +41,9 @@
     <logger name="netdiscovery.DiscoveryEngine" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
+    <logger name="netdiscovery.DiscoveryEngineWorker" level="debug" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
 
     <logger name="plugincore.PluginEngine" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
