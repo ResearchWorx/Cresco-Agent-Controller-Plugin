@@ -287,6 +287,7 @@ public class DiscoveryEngine implements Runnable {
 						me.setParam("dst_port", rme.getParam("src_port"));
 						me.setParam("agent_count", String.valueOf(PluginEngine.reachableAgents().size()));
 						me.setParam("discovery_type", DiscoveryType.AGENT.name());
+						logger.debug("getAgentMsg = " + me.getParams().toString());
 					}
 				}
 				else
