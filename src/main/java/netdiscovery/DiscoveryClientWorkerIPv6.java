@@ -27,6 +27,7 @@ import shared.MsgEvent;
 import shared.MsgEventType;
 
 public class DiscoveryClientWorkerIPv6  {
+	public static final Logger logger = LoggerFactory.getLogger(DiscoveryClientWorkerIPv6.class);
 	private DatagramSocket c;
 	//private MulticastSocket c;
 	private Gson gson;
@@ -36,8 +37,7 @@ public class DiscoveryClientWorkerIPv6  {
 	public DiscoveryType disType;
 	private boolean timerActive = false;
 	private List<MsgEvent> discoveredList;
-	
-	public static final Logger logger = LoggerFactory.getLogger(DiscoveryClientWorkerIPv6.class);
+
 
 	public DiscoveryClientWorkerIPv6(DiscoveryType disType, int discoveryTimeout, String multiCastNetwork) {
 		gson = new Gson();
@@ -49,7 +49,7 @@ public class DiscoveryClientWorkerIPv6  {
 		
 	}
 	
-	class StopListnerTask extends TimerTask {
+	private class StopListnerTask extends TimerTask {
 	    public void run() {
 	    	try
 	    	{
@@ -104,9 +104,9 @@ public class DiscoveryClientWorkerIPv6  {
 	}
 
 
-	public List<MsgEvent> discover() {
+	List<MsgEvent> discover() {
 		// Find the server using UDP broadcast
-		logger.info("Discovery started");
+		logger.info("Discovery (IPv6) started");
 		try {
 			discoveredList = new ArrayList<>();
 			// Broadcast the message over all the network interfaces
@@ -173,42 +173,41 @@ public class DiscoveryClientWorkerIPv6  {
 
 								//convert java object to JSON format,
 								// and returned as JSON formatted string
-								if(sme != null)
-								{
-						 		String sendJson = gson.toJson(sme);
+								if(sme != null) {
+									String sendJson = gson.toJson(sme);
 
-								byte[] sendData = sendJson.getBytes();
+									byte[] sendData = sendJson.getBytes();
 
-								DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName(multiCastNetwork), 32005);
-								synchronized (c) {
-									c.send(sendPacket);
-								}
-								//System.out.println(getClass().getName() + ">>> Request packet sent to: " + multiCastNetwork +  ": from : " + interfaceAddress.getAddress().getHostAddress());
-
-								while(!c.isClosed()) {
-									try {
-										byte[] recvBuf = new byte[15000];
-										DatagramPacket receivePacket = new DatagramPacket(recvBuf, recvBuf.length);
-										synchronized (c) {
-											c.receive(receivePacket);
-											if(timerActive)
-											{
-												//timer.cancel(); //reset timer on new discovery packet
-												timer.schedule(new StopListnerTask(), discoveryTimeout);
-											}
-										}
-										synchronized (receivePacket) {
-											processIncoming(receivePacket);
-										}
-										//new Thread(new IPv6Responder(c,receivePacket,hostAddress)).start();
-									} catch(SocketException ex) {
-										//eat message.. this should happen
-										//System.out.println(ex.getMessage());
-									} catch(Exception ex) {
-										logger.error("discovery {}", ex.getMessage());
+									DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName(multiCastNetwork), 32005);
+									synchronized (c) {
+										c.send(sendPacket);
 									}
-								}
-					  			//Close the port!
+									//System.out.println(getClass().getName() + ">>> Request packet sent to: " + multiCastNetwork +  ": from : " + interfaceAddress.getAddress().getHostAddress());
+
+									while(!c.isClosed()) {
+										try {
+											byte[] recvBuf = new byte[15000];
+											DatagramPacket receivePacket = new DatagramPacket(recvBuf, recvBuf.length);
+											synchronized (c) {
+												c.receive(receivePacket);
+												if(timerActive)
+												{
+													//timer.cancel(); //reset timer on new discovery packet
+													timer.schedule(new StopListnerTask(), discoveryTimeout);
+												}
+											}
+											synchronized (receivePacket) {
+												processIncoming(receivePacket);
+											}
+											//new Thread(new IPv6Responder(c,receivePacket,hostAddress)).start();
+										} catch(SocketException ex) {
+											//eat message.. this should happen
+											//System.out.println(ex.getMessage());
+										} catch(Exception ex) {
+											logger.error("discovery {}", ex.getMessage());
+										}
+									}
+									//Close the port!
 								}
 								
 					  		}

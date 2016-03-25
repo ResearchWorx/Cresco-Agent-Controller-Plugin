@@ -21,7 +21,7 @@ public class DiscoveryClientIPv6
 	}
 	
 	public  List<MsgEvent> getDiscoveryResponse(DiscoveryType disType, int discoveryTimeout) {
-			List<MsgEvent> discoveryList = new ArrayList<MsgEvent>();
+			List<MsgEvent> discoveryList = new ArrayList<>();
 		try {
 			
 			

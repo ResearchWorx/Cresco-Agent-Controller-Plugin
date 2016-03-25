@@ -7,6 +7,7 @@ import org.apache.commons.configuration.SubnodeConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import netdiscovery.DiscoveryClientIPv4;
 import netdiscovery.DiscoveryClientIPv6;
 import netdiscovery.DiscoveryEngine;
 import netdiscovery.DiscoveryType;
@@ -45,7 +46,7 @@ public class PluginEngine {
 	public static ConcurrentLinkedQueue<MsgEvent> msgInQueue;
 	
 	
-	public static boolean clientDiscoveryActive = false;
+	public static boolean clientDiscoveryActiveIPv4 = false;
 	public static boolean clientDiscoveryActiveIPv6 = false;
 	public static boolean DiscoveryActive = false;
 	public static boolean ActiveBrokerManagerActive = false;
@@ -77,7 +78,7 @@ public class PluginEngine {
 	public static ConcurrentLinkedQueue<MsgEvent> incomingCanidateBrokers;
 	public static ConcurrentLinkedQueue<MsgEvent> outgoingMessages;
 	
-	//public static DiscoveryClientIPv4 dc;
+	public static DiscoveryClientIPv4 dcv4;
 	public static DiscoveryClientIPv6 dcv6;
 
 	//public static Clogger logger;
@@ -87,7 +88,7 @@ public class PluginEngine {
 	{
 		try
 		{
-			rpcMap = new HashMap<String,Long>();
+			rpcMap = new HashMap<>();
 			pluginName = getPluginName();
 			pluginVersion = getPluginVersion();
 			
@@ -247,16 +248,21 @@ public class PluginEngine {
         	outgoingMessages = new ConcurrentLinkedQueue<>();
         	brokerAddress = null;
         	isIPv6 = isIPv6();
-        	
 
-        	dcv6 = new DiscoveryClientIPv6();
-            //dc = new DiscoveryClientIPv4();
+			List<MsgEvent> discoveryList = new ArrayList<>();
 
-        	logger.debug("Broker Search...");
-    		List<MsgEvent> discoveryList = dcv6.getDiscoveryResponse(DiscoveryType.AGENT,2000);
-			logger.debug("discoverylist count= " + discoveryList.size());
-			//logger.info("Broker search IPv4:");
-    		//dc.getDiscoveryMap(2000);
+			dcv4 = new DiscoveryClientIPv4();
+			dcv6 = new DiscoveryClientIPv6();
+
+			if (isIPv6) {
+				logger.debug("Broker Search (IPv6)...");
+				discoveryList = dcv6.getDiscoveryResponse(DiscoveryType.AGENT,2000);
+				logger.debug("IPv6 Broker count = {}", discoveryList.size());
+			}
+			logger.debug("Broker Search (IPv4)...");
+			discoveryList.addAll(dcv4.getDiscoveryResponse(DiscoveryType.AGENT,2000));
+			logger.debug("Broker count = {}", discoveryList.size());
+
     		if(discoveryList.isEmpty())
     		{
     			//generate regional ident if not assigned
@@ -317,7 +323,11 @@ public class PluginEngine {
     	        isRegionalController = true;
     	        //start regional discovery
     	        discoveryList.clear();
-    	        discoveryList = dcv6.getDiscoveryResponse(DiscoveryType.REGION,2000);
+				if (isIPv6)
+					discoveryList = dcv6.getDiscoveryResponse(DiscoveryType.REGION,2000);
+
+				if (discoveryList.isEmpty())
+					discoveryList = dcv4.getDiscoveryResponse(DiscoveryType.REGION,2000);
     	        if(!discoveryList.isEmpty())
         		{
     	        	for(MsgEvent ime : discoveryList)

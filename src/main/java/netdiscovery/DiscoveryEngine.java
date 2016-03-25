@@ -1,14 +1,7 @@
 package netdiscovery;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.Inet6Address;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.InterfaceAddress;
-import java.net.MulticastSocket;
-import java.net.NetworkInterface;
-import java.net.SocketAddress;
+import java.net.*;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -116,6 +109,7 @@ public class DiscoveryEngine implements Runnable {
 		  	 		      try {
 							  synchronized (socket) {
 								  socket.receive(recPacket); //rec broadcast packet, could be IPv6 or IPv4
+								  logger.trace("Received packet!");
 							  }
 
 							  synchronized (socket) {
@@ -189,7 +183,9 @@ public class DiscoveryEngine implements Runnable {
 				InetAddress returnAddr = packet.getAddress();
 
 				String remoteAddress = stripIPv6Address(returnAddr);
-				boolean isGlobal = !returnAddr.isSiteLocalAddress() && !returnAddr.isLinkLocalAddress();
+				boolean isGlobal = true;
+				if (returnAddr instanceof Inet6Address)
+					isGlobal = !returnAddr.isSiteLocalAddress() && !returnAddr.isLinkLocalAddress();
 				String sourceAddress = getSourceAddress(intAddr,remoteAddress); //determine send address
 
 				if(!(intAddr.containsKey(remoteAddress)) && (isGlobal) && (sourceAddress != null)) {
