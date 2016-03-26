@@ -325,9 +325,7 @@ public class PluginEngine {
     	        discoveryList.clear();
 				if (isIPv6)
 					discoveryList = dcv6.getDiscoveryResponse(DiscoveryType.REGION,2000);
-
-				if (discoveryList.isEmpty())
-					discoveryList = dcv4.getDiscoveryResponse(DiscoveryType.REGION,2000);
+				discoveryList.addAll(dcv4.getDiscoveryResponse(DiscoveryType.REGION,2000));
     	        if(!discoveryList.isEmpty())
         		{
     	        	for(MsgEvent ime : discoveryList)
@@ -398,7 +396,10 @@ public class PluginEngine {
 
     public static void shutdown() {
 		try {
-			logger.info("Shutting down");
+			if (restartOnShutdown)
+				logger.info("Tearing down services");
+			else
+				logger.info("Shutting down");
 			if(watchDogProcess != null) {
 				watchDogProcess.shutdown();
 				watchDogProcess = null;
