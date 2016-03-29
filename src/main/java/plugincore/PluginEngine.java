@@ -111,7 +111,7 @@ public class PluginEngine {
     {
 			return pluginVersion;
 	}
-	public void msgIn(MsgEvent me)
+	public static void msgIn(MsgEvent me)
 	{
 		
 		final MsgEvent ce = me;
