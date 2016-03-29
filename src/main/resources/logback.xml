@@ -10,13 +10,13 @@
         </layout>
     </appender>
 
-    <logger name="ActiveMQ.ActiveAgentConsumer" level="info" additivity="false">
+    <logger name="ActiveMQ.ActiveAgentConsumer" level="debug" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
     <logger name="ActiveMQ.ActiveBroker" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="ActiveMQ.ActiveProducer" level="info" additivity="false">
+    <logger name="ActiveMQ.ActiveProducer" level="debug" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
     <logger name="ActiveMQ.ActiveBrokerManager" level="info" additivity="false">
@@ -25,7 +25,7 @@
     <logger name="ActiveMQ.ActiveRegionConsumer" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="ActiveMQ.BrokeredAgent" level="info" additivity="false">
+    <logger name="ActiveMQ.BrokeredAgent" level="debug" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
     <logger name="ActiveMQ.BrokerMonitor" level="info" additivity="false">
