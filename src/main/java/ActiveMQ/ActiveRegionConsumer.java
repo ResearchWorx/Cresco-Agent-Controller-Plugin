@@ -43,6 +43,10 @@ public class ActiveRegionConsumer implements Runnable {
 				TextMessage msg = (TextMessage) consumer.receive(1000);
 				if (msg != null) {
 					MsgEvent me = gson.fromJson(msg.getText(), MsgEvent.class);
+					PluginEngine.msgIn(me);
+					logger.debug("Incoming Message Region: " + me.getParams().toString());
+
+					/*
 					if (me.getMsgBody().toLowerCase().equals("ping")) {
 						String pingAgent = me.getParam("src_region") + "_" + me.getParam("src_agent");
 						logger.info("Sending to Agent [{}]", pingAgent);
@@ -56,6 +60,7 @@ public class ActiveRegionConsumer implements Runnable {
 						logger.trace("[{}] {}_{} sent a message.", new Timestamp(new Date().getTime()), me.getParam("src_region"), me.getParam("src_agent"));
 						System.out.print("Name of Agent to message [q to quit]: ");
 					}
+					*/
 				}
 			}
 			logger.debug("Cleaning up ActiveRegionConsumer");
