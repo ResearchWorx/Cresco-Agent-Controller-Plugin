@@ -30,6 +30,7 @@ public class CommandExec {
 			}
 
 			if (isLocal) {
+				System.out.println("LOCAL CONTROLLER MESSAGE: " + ce.getParams());
 
 				if (ce.getMsgType() == MsgEventType.CONFIG) //for init
 				{
@@ -91,7 +92,7 @@ public class CommandExec {
 			}
 			else
 			{
-				logger.info("MESSAGE NOT FOR CONTROLLER");
+				System.out.println("NOT CONTROLLER MESSAGE / REMOTE: " + ce.getParams());
 				return null;
 			}
 		//end try
