@@ -93,7 +93,24 @@ public class CommandExec {
 			else
 			{
 				System.out.println("NOT CONTROLLER MESSAGE / REMOTE: " + ce.getParams());
-				return null;
+				String targetAgent = null;
+				if ((ce.getParam("dst_region") != null) && (ce.getParam("dst_agent") != null)) {
+					//agent message
+					targetAgent = ce.getParam("dst_region") + "_" + ce.getParam("dst_agent");
+				}
+				else if ((ce.getParam("dst_region") != null) && (ce.getParam("dst_agent") == null)) {
+					//regional message
+					targetAgent = ce.getParam("dst_region");
+				}
+
+				if (PluginEngine.isReachableAgent(targetAgent)) {
+					PluginEngine.ap.sendMessage(ce);
+					return null;
+				} else {
+					logger.error("Unreachable External Agent : " + targetAgent);
+					return null;
+				}
+
 			}
 		//end try
 		}
