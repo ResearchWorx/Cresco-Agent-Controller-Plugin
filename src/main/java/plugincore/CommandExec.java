@@ -70,8 +70,9 @@ public class CommandExec {
 						if ((ce.getParam("dst_region") != null) && (ce.getParam("dst_agent") != null) && (ce.getParam("dst_plugin") == null)) { //agent message
 							logger.debug("OUTGOING MESSAGE FOR EXTERNAL AGENT");
 						}
-					} else if ((ce.getMsgRegion().equals(PluginEngine.region) && (ce.getMsgAgent().equals(PluginEngine.agent)) && (ce.getMsgPlugin() == null))) //message for this agent
-					{
+
+					} else if ((ce.getMsgRegion().equals(PluginEngine.region) && (ce.getMsgAgent().equals(PluginEngine.agent)) && (ce.getMsgPlugin() == null))) { //message for this agent
+
 						if ((ce.getParam("dst_region").equals(PluginEngine.region)) && (ce.getParam("dst_agent").equals(PluginEngine.agent))) {
 							//message for plugin send to agent
 							logger.debug("MESSAGE FOR THIS AGENT");
@@ -94,7 +95,7 @@ public class CommandExec {
 							return null;
 						}
 					}
-					return ce;
+					return null;
 				}
 				else { //local, but not for this plugin, sent to agent.
 					System.out.println("LOCAL AGENT MESSAGE Sending to Agent: " + ce.getParams());
@@ -103,8 +104,8 @@ public class CommandExec {
 				}
 
 			}
-			else
-			{
+			else {
+
 
 				String targetAgent = null;
 				if ((ce.getParam("dst_region") != null) && (ce.getParam("dst_agent") != null)) {

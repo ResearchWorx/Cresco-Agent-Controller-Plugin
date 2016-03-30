@@ -50,7 +50,6 @@ public class ActiveProducerWorker {
 			conn.cleanup();
 			conn.close();
 			logger.debug("Producer Worker [{}] has shutdown", queueName);
-			System.out.print("Name of Agent to message [q to quit]: ");
 			isShutdown = true;
 		} catch (JMSException jmse) {
 			logger.error(jmse.getMessage());
