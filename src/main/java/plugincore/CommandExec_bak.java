@@ -6,16 +6,15 @@ import shared.MsgEvent;
 import shared.MsgEventType;
 
 
+public class CommandExec_bak {
 
-public class CommandExec {
-
-	public CommandExec()
+	public CommandExec_bak()
 	{
 		//toats
 	}
-	private static final Logger logger = LoggerFactory.getLogger(CommandExec.class);
+	private static final Logger logger = LoggerFactory.getLogger(CommandExec_bak.class);
 
-	public MsgEvent cmdExec(MsgEvent ce) 
+	public MsgEvent cmdExec(MsgEvent ce)
 	{
 		System.out.println("MESSAGE IN CONTROLLER: " + ce.getParams());
 		try
@@ -38,13 +37,6 @@ public class CommandExec {
 				if(isLocalPlugin) {
 					System.out.println("LOCAL CONTROLLER MESSAGE: " + ce.getParams());
 
-					/*
-					String callId = ce.getParam("callId-" + PluginEngine.region + "-" + PluginEngine.agent + "-" + PluginEngine.plugin); //unique callId
-					if (callId != null) //this is a callback put in RPC hashmap
-					{
-						//PluginEngine.rpcMap.put(callId, ce);
-					}
-					*/
 					if (ce.getMsgType() == MsgEventType.CONFIG) //for init
 					{
 						if (ce.getMsgBody() != null) {
@@ -60,8 +52,46 @@ public class CommandExec {
 						}
 
 					}
-					else if (ce.getMsgType() == MsgEventType.EXEC) {
-						System.out.println("THIS IS WHERE IT SHOULD STOP!!!");
+					else if (ce.getMsgType() == MsgEventType.CONFIG) {
+
+					}
+					String callId = ce.getParam("callId-" + PluginEngine.region + "-" + PluginEngine.agent + "-" + PluginEngine.plugin); //unique callId
+					if (callId != null) //this is a callback put in RPC hashmap
+					{
+						//PluginEngine.rpcMap.put(callId, ce);
+					}
+					else if ((ce.getMsgRegion().equals(PluginEngine.region) && (ce.getMsgAgent().equals(PluginEngine.agent)) && (ce.getMsgPlugin().equals(PluginEngine.plugin)))) {
+
+						if ((ce.getParam("dst_region") != null) && (ce.getParam("dst_agent") != null) && (ce.getParam("dst_plugin") != null)) //plugin message
+						{
+							if ((ce.getParam("dst_region").equals(PluginEngine.region)) && (ce.getParam("dst_agent").equals(PluginEngine.agent)) && (ce.getParam("dst_plugin").equals(PluginEngine.plugin))) {
+								logger.debug("MESSAGE FOR THIS PLUGIN");
+							}
+						}
+						if ((ce.getParam("dst_region") != null) && (ce.getParam("dst_agent") != null) && (ce.getParam("dst_plugin") == null)) { //agent message
+							logger.debug("OUTGOING MESSAGE FOR EXTERNAL AGENT");
+						}
+
+					} else if ((ce.getMsgRegion().equals(PluginEngine.region) && (ce.getMsgAgent().equals(PluginEngine.agent)) && (ce.getMsgPlugin() == null))) { //message for this agent
+
+						if ((ce.getParam("dst_region").equals(PluginEngine.region)) && (ce.getParam("dst_agent").equals(PluginEngine.agent))) {
+							//message for plugin send to agent
+							logger.debug("MESSAGE FOR THIS AGENT");
+							PluginEngine.msgInQueue.offer(ce);
+						}
+					}
+					//
+					else if ((ce.getParam("dst_region") != null) && (ce.getParam("dst_agent") != null)) //its a message for this plugin
+					{
+						//(isReachableAgent(targetAgent))
+						//String dst_region = ce.getParam("dst_region");
+						//String dst_agent = ce.getParam("dst_region");
+						String targetAgent = ce.getParam("dst_region") + "_" + ce.getParam("dst_region");
+						if (PluginEngine.isReachableAgent(targetAgent)) {
+							PluginEngine.ap.sendMessage(ce);
+						} else {
+							logger.error("Unreachable External Agent : " + targetAgent);
+						}
 					}
 				}
 				else { //local, but not for this plugin, sent to agent.
