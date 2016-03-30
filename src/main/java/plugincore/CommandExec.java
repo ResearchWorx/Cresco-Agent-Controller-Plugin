@@ -57,14 +57,12 @@ public class CommandExec {
 					if (callId != null) //this is a callback put in RPC hashmap
 					{
 						//PluginEngine.rpcMap.put(callId, ce);
-						return null;
 					} else if ((ce.getMsgRegion().equals(PluginEngine.region) && (ce.getMsgAgent().equals(PluginEngine.agent)) && (ce.getMsgPlugin().equals(PluginEngine.plugin)))) {
 
 						if ((ce.getParam("dst_region") != null) && (ce.getParam("dst_agent") != null) && (ce.getParam("dst_plugin") != null)) //plugin message
 						{
 							if ((ce.getParam("dst_region").equals(PluginEngine.region)) && (ce.getParam("dst_agent").equals(PluginEngine.agent)) && (ce.getParam("dst_plugin").equals(PluginEngine.plugin))) {
 								logger.debug("MESSAGE FOR THIS PLUGIN");
-								return null;
 							}
 						}
 						if ((ce.getParam("dst_region") != null) && (ce.getParam("dst_agent") != null) && (ce.getParam("dst_plugin") == null)) { //agent message
@@ -77,7 +75,6 @@ public class CommandExec {
 							//message for plugin send to agent
 							logger.debug("MESSAGE FOR THIS AGENT");
 							PluginEngine.msgInQueue.offer(ce);
-							return null;
 						}
 					}
 					//
@@ -89,23 +86,18 @@ public class CommandExec {
 						String targetAgent = ce.getParam("dst_region") + "_" + ce.getParam("dst_region");
 						if (PluginEngine.isReachableAgent(targetAgent)) {
 							PluginEngine.ap.sendMessage(ce);
-							return null;
 						} else {
 							logger.error("Unreachable External Agent : " + targetAgent);
-							return null;
 						}
 					}
-					return null;
 				}
 				else { //local, but not for this plugin, sent to agent.
 					System.out.println("LOCAL AGENT MESSAGE Sending to Agent: " + ce.getParams());
 					PluginEngine.msgInQueue.offer(ce);
-					return null;
 				}
-
+				return null; //default don't send anything back
 			}
-			else {
-
+			else { //not local message send over broker
 
 				String targetAgent = null;
 				if ((ce.getParam("dst_region") != null) && (ce.getParam("dst_agent") != null)) {
@@ -121,12 +113,10 @@ public class CommandExec {
 				if (PluginEngine.isReachableAgent(targetAgent)) {
 					PluginEngine.ap.sendMessage(ce);
 					System.out.println("SENT NOT CONTROLLER MESSAGE / REMOTE=: " + targetAgent + " " + " region=" + ce.getParam("dst_region") + " agent=" + ce.getParam("dst_agent") + " "  + ce.getParams());
-					return null;
 				} else {
 					logger.error("Unreachable External Agent : " + targetAgent);
-					return null;
 				}
-
+				return null;
 			}
 		//end try
 		}
