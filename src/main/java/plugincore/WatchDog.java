@@ -31,6 +31,7 @@ public class WatchDog {
 		le.setParam("src_plugin", PluginEngine.plugin);
 		le.setParam("dst_region", PluginEngine.region);
 		//PluginEngine.clog.log(le);
+        PluginEngine.msgInQueue.offer(le);
 	}
 
 	public void shutdown() {
