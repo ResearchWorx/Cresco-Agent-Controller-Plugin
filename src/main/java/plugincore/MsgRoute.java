@@ -25,6 +25,7 @@ public class MsgRoute implements Runnable{
          switch (routePath) {
              case 0:  System.out.println("CONTROLLER ROUTE CASE 1");
                  if (rm.getMsgBody().equals("comminit")) { //return discovery message
+                     System.out.println("CONTROLLER ROUTE COMMINIT MESSAGE TO AGENT");
                      PluginEngine.msgInQueue.offer(rm);
                  }
                  break;
@@ -139,7 +140,7 @@ public class MsgRoute implements Runnable{
                         if (rm.getParam("src_agent").equals(PluginEngine.agent)) {
                             TXa = "1";
                             if (rm.getParam("src_plugin") != null) {
-                                if (rm.getParam("ssrc_plugin").equals(PluginEngine.plugin)) {
+                                if (rm.getParam("src_plugin").equals(PluginEngine.plugin)) {
                                     TXp = "1";
                                 }
                             }
