@@ -16,12 +16,6 @@ public class MsgRoute implements Runnable{
 			 return;
 		 }
 
-         String callId = "callId-" + PluginEngine.region + "_" + PluginEngine.agent; //calculate callID
-         if(rm.getParam(callId) != null) { //send message to RPC hash
-             PluginEngine.rpcMap.put(rm.getParam(callId), rm);
-             return;
-         }
-
          int routePath = getRoutePath();
 
          MsgEvent re = null;
@@ -29,7 +23,14 @@ public class MsgRoute implements Runnable{
              case 1:  System.out.println("CONTROLLER ROUTE CASE 1");
                  break;
              case 42:  System.out.println("CONTROLLER ROUTE TO COMMANDEXEC : 42");
-                 re = PluginEngine.commandExec.cmdExec(rm);
+                 String callId = "callId-" + PluginEngine.region + "_" + PluginEngine.agent; //calculate callID
+                 if(rm.getParam(callId) != null) { //send message to RPC hash
+                     PluginEngine.rpcMap.put(rm.getParam(callId), rm);
+                     return;
+                 }
+                 else {
+                     re = PluginEngine.commandExec.cmdExec(rm);
+                 }
                  break;
                  //case 42:  System.out.println("CONTROLLER ROUTE LOCAL PLUGIN TO LOCAL AGNET");
              //          PluginEngine.msgInQueue.offer(rm);
