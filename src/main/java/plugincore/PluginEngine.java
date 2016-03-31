@@ -40,11 +40,11 @@ public class PluginEngine {
 	public static String region;
 	public static String agentpath;
 	
-	public static HashMap<String,Long> rpcMap;
 	public static CommandExec commandExec;
 	public static PluginConfig config;
 	public static ConcurrentLinkedQueue<MsgEvent> msgInQueue;
-	
+	public static Map<String,MsgEvent> rpcMap;
+
 	
 	public static boolean clientDiscoveryActiveIPv4 = false;
 	public static boolean clientDiscoveryActiveIPv6 = false;
@@ -113,7 +113,9 @@ public class PluginEngine {
 	}
 	public static void msgIn(MsgEvent me)
 	{
+		new MsgRoute(me).run();
 		
+		/*
 		final MsgEvent ce = me;
 		try
 		{
@@ -142,7 +144,7 @@ public class PluginEngine {
 		{
 			logger.error("msgIn Thread: " + ex.getMessage());        	
 		}
-		
+		*/
 	}
 	
 	public boolean initialize(ConcurrentLinkedQueue<MsgEvent> msgOutQueue, ConcurrentLinkedQueue<MsgEvent> msgInQueue, SubnodeConfiguration configObj, String region, String agent, String plugin) {
