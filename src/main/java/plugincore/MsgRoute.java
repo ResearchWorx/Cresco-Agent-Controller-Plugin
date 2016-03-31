@@ -1,10 +1,13 @@
 package plugincore;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import shared.MsgEvent;
 
 public class MsgRoute implements Runnable{
+    private static final Logger logger = LoggerFactory.getLogger(MsgRoute.class);
 
-	private MsgEvent rm;
+    private MsgEvent rm;
 	public MsgRoute(MsgEvent rm)
 	{
 		this.rm = rm;
@@ -22,11 +25,12 @@ public class MsgRoute implements Runnable{
          switch (routePath) {
              case 1:  System.out.println("CONTROLLER ROUTE CASE 1");
                  break;
+             case 40:  System.out.println("CONTROLLER ROUTE TO REGIONAL AGENT : 40");
+                 externalSend();
              case 42:  System.out.println("CONTROLLER ROUTE TO COMMANDEXEC : 42");
                  String callId = "callId-" + PluginEngine.region + "_" + PluginEngine.agent; //calculate callID
                  if(rm.getParam(callId) != null) { //send message to RPC hash
                      PluginEngine.rpcMap.put(rm.getParam(callId), rm);
-                     return;
                  }
                  else {
                      re = PluginEngine.commandExec.cmdExec(rm);
@@ -54,6 +58,33 @@ public class MsgRoute implements Runnable{
 
 	}
 
+    private void externalSend() {
+        String targetAgent = null;
+        try {
+
+            if ((rm.getParam("dst_region") != null) && (rm.getParam("dst_agent") != null)) {
+                //agent message
+                targetAgent = rm.getParam("dst_region") + "_" + rm.getParam("dst_agent");
+
+            }
+            else if ((rm.getParam("dst_region") != null) && (rm.getParam("dst_agent") == null)) {
+                //regional message
+                targetAgent = rm.getParam("dst_region");
+            }
+
+            if (PluginEngine.isReachableAgent(targetAgent)) {
+                PluginEngine.ap.sendMessage(rm);
+                //System.out.println("SENT NOT CONTROLLER MESSAGE / REMOTE=: " + targetAgent + " " + " region=" + ce.getParam("dst_region") + " agent=" + ce.getParam("dst_agent") + " "  + ce.getParams());
+            } else {
+                logger.error("Unreachable External Agent : " + targetAgent);
+            }
+        }
+        catch(Exception ex) {
+            logger.error("External Send Error : " + targetAgent);
+        }
+
+
+    }
     private int getRoutePath() {
         int routePath = -1;
         try {
