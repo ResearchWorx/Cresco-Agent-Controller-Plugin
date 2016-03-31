@@ -61,11 +61,24 @@ public class ActiveProducer {
 		try {
 			ActiveProducerWorker apw = null;
 			String dstPath;
+			if((sm.getParam("dst_region") != null) && (sm.getParam("dst_agent") != null)) {
+				dstPath = sm.getParam("dst_region") + "_" + sm.getParam("dst_agent");
+			}
+			else if(sm.getParam("dst_region") != null) {
+				dstPath = sm.getParam("dst_region"); //send to broker for routing
+			}
+			else {
+				return false;
+			}
+
+			/*
+			String dstPath;
 			if(PluginEngine.isRegionalController) {
 				dstPath = sm.getParam("dst_region") + "_" + sm.getParam("dst_agent");
 			} else {
 				dstPath = sm.getParam("dst_region"); //send to broker for routing
 			}
+			*/
 			if(producerWorkers.containsKey(dstPath)) {
 				if(PluginEngine.isReachableAgent(dstPath)) {
 					apw = producerWorkers.get(dstPath);
