@@ -28,7 +28,7 @@ public class MsgRoute implements Runnable{
          switch (routePath) {
              case 1:  System.out.println("CONTROLLER ROUTE CASE 1");
                  break;
-             case 42:  System.out.println("ROUTE LOCAL PLUGIN TO LOCAL AGNET");
+             case 42:  System.out.println("CONTROLLER ROUTE LOCAL PLUGIN TO LOCAL AGNET");
                        PluginEngine.msgInQueue.offer(rm);
              //    break;
              default: System.out.println("CONTROLLER ROUTE CASE " + routePath + " " + rm.getParams());
