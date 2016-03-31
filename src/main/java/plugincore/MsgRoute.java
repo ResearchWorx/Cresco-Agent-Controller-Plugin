@@ -104,7 +104,9 @@ public class MsgRoute implements Runnable{
                         if (rm.getParam("dst_agent").equals(PluginEngine.agent)) {
                             RXa = "1";
                             if (rm.getParam("dst_plugin") != null) {
-                                RXp = "1";
+                                if (rm.getParam("dst_plugin").equals(PluginEngine.plugin)) {
+                                    RXp = "1";
+                                }
                             }
                         }
                     }
@@ -114,12 +116,14 @@ public class MsgRoute implements Runnable{
 
             if (rm.getParam("src_region") != null) {
                 if (rm.getParam("src_region").equals(PluginEngine.region)) {
-                    RXr = "1";
+                    TXr = "1";
                     if (rm.getParam("src_agent") != null) {
                         if (rm.getParam("src_agent").equals(PluginEngine.agent)) {
-                            RXa = "1";
+                            TXa = "1";
                             if (rm.getParam("src_plugin") != null) {
-                                RXp = "1";
+                                if (rm.getParam("ssrc_plugin").equals(PluginEngine.plugin)) {
+                                    TXp = "1";
+                                }
                             }
                         }
                     }
