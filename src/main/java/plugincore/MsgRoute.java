@@ -25,9 +25,9 @@ public class MsgRoute implements Runnable{
          switch (routePath) {
              case 1:  System.out.println("CONTROLLER ROUTE CASE 1");
                  break;
-             case 40:  System.out.println("CONTROLLER ROUTE TO REGIONAL AGENT : 40");
+             case 40:  System.out.println("CONTROLLER ROUTE TO REGIONAL AGENT : 40 " + rm.getParams());
                  externalSend();
-             case 42:  System.out.println("CONTROLLER ROUTE TO COMMANDEXEC : 42");
+             case 42:  System.out.println("CONTROLLER ROUTE TO COMMANDEXEC : 42 "  + rm.getParams());
                  String callId = "callId-" + PluginEngine.region + "_" + PluginEngine.agent; //calculate callID
                  if(rm.getParam(callId) != null) { //send message to RPC hash
                      PluginEngine.rpcMap.put(rm.getParam(callId), rm);
