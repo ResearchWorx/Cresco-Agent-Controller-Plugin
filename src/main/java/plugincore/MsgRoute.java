@@ -22,27 +22,25 @@ public class MsgRoute implements Runnable{
          int routePath = getRoutePath();
          MsgEvent re = null;
          switch (routePath) {
-             case 0:  System.out.println("CONTROLLER ROUTE CASE 1");
+             case 0:  //System.out.println("CONTROLLER ROUTE CASE 0");
                  if (rm.getMsgBody().equals("comminit")) { //return discovery message
-                     System.out.println("CONTROLLER ROUTE COMMINIT MESSAGE TO AGENT");
+                     //System.out.println("CONTROLLER ROUTE COMMINIT MESSAGE TO AGENT");
                      PluginEngine.msgInQueue.offer(rm);
                  }
                  break;
-             case 1:  System.out.println("CONTROLLER ROUTE CASE 1");
-                 break;
-             case 52:  System.out.println("CONTROLLER ROUTE TO REGIONAL AGENT : 52 " + rm.getParams());
+             case 52:  //System.out.println("CONTROLLER ROUTE TO REGIONAL AGENT : 52 " + rm.getParams());
                  externalSend();
                  break;
-             case 53:  System.out.println("CONTROLLER ROUTE TO REGIONAL AGENT : 53 " + rm.getParams());
+             case 53:  //System.out.println("CONTROLLER ROUTE TO REGIONAL AGENT : 53 " + rm.getParams());
                  externalSend();
                  break;
-             case 56:  System.out.println("CONTROLLER ROUTE TO LOCAL AGENT : 56 "  + rm.getParams());
+             case 56:  //System.out.println("CONTROLLER ROUTE TO LOCAL AGENT : 56 "  + rm.getParams());
                      PluginEngine.msgInQueue.offer(rm);
                  break;
-             case 58:  System.out.println("CONTROLLER ROUTE TO COMMANDEXEC : 58 "  + rm.getParams());
+             case 58:  //System.out.println("CONTROLLER ROUTE TO COMMANDEXEC : 58 "  + rm.getParams());
                  re = getCommandExec();
                  break;
-             case 62:  System.out.println("CONTROLLER ROUTE TO COMMANDEXEC : 62 "  + rm.getParams());
+             case 62:  //System.out.println("CONTROLLER ROUTE TO COMMANDEXEC : 62 "  + rm.getParams());
                  re = getCommandExec();
                  break;
                  //case 42:  System.out.println("CONTROLLER ROUTE LOCAL PLUGIN TO LOCAL AGNET");
