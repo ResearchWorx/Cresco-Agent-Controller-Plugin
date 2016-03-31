@@ -40,7 +40,6 @@ public class MsgRoute implements Runnable{
                      re = PluginEngine.commandExec.cmdExec(rm);
                  }
                  break;
-
              case 62:  System.out.println("CONTROLLER ROUTE TO COMMANDEXEC : 62 "  + rm.getParams());
                  callId = "callId-" + PluginEngine.region + "_" + PluginEngine.agent; //calculate callID
                  if(rm.getParam(callId) != null) { //send message to RPC hash
@@ -59,7 +58,8 @@ public class MsgRoute implements Runnable{
          if(re != null)
          {
              re.setReturn(); //reverse to-from for return
-             PluginEngine.msgInQueue.offer(re);
+             //PluginEngine.msgInQueue.offer(re);
+             PluginEngine.msgIn(re);
          }
                  //	AgentEngine.commandExec.cmdExec(me);
 
