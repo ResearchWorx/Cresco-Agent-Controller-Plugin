@@ -85,6 +85,7 @@ public class WatchDog {
 			 le.setParam("dst_region", PluginEngine.region);
 			 le.setParam("runtime", String.valueOf(runTime));
 			 le.setParam("timestamp", String.valueOf(System.currentTimeMillis()));
+			 PluginEngine.msgInQueue.offer(le);
 			 //PluginEngine.clog.log(le);
 	    }
 	  }
