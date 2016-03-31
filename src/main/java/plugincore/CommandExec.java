@@ -34,7 +34,6 @@ public class CommandExec {
 						}
 					}
 					else if (ce.getMsgType() == MsgEventType.EXEC) {
-						System.out.println("THIS IS WHERE IT SHOULD STOP!!!");
 						if (ce.getParam("cmd").equals("show_name")) {
 							ce.setMsgBody(PluginEngine.pluginName);
 							return ce;
