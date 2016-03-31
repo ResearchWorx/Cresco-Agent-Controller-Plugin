@@ -23,6 +23,11 @@ public class MsgRoute implements Runnable{
          String callId = null;
          MsgEvent re = null;
          switch (routePath) {
+             case 0:  System.out.println("CONTROLLER ROUTE CASE 1");
+                 if (rm.getMsgBody().equals("comminit")) { //return discovery message
+                     PluginEngine.msgInQueue.offer(rm);
+                 }
+                 break;
              case 1:  System.out.println("CONTROLLER ROUTE CASE 1");
                  break;
              case 52:  System.out.println("CONTROLLER ROUTE TO REGIONAL AGENT : 52 " + rm.getParams());
