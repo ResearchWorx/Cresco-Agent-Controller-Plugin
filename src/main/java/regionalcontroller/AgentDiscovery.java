@@ -19,8 +19,8 @@ public class AgentDiscovery {
 
         rpcc = new RPCCall();
 
-        cleanUpTimer = new Timer();
-        cleanUpTimer.scheduleAtFixedRate(new DiscoveryCleanUpTask(), 500, PluginEngine.config.getWatchDogTimer() * 3);
+        //cleanUpTimer = new Timer();
+        //cleanUpTimer.scheduleAtFixedRate(new DiscoveryCleanUpTask(), 500, PluginEngine.config.getWatchDogTimer() * 3);
     }
 
     public void perfupdate(MsgEvent pe) {
