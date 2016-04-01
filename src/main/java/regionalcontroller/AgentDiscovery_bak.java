@@ -1,21 +1,21 @@
 package regionalcontroller;
 
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 import communication.RPCCall;
 import plugincore.PluginEngine;
 import shared.MsgEvent;
 import shared.MsgEventType;
 
+import java.util.Timer;
+import java.util.TimerTask;
 
-public class AgentDiscovery {
+
+public class AgentDiscovery_bak {
 
     private Timer cleanUpTimer;
     private static RPCCall rpcc;
 
-    public AgentDiscovery() throws Exception {
+    public AgentDiscovery_bak() throws Exception {
 
         rpcc = new RPCCall();
 
@@ -170,7 +170,6 @@ public class AgentDiscovery {
 
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
             System.out.println("Controller : AgentDiscovery run() : " + ex.toString());
 
         }
