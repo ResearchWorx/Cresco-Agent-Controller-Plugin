@@ -23,9 +23,10 @@ public class MsgRoute implements Runnable{
          MsgEvent re = null;
          switch (routePath) {
              case 0:  //System.out.println("CONTROLLER ROUTE CASE 0");
-                 if (rm.getMsgBody().equals("comminit")) { //return discovery message
-                     //System.out.println("CONTROLLER ROUTE COMMINIT MESSAGE TO AGENT");
-                     PluginEngine.msgInQueue.offer(rm);
+                 if(rm.getParam("configtype") != null) {
+                     if (rm.getParam("configtype").equals("comminit")) {
+                         PluginEngine.msgInQueue.offer(rm);
+                     }
                  }
                  break;
              case 48:  //System.out.println("CONTROLLER ROUTE TO REGIONAL AGENT : 52 " + rm.getParams()); //also where regional messages go
