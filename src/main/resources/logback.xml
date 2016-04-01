@@ -10,13 +10,20 @@
         </layout>
     </appender>
 
-    <logger name="communication.ActiveAgentConsumer" level="debug" additivity="false">
+
+    <logger name="regionalcontroller.ControllerDB" level="info" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
+    <logger name="regionalcontroller.AgentDiscovery" level="info" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
+    <logger name="communication.ActiveAgentConsumer" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
     <logger name="communication.ActiveBroker" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="communication.ActiveProducer" level="debug" additivity="false">
+    <logger name="communication.ActiveProducer" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
     <logger name="communication.ActiveBrokerManager" level="info" additivity="false">
@@ -25,7 +32,7 @@
     <logger name="communication.ActiveRegionConsumer" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="communication.BrokeredAgent" level="debug" additivity="false">
+    <logger name="communication.BrokeredAgent" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
     <logger name="communication.BrokerMonitor" level="info" additivity="false">
