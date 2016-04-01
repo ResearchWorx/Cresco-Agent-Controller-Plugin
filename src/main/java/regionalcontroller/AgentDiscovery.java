@@ -89,6 +89,7 @@ public class AgentDiscovery {
                     PluginEngine.msgInQueue.offer(le);
 
                 } else if (le.getMsgType() == MsgEventType.WATCHDOG) {
+                    /*
                     long watchRunTime = 0; //determine message runtime
                     long watchTimeStamp = 0; //determine message timestamp
                     try {
@@ -170,7 +171,8 @@ public class AgentDiscovery {
                             }
                         }
                     }
-
+                    */
+//end watch
                 }
 
                 if (PluginEngine.discoveryMap.containsKey(discoverString)) {
