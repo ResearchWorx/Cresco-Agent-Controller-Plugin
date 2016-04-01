@@ -28,6 +28,15 @@ public class MsgRoute implements Runnable{
                      PluginEngine.msgInQueue.offer(rm);
                  }
                  break;
+             case 48:  //System.out.println("CONTROLLER ROUTE TO REGIONAL AGENT : 52 " + rm.getParams()); //also where regional messages go
+                 if((PluginEngine.isRegionalController) && (rm.getParam("dst_agent") == null)) { //if this is the regional controller consume the message
+                     logger.info("CONTROLLER SENDING REGIONAL MESSAGE 48");
+                     PluginEngine.agentDiscover.discover(rm);
+                 }
+                 else {
+                     externalSend();
+                 }
+                 break;
              case 52:  //System.out.println("CONTROLLER ROUTE TO REGIONAL AGENT : 52 " + rm.getParams()); //also where regional messages go
                  if((PluginEngine.isRegionalController) && (rm.getParam("dst_agent") == null)) { //if this is the regional controller consume the message
                     logger.info("CONTROLLER SENDING REGIONAL MESSAGE 52");
