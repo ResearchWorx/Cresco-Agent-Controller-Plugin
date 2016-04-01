@@ -79,8 +79,8 @@ public class ControllerDB {
 	public boolean addNode(String region, String agent, String plugin)
 	{
         boolean wasAdded = false;
-		//CODY
-		try{
+
+        try{
 		if((region != null) && (agent != null) && (plugin == null)) //agent node			
 		{
 			if(!agentMap.containsKey(agent)) {
