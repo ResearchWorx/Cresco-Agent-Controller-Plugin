@@ -144,7 +144,7 @@ public class AgentDiscovery {
                             MsgEvent dep = refreshCmd(le);
 
                             PluginEngine.gdb.addNode(le.getParam("src_region"), le.getParam("src_agent"), le.getParam("src_plugin"));
-                            PluginEngine.gdb.setNodeParams(le.getParam("src_region"), le.getParam("src_agent"), le.getParam("src_plugin"), dep.getParams());
+                            //PluginEngine.gdb.setNodeParams(le.getParam("src_region"), le.getParam("src_agent"), le.getParam("src_plugin"), dep.getParams());
 
                             System.out.println("WATCHDOG DISCOVERED: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent") + " plugin:" + le.getParam("src_plugin"));
                         } else //plugin exist so update
