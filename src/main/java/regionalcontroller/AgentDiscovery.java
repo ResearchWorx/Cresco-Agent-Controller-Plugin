@@ -75,6 +75,27 @@ public class AgentDiscovery {
                     PluginEngine.msgInQueue.offer(le);
 
                 } else if (le.getMsgType() == MsgEventType.WATCHDOG) {
+
+                    try {
+
+                        if((le.getParam("src_region") != null) && (le.getParam("src_agent") != null) && (le.getParam("src_plugin")) == null)  { //agent
+                            if (!PluginEngine.gdb.isNode(le.getParam("src_region"), le.getParam("src_agent"), null)) { //add if it does not exist
+                                PluginEngine.gdb.addNode(le.getParam("src_region"), le.getParam("src_agent"), null);
+                            }
+                        }
+                        else if((le.getParam("src_region") != null) && (le.getParam("src_agent") != null) && (le.getParam("src_plugin")) != null) { //plugin
+                            if (!PluginEngine.gdb.isNode(le.getParam("src_region"), le.getParam("src_agent"), le.getParam("src_plugin"))) { //add if it does not exist
+                                PluginEngine.gdb.addNode(le.getParam("src_region"), le.getParam("src_agent"), le.getParam("src_plugin"));
+                            }
+                        }
+
+
+
+
+                    }
+                    catch(Exception ex) {
+
+                    }
                     /*
                     long watchRunTime = 0; //determine message runtime
                     long watchTimeStamp = 0; //determine message timestamp
