@@ -24,11 +24,12 @@ public class WatchDog {
         timer.scheduleAtFixedRate(new WatchDogTask(), 500, wdTimer);
         //wdMap = new HashMap<>(); //for sending future WD messages
 
-        MsgEvent le = new MsgEvent(MsgEventType.INFO, PluginEngine.region, null, null, "WatchDog timer set to " + wdTimer + " milliseconds");
+        MsgEvent le = new MsgEvent(MsgEventType.CONFIG, PluginEngine.region, null, null, "enabled");
         le.setParam("src_region", PluginEngine.region);
         le.setParam("src_agent", PluginEngine.agent);
         le.setParam("src_plugin", PluginEngine.plugin);
         le.setParam("dst_region", PluginEngine.region);
+        le.setParam("watchdogmessage", "WatchDog timer set to " + wdTimer + " milliseconds");
         //PluginEngine.clog.log(le);
         PluginEngine.msgInQueue.offer(le);
     }

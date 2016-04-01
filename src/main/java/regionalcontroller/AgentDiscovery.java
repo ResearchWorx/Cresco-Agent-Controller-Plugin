@@ -59,21 +59,7 @@ public class AgentDiscovery {
                         System.out.println("PLUGIN REMOVED: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent") + " Plugin:" + le.getParam("src_plugin"));
 
                     }
-                    //le.setReturn(); //reverse
-                    //PluginEngine.msgInQueue.offer(le);
-             /*
-			 le.setMsgPlugin(null);
-			 le.setMsgRegion(le.getParam("src_region"));
-			 le.setMsgAgent(le.getParam("src_agent"));
-			 le.removeParam("src_plugin");
-			 le.setMsgBody("controllerdisabled");
-			 le.setParam("dst_region", le.getParam("src_region"));
-			 le.setParam("dst_agent", le.getParam("src_agent"));
-			 le.setSrc(PluginEngine.region, PluginEngine.agent, PluginEngine.plugin);
-		     //le.setDst(me.getParam("src_region"),me.getParam("src_agent"),me.getParam("src_plugin"));
-			 
-			 PluginEngine.msgInQueue.offer(le);
-			  */
+
                 } else if ((le.getMsgType() == MsgEventType.CONFIG) && (le.getMsgBody().equals("enabled"))) {
                     //if we see a agent enable command respond to it
                     System.out.println("AGENTDISCOVER: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
