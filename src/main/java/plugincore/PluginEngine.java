@@ -469,6 +469,7 @@ public class PluginEngine {
             }
             if (restartOnShutdown) {
                 MsgEvent ce = new MsgEvent(MsgEventType.CONFIG, region, agent, null, "comminit");
+                ce.setParam("configtype","comminit");
                 ce.setParam("src_region", PluginEngine.region);
                 ce.setParam("src_agent", PluginEngine.agent);
                 ce.setParam("src_plugin", PluginEngine.plugin);
