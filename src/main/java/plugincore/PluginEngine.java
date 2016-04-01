@@ -12,6 +12,7 @@ import netdiscovery.DiscoveryClientIPv6;
 import netdiscovery.DiscoveryEngine;
 import netdiscovery.DiscoveryType;
 //import shared.Clogger;
+import regionalcontroller.AgentDiscovery;
 import regionalcontroller.ControllerChannel;
 import regionalcontroller.ControllerDB;
 import shared.MsgEvent;
@@ -73,6 +74,7 @@ public class PluginEngine {
     public static String brokerAddress;
     public static boolean isRegionalController = false;
     public static Map<String,Long> discoveryMap;
+    public static AgentDiscovery agentDiscover;
 
     public static boolean hasGlobalController = false;
     public static ControllerChannel globalControllerChannel;
@@ -320,8 +322,10 @@ public class PluginEngine {
                 }
                 //logger.debug("Region ConsumerThread Started..");
 
-                discoveryMap = new ConcurrentHashMap<String,Long>();
+                discoveryMap = new ConcurrentHashMap<String,Long>(); //discovery map
                 gdb = new ControllerDB(); //start graphdb service
+                agentDiscover = new AgentDiscovery(); //discovery service
+
                 logger.info("ControllerDB Service Started..");
 
                 isRegionalController = true;

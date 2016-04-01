@@ -30,7 +30,8 @@ public class MsgRoute implements Runnable{
                  break;
              case 52:  //System.out.println("CONTROLLER ROUTE TO REGIONAL AGENT : 52 " + rm.getParams()); //also where regional messages go
                  if((PluginEngine.isRegionalController) && (rm.getParam("dst_agent") == null)) { //if this is the regional controller consume the message
-                    System.out.println("EAT REGIONAL MESSAGE");
+                    System.out.println("SENDING REGIONAL MESSAGE 52");
+                     PluginEngine.agentDiscover.discover(rm);
                  }
                  else {
                  externalSend();
@@ -38,7 +39,8 @@ public class MsgRoute implements Runnable{
                  break;
              case 53:  //System.out.println("CONTROLLER ROUTE TO REGIONAL AGENT : 53 " + rm.getParams());
                  if((PluginEngine.isRegionalController) && (rm.getParam("dst_agent") == null)) { //if this is the regional controller consume the message
-                     System.out.println("EAT REGIONAL MESSAGE");
+                     System.out.println("SENDING REGIONAL MESSAGE 53");
+                     PluginEngine.agentDiscover.discover(rm);
                  }
                  else {
                      externalSend();
