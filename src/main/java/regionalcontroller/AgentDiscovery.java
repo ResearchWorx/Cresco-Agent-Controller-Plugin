@@ -115,7 +115,7 @@ public class AgentDiscovery {
                         }
                         //Adding Node: region-grzv agent-ynyt null
                         PluginEngine.gdb.addNode(le.getParam("src_region"), le.getParam("src_agent"), null);
-                        PluginEngine.gdb.setNodeParams(le.getParam("src_region"), le.getParam("src_agent"), null, de.getParams());
+                        //PluginEngine.gdb.setNodeParams(le.getParam("src_region"), le.getParam("src_agent"), null, de.getParams());
 
                         System.out.println("WATCHDOG DISCOVERED: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
                     } else //agent already exist
@@ -201,11 +201,13 @@ public class AgentDiscovery {
                 ce.setParam("dst_agent", me.getParam("src_agent"));
             }
 
+            /*
             if (isLocal) {
                 cr = PluginEngine.commandExec.cmdExec(ce);
             } else {
                 cr = rpcc.call(ce); //get reply from remote plugin/agent
             }
+            */
 
             return cr;
 
@@ -216,7 +218,6 @@ public class AgentDiscovery {
             System.out.println("Region=" + me.getMsgRegion() + " Agent=" + me.getMsgAgent() + " plugin=" + me.getMsgPlugin());
             System.out.println("params=" + me.getParamsString());
             return null;
-
         }
     }
 

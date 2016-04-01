@@ -75,26 +75,21 @@ public class ControllerDB {
 	
 	public void addNode(String region, String agent, String plugin)
 	{
-		System.out.println("Adding Node 0 : " + region + " " + agent + " " + plugin);
+		System.out.println("Adding Node: " + region + " " + agent + " " + plugin);
 		//CODY
 		try{
 		if((region != null) && (agent != null) && (plugin == null)) //agent node			
 		{
 			AgentNode aNode = new AgentNode(agent);
 			agentMap.put(agent, aNode);
-			System.out.println("Adding Node 1 : " + region + " " + agent + " " + plugin);
 
 			//add to controller
 			if(PluginEngine.hasGlobalController)
 			{
-				System.out.println("Adding Node 2 : " + region + " " + agent + " " + plugin);
-
 				if(!PluginEngine.globalControllerChannel.addNode(controllerMsgEvent(region,agent,plugin,"addnode")))
 				{
 					System.out.println("Controller : ControllerDB : Failed to addNode to Controller");
 				}
-				System.out.println("Adding Node 3 : " + region + " " + agent + " " + plugin);
-
 			}
 			
 		}
