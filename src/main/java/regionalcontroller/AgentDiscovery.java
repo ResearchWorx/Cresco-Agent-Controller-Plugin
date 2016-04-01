@@ -5,6 +5,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import communication.RPCCall;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import plugincore.PluginEngine;
 import shared.MsgEvent;
 import shared.MsgEventType;
@@ -14,6 +16,7 @@ public class AgentDiscovery {
 
     private Timer cleanUpTimer;
     private static RPCCall rpcc;
+    private static final Logger logger = LoggerFactory.getLogger(AgentDiscovery.class);
 
     public AgentDiscovery() throws Exception {
 
@@ -94,7 +97,7 @@ public class AgentDiscovery {
                         le.setParam("timestamp", String.valueOf(System.currentTimeMillis()));
                     } catch (Exception ex) {
                         //PluginEngine.clog.getError("Problem with WATCHDOG parameters: " + ex.toString());
-                        System.out.println("Controller : AgentDiscovery : Problem with WATCHDOG parameters: " + ex.toString());
+                        logger.info("Controller : AgentDiscovery : Problem with WATCHDOG parameters: " + ex.toString());
                     }
 
                     if (!PluginEngine.gdb.isNode(le.getParam("src_region"), le.getParam("src_agent"), null)) //add if it does not exist
@@ -116,7 +119,7 @@ public class AgentDiscovery {
                         //Adding Node: region-grzv agent-ynyt null
 
                         if(PluginEngine.gdb.addNode(le.getParam("src_region"), le.getParam("src_agent"), null)) {
-                            System.out.println("WATCHDOG DISCOVERED: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
+                            logger.info("WATCHDOG DISCOVERED: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
                         }
                         //PluginEngine.gdb.setNodeParams(le.getParam("src_region"), le.getParam("src_agent"), null, de.getParams());
 

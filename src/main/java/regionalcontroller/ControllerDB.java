@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import plugincore.PluginEngine;
 import shared.MsgEvent;
 import shared.MsgEventType;
@@ -12,8 +14,9 @@ import shared.MsgEventType;
 public class ControllerDB {
 
 	Map<String,AgentNode> agentMap;
-	
-	public ControllerDB()
+    private static final Logger logger = LoggerFactory.getLogger(ControllerDB.class);
+
+    public ControllerDB()
 	{
 			agentMap = new ConcurrentHashMap<String,AgentNode>();		
 	}
@@ -84,12 +87,12 @@ public class ControllerDB {
                 AgentNode aNode = new AgentNode(agent);
                 agentMap.put(agent, aNode);
                 wasAdded = true;
-                System.out.println("Adding Node: " + region + " " + agent + " " + plugin);
+                logger.info("Adding Node: " + region + " " + agent + " " + plugin);
 
                 //add to controller
                 if (PluginEngine.hasGlobalController) {
                     if (!PluginEngine.globalControllerChannel.addNode(controllerMsgEvent(region, agent, plugin, "addnode"))) {
-                        System.out.println("Controller : ControllerDB : Failed to addNode to Controller");
+                        logger.info("Controller : ControllerDB : Failed to addNode to Controller");
                     }
                 }
             }
@@ -107,12 +110,12 @@ public class ControllerDB {
             if(!agentMap.get(agent).getPlugins().contains(plugin)) {
 
                 agentMap.get(agent).addPlugin(plugin);
-                System.out.println("Adding Plugin: " + region + " " + agent + " " + plugin);
+                logger.info("Adding Plugin: " + region + " " + agent + " " + plugin);
                 wasAdded = true;
                 //add to controller
                 if (PluginEngine.hasGlobalController) {
                     if (!PluginEngine.globalControllerChannel.addNode(controllerMsgEvent(region, agent, plugin, "addnode"))) {
-                        System.out.println("Controller : ControllerDB : Failed to addNode to Controller");
+                        logger.info("Controller : ControllerDB : Failed to addNode to Controller");
                     }
                 }
             }
@@ -120,7 +123,7 @@ public class ControllerDB {
 		}
 		catch(Exception ex)
 		{
-			System.out.println("Controller : ControllerDB : addNode ERROR : " + ex.toString());
+			logger.error("Controller : ControllerDB : addNode ERROR : " + ex.toString());
 		}
         return wasAdded;
 	}
