@@ -113,6 +113,7 @@ public class AgentDiscovery {
                             de = refreshCmd(le); //build the discovery message discover host
 
                         }
+                        //Adding Node: region-grzv agent-ynyt null
                         PluginEngine.gdb.addNode(le.getParam("src_region"), le.getParam("src_agent"), null);
                         PluginEngine.gdb.setNodeParams(le.getParam("src_region"), le.getParam("src_agent"), null, de.getParams());
 

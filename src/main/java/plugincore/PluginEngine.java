@@ -322,8 +322,8 @@ public class PluginEngine {
                 }
                 //logger.debug("Region ConsumerThread Started..");
 
-                discoveryMap = new ConcurrentHashMap<String,Long>(); //discovery map
                 gdb = new ControllerDB(); //start graphdb service
+                discoveryMap = new ConcurrentHashMap<String,Long>(); //discovery map
                 agentDiscover = new AgentDiscovery(); //discovery service
 
                 logger.info("ControllerDB Service Started..");
