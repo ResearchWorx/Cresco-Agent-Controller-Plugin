@@ -28,10 +28,10 @@ public class MsgRoute implements Runnable{
                      PluginEngine.msgInQueue.offer(rm);
                  }
                  break;
-             case 52:  //System.out.println("CONTROLLER ROUTE TO REGIONAL AGENT : 52 " + rm.getParams());
+             case 52:  System.out.println("CONTROLLER ROUTE TO REGIONAL AGENT : 52 " + rm.getParams());
                  externalSend();
                  break;
-             case 53:  //System.out.println("CONTROLLER ROUTE TO REGIONAL AGENT : 53 " + rm.getParams());
+             case 53:  System.out.println("CONTROLLER ROUTE TO REGIONAL AGENT : 53 " + rm.getParams());
                  externalSend();
                  break;
              case 56:  //System.out.println("CONTROLLER ROUTE TO LOCAL AGENT : 56 "  + rm.getParams());
