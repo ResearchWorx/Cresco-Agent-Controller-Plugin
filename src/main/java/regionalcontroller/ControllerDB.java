@@ -81,7 +81,6 @@ public class ControllerDB {
 		if((region != null) && (agent != null) && (plugin == null)) //agent node			
 		{
 			if(!agentMap.containsKey(agent)) {
-
                 AgentNode aNode = new AgentNode(agent);
                 agentMap.put(agent, aNode);
                 wasAdded = true;
