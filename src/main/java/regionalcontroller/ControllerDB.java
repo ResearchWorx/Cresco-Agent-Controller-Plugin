@@ -73,24 +73,27 @@ public class ControllerDB {
 		return ce;
 	}
 	
-	public void addNode(String region, String agent, String plugin)
+	public boolean addNode(String region, String agent, String plugin)
 	{
-		System.out.println("Adding Node: " + region + " " + agent + " " + plugin);
+        boolean wasAdded = false;
 		//CODY
 		try{
 		if((region != null) && (agent != null) && (plugin == null)) //agent node			
 		{
-			AgentNode aNode = new AgentNode(agent);
-			agentMap.put(agent, aNode);
+			if(!agentMap.containsKey(agent)) {
 
-			//add to controller
-			if(PluginEngine.hasGlobalController)
-			{
-				if(!PluginEngine.globalControllerChannel.addNode(controllerMsgEvent(region,agent,plugin,"addnode")))
-				{
-					System.out.println("Controller : ControllerDB : Failed to addNode to Controller");
-				}
-			}
+                AgentNode aNode = new AgentNode(agent);
+                agentMap.put(agent, aNode);
+                wasAdded = true;
+                System.out.println("Adding Node: " + region + " " + agent + " " + plugin);
+
+                //add to controller
+                if (PluginEngine.hasGlobalController) {
+                    if (!PluginEngine.globalControllerChannel.addNode(controllerMsgEvent(region, agent, plugin, "addnode"))) {
+                        System.out.println("Controller : ControllerDB : Failed to addNode to Controller");
+                    }
+                }
+            }
 			
 		}
 		else if((region != null) && (agent != null) && (plugin != null)) //plugin node			
@@ -102,21 +105,25 @@ public class ControllerDB {
 				//CODY
 				addNode(region, agent, null);
 			}
-			agentMap.get(agent).addPlugin(plugin);
-			//add to controller
-			if(PluginEngine.hasGlobalController)
-			{
-				if(!PluginEngine.globalControllerChannel.addNode(controllerMsgEvent(region,agent,plugin,"addnode")))
-				{
-					System.out.println("Controller : ControllerDB : Failed to addNode to Controller");
-				}
-			}
+            if(!agentMap.get(agent).getPlugins().contains(plugin)) {
+
+                agentMap.get(agent).addPlugin(plugin);
+                System.out.println("Adding Plugin: " + region + " " + agent + " " + plugin);
+                wasAdded = true;
+                //add to controller
+                if (PluginEngine.hasGlobalController) {
+                    if (!PluginEngine.globalControllerChannel.addNode(controllerMsgEvent(region, agent, plugin, "addnode"))) {
+                        System.out.println("Controller : ControllerDB : Failed to addNode to Controller");
+                    }
+                }
+            }
 		}
 		}
 		catch(Exception ex)
 		{
 			System.out.println("Controller : ControllerDB : addNode ERROR : " + ex.toString());
 		}
+        return wasAdded;
 	}
 	
 	public void setNodeParams(String region, String agent, String plugin, Map<String,String> paramMap)

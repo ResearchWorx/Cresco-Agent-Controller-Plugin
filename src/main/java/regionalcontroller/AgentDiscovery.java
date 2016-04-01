@@ -114,10 +114,13 @@ public class AgentDiscovery {
 
                         }
                         //Adding Node: region-grzv agent-ynyt null
-                        PluginEngine.gdb.addNode(le.getParam("src_region"), le.getParam("src_agent"), null);
+
+                        if(PluginEngine.gdb.addNode(le.getParam("src_region"), le.getParam("src_agent"), null)) {
+                            System.out.println("WATCHDOG DISCOVERED: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
+                        }
                         //PluginEngine.gdb.setNodeParams(le.getParam("src_region"), le.getParam("src_agent"), null, de.getParams());
 
-                        System.out.println("WATCHDOG DISCOVERED: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
+
                     } else //agent already exist
                     {
                         if (le.getParam("src_plugin") == null) //update agent
@@ -143,10 +146,12 @@ public class AgentDiscovery {
 
                             MsgEvent dep = refreshCmd(le);
 
-                            PluginEngine.gdb.addNode(le.getParam("src_region"), le.getParam("src_agent"), le.getParam("src_plugin"));
+                            if(PluginEngine.gdb.addNode(le.getParam("src_region"), le.getParam("src_agent"), le.getParam("src_plugin"))) {
+                                System.out.println("WATCHDOG DISCOVERED: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent") + " plugin:" + le.getParam("src_plugin"));
+                            }
                             //PluginEngine.gdb.setNodeParams(le.getParam("src_region"), le.getParam("src_agent"), le.getParam("src_plugin"), dep.getParams());
 
-                            System.out.println("WATCHDOG DISCOVERED: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent") + " plugin:" + le.getParam("src_plugin"));
+
                         } else //plugin exist so update
                         {
                             long oldRunTime = 0l;
