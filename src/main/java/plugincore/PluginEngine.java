@@ -324,8 +324,8 @@ public class PluginEngine {
 
                 gdb = new ControllerDB(); //start graphdb service
                 discoveryMap = new ConcurrentHashMap<String,Long>(); //discovery map
+                logger.info("AgentDiscover Service Started");
                 agentDiscover = new AgentDiscovery(); //discovery service
-
                 logger.info("ControllerDB Service Started");
 
                 isRegionalController = true;

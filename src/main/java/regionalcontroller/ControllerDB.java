@@ -18,13 +18,14 @@ public class ControllerDB {
 
     public ControllerDB()
 	{
-			agentMap = new ConcurrentHashMap<String,AgentNode>();		
+			agentMap = new ConcurrentHashMap<>();
 	}
 	
 	public Boolean isNode(String region, String agent, String plugin)
 	{
         boolean isNode = false;
 		try{
+            logger.info("AGENTMAP = " + agentMap.size());
 		if((region != null) && (agent != null) && (plugin == null)) //agent node
 		{
 			if(agentMap.containsKey(agent))
