@@ -1,4 +1,4 @@
-package ActiveMQ;
+package communication;
 
 import javax.jms.DeliveryMode;
 import javax.jms.Destination;

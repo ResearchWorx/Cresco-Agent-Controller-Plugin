@@ -10,25 +10,25 @@
         </layout>
     </appender>
 
-    <logger name="ActiveMQ.ActiveAgentConsumer" level="debug" additivity="false">
+    <logger name="communication.ActiveAgentConsumer" level="debug" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="ActiveMQ.ActiveBroker" level="info" additivity="false">
+    <logger name="communication.ActiveBroker" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="ActiveMQ.ActiveProducer" level="debug" additivity="false">
+    <logger name="communication.ActiveProducer" level="debug" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="ActiveMQ.ActiveBrokerManager" level="info" additivity="false">
+    <logger name="communication.ActiveBrokerManager" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="ActiveMQ.ActiveRegionConsumer" level="info" additivity="false">
+    <logger name="communication.ActiveRegionConsumer" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="ActiveMQ.BrokeredAgent" level="debug" additivity="false">
+    <logger name="communication.BrokeredAgent" level="debug" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="ActiveMQ.BrokerMonitor" level="info" additivity="false">
+    <logger name="communication.BrokerMonitor" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
 

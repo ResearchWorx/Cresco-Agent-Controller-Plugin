@@ -1,4 +1,4 @@
-package ActiveMQ;
+package communication;
 
 import javax.jms.*;
 
@@ -10,9 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import plugincore.PluginEngine;
 import shared.MsgEvent;
-
-import java.sql.Timestamp;
-import java.util.Date;
 
 public class ActiveRegionConsumer implements Runnable {
 	private Queue RXqueue; 

@@ -1,4 +1,4 @@
-package ActiveMQ;
+package communication;
 
 import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.broker.TransportConnector;

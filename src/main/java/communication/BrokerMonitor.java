@@ -1,4 +1,4 @@
-package ActiveMQ;
+package communication;
 
 import java.net.Inet6Address;
 import java.net.InetAddress;

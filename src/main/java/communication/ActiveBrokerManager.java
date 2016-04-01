@@ -1,4 +1,4 @@
-package ActiveMQ;
+package communication;
 
 import java.util.Map.Entry;
 import java.util.Timer;

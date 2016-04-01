@@ -1,4 +1,4 @@
-package ActiveMQ;
+package communication;
 
 import javax.jms.MessageConsumer;
 import javax.jms.Queue;
@@ -13,9 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import plugincore.PluginEngine;
 import shared.MsgEvent;
-
-import java.util.Date;
-import java.sql.Timestamp;
 
 public class ActiveAgentConsumer implements Runnable {
 	private Queue RXqueue; 
