@@ -13,7 +13,7 @@ import shared.MsgEventType;
 
 public class ControllerDB {
 
-	Map<String,AgentNode> agentMap;
+	private static Map<String,AgentNode> agentMap;
     private static final Logger logger = LoggerFactory.getLogger(ControllerDB.class);
 
     public ControllerDB()
