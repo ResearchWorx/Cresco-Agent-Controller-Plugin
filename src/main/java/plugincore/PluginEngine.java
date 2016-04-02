@@ -344,7 +344,7 @@ public class PluginEngine {
                     }
                 }
                 //global init
-                if(PluginEngine.config.getParam("globalcontroller_ip") != null)
+                if(PluginEngine.config.getParam("globalcontroller_host") != null)
                 {
                     logger.info("Global Controller : Config Found Starting...");
                     globalControllerChannel = new ControllerChannel();
