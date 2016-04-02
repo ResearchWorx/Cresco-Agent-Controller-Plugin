@@ -30,7 +30,11 @@ public class PluginConfig {
         return configObj.getInt("watchdogtimer");
     }
 
-    public String getParam(String param) {
+    public Integer getIntParam(String param) {
+        return Integer.parseInt(configObj.getString(param));
+    }
+
+    public String getStringParam(String param) {
         return configObj.getString(param);
     }
 

@@ -18,7 +18,7 @@ public class WatchDog {
 
     public WatchDog() {
         logger.debug("Watchdog initialized");
-        wdTimer = 1000;
+        wdTimer = PluginEngine.config.getIntParam("watchdogtimer");
         startTS = System.currentTimeMillis();
         timer = new Timer();
         timer.scheduleAtFixedRate(new WatchDogTask(), 500, wdTimer);

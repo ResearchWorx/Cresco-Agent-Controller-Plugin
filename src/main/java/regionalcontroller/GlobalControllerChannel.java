@@ -31,22 +31,22 @@ public class GlobalControllerChannel {
 	
 	public GlobalControllerChannel()
 	{
-		if(PluginEngine.config.getParam("globalcontroller_host") != null)
+		if(PluginEngine.config.getStringParam("globalcontroller_host") != null)
 		{
-			if(PluginEngine.config.getParam("globalcontroller_port") != null)
+			if(PluginEngine.config.getStringParam("globalcontroller_port") != null)
 			{
-				controllerUrl = "http://" + PluginEngine.config.getParam("globalcontroller_host") + ":" + PluginEngine.config.getParam("globalcontroller_port") + "/API";
+				controllerUrl = "http://" + PluginEngine.config.getStringParam("globalcontroller_host") + ":" + PluginEngine.config.getStringParam("globalcontroller_port") + "/API";
 			}
 			else
 			{
-				controllerUrl = "http://" + PluginEngine.config.getParam("globalcontroller_host") + ":32000/API";
+				controllerUrl = "http://" + PluginEngine.config.getStringParam("globalcontroller_host") + ":32000/API";
 			}
-			performanceUrl = "http://" + PluginEngine.config.getParam("globalcontroller_host") + ":32002/API";
+			performanceUrl = "http://" + PluginEngine.config.getStringParam("globalcontroller_host") + ":32002/API";
 			
 			//Create pooling agent
 			startTS = System.currentTimeMillis();
 			timer = new Timer();
-		    timer.scheduleAtFixedRate(new CmdPoolTask(), 500, PluginEngine.config.getWatchDogTimer());
+		    timer.scheduleAtFixedRate(new CmdPoolTask(), 500, PluginEngine.config.getIntParam("watchdogtimer"));
 		}
 		
 	}
