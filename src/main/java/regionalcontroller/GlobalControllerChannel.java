@@ -19,7 +19,7 @@ import plugincore.PluginEngine;
 import shared.MsgEvent;
 import shared.MsgEventType;
 
-public class ControllerChannel {
+public class GlobalControllerChannel {
 
 	private final String USER_AGENT = "Cresco-Agent-Controller-Plugin/0.5.0";
 	private Timer timer;
@@ -29,19 +29,19 @@ public class ControllerChannel {
 	private String controllerUrl;
 	private String performanceUrl;
 	
-	public ControllerChannel()
+	public GlobalControllerChannel()
 	{
-		if(PluginEngine.config.getParam("globalcontroller_ip") != null)
+		if(PluginEngine.config.getParam("globalcontroller_host") != null)
 		{
 			if(PluginEngine.config.getParam("globalcontroller_port") != null)
 			{
-				controllerUrl = "http://" + PluginEngine.config.getParam("globalcontroller_ip") + ":" + PluginEngine.config.getParam("globalcontroller_port") + "/API";
+				controllerUrl = "http://" + PluginEngine.config.getParam("globalcontroller_host") + ":" + PluginEngine.config.getParam("globalcontroller_port") + "/API";
 			}
 			else
 			{
-				controllerUrl = "http://" + PluginEngine.config.getParam("globalcontroller_ip") + ":32000/API";
+				controllerUrl = "http://" + PluginEngine.config.getParam("globalcontroller_host") + ":32000/API";
 			}
-			performanceUrl = "http://" + PluginEngine.config.getParam("globalcontroller_ip") + ":32002/API";
+			performanceUrl = "http://" + PluginEngine.config.getParam("globalcontroller_host") + ":32002/API";
 			
 			//Create pooling agent
 			startTS = System.currentTimeMillis();

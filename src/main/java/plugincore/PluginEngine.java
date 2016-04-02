@@ -13,7 +13,7 @@ import netdiscovery.DiscoveryEngine;
 import netdiscovery.DiscoveryType;
 //import shared.Clogger;
 import regionalcontroller.AgentDiscovery;
-import regionalcontroller.ControllerChannel;
+import regionalcontroller.GlobalControllerChannel;
 import regionalcontroller.ControllerDB;
 import shared.MsgEvent;
 import shared.MsgEventType;
@@ -77,7 +77,7 @@ public class PluginEngine {
     public static AgentDiscovery agentDiscover;
 
     public static boolean hasGlobalController = false;
-    public static ControllerChannel globalControllerChannel;
+    public static GlobalControllerChannel globalControllerChannel;
 
 
     public static boolean isIPv6 = false;
@@ -347,7 +347,7 @@ public class PluginEngine {
                 if(PluginEngine.config.getParam("globalcontroller_host") != null)
                 {
                     logger.info("Global Controller : Config Found Starting...");
-                    globalControllerChannel = new ControllerChannel();
+                    globalControllerChannel = new GlobalControllerChannel();
                     hasGlobalController = globalControllerChannel.getController();
                     if(hasGlobalController)
                     {
