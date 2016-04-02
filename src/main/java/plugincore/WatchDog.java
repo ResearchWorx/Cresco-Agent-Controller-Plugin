@@ -67,10 +67,11 @@ public class WatchDog {
                         isHealthy = false;
                         logger.debug("Broker shutdown detected");
                     }
-                    PluginEngine.gdb.removeNode(PluginEngine.region, PluginEngine.agent, null); //remove self from DB
+
 
                 }
                 if (!isHealthy) {
+                    PluginEngine.gdb.removeNode(PluginEngine.region, PluginEngine.agent, null); //remove self from DB
                     logger.debug("System has become unhealthy, rebooting services");
                     PluginEngine.restartOnShutdown = true;
                     PluginEngine.shutdown();
