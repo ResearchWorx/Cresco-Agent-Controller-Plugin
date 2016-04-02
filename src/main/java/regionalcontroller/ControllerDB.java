@@ -25,7 +25,7 @@ public class ControllerDB {
 	{
         boolean isNode = false;
 		try{
-            logger.info("AGENTMAP = " + agentMap.size() + agentMap);
+            logger.debug("AGENTMAP = " + agentMap.size() + agentMap);
 		if((region != null) && (agent != null) && (plugin == null)) //agent node
 		{
 			if(agentMap.containsKey(agent))
