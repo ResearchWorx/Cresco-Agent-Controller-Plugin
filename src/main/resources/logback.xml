@@ -11,47 +11,47 @@
     </appender>
 
 
-    <logger name="regionalcontroller.ControllerDB" level="info" additivity="false">
+    <logger name="com.researchworx.cresco.controller.regionalcontroller.ControllerDB" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="regionalcontroller.AgentDiscovery" level="info" additivity="false">
+    <logger name="com.researchworx.cresco.controller.regionalcontroller.AgentDiscovery" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="communication.ActiveAgentConsumer" level="info" additivity="false">
+    <logger name="com.researchworx.cresco.controller.communication.ActiveAgentConsumer" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="communication.ActiveBroker" level="info" additivity="false">
+    <logger name="com.researchworx.cresco.controller.communication.ActiveBroker" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="communication.ActiveProducer" level="info" additivity="false">
+    <logger name="com.researchworx.cresco.controller.communication.ActiveProducer" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="communication.ActiveBrokerManager" level="info" additivity="false">
+    <logger name="com.researchworx.cresco.controller.communication.ActiveBrokerManager" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="communication.ActiveRegionConsumer" level="info" additivity="false">
+    <logger name="com.researchworx.cresco.controller.communication.ActiveRegionConsumer" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="communication.BrokeredAgent" level="info" additivity="false">
+    <logger name="com.researchworx.cresco.controller.communication.BrokeredAgent" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="communication.BrokerMonitor" level="info" additivity="false">
+    <logger name="com.researchworx.cresco.controller.communication.BrokerMonitor" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
 
-    <logger name="netdiscovery.DiscoveryClientWorkerIPv6" level="info" additivity="false">
+    <logger name="com.researchworx.cresco.controller.netdiscovery.DiscoveryClientWorkerIPv6" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="netdiscovery.DiscoveryClientIPv6" level="info" additivity="false">
+    <logger name="com.researchworx.cresco.controller.netdiscovery.DiscoveryClientIPv6" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="netdiscovery.DiscoveryClientWorkerIPv4" level="info" additivity="false">
+    <logger name="com.researchworx.cresco.controller.netdiscovery.DiscoveryClientWorkerIPv4" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="netdiscovery.DiscoveryClientIPv4" level="info" additivity="false">
+    <logger name="com.researchworx.cresco.controller.netdiscovery.DiscoveryClientIPv4" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="netdiscovery.DiscoveryEngine" level="info" additivity="false">
+    <logger name="com.researchworx.cresco.controller.netdiscovery.DiscoveryEngine" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
     <logger name="netdiscovery.DiscoveryEngineWorker" level="info" additivity="false">
