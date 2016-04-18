@@ -150,6 +150,17 @@ public class Launcher extends CPlugin {
                 LOG.info("Tearing down services");
             else
                 LOG.info("Shutting down");
+            this.DiscoveryActive = false;
+            this.ConsumerThreadRegionActive = false;
+            this.ConsumerThreadActive = false;
+            this.ActiveBrokerManagerActive = false;
+            if (this.discoveryEngineThread != null) {
+                LOG.trace("Discovery Engine shutting down");
+                DiscoveryEngine.shutdown();
+                this.discoveryEngineThread.join();
+                this.discoveryEngineThread = null;
+                this.isActive = false;
+            }
             if (this.watchDog != null) {
                 this.watchDog.stop();
                 this.watchDog = null;
@@ -158,27 +169,16 @@ public class Launcher extends CPlugin {
                 this.healthWatcher.timer.cancel();
                 this.healthWatcher = null;
             }
-            this.DiscoveryActive = false;
-            if (this.discoveryEngineThread != null) {
-                LOG.trace("Discovery Engine shutting down");
-                DiscoveryEngine.shutdown();
-                this.discoveryEngineThread.join();
-                this.discoveryEngineThread = null;
-                this.isActive = false;
-            }
-            this.ConsumerThreadRegionActive = false;
             if (this.consumerRegionThread != null) {
                 LOG.trace("Region Consumer shutting down");
                 this.consumerRegionThread.join();
                 this.consumerRegionThread = null;
             }
-            this.ConsumerThreadActive = false;
             if (this.consumerAgentThread != null) {
                 LOG.trace("Agent Consumer shutting down");
                 this.consumerAgentThread.join();
                 this.consumerAgentThread = null;
             }
-            this.ActiveBrokerManagerActive = false;
             if (this.activeBrokerManagerThread != null) {
                 LOG.trace("Active Broker Manager shutting down");
                 this.activeBrokerManagerThread.join();
