@@ -20,6 +20,7 @@ public class BrokeredAgent {
 	public BrokeredAgent(Launcher plugin, String activeAddress, String agentPath) {
 		logger.debug("Creating BrokerAgent : " + agentPath + " address: " + activeAddress);
 		System.out.print("Name of Agent to message [q to quit]: ");
+		this.plugin = plugin;
 		this.bm = new BrokerMonitor(plugin, agentPath);
 		this.activeAddress = activeAddress;
 		this.agentPath = agentPath;
