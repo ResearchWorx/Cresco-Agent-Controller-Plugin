@@ -99,13 +99,11 @@ public class MsgRoute implements Runnable {
 
     private MsgEvent getCommandExec() {
         try {
-            System.out.println("getCommandExec: " + rm.getParams());
             String callId = "callId-" + /*PluginEngine.region*/plugin.getRegion() + "_" + /*PluginEngine.agent*/plugin.getAgent() + "_" + /*PluginEngine.plugin*/plugin.getPluginID(); //calculate callID
             if (rm.getParam(callId) != null) { //send message to RPC hash
                 //PluginEngine.rpcMap.put(rm.getParam(callId), rm);
                 plugin.putRPCMap(rm.getParam(callId), rm);
             } else {
-                System.out.println("plugin.execute: " + rm.getParams());
                 //return PluginEngine.commandExec.cmdExec(rm);
                 return plugin.execute(rm);
             }
