@@ -54,11 +54,17 @@
     <logger name="com.researchworx.cresco.controller.netdiscovery.DiscoveryEngine" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="netdiscovery.DiscoveryEngineWorker" level="info" additivity="false">
+    <logger name="com.researchworx.cresco.controller.netdiscovery.DiscoveryEngineWorker" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
 
-    <logger name="plugincore.PluginEngine" level="info" additivity="false">
+    <logger name="com.researchworx.cresco.library.plugin.core.CPlugin" level="info" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
+    <logger name="com.researchworx.cresco.library.plugin.core.CExecutor" level="info" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
+    <logger name="com.researchworx.cresco.controller.core.MsgRoute" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
     <logger name="plugincore.WatchDog" level="info" additivity="false">
