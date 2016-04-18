@@ -1,8 +1,5 @@
 package com.researchworx.cresco.controller.regionalcontroller;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.messaging.RPC;
@@ -10,17 +7,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AgentDiscovery {
-    private Launcher plugin;
-    private Timer cleanUpTimer;
-    private static RPC rpc;
     private static final Logger logger = LoggerFactory.getLogger(AgentDiscovery.class);
+    private Launcher plugin;
+    private static RPC rpc;
 
     public AgentDiscovery(Launcher plugin) throws Exception {
         this.plugin = plugin;
         rpc = new RPC(plugin.getMsgOutQueue(), plugin.getRPCMap(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), null);
-
-        //cleanUpTimer = new Timer();
-        //cleanUpTimer.scheduleAtFixedRate(new DiscoveryCleanUpTask(), 500, PluginEngine.config.getWatchDogTimer() * 3);
     }
 
     public void perfupdate(MsgEvent pe) {
@@ -70,28 +63,18 @@ public class AgentDiscovery {
                     le.setSrc(plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
                     //le.setDst(me.getParam("src_region"),me.getParam("src_agent"),me.getParam("src_plugin"));
                     plugin.sendMsgEvent(le);
-                    //PluginEngine.msgInQueue.offer(le);
-
                 } else if (le.getMsgType() == MsgEvent.Type.WATCHDOG) {
-
                     try {
-
-                        if((le.getParam("src_region") != null) && (le.getParam("src_agent") != null) && (le.getParam("src_plugin")) == null)  { //agent
+                        if ((le.getParam("src_region") != null) && (le.getParam("src_agent") != null) && (le.getParam("src_plugin")) == null) { //agent
                             if (!plugin.getGDB().isNode(le.getParam("src_region"), le.getParam("src_agent"), null)) { //add if it does not exist
                                 plugin.getGDB().addNode(le.getParam("src_region"), le.getParam("src_agent"), null);
                             }
-                        }
-                        else if((le.getParam("src_region") != null) && (le.getParam("src_agent") != null) && (le.getParam("src_plugin")) != null) { //plugin
+                        } else if ((le.getParam("src_region") != null) && (le.getParam("src_agent") != null) && (le.getParam("src_plugin")) != null) { //plugin
                             if (!plugin.getGDB().isNode(le.getParam("src_region"), le.getParam("src_agent"), le.getParam("src_plugin"))) { //add if it does not exist
                                 plugin.getGDB().addNode(le.getParam("src_region"), le.getParam("src_agent"), le.getParam("src_plugin"));
                             }
                         }
-
-
-
-
-                    }
-                    catch(Exception ex) {
+                    } catch (Exception ex) {
 
                     }
                     /*
@@ -236,9 +219,8 @@ public class AgentDiscovery {
         }
     }
 
-    class DiscoveryCleanUpTask extends TimerTask {
+    /*class DiscoveryCleanUpTask extends TimerTask {
         public void run() {
-  	    	/*
   	  	        long timeStamp = System.currentTimeMillis();
   	  	    
   	    	    Iterator it = PluginEngine.agentStatus.entrySet().iterator();
@@ -290,9 +272,8 @@ public class AgentDiscovery {
   	    	        	PluginEngine.agentStatus.remove(region);
   	    	        }
   	    	    }
-  	    	*/
 
             //walk config and clean things up
         }
-    }
+    }*/
 }
