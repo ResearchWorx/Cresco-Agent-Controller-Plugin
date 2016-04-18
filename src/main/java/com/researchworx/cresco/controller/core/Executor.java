@@ -17,31 +17,21 @@ public class Executor extends CExecutor {
 
     @Override
     public MsgEvent processConfig(MsgEvent msg) {
+        logger.info("Processing Config message");
         if (msg.getParam("configtype") == null || msg.getMsgBody() == null) return null;
-
+        logger.debug("Config-type is properly set, as well as message body");
         switch (msg.getParam("configtype")) {
             case "comminit":
+                logger.debug("comminit message type found");
                 mainPlugin.commInit();
                 msg.setParam("set_region", this.plugin.getRegion());
                 msg.setParam("set_agent", this.plugin.getAgent());
                 msg.setParam("is_regional_controller", Boolean.toString(this.mainPlugin.isRegionalController()));
                 msg.setParam("is_active", Boolean.toString(this.plugin.isActive()));
+                logger.debug("Returning communication details to Cresco agent");
                 return msg;
             default:
-                return null;
-        }
-    }
-
-    @Override
-    public MsgEvent processExec(MsgEvent msg) {
-        switch (msg.getParam("cmd")) {
-            case "show_name":
-                msg.setMsgBody(this.plugin.getName());
-                return msg;
-            case "show_version":
-                msg.setMsgBody(this.plugin.getVersion());
-                return msg;
-            default:
+                logger.debug("Unknown configtype found: {}", msg.getParam("configtype"));
                 return null;
         }
     }
