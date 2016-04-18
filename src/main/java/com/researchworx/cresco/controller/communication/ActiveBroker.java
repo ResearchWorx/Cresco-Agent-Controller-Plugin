@@ -60,7 +60,7 @@ public class ActiveBroker {
 	public boolean isHealthy() {
 		boolean isHealthy = false;
 		try  {
-			if(broker != null && broker.isStarted()) {
+			if(broker.isStarted()) {
 				isHealthy = true;
 			}
 		} catch (Exception e) {
