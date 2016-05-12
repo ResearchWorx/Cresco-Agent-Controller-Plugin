@@ -250,6 +250,10 @@ public class DiscoveryEngine implements Runnable {
         private MsgEvent getAgentMsg(MsgEvent rme) {
             MsgEvent me = null;
             try {
+
+                //discovery_secret
+                logger.error(plugin.getConfig().getStringParam("discovery_secret"));
+
                 if (plugin.reachableAgents().size() < 25) {
                     if (rme.getParam("src_region") != null) {
                         if (rme.getParam("src_region").equals("init")) {
