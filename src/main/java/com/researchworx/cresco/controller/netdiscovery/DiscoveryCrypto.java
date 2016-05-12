@@ -9,10 +9,8 @@ import sun.misc.BASE64Encoder;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.UnsupportedEncodingException;
 import java.security.Key;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 /**
@@ -27,36 +25,25 @@ public class DiscoveryCrypto {
     public DiscoveryCrypto() {}
 
 
-    private static String hashString(String message, String algorithm) {
-
-        try {
-            MessageDigest digest = MessageDigest.getInstance(algorithm);
-            byte[] hashedBytes = digest.digest(message.getBytes("UTF-8"));
-
-            return convertByteArrayToHexString(hashedBytes);
-        }
-        catch (Exception ex) {
-            logger.error(ex.getMessage());
-        }
-        return null;
-    }
-
-    private static String convertByteArrayToHexString(byte[] arrayBytes) {
-        StringBuffer stringBuffer = new StringBuffer();
-        for (int i = 0; i < arrayBytes.length; i++) {
-            stringBuffer.append(Integer.toString((arrayBytes[i] & 0xff) + 0x100, 16)
-                    .substring(1));
-        }
-        return stringBuffer.toString();
-    }
-
     private Key generateKeyFromString(final String secKey) throws Exception {
+        String SALT = "MrSaltyManBaby";
+        byte[] keyVal = (SALT + secKey).getBytes("UTF-8");
+        MessageDigest sha = MessageDigest.getInstance("SHA-1");
+        keyVal = sha.digest(keyVal);
+        keyVal = Arrays.copyOf(keyVal, 16); // use only first 128 bit
+        final Key key = new SecretKeySpec(keyVal, ALGORITHM);
+        return key;
+    }
+
+    /*
+    private Key generateKeyFromString2(final String secKey) throws Exception {
         //final String HashKey = hashString(secKey, "SHA-1");
         byte[] keyVal = new BASE64Decoder().decodeBuffer(secKey);
         keyVal = Arrays.copyOf(keyVal, 16);
         final Key key = new SecretKeySpec(keyVal, ALGORITHM);
         return key;
     }
+    */
 
     public String encrypt(final String valueEnc, final String secKey) {
 
