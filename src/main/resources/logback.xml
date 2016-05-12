@@ -51,7 +51,7 @@
     <logger name="com.researchworx.cresco.controller.netdiscovery.DiscoveryClientIPv4" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="com.researchworx.cresco.controller.netdiscovery.DiscoveryEngine" level="info" additivity="false">
+    <logger name="com.researchworx.cresco.controller.netdiscovery.DiscoveryEngine" level="debug" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
     <logger name="com.researchworx.cresco.controller.netdiscovery.DiscoveryEngineWorker" level="info" additivity="false">
