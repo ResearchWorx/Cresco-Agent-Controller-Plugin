@@ -17,7 +17,9 @@ import com.google.gson.Gson;
 public class DiscoveryEngine implements Runnable {
     private Launcher plugin;
     private Gson gson;
+    private DiscoveryCrypto discoveryCrypto;
     private static Map<NetworkInterface, MulticastSocket> workers = new HashMap<>();
+
 
     private static final Logger logger = LoggerFactory.getLogger(DiscoveryEngine.class);
 
@@ -25,6 +27,7 @@ public class DiscoveryEngine implements Runnable {
         logger.trace("Discovery Engine initialized");
         this.plugin = plugin;
         gson = new Gson();
+        discoveryCrypto = new DiscoveryCrypto();
     }
 
     public static void shutdown() {
@@ -39,7 +42,7 @@ public class DiscoveryEngine implements Runnable {
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             while (interfaces.hasMoreElements()) {
                 NetworkInterface networkInterface = interfaces.nextElement();
-                Thread thread = new Thread(new DiscoveryEngineWorker(networkInterface, logger));
+                Thread thread = new Thread(new DiscoveryEngineWorker(networkInterface));
                 thread.start();
             }
             this.plugin.setDiscoveryActive(true);
@@ -58,16 +61,13 @@ public class DiscoveryEngine implements Runnable {
 	}*/
 
     class DiscoveryEngineWorker implements Runnable {
-        //private final Logger logger = LoggerFactory.getLogger(DiscoveryEngine.class);
+        private final Logger logger = LoggerFactory.getLogger(DiscoveryEngineWorker.class);
+
 
         private NetworkInterface networkInterface;
         private MulticastSocket socket;
-        private Logger logger;
 
-        public DiscoveryEngineWorker(NetworkInterface networkInterface, Logger logger) {
-            this.networkInterface = networkInterface;
-            this.logger = logger;
-        }
+        public DiscoveryEngineWorker(NetworkInterface networkInterface) { this.networkInterface = networkInterface; }
 
         public void shutdown() {
             socket.close();
@@ -253,10 +253,8 @@ public class DiscoveryEngine implements Runnable {
             MsgEvent me = null;
             try {
 
-                //discovery_secret
-                logger.error(plugin.getConfig().getStringParam("discovery_secret"));
-
-                if (plugin.reachableAgents().size() < 25) {
+                //determine if we should respond to request
+                if ((plugin.reachableAgents().size() < 25)  && (validateMsgEvent(rme))) {
                     if (rme.getParam("src_region") != null) {
                         if (rme.getParam("src_region").equals("init")) {
                             //System.out.println(getClass().getName() + "1 " + Thread.currentThread().getId());
@@ -304,6 +302,23 @@ public class DiscoveryEngine implements Runnable {
                 logger.error("{}", ex.getMessage());
             }
             return me;
+        }
+
+        private boolean validateMsgEvent(MsgEvent rme) {
+            boolean isValidated = false;
+            try {
+                String discoverySecret = plugin.getConfig().getStringParam("discovery_secret");
+                String discoveryValidator = rme.getParam("discovery_validator");
+                String decryptedString = discoveryCrypto.decrypt(discoveryValidator,discoverySecret);
+                if(decryptedString.equals("DISCOVERY_MESSAGE_VERIFIED")) {
+                    isValidated = true;
+                }
+            }
+            catch(Exception ex) {
+                logger.error(ex.getMessage());
+            }
+
+            return isValidated;
         }
 
     }
