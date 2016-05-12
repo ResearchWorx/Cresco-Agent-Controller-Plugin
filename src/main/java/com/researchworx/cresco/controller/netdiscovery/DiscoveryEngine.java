@@ -311,6 +311,8 @@ public class DiscoveryEngine implements Runnable {
         private boolean validateMsgEvent(MsgEvent rme) {
             boolean isValidated = false;
             try {
+
+                System.out.println(rme.getParams());
                 String verifyMessage = "DISCOVERY_MESSAGE_VERIFIED";
                 String discoverySecret = plugin.getConfig().getStringParam("discovery_secret");
                 String discoveryValidator = rme.getParam("discovery_validator");
