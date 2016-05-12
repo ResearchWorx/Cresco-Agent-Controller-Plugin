@@ -35,6 +35,7 @@ public class DiscoveryClientWorkerIPv6 {
     public DiscoveryType disType;
     private boolean timerActive = false;
     private List<MsgEvent> discoveredList;
+    private DiscoveryCrypto discoveryCrypto;
 
 
     public DiscoveryClientWorkerIPv6(Launcher plugin, DiscoveryType disType, int discoveryTimeout, String multiCastNetwork) {
@@ -45,7 +46,7 @@ public class DiscoveryClientWorkerIPv6 {
         this.discoveryTimeout = discoveryTimeout;
         this.multiCastNetwork = multiCastNetwork;
         this.disType = disType;
-
+        discoveryCrypto = new DiscoveryCrypto();
     }
 
     private class StopListnerTask extends TimerTask {
@@ -147,6 +148,10 @@ public class DiscoveryClientWorkerIPv6 {
                                 sme.setParam("broadcast_ip", multiCastNetwork);
                                 sme.setParam("src_region", this.plugin.getRegion());
                                 sme.setParam("src_agent", this.plugin.getAgent());
+
+                                //set crypto message for discovery
+                                sme.setParam("discovery_secret",generateValidateMessage());
+
                                 if (disType == DiscoveryType.AGENT) {
                                     sme.setParam("discovery_type", DiscoveryType.AGENT.name());
                                 } else if (disType == DiscoveryType.REGION) {
@@ -214,5 +219,20 @@ public class DiscoveryClientWorkerIPv6 {
             logger.error("while not closed: " + ex.getMessage());
         }
         return discoveredList;
+    }
+
+    private String generateValidateMessage() {
+        String encryptedString = null;
+        try {
+            String verifyMessage = "DISCOVERY_MESSAGE_VERIFIED";
+            String discoverySecret = plugin.getConfig().getStringParam("discovery_secret");
+            encryptedString = discoveryCrypto.encrypt(verifyMessage,discoverySecret);
+
+        }
+        catch(Exception ex) {
+            logger.error(ex.getMessage());
+        }
+
+        return encryptedString;
     }
 }

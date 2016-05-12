@@ -16,6 +16,7 @@ public class DiscoveryCrypto {
 
     private static final String ALGORITHM = "AES";
 
+    public DiscoveryCrypto() {}
 
     private Key generateKeyFromString(final String secKey) throws Exception {
         final byte[] keyVal = new BASE64Decoder().decodeBuffer(secKey);

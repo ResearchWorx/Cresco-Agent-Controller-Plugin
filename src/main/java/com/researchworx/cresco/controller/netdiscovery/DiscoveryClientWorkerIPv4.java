@@ -23,6 +23,7 @@ class DiscoveryClientWorkerIPv4 {
     private DiscoveryType disType;
     private boolean timerActive = false;
     private List<MsgEvent> discoveredList;
+    private DiscoveryCrypto discoveryCrypto;
 
     DiscoveryClientWorkerIPv4(Launcher plugin, DiscoveryType disType, int discoveryTimeout, String broadCastNetwork) {
         this.plugin = plugin;
@@ -30,6 +31,7 @@ class DiscoveryClientWorkerIPv4 {
         this.discoveryTimeout = discoveryTimeout;
         this.broadCastNetwork = broadCastNetwork;
         this.disType = disType;
+        discoveryCrypto = new DiscoveryCrypto();
     }
 
     private class StopListenerTask extends TimerTask {
@@ -114,6 +116,11 @@ class DiscoveryClientWorkerIPv4 {
                         sme.setParam("broadcast_ip", broadCastNetwork);
                         sme.setParam("src_region", this.plugin.getRegion());
                         sme.setParam("src_agent", this.plugin.getAgent());
+
+                        //set crypto message for discovery
+                        sme.setParam("discovery_secret",generateValidateMessage());
+
+
                         if (disType == DiscoveryType.AGENT || disType == DiscoveryType.REGION || disType == DiscoveryType.GLOBAL) {
                             logger.trace("Discovery Type = {}", disType.name());
                             sme.setParam("discovery_type", disType.name());
@@ -167,5 +174,20 @@ class DiscoveryClientWorkerIPv4 {
             logger.error("while not closed: {}", ex.getMessage());
         }
         return discoveredList;
+    }
+
+    private String generateValidateMessage() {
+        String encryptedString = null;
+        try {
+            String verifyMessage = "DISCOVERY_MESSAGE_VERIFIED";
+            String discoverySecret = plugin.getConfig().getStringParam("discovery_secret");
+            encryptedString = discoveryCrypto.encrypt(verifyMessage,discoverySecret);
+
+        }
+        catch(Exception ex) {
+            logger.error(ex.getMessage());
+        }
+
+        return encryptedString;
     }
 }
