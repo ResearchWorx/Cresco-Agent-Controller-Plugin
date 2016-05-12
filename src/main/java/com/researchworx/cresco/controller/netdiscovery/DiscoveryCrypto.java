@@ -13,6 +13,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.Key;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 
 /**
  * Created by cody on 5/12/16.
@@ -50,8 +51,9 @@ public class DiscoveryCrypto {
     }
 
     private Key generateKeyFromString(final String secKey) throws Exception {
-        final String HashKey = hashString(secKey, "SHA-1");
-        final byte[] keyVal = new BASE64Decoder().decodeBuffer(HashKey);
+        //final String HashKey = hashString(secKey, "SHA-1");
+        byte[] keyVal = new BASE64Decoder().decodeBuffer(secKey);
+        keyVal = Arrays.copyOf(keyVal, 16);
         final Key key = new SecretKeySpec(keyVal, ALGORITHM);
         return key;
     }
