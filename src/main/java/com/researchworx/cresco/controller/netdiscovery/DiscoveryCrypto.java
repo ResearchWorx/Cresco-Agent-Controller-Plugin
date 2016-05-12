@@ -2,6 +2,8 @@ package com.researchworx.cresco.controller.netdiscovery;
 
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
 
@@ -13,6 +15,8 @@ import java.security.Key;
  * Created by cody on 5/12/16.
  */
 public class DiscoveryCrypto {
+
+    private static final Logger logger = LoggerFactory.getLogger(DiscoveryCrypto.class);
 
     private static final String ALGORITHM = "AES";
 
@@ -35,7 +39,8 @@ public class DiscoveryCrypto {
             final byte[] encValue = c.doFinal(valueEnc.getBytes());
             encryptedValue = new BASE64Encoder().encode(encValue);
         } catch(Exception ex) {
-            System.out.println("The Exception is=" + ex);
+            logger.error(ex.getMessage());
+            ex.printStackTrace();
         }
 
         return encryptedValue;
@@ -54,7 +59,8 @@ public class DiscoveryCrypto {
             final byte[] decValue = c.doFinal(decorVal);
             decryptedValue = new String(decValue);
         } catch(Exception ex) {
-            System.out.println("The Exception is=" + ex);
+            logger.error(ex.getMessage());
+            ex.printStackTrace();
         }
 
         return decryptedValue;
