@@ -42,6 +42,7 @@ public class ActiveBroker {
 				connector = new TransportConnector();
 
 				connector.setUri(new URI("tcp://[::]:32010"));
+
 				broker.addConnector(connector);
 
 				broker.start();
@@ -109,7 +110,8 @@ public class ActiveBroker {
 		try {
 			bridge = broker.addNetworkConnector(new URI("static:tcp://" + URI + ":32010"));
 			//RandomString rs = new RandomString(5);
-			
+			bridge.setUserName("cody");
+            bridge.setPassword("cody");
 			bridge.setName(java.util.UUID.randomUUID().toString());
 			bridge.setDuplex(true);
 			bridge.setDynamicOnly(true);
