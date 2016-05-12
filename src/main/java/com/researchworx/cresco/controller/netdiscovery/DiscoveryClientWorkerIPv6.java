@@ -150,7 +150,7 @@ public class DiscoveryClientWorkerIPv6 {
                                 sme.setParam("src_agent", this.plugin.getAgent());
 
                                 //set crypto message for discovery
-                                sme.setParam("discovery_secret",generateValidateMessage());
+                                sme.setParam("discovery_validator",generateValidateMessage());
 
                                 if (disType == DiscoveryType.AGENT) {
                                     sme.setParam("discovery_type", DiscoveryType.AGENT.name());
