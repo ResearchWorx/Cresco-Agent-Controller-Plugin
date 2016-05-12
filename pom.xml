@@ -115,25 +115,6 @@
 				</executions>
 			</plugin>
 		</plugins>
-		<finalName>${project.artifactId}</finalName>
+		<finalName>${project.artifactId}-${project.version}</finalName>
 	</build>
-
-	<repositories>
-		<repository>
-			<id>Cresco-Github</id>
-			<name>Cresco's Git-based repo</name>
-			<url>https://github.com/ResearchWorx/maven-repo/raw/master</url>
-			<layout>default</layout>
-			<releases>
-				<enabled>true</enabled>
-				<updatePolicy>always</updatePolicy>
-				<checksumPolicy>warn</checksumPolicy>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-				<updatePolicy>always</updatePolicy>
-				<checksumPolicy>fail</checksumPolicy>
-			</snapshots>
-		</repository>
-	</repositories>
 </project>
