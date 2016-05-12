@@ -131,7 +131,7 @@ public class Launcher extends CPlugin {
     }
 
     public void start() {
-        this.config = new ControllerConfig(this.config.getPluginConfig());
+        this.config = new ControllerConfig(this.config.getConfig());
     }
 
     @Override
