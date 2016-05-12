@@ -39,7 +39,7 @@ public class DiscoveryEngine implements Runnable {
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             while (interfaces.hasMoreElements()) {
                 NetworkInterface networkInterface = interfaces.nextElement();
-                Thread thread = new Thread(new DiscoveryEngineWorker(networkInterface));
+                Thread thread = new Thread(new DiscoveryEngineWorker(networkInterface, logger));
                 thread.start();
             }
             this.plugin.setDiscoveryActive(true);
@@ -58,13 +58,15 @@ public class DiscoveryEngine implements Runnable {
 	}*/
 
     class DiscoveryEngineWorker implements Runnable {
-        private final Logger logger = LoggerFactory.getLogger(DiscoveryEngine.class);
+        //private final Logger logger = LoggerFactory.getLogger(DiscoveryEngine.class);
 
         private NetworkInterface networkInterface;
         private MulticastSocket socket;
+        private Logger logger;
 
-        public DiscoveryEngineWorker(NetworkInterface networkInterface) {
+        public DiscoveryEngineWorker(NetworkInterface networkInterface, Logger logger) {
             this.networkInterface = networkInterface;
+            this.logger = logger;
         }
 
         public void shutdown() {
