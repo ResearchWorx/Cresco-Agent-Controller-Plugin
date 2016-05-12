@@ -9,7 +9,10 @@ import sun.misc.BASE64Encoder;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.UnsupportedEncodingException;
 import java.security.Key;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Created by cody on 5/12/16.
@@ -22,8 +25,33 @@ public class DiscoveryCrypto {
 
     public DiscoveryCrypto() {}
 
+
+    private static String hashString(String message, String algorithm) {
+
+        try {
+            MessageDigest digest = MessageDigest.getInstance(algorithm);
+            byte[] hashedBytes = digest.digest(message.getBytes("UTF-8"));
+
+            return convertByteArrayToHexString(hashedBytes);
+        }
+        catch (Exception ex) {
+            logger.error(ex.getMessage());
+        }
+        return null;
+    }
+
+    private static String convertByteArrayToHexString(byte[] arrayBytes) {
+        StringBuffer stringBuffer = new StringBuffer();
+        for (int i = 0; i < arrayBytes.length; i++) {
+            stringBuffer.append(Integer.toString((arrayBytes[i] & 0xff) + 0x100, 16)
+                    .substring(1));
+        }
+        return stringBuffer.toString();
+    }
+
     private Key generateKeyFromString(final String secKey) throws Exception {
-        final byte[] keyVal = new BASE64Decoder().decodeBuffer(secKey);
+        final String HashKey = hashString(secKey, "SHA-1");
+        final byte[] keyVal = new BASE64Decoder().decodeBuffer(HashKey);
         final Key key = new SecretKeySpec(keyVal, ALGORITHM);
         return key;
     }
