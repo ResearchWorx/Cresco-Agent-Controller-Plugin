@@ -11,9 +11,9 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class ControllerConfig extends Config {
-    public ControllerConfig(String configFile) throws ConfigurationException {
-        super(configFile);
-    }
+    //public ControllerConfig(String configFile) throws ConfigurationException {
+    //    super(configFile);
+    //}
 
     public ControllerConfig (SubnodeConfiguration config) {
         super(config);
@@ -45,7 +45,7 @@ public class ControllerConfig extends Config {
 
     public Map<String, String> getPluginConfigObject() {
         final Map<String, String> result = new TreeMap<>();
-        final Iterator it = this.agentConfObj.getKeys();
+        final Iterator it = this.confObj.getKeys();
         while (it.hasNext()) {
             final Object key = it.next();
             final String value = getStringParam(key.toString());
@@ -57,7 +57,7 @@ public class ControllerConfig extends Config {
     public String getPluginConfigString() {
         //final Map<String,String> result=new TreeMap<String,String>();
         StringBuilder sb = new StringBuilder();
-        final Iterator it = this.agentConfObj.getKeys();
+        final Iterator it = this.confObj.getKeys();
         while (it.hasNext()) {
             final Object key = it.next();
             final String value = getStringParam(key.toString());
