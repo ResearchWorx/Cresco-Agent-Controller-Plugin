@@ -43,7 +43,7 @@ public class DiscoveryEngine implements Runnable {
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             while (interfaces.hasMoreElements()) {
                 NetworkInterface networkInterface = interfaces.nextElement();
-                Thread thread = new Thread(new DiscoveryEngineWorker(networkInterface));
+                Thread thread = new Thread(new DiscoveryEngineWorker(networkInterface, plugin));
                 thread.start();
             }
             this.plugin.setDiscoveryActive(true);
@@ -67,10 +67,11 @@ public class DiscoveryEngine implements Runnable {
 
         private NetworkInterface networkInterface;
         private MulticastSocket socket;
+        private Launcher plugin;
 
-        public DiscoveryEngineWorker(NetworkInterface networkInterface) {
+        public DiscoveryEngineWorker(NetworkInterface networkInterface, Launcher plugin) {
             this.networkInterface = networkInterface;
-
+            this.plugin = plugin;
         }
 
         public void shutdown() {
@@ -310,24 +311,29 @@ public class DiscoveryEngine implements Runnable {
 
         private String validateMsgEvent(MsgEvent rme) {
             String validatedAuthenication = null;
+            String groupName = null;
             try {
                 String discoverySecret = null;
                 if (rme.getParam("discovery_type").equals(DiscoveryType.AGENT.name())) {
                     discoverySecret = plugin.getConfig().getStringParam("discovery_secret_agent");
+                    groupName = "agent";
                 } else if (rme.getParam("discovery_type").equals(DiscoveryType.REGION.name())) {
                     discoverySecret = plugin.getConfig().getStringParam("discovery_secret_region");
+                    groupName = "region";
                 } else if (rme.getParam("discovery_type").equals(DiscoveryType.GLOBAL.name())) {
                     discoverySecret = plugin.getConfig().getStringParam("discovery_secret_global");
+                    groupName = "global";
                 }
 
                 String verifyMessage = "DISCOVERY_MESSAGE_VERIFIED";
                 String discoveryValidator = rme.getParam("discovery_validator");
                 String decryptedString = discoveryCrypto.decrypt(discoveryValidator,discoverySecret);
                 if(decryptedString.equals(verifyMessage)) {
+                    //plugin.brokerUserNameAgent
                     //isValidated = true;
                     //String verifyMessage = "DISCOVERY_MESSAGE_VERIFIED";
                     //encryptedString = discoveryCrypto.encrypt(verifyMessage,discoverySecret);
-                    validatedAuthenication = "test";
+                    validatedAuthenication = discoveryCrypto.encrypt(plugin.brokerUserNameAgent + "," + plugin.brokerPasswordAgent + "," + groupName,discoverySecret);
                 }
             }
             catch(Exception ex) {
