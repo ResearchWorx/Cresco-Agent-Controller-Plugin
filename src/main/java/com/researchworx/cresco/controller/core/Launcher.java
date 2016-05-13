@@ -1,10 +1,7 @@
 package com.researchworx.cresco.controller.core;
 
 import com.researchworx.cresco.controller.communication.*;
-import com.researchworx.cresco.controller.netdiscovery.DiscoveryClientIPv4;
-import com.researchworx.cresco.controller.netdiscovery.DiscoveryClientIPv6;
-import com.researchworx.cresco.controller.netdiscovery.DiscoveryEngine;
-import com.researchworx.cresco.controller.netdiscovery.DiscoveryType;
+import com.researchworx.cresco.controller.netdiscovery.*;
 import com.researchworx.cresco.controller.regionalcontroller.AgentDiscovery;
 import com.researchworx.cresco.controller.regionalcontroller.ControllerDB;
 import com.researchworx.cresco.controller.regionalcontroller.GlobalControllerChannel;
@@ -351,6 +348,8 @@ public class Launcher extends CPlugin {
                 //determine least loaded broker
                 //need to use additional metrics to determine best fit broker
                 String cbrokerAddress = null;
+                String cbrokerValidatedAuthenication = null;
+
                 String cRegion = null;
                 int brokerCount = -1;
                 for (MsgEvent bm : discoveryList) {
@@ -359,10 +358,18 @@ public class Launcher extends CPlugin {
                     if (brokerCount < tmpBrokerCount) {
                         System.out.println("commInit {}" + bm.getParams().toString());
                         cbrokerAddress = bm.getParam("dst_ip");
+                        cbrokerValidatedAuthenication = bm.getParam("validated_authenication");
                         cRegion = bm.getParam("src_region");
                     }
                 }
-                if (cbrokerAddress != null) {
+                if ((cbrokerAddress != null) && (cbrokerValidatedAuthenication != null)) {
+
+                    //set agent broker auth
+                    String[] tmpAuth = cbrokerValidatedAuthenication.split(",");
+                    this.brokerUserNameAgent = tmpAuth[0];
+                    this.brokerPasswordAgent = tmpAuth[1];
+
+                    //set broker ip
                     InetAddress remoteAddress = InetAddress.getByName(cbrokerAddress);
                     if (remoteAddress instanceof Inet6Address) {
                         cbrokerAddress = "[" + cbrokerAddress + "]";
@@ -373,6 +380,7 @@ public class Launcher extends CPlugin {
                         //logger.warn("Agent region changed from :" + oldRegion + " to " + region);
                     }
                     this.brokerAddressAgent = cbrokerAddress;
+
                     this.region = cRegion;
                     LOG.info("Assigned regionid=" + this.region);
                     this.agentpath = this.region + "_" + this.agent;

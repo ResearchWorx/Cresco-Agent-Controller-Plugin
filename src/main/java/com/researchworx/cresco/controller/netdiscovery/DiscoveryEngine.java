@@ -259,8 +259,13 @@ public class DiscoveryEngine implements Runnable {
             try {
 
                 //determine if we should respond to request
-                if ((plugin.reachableAgents().size() < 25)  && (validateMsgEvent(rme) != null)) {
-                    if (rme.getParam("src_region") != null) {
+                //String validateMsgEvent(rme)
+                 //       validatedAuthenication
+                if (plugin.reachableAgents().size() < 25)  {
+
+                    String validatedAuthenication = validateMsgEvent(rme); //create auth string
+
+                    if ((rme.getParam("src_region") != null) && (validatedAuthenication != null)) {
                         if (rme.getParam("src_region").equals("init")) {
                             //System.out.println(getClass().getName() + "1 " + Thread.currentThread().getId());
                             me = new MsgEvent(MsgEvent.Type.DISCOVER, plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), "Broadcast discovery response.");
@@ -272,6 +277,7 @@ public class DiscoveryEngine implements Runnable {
                             me.setParam("dst_port", rme.getParam("src_port"));
                             me.setParam("agent_count", String.valueOf(plugin.reachableAgents().size()));
                             me.setParam("discovery_type", DiscoveryType.AGENT.name());
+                            me.setParam("validated_authenication",validatedAuthenication);
                             logger.debug("getAgentMsg = " + me.getParams().toString());
                         }
                     } else {
