@@ -1,10 +1,13 @@
 package com.researchworx.cresco.controller.communication;
 
+import org.apache.activemq.broker.BrokerPlugin;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.broker.TransportConnector;
 import org.apache.activemq.broker.region.policy.PolicyEntry;
 import org.apache.activemq.broker.region.policy.PolicyMap;
 import org.apache.activemq.network.NetworkConnector;
+import org.apache.activemq.security.AuthenticationUser;
+import org.apache.activemq.security.SimpleAuthenticationPlugin;
 import org.apache.activemq.util.ServiceStopper;
 
 import org.slf4j.Logger;
@@ -14,6 +17,8 @@ import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ActiveBroker {
 	private static final Logger logger = LoggerFactory.getLogger(ActiveBroker.class);
@@ -38,6 +43,14 @@ public class ActiveBroker {
 				broker.setSchedulePeriodForDestinationPurge(2500);
 				broker.setDestinationPolicy(map);
 				broker.setUseJmx(false);
+
+                //set auth username
+                SimpleAuthenticationPlugin simpleAuthenticationPlugin = new SimpleAuthenticationPlugin();
+                simpleAuthenticationPlugin.setAnonymousAccessAllowed(false);
+                AuthenticationUser loginuser = new AuthenticationUser("cody","cody","users,admins");
+                List<AuthenticationUser> users = new ArrayList<AuthenticationUser>();
+                simpleAuthenticationPlugin.setUsers(users);
+                broker.setPlugins(new BrokerPlugin[]{simpleAuthenticationPlugin });
 
 				connector = new TransportConnector();
 
