@@ -51,14 +51,23 @@ public class ActiveBroker {
                 DefaultAuthorizationMap authMap = new DefaultAuthorizationMap();
                 List<DestinationMapEntry> authEntries = new ArrayList();
 
-                AuthorizationEntry authEntry = new AuthorizationEntry();
-                authEntry.setGroupClass("org.apache.activemq.jaas.GroupPrincipal");
-                authEntry.setTopic(">");
-                authEntry.setQueue(">");
-                authEntry.setRead("agents");
-                authEntry.setWrite("agents");
-                authEntry.setAdmin("agents");
-                authEntries.add(authEntry);
+                AuthorizationEntry authEntryTopic = new AuthorizationEntry();
+                authEntryTopic.setGroupClass("org.apache.activemq.jaas.GroupPrincipal");
+                authEntryTopic.setTopic(">");
+                authEntryTopic.setQueue(">");
+                authEntryTopic.setRead("agents");
+                authEntryTopic.setWrite("agents");
+                authEntryTopic.setAdmin("agents");
+                authEntries.add(authEntryTopic);
+
+                AuthorizationEntry authEntryQueue = new AuthorizationEntry();
+                authEntryQueue.setGroupClass("org.apache.activemq.jaas.GroupPrincipal");
+                authEntryQueue.setTopic(">");
+                authEntryQueue.setQueue(">");
+                authEntryQueue.setRead("agents");
+                authEntryQueue.setWrite("agents");
+                authEntryQueue.setAdmin("agents");
+                authEntries.add(authEntryQueue);
 
                 authMap.setAuthorizationEntries(authEntries);
                 authorizationPlugin.setMap(authMap);
