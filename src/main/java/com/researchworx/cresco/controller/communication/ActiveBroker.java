@@ -5,6 +5,7 @@ import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.broker.TransportConnector;
 import org.apache.activemq.broker.region.policy.PolicyEntry;
 import org.apache.activemq.broker.region.policy.PolicyMap;
+import org.apache.activemq.filter.DestinationMapEntry;
 import org.apache.activemq.network.NetworkConnector;
 import org.apache.activemq.security.*;
 import org.apache.activemq.util.ServiceStopper;
@@ -46,7 +47,7 @@ public class ActiveBroker {
 				broker.setUseJmx(false);
 
                 //auth
-                /*
+                AuthorizationPlugin authorizationPlugin = new AuthorizationPlugin();
                 DefaultAuthorizationMap authMap = new DefaultAuthorizationMap();
                 List<DestinationMapEntry> authEntries = new ArrayList();
 
@@ -58,7 +59,8 @@ public class ActiveBroker {
                 authEntries.add(authEntry);
 
                 authMap.setAuthorizationEntries(authEntries);
-                */
+                authorizationPlugin.setMap(authMap);
+
 
                 logger.info("PREAUTH0");
 
@@ -84,7 +86,7 @@ public class ActiveBroker {
                 //simpleAuthenticationPlugin
 
                 logger.info("PREAUTH1");
-                broker.setPlugins(new BrokerPlugin[]{simpleAuthenticationPlugin});
+                broker.setPlugins(new BrokerPlugin[]{authorizationPlugin,simpleAuthenticationPlugin});
                 logger.info("PREAUTH2");
 
                 connector = new TransportConnector();
