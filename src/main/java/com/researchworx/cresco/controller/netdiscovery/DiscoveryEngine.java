@@ -311,10 +311,16 @@ public class DiscoveryEngine implements Runnable {
         private boolean validateMsgEvent(MsgEvent rme) {
             boolean isValidated = false;
             try {
+                String discoverySecret = null;
+                if (rme.getParam("discovery_type").equals(DiscoveryType.AGENT.name())) {
+                    discoverySecret = plugin.getConfig().getStringParam("discovery_secret_agent");
+                } else if (rme.getParam("discovery_type").equals(DiscoveryType.REGION.name())) {
+                    discoverySecret = plugin.getConfig().getStringParam("discovery_secret_region");
+                } else if (rme.getParam("discovery_type").equals(DiscoveryType.GLOBAL.name())) {
+                    discoverySecret = plugin.getConfig().getStringParam("discovery_secret_global");
+                }
 
-                System.out.println(rme.getParams());
                 String verifyMessage = "DISCOVERY_MESSAGE_VERIFIED";
-                String discoverySecret = plugin.getConfig().getStringParam("discovery_secret");
                 String discoveryValidator = rme.getParam("discovery_validator");
                 String decryptedString = discoveryCrypto.decrypt(discoveryValidator,discoverySecret);
                 if(decryptedString.equals(verifyMessage)) {

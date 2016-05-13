@@ -150,7 +150,6 @@ public class DiscoveryClientWorkerIPv6 {
                                 sme.setParam("src_agent", this.plugin.getAgent());
 
                                 //set crypto message for discovery
-                                sme.setParam("discovery_validator",generateValidateMessage());
 
                                 if (disType == DiscoveryType.AGENT) {
                                     sme.setParam("discovery_type", DiscoveryType.AGENT.name());
@@ -161,6 +160,9 @@ public class DiscoveryClientWorkerIPv6 {
                                 } else {
                                     sme = null;
                                 }
+
+                                sme.setParam("discovery_validator",generateValidateMessage(sme));
+
                                 //me.setParam("clientip", packet.getAddress().getHostAddress());
 
                                 //convert java object to JSON format,
@@ -221,11 +223,20 @@ public class DiscoveryClientWorkerIPv6 {
         return discoveredList;
     }
 
-    private String generateValidateMessage() {
+    private String generateValidateMessage(MsgEvent sme) {
         String encryptedString = null;
         try {
+
+            String discoverySecret = null;
+            if (sme.getParam("discovery_type").equals(DiscoveryType.AGENT.name())) {
+                discoverySecret = plugin.getConfig().getStringParam("discovery_secret_agent");
+            } else if (sme.getParam("discovery_type").equals(DiscoveryType.REGION.name())) {
+                discoverySecret = plugin.getConfig().getStringParam("discovery_secret_region");
+            } else if (sme.getParam("discovery_type").equals(DiscoveryType.GLOBAL.name())) {
+                discoverySecret = plugin.getConfig().getStringParam("discovery_secret_global");
+            }
+
             String verifyMessage = "DISCOVERY_MESSAGE_VERIFIED";
-            String discoverySecret = plugin.getConfig().getStringParam("discovery_secret");
             encryptedString = discoveryCrypto.encrypt(verifyMessage,discoverySecret);
 
         }
