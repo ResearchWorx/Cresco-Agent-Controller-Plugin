@@ -65,6 +65,8 @@ class DiscoveryClientWorkerIPv4 {
                     me.setParam("dst_region", me.getParam("src_region"));
                     me.setParam("dst_agent", me.getParam("src_agent"));
 
+                    me.setParam("validated_authenication",ValidatedAuthenication(me));
+
                     discoveredList.add(me);
                 }
             } catch (Exception ex) {
@@ -175,6 +177,29 @@ class DiscoveryClientWorkerIPv4 {
             logger.error("while not closed: {}", ex.getMessage());
         }
         return discoveredList;
+    }
+
+
+    private String ValidatedAuthenication(MsgEvent rme) {
+        String decryptedString = null;
+        try {
+
+            String discoverySecret = null;
+            if (rme.getParam("discovery_type").equals(DiscoveryType.AGENT.name())) {
+                discoverySecret = plugin.getConfig().getStringParam("discovery_secret_agent");
+            } else if (rme.getParam("discovery_type").equals(DiscoveryType.REGION.name())) {
+                discoverySecret = plugin.getConfig().getStringParam("discovery_secret_region");
+            } else if (rme.getParam("discovery_type").equals(DiscoveryType.GLOBAL.name())) {
+                discoverySecret = plugin.getConfig().getStringParam("discovery_secret_global");
+            }
+            decryptedString = discoveryCrypto.decrypt(rme.getParam("validated_authenication"),discoverySecret);
+
+        }
+        catch(Exception ex) {
+            logger.error(ex.getMessage());
+        }
+
+        return decryptedString;
     }
 
     private String generateValidateMessage(MsgEvent sme) {
