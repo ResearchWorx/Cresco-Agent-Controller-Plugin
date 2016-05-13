@@ -17,6 +17,8 @@ public class ActiveProducer {
 	private Launcher plugin;
 	private String URI;
 	private Timer timer;
+	private String brokerUserNameAgent;
+	private String brokerPasswordAgent;
 
 	private static final Logger logger = LoggerFactory.getLogger(ActiveProducer.class);
 
@@ -37,8 +39,10 @@ public class ActiveProducer {
 		}
 	}
 	
-	public ActiveProducer(Launcher plugin, String URI)  {
+	public ActiveProducer(Launcher plugin, String URI,String brokerUserNameAgent, String brokerPasswordAgent)  {
 		this.plugin = plugin;
+        this.brokerUserNameAgent = brokerUserNameAgent;
+        this.brokerPasswordAgent = brokerPasswordAgent;
 		try {
 			producerWorkers = new ConcurrentHashMap<>();
 			this.URI = URI;
@@ -90,7 +94,7 @@ public class ActiveProducer {
 			} else {
 				if (this.plugin.isReachableAgent(dstPath)) {
 					System.out.println("Creating new ActiveProducerWorker [" + dstPath + "]");
-					apw = new ActiveProducerWorker(dstPath, URI);
+					apw = new ActiveProducerWorker(dstPath, URI, brokerUserNameAgent, brokerPasswordAgent);
 					producerWorkers.put(dstPath, apw);
 				} else {
 					System.out.println(dstPath + " is unreachable...");
