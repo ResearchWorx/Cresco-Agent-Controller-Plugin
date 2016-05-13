@@ -55,7 +55,8 @@ public class ActiveBroker {
                 simpleAuthenticationPlugin.setAnonymousAccessAllowed(false);
                 logger.info("PREAUTH0.1");
 
-                AuthenticationUser autogenUser = new AuthenticationUser(brokerUserNameAgent,brokerPasswordAgent,"users,admins");
+                //AuthenticationUser autogenUser = new AuthenticationUser(brokerUserNameAgent,brokerPasswordAgent,"users,admins");
+                AuthenticationUser autogenUser = new AuthenticationUser(brokerUserNameAgent,brokerPasswordAgent,"");
                 logger.info("PREAUTH0.2");
 
                 List<AuthenticationUser> users = new ArrayList<>();
@@ -65,7 +66,7 @@ public class ActiveBroker {
                 logger.info("PREAUTH0.4");
 
                 simpleAuthenticationPlugin.setUsers(users);
-
+                //simpleAuthenticationPlugin
 
                 logger.info("PREAUTH1");
                 broker.setPlugins(new BrokerPlugin[]{simpleAuthenticationPlugin});
