@@ -147,28 +147,11 @@ public class CrescoAuthorizationMap extends DestinationMap implements Authorizat
         return findWildcardMatches(key, false);
     }
 
-    public void addAuthorizationEntry(String channelName, String policyGroupName) throws Exception {
-        AuthorizationEntry topicEntry = new AuthorizationEntry();
-        topicEntry.setGroupClass("org.apache.activemq.jaas.GroupPrincipal");
-        topicEntry.setTopic(channelName);
-        topicEntry.setRead(policyGroupName);
-        topicEntry.setWrite(policyGroupName);
-        topicEntry.setAdmin(policyGroupName);
-        addAuthorizationEntry(topicEntry);
-        AuthorizationEntry queueEntry = new AuthorizationEntry();
-        queueEntry.setGroupClass("org.apache.activemq.jaas.GroupPrincipal");
-        queueEntry.setQueue(channelName);
-        queueEntry.setRead(policyGroupName);
-        queueEntry.setWrite(policyGroupName);
-        queueEntry.setAdmin(policyGroupName);
-        addAuthorizationEntry(queueEntry);
-    }
-
     public void addAuthorizationEntry(AuthorizationEntry entry) {
         put(entry.getDestination(), entry.getValue());
     }
 
-    public void removeAuthoizationEntry(AuthorizationEntry entry) {
+    public void removeAuthorizationEntry(AuthorizationEntry entry) {
         remove(entry.getDestination(), entry.getValue());
     }
 

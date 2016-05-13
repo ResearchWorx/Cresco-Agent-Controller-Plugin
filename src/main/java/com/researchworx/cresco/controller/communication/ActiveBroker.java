@@ -5,9 +5,7 @@ import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.broker.TransportConnector;
 import org.apache.activemq.broker.region.policy.PolicyEntry;
 import org.apache.activemq.broker.region.policy.PolicyMap;
-import org.apache.activemq.filter.DestinationMapEntry;
 import org.apache.activemq.network.NetworkConnector;
-import org.apache.activemq.security.*;
 import org.apache.activemq.util.ServiceStopper;
 
 import org.slf4j.Logger;
@@ -17,16 +15,14 @@ import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-
 
 public class ActiveBroker {
 	private static final Logger logger = LoggerFactory.getLogger(ActiveBroker.class);
+	private TransportConnector connector;
+	private CrescoAuthenticationPlugin authenticationPlugin;
+	private CrescoAuthorizationPlugin authorizationPlugin;
 
 	public BrokerService broker;
-	public TransportConnector connector;
-
 
 	public ActiveBroker(String brokerName, String brokerUserNameAgent, String brokerPasswordAgent) {
 		logger.info("Broker initialized");
@@ -46,44 +42,9 @@ public class ActiveBroker {
 				broker.setDestinationPolicy(map);
 				broker.setUseJmx(false);
 
-                //auth
-                AuthorizationPlugin authorizationPlugin = new AuthorizationPlugin();
-                DefaultAuthorizationMap authMap = new DefaultAuthorizationMap();
-                List<DestinationMapEntry> authEntries = new ArrayList();
-
-                AuthorizationEntry authEntryTopic = new AuthorizationEntry();
-                authEntryTopic.setGroupClass("org.apache.activemq.jaas.GroupPrincipal");
-                authEntryTopic.setTopic(">");
-                authEntryTopic.setRead("agent");
-                authEntryTopic.setWrite("agent");
-                authEntryTopic.setAdmin("agent");
-                authEntries.add(authEntryTopic);
-
-                AuthorizationEntry authEntryQueue = new AuthorizationEntry();
-                authEntryQueue.setGroupClass("org.apache.activemq.jaas.GroupPrincipal");
-                authEntryQueue.setQueue(">");
-                authEntryQueue.setRead("agent");
-                authEntryQueue.setWrite("agent");
-                authEntryQueue.setAdmin("agent");
-                authEntries.add(authEntryQueue);
-
-                authMap.setAuthorizationEntries(authEntries);
-                authorizationPlugin.setMap(authMap);
-
-                /*
-                //set auth username
-                SimpleAuthenticationPlugin simpleAuthenticationPlugin = new SimpleAuthenticationPlugin();
-                simpleAuthenticationPlugin.setAnonymousAccessAllowed(false);
-                AuthenticationUser autogenUser = new AuthenticationUser(brokerUserNameAgent,brokerPasswordAgent,"agent");
-                List<AuthenticationUser> users = new ArrayList<>();
-                users.add(autogenUser);
-                simpleAuthenticationPlugin.setUsers(users);
-                */
-                CrescoAuthenticationPlugin crescoAuthenticationPlugin = new CrescoAuthenticationPlugin();
-                crescoAuthenticationPlugin.addUser(brokerUserNameAgent,brokerPasswordAgent,"agent");
-                broker.setPlugins(new BrokerPlugin[]{authorizationPlugin,crescoAuthenticationPlugin});
-
-                //broker.setPlugins(new BrokerPlugin[]{authorizationPlugin,simpleAuthenticationPlugin});
+				authorizationPlugin = new CrescoAuthorizationPlugin();
+				authenticationPlugin = new CrescoAuthenticationPlugin();
+				broker.setPlugins(new BrokerPlugin[]{authorizationPlugin,authenticationPlugin});
 
                 connector = new TransportConnector();
 
@@ -96,6 +57,8 @@ public class ActiveBroker {
                 while(!broker.isStarted()) {
 			    	Thread.sleep(1000);
                 }
+				authenticationPlugin.addUser(brokerUserNameAgent,brokerPasswordAgent,"agent");
+				authorizationPlugin.addEntry(">", "agent");
 
             } else {
 				System.out.println("Constructor : portAvailable(32010) == false");
@@ -104,7 +67,27 @@ public class ActiveBroker {
 			ex.printStackTrace();
 			System.out.println("Init {}" + ex.getMessage());
 		}
-	}	
+	}
+
+	public void addUser(String username, String password, String groups) {
+		authenticationPlugin.addUser(username, password, groups);
+	}
+
+	public void removeUser(String username) {
+		authenticationPlugin.removeUser(username);
+	}
+
+	public void addPolicy(String channelName, String groupName) {
+		try {
+			authorizationPlugin.addEntry(channelName, groupName);
+		} catch (Exception e) {
+			logger.error("addPolicy : {}", e.getMessage());
+		}
+	}
+
+	public void removePolicy(String channelName) {
+		authorizationPlugin.removeEntry(channelName);
+	}
 
 	public boolean isHealthy() {
 		boolean isHealthy = false;
