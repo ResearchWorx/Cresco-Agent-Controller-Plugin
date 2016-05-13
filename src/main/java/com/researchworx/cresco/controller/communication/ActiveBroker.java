@@ -45,14 +45,28 @@ public class ActiveBroker {
 				broker.setSchedulePeriodForDestinationPurge(2500);
 				broker.setDestinationPolicy(map);
 				broker.setUseJmx(false);
+
                 logger.info("PREAUTH0");
+
                 //set auth username
                 SimpleAuthenticationPlugin simpleAuthenticationPlugin = new SimpleAuthenticationPlugin();
+                logger.info("PREAUTH0.0");
+
                 simpleAuthenticationPlugin.setAnonymousAccessAllowed(false);
+                logger.info("PREAUTH0.1");
+
                 AuthenticationUser autogenUser = new AuthenticationUser(brokerUserNameAgent,brokerPasswordAgent,"users,admins");
+                logger.info("PREAUTH0.2");
+
                 List<AuthenticationUser> users = new ArrayList<>();
+                logger.info("PREAUTH0.3");
+
                 users.add(autogenUser);
+                logger.info("PREAUTH0.4");
+
                 simpleAuthenticationPlugin.setUsers(users);
+
+
                 logger.info("PREAUTH1");
                 broker.setPlugins(new BrokerPlugin[]{simpleAuthenticationPlugin});
                 logger.info("PREAUTH2");
