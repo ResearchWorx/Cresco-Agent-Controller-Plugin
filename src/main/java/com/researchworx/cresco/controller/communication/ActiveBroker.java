@@ -45,7 +45,7 @@ public class ActiveBroker {
 				broker.setSchedulePeriodForDestinationPurge(2500);
 				broker.setDestinationPolicy(map);
 				broker.setUseJmx(false);
-
+                logger.info("PREAUTH0");
                 //set auth username
                 SimpleAuthenticationPlugin simpleAuthenticationPlugin = new SimpleAuthenticationPlugin();
                 simpleAuthenticationPlugin.setAnonymousAccessAllowed(false);
@@ -53,19 +53,28 @@ public class ActiveBroker {
                 List<AuthenticationUser> users = new ArrayList<>();
                 users.add(autogenUser);
                 simpleAuthenticationPlugin.setUsers(users);
+                logger.info("PREAUTH1");
                 broker.setPlugins(new BrokerPlugin[]{simpleAuthenticationPlugin});
+                logger.info("PREAUTH2");
 
-				connector = new TransportConnector();
+                connector = new TransportConnector();
 
 				connector.setUri(new URI("tcp://[::]:32010"));
 
 				broker.addConnector(connector);
+                logger.info("PREAUTH3");
 
-				broker.start();
-				while(!broker.isStarted()) {
+                broker.start();
+                logger.info("PREAUTH4");
+
+                while(!broker.isStarted()) {
 			    	Thread.sleep(1000);
-			    }
-			} else {
+                    logger.info("PREAUTH5");
+
+                }
+                logger.info("PREAUTH6");
+
+            } else {
 				System.out.println("Constructor : portAvailable(32010) == false");
 			}
 		} catch(Exception ex) {
