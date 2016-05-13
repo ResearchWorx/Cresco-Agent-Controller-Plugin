@@ -57,6 +57,7 @@ public class ActiveBroker {
                 //authEntry.setQueue(">");
                 authEntry.setRead("agents");
                 authEntry.setWrite("agents");
+                authEntry.setAdmin("agents");
                 authEntries.add(authEntry);
 
                 authMap.setAuthorizationEntries(authEntries);
