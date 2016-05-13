@@ -391,7 +391,7 @@ public class Launcher extends CPlugin {
             }
             LOG.debug("Agent ConsumerThread Started..");
 
-            this.ap = new ActiveProducer(this, "tcp://" + this.brokerAddressAgent + ":32010");
+            this.ap = new ActiveProducer(this, "tcp://" + this.brokerAddressAgent + ":32010", brokerUserNameAgent, brokerPasswordAgent);
 
             //watchDogProcess = new plugincore.WatchDog();
             setWatchDog(new WatchDog(region, agent, pluginID, logger, config));
