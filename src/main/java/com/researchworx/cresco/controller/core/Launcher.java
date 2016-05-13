@@ -308,7 +308,7 @@ public class Launcher extends CPlugin {
                 }
 
                 //consumer region
-                this.consumerRegionThread = new Thread(new ActiveRegionConsumer(this, this.region, "tcp://" + this.brokerAddressAgent + ":32010"));
+                this.consumerRegionThread = new Thread(new ActiveRegionConsumer(this, this.region, "tcp://" + this.brokerAddressAgent + ":32010",brokerUserNameAgent,brokerPasswordAgent));
                 this.consumerRegionThread.start();
                 while (!this.ConsumerThreadRegionActive) {
                     Thread.sleep(1000);
@@ -384,7 +384,7 @@ public class Launcher extends CPlugin {
             }
 
             //consumer agent
-            this.consumerAgentThread = new Thread(new ActiveAgentConsumer(this, this.agentpath, "tcp://" + this.brokerAddressAgent + ":32010"));
+            this.consumerAgentThread = new Thread(new ActiveAgentConsumer(this, this.agentpath, "tcp://" + this.brokerAddressAgent + ":32010",brokerUserNameAgent,brokerPasswordAgent));
             this.consumerAgentThread.start();
             while (!this.ConsumerThreadActive) {
                 Thread.sleep(1000);
