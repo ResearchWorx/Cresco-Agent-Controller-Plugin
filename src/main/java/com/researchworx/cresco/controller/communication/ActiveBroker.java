@@ -51,6 +51,7 @@ public class ActiveBroker {
 				broker.setUseJmx(false);
 
                 //auth
+                /*
                 DefaultAuthorizationMap authMap = new DefaultAuthorizationMap();
                 List<DestinationMapEntry> authEntries = new ArrayList();
 
@@ -62,7 +63,7 @@ public class ActiveBroker {
                 authEntries.add(authEntry);
 
                 authMap.setAuthorizationEntries(authEntries);
-
+                */
 
                 logger.info("PREAUTH0");
 
