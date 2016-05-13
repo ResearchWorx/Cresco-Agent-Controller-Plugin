@@ -70,50 +70,32 @@ public class ActiveBroker {
                 authMap.setAuthorizationEntries(authEntries);
                 authorizationPlugin.setMap(authMap);
 
-
-                logger.info("PREAUTH0");
-
+                /*
                 //set auth username
                 SimpleAuthenticationPlugin simpleAuthenticationPlugin = new SimpleAuthenticationPlugin();
-                logger.info("PREAUTH0.0");
-
                 simpleAuthenticationPlugin.setAnonymousAccessAllowed(false);
-                logger.info("PREAUTH0.1");
-
-                //AuthenticationUser autogenUser = new AuthenticationUser(brokerUserNameAgent,brokerPasswordAgent,"users,admins");
                 AuthenticationUser autogenUser = new AuthenticationUser(brokerUserNameAgent,brokerPasswordAgent,"agent");
-
-                logger.info("PREAUTH0.2");
-
                 List<AuthenticationUser> users = new ArrayList<>();
-                logger.info("PREAUTH0.3");
-
                 users.add(autogenUser);
-                logger.info("PREAUTH0.4");
-
                 simpleAuthenticationPlugin.setUsers(users);
-                //simpleAuthenticationPlugin
+                */
+                CrescoAuthenticationPlugin crescoAuthenticationPlugin = new CrescoAuthenticationPlugin();
+                crescoAuthenticationPlugin.addUser(brokerUserNameAgent,brokerPasswordAgent,"agent");
+                broker.setPlugins(new BrokerPlugin[]{authorizationPlugin,crescoAuthenticationPlugin});
 
-                logger.info("PREAUTH1");
-                broker.setPlugins(new BrokerPlugin[]{authorizationPlugin,simpleAuthenticationPlugin});
-                logger.info("PREAUTH2");
+                //broker.setPlugins(new BrokerPlugin[]{authorizationPlugin,simpleAuthenticationPlugin});
 
                 connector = new TransportConnector();
 
 				connector.setUri(new URI("tcp://[::]:32010"));
 
 				broker.addConnector(connector);
-                logger.info("PREAUTH3");
 
                 broker.start();
-                logger.info("PREAUTH4");
 
                 while(!broker.isStarted()) {
 			    	Thread.sleep(1000);
-                    logger.info("PREAUTH5");
-
                 }
-                logger.info("PREAUTH6");
 
             } else {
 				System.out.println("Constructor : portAvailable(32010) == false");
