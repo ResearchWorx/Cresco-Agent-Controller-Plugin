@@ -81,7 +81,7 @@ public class ActiveBroker {
                 logger.info("PREAUTH0.1");
 
                 //AuthenticationUser autogenUser = new AuthenticationUser(brokerUserNameAgent,brokerPasswordAgent,"users,admins");
-                AuthenticationUser autogenUser = new AuthenticationUser(brokerUserNameAgent,brokerPasswordAgent,"agents");
+                AuthenticationUser autogenUser = new AuthenticationUser(brokerUserNameAgent,brokerPasswordAgent,"agent");
 
                 logger.info("PREAUTH0.2");
 
