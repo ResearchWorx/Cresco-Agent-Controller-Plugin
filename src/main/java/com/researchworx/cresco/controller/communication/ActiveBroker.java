@@ -126,6 +126,7 @@ public class ActiveBroker {
 		try {
 			TransportConnector connector = new TransportConnector();
 			connector.setUri(new URI(URI));
+
 			this.broker.addConnector(connector);
 			this.broker.startTransportConnector(connector);
 		} catch(Exception ex) {
