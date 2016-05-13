@@ -5,6 +5,8 @@ package com.researchworx.cresco.controller.netdiscovery;
 import org.apache.commons.net.util.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.misc.BASE64Decoder;
+import sun.misc.BASE64Encoder;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
@@ -43,8 +45,8 @@ public class DiscoveryCrypto {
             final Cipher c = Cipher.getInstance(ALGORITHM);
             c.init(Cipher.ENCRYPT_MODE, key);
             final byte[] encValue = c.doFinal(valueEnc.getBytes());
-            //encryptedValue = new BASE64Encoder().encode(encValue);
-            encryptedValue = Base64.encodeBase64String(encValue);
+            encryptedValue = new BASE64Encoder().encode(encValue);
+            //encryptedValue = Base64.encodeBase64String(encValue);
         } catch(Exception ex) {
             logger.error(ex.getMessage());
             ex.printStackTrace();
@@ -62,8 +64,8 @@ public class DiscoveryCrypto {
             final Key key = generateKeyFromString(secretKey);
             final Cipher c = Cipher.getInstance(ALGORITHM);
             c.init(Cipher.DECRYPT_MODE, key);
-            //final byte[] decorVal = new BASE64Decoder().decodeBuffer(encryptedValue);
-            final byte[] decorVal = Base64.decodeBase64(encryptedValue);
+            final byte[] decorVal = new BASE64Decoder().decodeBuffer(encryptedValue);
+            //final byte[] decorVal = Base64.decodeBase64(encryptedValue);
             //byte[] valueDecoded= Base64.decodeBase64(bytesEncoded );
             final byte[] decValue = c.doFinal(decorVal);
             decryptedValue = new String(decValue);
