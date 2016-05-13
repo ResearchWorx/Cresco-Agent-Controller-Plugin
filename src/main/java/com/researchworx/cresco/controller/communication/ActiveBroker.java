@@ -6,9 +6,10 @@ import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.broker.TransportConnector;
 import org.apache.activemq.broker.region.policy.PolicyEntry;
 import org.apache.activemq.broker.region.policy.PolicyMap;
+import org.apache.activemq.command.ActiveMQDestination;
+import org.apache.activemq.filter.DestinationMapEntry;
 import org.apache.activemq.network.NetworkConnector;
-import org.apache.activemq.security.AuthenticationUser;
-import org.apache.activemq.security.SimpleAuthenticationPlugin;
+import org.apache.activemq.security.*;
 import org.apache.activemq.util.ServiceStopper;
 
 import org.slf4j.Logger;
@@ -20,6 +21,9 @@ import java.net.ServerSocket;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
+import static com.sun.tools.internal.ws.wsdl.parser.Util.fail;
 
 public class ActiveBroker {
 	private static final Logger logger = LoggerFactory.getLogger(ActiveBroker.class);
@@ -46,6 +50,20 @@ public class ActiveBroker {
 				broker.setDestinationPolicy(map);
 				broker.setUseJmx(false);
 
+                //auth
+                DefaultAuthorizationMap authMap = new DefaultAuthorizationMap();
+                List<DestinationMapEntry> authEntries = new ArrayList();
+
+                AuthorizationEntry authEntry = new AuthorizationEntry();
+                authEntry.setGroupClass("org.apache.activemq.jaas.GroupPrincipal");
+                authEntry.setQueue(">");
+                authEntry.setRead("agents");
+                authEntry.setWrite("agents");
+                authEntries.add(authEntry);
+
+                authMap.setAuthorizationEntries(authEntries);
+
+
                 logger.info("PREAUTH0");
 
                 //set auth username
@@ -56,7 +74,7 @@ public class ActiveBroker {
                 logger.info("PREAUTH0.1");
 
                 //AuthenticationUser autogenUser = new AuthenticationUser(brokerUserNameAgent,brokerPasswordAgent,"users,admins");
-                AuthenticationUser autogenUser = new AuthenticationUser(brokerUserNameAgent,brokerPasswordAgent,"");
+                AuthenticationUser autogenUser = new AuthenticationUser(brokerUserNameAgent,brokerPasswordAgent,"agents");
                 logger.info("PREAUTH0.2");
 
                 List<AuthenticationUser> users = new ArrayList<>();
