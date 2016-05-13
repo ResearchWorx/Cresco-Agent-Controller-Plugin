@@ -117,9 +117,6 @@ class DiscoveryClientWorkerIPv4 {
                         sme.setParam("src_region", this.plugin.getRegion());
                         sme.setParam("src_agent", this.plugin.getAgent());
 
-                        //set crypto message for discovery
-                        sme.setParam("discovery_validator",generateValidateMessage());
-
 
                         if (disType == DiscoveryType.AGENT || disType == DiscoveryType.REGION || disType == DiscoveryType.GLOBAL) {
                             logger.trace("Discovery Type = {}", disType.name());
@@ -128,6 +125,10 @@ class DiscoveryClientWorkerIPv4 {
                             logger.trace("Discovery type unknown");
                             sme = null;
                         }
+
+                        //set crypto message for discovery
+                        sme.setParam("discovery_validator",generateValidateMessage(sme));
+
                         if (sme != null) {
                             logger.trace("Building sendPacket for {}", inAddr.toString());
                             String sendJson = gson.toJson(sme);
@@ -176,11 +177,20 @@ class DiscoveryClientWorkerIPv4 {
         return discoveredList;
     }
 
-    private String generateValidateMessage() {
+    private String generateValidateMessage(MsgEvent sme) {
         String encryptedString = null;
         try {
+
+            String discoverySecret = null;
+            if (sme.getParam("discovery_type").equals(DiscoveryType.AGENT.name())) {
+                discoverySecret = plugin.getConfig().getStringParam("discovery_secret_agent");
+            } else if (sme.getParam("discovery_type").equals(DiscoveryType.REGION.name())) {
+                discoverySecret = plugin.getConfig().getStringParam("discovery_secret_region");
+            } else if (sme.getParam("discovery_type").equals(DiscoveryType.GLOBAL.name())) {
+                discoverySecret = plugin.getConfig().getStringParam("discovery_secret_global");
+            }
+
             String verifyMessage = "DISCOVERY_MESSAGE_VERIFIED";
-            String discoverySecret = plugin.getConfig().getStringParam("discovery_secret");
             encryptedString = discoveryCrypto.encrypt(verifyMessage,discoverySecret);
 
         }
