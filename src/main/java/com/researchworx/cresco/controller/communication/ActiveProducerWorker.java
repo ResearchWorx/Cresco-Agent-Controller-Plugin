@@ -26,11 +26,12 @@ public class ActiveProducerWorker {
 	public boolean isActive;
 	private String queueName;
 	
-	public ActiveProducerWorker(String TXQueueName, String URI)  {
+	public ActiveProducerWorker(String TXQueueName, String URI, String brokerUserNameAgent, String brokerPasswordAgent)  {
 		try {
 			queueName = TXQueueName;
 			gson = new Gson();
-			conn = (ActiveMQConnection) new ActiveMQConnectionFactory(URI).createConnection();
+			//conn = (ActiveMQConnection) new ActiveMQConnectionFactory(URI).createConnection();
+			conn = (ActiveMQConnection)new ActiveMQConnectionFactory(brokerUserNameAgent,brokerPasswordAgent,URI).createConnection();
 			conn.start();
 			this.sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
 			Destination destination = sess.createQueue(TXQueueName);

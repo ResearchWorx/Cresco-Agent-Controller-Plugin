@@ -1,5 +1,6 @@
 package com.researchworx.cresco.controller.communication;
 
+import com.researchworx.cresco.controller.core.Launcher;
 import org.apache.activemq.broker.BrokerPlugin;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.broker.TransportConnector;
@@ -26,7 +27,8 @@ public class ActiveBroker {
 	public BrokerService broker;
 	public TransportConnector connector;
 
-	public ActiveBroker(String brokerName) {
+
+	public ActiveBroker(String brokerName, String brokerUserNameAgent, String brokerPasswordAgent) {
 		logger.info("Broker initialized");
 		try {
 			if(portAvailable(32010)) {
@@ -45,9 +47,10 @@ public class ActiveBroker {
 				broker.setUseJmx(false);
 
                 //set auth username
+                //RandomString rs = new RandomString(4);
                 SimpleAuthenticationPlugin simpleAuthenticationPlugin = new SimpleAuthenticationPlugin();
                 simpleAuthenticationPlugin.setAnonymousAccessAllowed(false);
-                AuthenticationUser loginuser = new AuthenticationUser("cody","cody","users,admins");
+                AuthenticationUser loginuser = new AuthenticationUser(brokerUserNameAgent,brokerPasswordAgent,"users,admins");
                 List<AuthenticationUser> users = new ArrayList<AuthenticationUser>();
                 simpleAuthenticationPlugin.setUsers(users);
                 broker.setPlugins(new BrokerPlugin[]{simpleAuthenticationPlugin });

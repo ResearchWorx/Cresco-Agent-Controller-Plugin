@@ -1,7 +1,6 @@
 package com.researchworx.cresco.controller.core;
 
 import com.researchworx.cresco.controller.communication.*;
-import com.researchworx.cresco.controller.core.*;
 import com.researchworx.cresco.controller.netdiscovery.DiscoveryClientIPv4;
 import com.researchworx.cresco.controller.netdiscovery.DiscoveryClientIPv6;
 import com.researchworx.cresco.controller.netdiscovery.DiscoveryEngine;
@@ -93,7 +92,10 @@ public class Launcher extends CPlugin {
 
     private ActiveProducer ap;
 
-    private String brokerAddress;
+    private String brokerAddressAgent;
+    public String brokerUserNameAgent;
+    public String brokerPasswordAgent;
+
 
     private boolean isRegionalController = false;
     private Map<String, Long> discoveryMap;
@@ -244,7 +246,7 @@ public class Launcher extends CPlugin {
             this.brokeredAgents = new ConcurrentHashMap<>();
             this.incomingCanidateBrokers = new ConcurrentLinkedQueue<>();
             this.outgoingMessages = new ConcurrentLinkedQueue<>();
-            this.brokerAddress = null;
+            this.brokerAddressAgent = null;
             this.isIPv6 = isIPv6();
 
             List<MsgEvent> discoveryList = new ArrayList<>();
@@ -283,7 +285,9 @@ public class Launcher extends CPlugin {
                 //logger.debug("IPv6 DiscoveryEngine Started..");
 
                 LOG.debug("Broker starting");
-                this.broker = new ActiveBroker(this.agentpath);
+                brokerUserNameAgent = java.util.UUID.randomUUID().toString();
+                brokerPasswordAgent = java.util.UUID.randomUUID().toString();
+                this.broker = new ActiveBroker(this.agentpath,brokerUserNameAgent,brokerPasswordAgent);
 
                 //broker manager
                 LOG.debug("Starting Broker Manager");
@@ -298,13 +302,13 @@ public class Launcher extends CPlugin {
                 //logger.debug("ActiveBrokerManager Started..");
 
                 if (this.isIPv6) { //set broker address for consumers and producers
-                    this.brokerAddress = "[::1]";
+                    this.brokerAddressAgent = "[::1]";
                 } else {
-                    this.brokerAddress = "localhost";
+                    this.brokerAddressAgent = "localhost";
                 }
 
                 //consumer region
-                this.consumerRegionThread = new Thread(new ActiveRegionConsumer(this, this.region, "tcp://" + this.brokerAddress + ":32010"));
+                this.consumerRegionThread = new Thread(new ActiveRegionConsumer(this, this.region, "tcp://" + this.brokerAddressAgent + ":32010"));
                 this.consumerRegionThread.start();
                 while (!this.ConsumerThreadRegionActive) {
                     Thread.sleep(1000);
@@ -368,7 +372,7 @@ public class Launcher extends CPlugin {
                         this.agent = "agent-" + java.util.UUID.randomUUID().toString();//rs.nextString();
                         //logger.warn("Agent region changed from :" + oldRegion + " to " + region);
                     }
-                    this.brokerAddress = cbrokerAddress;
+                    this.brokerAddressAgent = cbrokerAddress;
                     this.region = cRegion;
                     LOG.info("Assigned regionid=" + this.region);
                     this.agentpath = this.region + "_" + this.agent;
@@ -380,14 +384,14 @@ public class Launcher extends CPlugin {
             }
 
             //consumer agent
-            this.consumerAgentThread = new Thread(new ActiveAgentConsumer(this, this.agentpath, "tcp://" + this.brokerAddress + ":32010"));
+            this.consumerAgentThread = new Thread(new ActiveAgentConsumer(this, this.agentpath, "tcp://" + this.brokerAddressAgent + ":32010"));
             this.consumerAgentThread.start();
             while (!this.ConsumerThreadActive) {
                 Thread.sleep(1000);
             }
             LOG.debug("Agent ConsumerThread Started..");
 
-            this.ap = new ActiveProducer(this, "tcp://" + this.brokerAddress + ":32010");
+            this.ap = new ActiveProducer(this, "tcp://" + this.brokerAddressAgent + ":32010");
 
             //watchDogProcess = new plugincore.WatchDog();
             setWatchDog(new WatchDog(region, agent, pluginID, logger, config));

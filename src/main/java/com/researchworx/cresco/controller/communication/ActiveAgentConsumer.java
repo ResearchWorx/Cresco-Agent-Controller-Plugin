@@ -18,11 +18,11 @@ public class ActiveAgentConsumer implements Runnable {
 	private ActiveMQConnection conn;
 	private static final Logger logger = LoggerFactory.getLogger(ActiveAgentConsumer.class);
 
-	public ActiveAgentConsumer(Launcher plugin, String RXQueueName, String URI) {
+	public ActiveAgentConsumer(Launcher plugin, String RXQueueName, String URI, String brokerUserNameAgent, String brokerPasswordAgent) {
 		logger.debug("Agent Consumer initialized");
 		this.plugin = plugin;
 		try {
-			conn = (ActiveMQConnection)new ActiveMQConnectionFactory(URI).createConnection();
+			conn = (ActiveMQConnection)new ActiveMQConnectionFactory(brokerUserNameAgent,brokerPasswordAgent,URI).createConnection();
 			conn.start();
 			this.sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
 			this.RXqueue = sess.createQueue(RXQueueName);
