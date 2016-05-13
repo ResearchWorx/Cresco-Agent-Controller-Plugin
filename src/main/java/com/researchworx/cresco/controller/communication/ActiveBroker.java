@@ -47,13 +47,13 @@ public class ActiveBroker {
 				broker.setUseJmx(false);
 
                 //set auth username
-                //RandomString rs = new RandomString(4);
                 SimpleAuthenticationPlugin simpleAuthenticationPlugin = new SimpleAuthenticationPlugin();
                 simpleAuthenticationPlugin.setAnonymousAccessAllowed(false);
-                AuthenticationUser loginuser = new AuthenticationUser(brokerUserNameAgent,brokerPasswordAgent,"users,admins");
-                List<AuthenticationUser> users = new ArrayList<AuthenticationUser>();
+                AuthenticationUser autogenUser = new AuthenticationUser(brokerUserNameAgent,brokerPasswordAgent,"users,admins");
+                List<AuthenticationUser> users = new ArrayList<>();
+                users.add(autogenUser);
                 simpleAuthenticationPlugin.setUsers(users);
-                broker.setPlugins(new BrokerPlugin[]{simpleAuthenticationPlugin });
+                broker.setPlugins(new BrokerPlugin[]{simpleAuthenticationPlugin});
 
 				connector = new TransportConnector();
 
