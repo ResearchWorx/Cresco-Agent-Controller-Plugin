@@ -258,7 +258,7 @@ public class DiscoveryEngine implements Runnable {
             try {
 
                 //determine if we should respond to request
-                if ((plugin.reachableAgents().size() < 25)  && (validateMsgEvent(rme))) {
+                if ((plugin.reachableAgents().size() < 25)  && (validateMsgEvent(rme) != null)) {
                     if (rme.getParam("src_region") != null) {
                         if (rme.getParam("src_region").equals("init")) {
                             //System.out.println(getClass().getName() + "1 " + Thread.currentThread().getId());
@@ -308,8 +308,8 @@ public class DiscoveryEngine implements Runnable {
             return me;
         }
 
-        private boolean validateMsgEvent(MsgEvent rme) {
-            boolean isValidated = false;
+        private String validateMsgEvent(MsgEvent rme) {
+            String validatedAuthenication = null;
             try {
                 String discoverySecret = null;
                 if (rme.getParam("discovery_type").equals(DiscoveryType.AGENT.name())) {
@@ -324,14 +324,17 @@ public class DiscoveryEngine implements Runnable {
                 String discoveryValidator = rme.getParam("discovery_validator");
                 String decryptedString = discoveryCrypto.decrypt(discoveryValidator,discoverySecret);
                 if(decryptedString.equals(verifyMessage)) {
-                    isValidated = true;
+                    //isValidated = true;
+                    //String verifyMessage = "DISCOVERY_MESSAGE_VERIFIED";
+                    //encryptedString = discoveryCrypto.encrypt(verifyMessage,discoverySecret);
+                    validatedAuthenication = "test";
                 }
             }
             catch(Exception ex) {
                 logger.error(ex.getMessage());
             }
 
-            return isValidated;
+            return validatedAuthenication ;
         }
 
     }
