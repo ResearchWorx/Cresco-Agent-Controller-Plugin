@@ -53,7 +53,7 @@ public class AgentDiscovery {
 
                 } else if ((le.getMsgType() == MsgEvent.Type.CONFIG) && (le.getMsgBody().equals("enabled"))) {
                     //if we see a agent enable command respond to it
-                    logger.debug("AGENTDISCOVER: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
+                    logger.debug("CONFIG : AGENTDISCOVER: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
                     le.setMsgPlugin(null);
                     le.setMsgRegion(le.getParam("src_region"));
                     le.setMsgAgent(le.getParam("src_agent"));
@@ -65,6 +65,7 @@ public class AgentDiscovery {
                     //le.setDst(me.getParam("src_region"),me.getParam("src_agent"),me.getParam("src_plugin"));
                     plugin.sendMsgEvent(le);
                 } else if (le.getMsgType() == MsgEvent.Type.WATCHDOG) {
+                    logger.debug("WATCHDOG : AGENTDISCOVER: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
                     try {
                         if ((le.getParam("src_region") != null) && (le.getParam("src_agent") != null) && (le.getParam("src_plugin")) == null) { //agent
                             if (!plugin.getGDB().isNode(le.getParam("src_region"), le.getParam("src_agent"), null)) { //add if it does not exist
