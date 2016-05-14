@@ -30,7 +30,7 @@ public class AgentDiscovery {
     public void discover(MsgEvent le) {
         try {
             String discoverString = le.getParam("src_region") + "-" + le.getParam("src_agent") + "-" + le.getParam("src_plugin");
-            logger.debug("discoveryString : " + discoverString);
+            logger.debug("MsgType : " + le.getMsgType() + " Params: " + le.getParams());
             if (plugin.getDiscoveryMap().containsKey(discoverString)) {
                 logger.info("Discovery underway for : discoverString=" + discoverString);
             } else {
@@ -165,7 +165,7 @@ public class AgentDiscovery {
 //end watch
                 }
                 else {
-                    logger.error("UNKNOWN DISCOVERY PATH! : " + le.getParams());
+                    logger.error("UNKNOWN DISCOVERY PATH! : MsgType=" + le.getMsgType() + " " +  le.getParams());
                 }
                 if (plugin.getDiscoveryMap().containsKey(discoverString)) {
                     plugin.getDiscoveryMap().remove(discoverString); //remove discovery block
