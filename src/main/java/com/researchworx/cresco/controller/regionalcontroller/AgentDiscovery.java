@@ -77,7 +77,7 @@ public class AgentDiscovery {
                             }
                         }
                     } catch (Exception ex) {
-
+                        logger.debug("WATCHDOG : " + ex.getMessage());
                     }
                     /*
                     long watchRunTime = 0; //determine message runtime
