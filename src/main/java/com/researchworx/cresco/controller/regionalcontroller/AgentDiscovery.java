@@ -29,6 +29,7 @@ public class AgentDiscovery {
 
     public void discover(MsgEvent le) {
         try {
+
             String discoverString = le.getParam("src_region") + "-" + le.getParam("src_agent") + "-" + le.getParam("src_plugin");
             logger.debug("MsgType : " + le.getMsgType() + " Params: " + le.getParams());
             if (plugin.getDiscoveryMap().containsKey(discoverString)) {
