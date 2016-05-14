@@ -16,8 +16,11 @@ import com.google.gson.GsonBuilder;
 
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GlobalControllerChannel {
+    private static final Logger logger = LoggerFactory.getLogger(GlobalControllerChannel.class);
 
     private final String USER_AGENT = "Cresco-Agent-Controller-Plugin/0.5.0";
     private Launcher plugin;
@@ -78,11 +81,11 @@ public class GlobalControllerChannel {
                         ce = meFromJson(response.toString());
                     } catch (Exception ex) {
                         //its ok to fail
-                        //System.out.println("Controller : ControllerChannel : Error meFromJson");
+                        //logger.debug("Controller : ControllerChannel : Error meFromJson");
                     }
                     if (ce != null) {
                         if (ce.getMsgBody() != null) {
-                            System.out.println("Incoming Regional Message: " + ce.getParams());
+                            logger.debug("Incoming Regional Message: " + ce.getParams());
                             plugin.sendMsgEvent(ce);
                             //PluginEngine.msgInQueue.offer(ce);
                             Thread.sleep(500); //take it easy on server
@@ -94,7 +97,7 @@ public class GlobalControllerChannel {
                 return false;
 
             } catch (Exception ex) {
-                System.out.println("Controller : ControllerChannel : CmdPoolTasks : " + ex.toString());
+                logger.debug("Controller : ControllerChannel : CmdPoolTasks : " + ex.toString());
                 return false; //wait for timeout for messages
             }
         }
@@ -102,7 +105,7 @@ public class GlobalControllerChannel {
         public void run() {
             if (plugin.hasGlobalController()) {
                 while (pool()) {
-                    //System.out.println("pool");
+                    //logger.debug("pool");
                 }
             }
             /*
@@ -152,7 +155,7 @@ public class GlobalControllerChannel {
                 try {
                     ce = meFromJson(response.toString());
                 } catch (Exception ex) {
-                    System.out.println("Controller : ControllerChannel : Error meFromJson");
+                    logger.debug("Controller : ControllerChannel : Error meFromJson");
                 }
                 if (ce != null) {
                     if (ce.getMsgBody() != null) {
@@ -164,7 +167,7 @@ public class GlobalControllerChannel {
             }
             return false;
         } catch (Exception ex) {
-            System.out.println("Controller : ControllerChannel : getController : " + ex.toString());
+            logger.debug("Controller : ControllerChannel : getController : " + ex.toString());
             return false;
         }
     }
@@ -182,10 +185,10 @@ public class GlobalControllerChannel {
                 sb.append("&paramkey=" + URLEncoder.encode(pairs.getKey().toString(), "UTF-8") + "&paramvalue=" + URLEncoder.encode(pairs.getValue().toString(), "UTF-8"));
                 it.remove(); // avoids a ConcurrentModificationException
             }
-            //System.out.println(sb.toString());
+            //logger.debug(sb.toString());
             return sb.toString();
         } catch (Exception ex) {
-            System.out.println("Controller : ControllerChannel : urlFromMsg :" + ex.toString());
+            logger.debug("Controller : ControllerChannel : urlFromMsg :" + ex.toString());
             return null;
         }
     }
@@ -227,7 +230,7 @@ public class GlobalControllerChannel {
                 try {
                     ce = meFromJson(response.toString());
                 } catch (Exception ex) {
-                    System.out.println("Controller : ControllerChannel : Error meFromJson");
+                    logger.debug("Controller : ControllerChannel : Error meFromJson");
                 }
                 if (ce != null) {
                     if (ce.getMsgBody() != null) {
@@ -240,7 +243,7 @@ public class GlobalControllerChannel {
             return false;
 
         } catch (Exception ex) {
-            System.out.println("Controller : ControllerChannel : sendControllerLog : " + ex.toString());
+            logger.debug("Controller : ControllerChannel : sendControllerLog : " + ex.toString());
             return false;
         }
     }
@@ -248,8 +251,8 @@ public class GlobalControllerChannel {
     public boolean addNode(MsgEvent le) {
         try {
 
-            System.out.println("*addNode Controller Channel: sendParams: " + le.getParams());
-            //System.out.println(le.getParamsString());
+            logger.debug("*addNode Controller Channel: sendParams: " + le.getParams());
+            //logger.debug(le.getParamsString());
             //CODY
 
             Map<String, String> tmpMap = le.getParams();
@@ -261,8 +264,8 @@ public class GlobalControllerChannel {
             }
             String url = controllerUrl + urlFromMsg(type, leMap);
 
-            //System.out.println(url);
-            System.out.println("*addNode Controller Channel url: " + url);
+            //logger.debug(url);
+            logger.debug("*addNode Controller Channel url: " + url);
 
             //CODY
 
@@ -291,15 +294,15 @@ public class GlobalControllerChannel {
 
                 MsgEvent ce = null;
                 try {
-                    //System.out.println(response);
+                    //logger.debug(response);
                     ce = meFromJson(response.toString());
-                    System.out.println("*addNode Controller Channel : return responce" + response.toString());
+                    logger.debug("*addNode Controller Channel : return responce" + response.toString());
 
-                    //System.out.println(ce.getParamsString());
+                    //logger.debug(ce.getParamsString());
                     //CODY
 
                 } catch (Exception ex) {
-                    System.out.println("Controller : ControllerChannel : Error meFromJson");
+                    logger.debug("Controller : ControllerChannel : Error meFromJson");
                 }
                 if (ce != null) {
                     if (ce.getMsgBody() != null) {
@@ -312,7 +315,7 @@ public class GlobalControllerChannel {
             return false;
 
         } catch (Exception ex) {
-            System.out.println("Controller : ControllerChannel : sendControllerLog : " + ex.toString());
+            logger.debug("Controller : ControllerChannel : sendControllerLog : " + ex.toString());
             return false;
         }
     }
@@ -352,10 +355,10 @@ public class GlobalControllerChannel {
 
                 MsgEvent ce = null;
                 try {
-                    //System.out.println(response);
+                    //logger.debug(response);
                     ce = meFromJson(response.toString());
                 } catch (Exception ex) {
-                    System.out.println("Controller : ControllerChannel : Error meFromJson");
+                    logger.debug("Controller : ControllerChannel : Error meFromJson");
                 }
                 if (ce != null) {
                     if (ce.getMsgBody() != null) {
@@ -368,7 +371,7 @@ public class GlobalControllerChannel {
             return false;
 
         } catch (Exception ex) {
-            System.out.println("Controller : ControllerChannel : sendControllerLog : " + ex.toString());
+            logger.debug("Controller : ControllerChannel : sendControllerLog : " + ex.toString());
             return false;
         }
     }
@@ -409,10 +412,10 @@ public class GlobalControllerChannel {
 
                 MsgEvent ce = null;
                 try {
-                    //System.out.println(response);
+                    //logger.debug(response);
                     ce = meFromJson(response.toString());
                 } catch (Exception ex) {
-                    System.out.println("Controller : ControllerChannel : Error meFromJson");
+                    logger.debug("Controller : ControllerChannel : Error meFromJson");
                 }
                 if (ce != null) {
                     if (ce.getMsgBody() != null) {
@@ -425,7 +428,7 @@ public class GlobalControllerChannel {
             return false;
 
         } catch (Exception ex) {
-            System.out.println("Controller : ControllerChannel : sendControllerLog : " + ex.toString());
+            logger.debug("Controller : ControllerChannel : sendControllerLog : " + ex.toString());
             return false;
         }
     }
@@ -454,12 +457,12 @@ public class GlobalControllerChannel {
             int responseCode = con.getResponseCode();
 
             if (responseCode != 200) {
-                System.out.println("Controller : ControllerChannel : sendControllerLog Error RepsonceCode: " + responseCode);
-                System.out.println(url);
+                logger.debug("Controller : ControllerChannel : sendControllerLog Error RepsonceCode: " + responseCode);
+                logger.debug(url);
             }
 
         } catch (Exception ex) {
-            System.out.println("Controller : ControllerChannel : sendControllerLog : " + ex.toString());
+            logger.debug("Controller : ControllerChannel : sendControllerLog : " + ex.toString());
         }
     }
 
@@ -478,8 +481,8 @@ public class GlobalControllerChannel {
         con.setRequestProperty("User-Agent", USER_AGENT);
 
         int responseCode = con.getResponseCode();
-        System.out.println("\nSending 'GET' request to URL : " + url);
-        System.out.println("Response Code : " + responseCode);
+        logger.debug("\nSending 'GET' request to URL : " + url);
+        logger.debug("Response Code : " + responseCode);
 
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(con.getInputStream()));
@@ -493,14 +496,14 @@ public class GlobalControllerChannel {
 
 
         //print result
-        System.out.println(response.toString());
+        logger.debug(response.toString());
 
     }
 
     private MsgEvent meFromJson(String jsonMe) {
         Gson gson = new GsonBuilder().create();
         MsgEvent me = gson.fromJson(jsonMe, MsgEvent.class);
-        //System.out.println(p);
+        //logger.debug(p);
         return me;
     }
 }
