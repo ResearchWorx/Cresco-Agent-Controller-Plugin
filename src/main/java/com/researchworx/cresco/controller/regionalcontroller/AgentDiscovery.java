@@ -164,7 +164,9 @@ public class AgentDiscovery {
                     */
 //end watch
                 }
-
+                else {
+                    logger.error("UNKNOWN DISCOVERY PATH! : " + le.getParams());
+                }
                 if (plugin.getDiscoveryMap().containsKey(discoverString)) {
                     plugin.getDiscoveryMap().remove(discoverString); //remove discovery block
                 }
