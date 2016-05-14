@@ -57,8 +57,8 @@ public class ActiveBroker {
                 while(!broker.isStarted()) {
 			    	Thread.sleep(1000);
                 }
-				authenticationPlugin.addUser(brokerUserNameAgent,brokerPasswordAgent,"agent");
-				authorizationPlugin.addEntry(">", "agent");
+				addUser(brokerUserNameAgent,brokerPasswordAgent,"agent");
+				addPolicy(">", "agent");
 
             } else {
 				System.out.println("Constructor : portAvailable(32010) == false");
