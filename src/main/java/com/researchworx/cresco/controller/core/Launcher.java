@@ -230,7 +230,7 @@ public class Launcher extends CPlugin {
 
     public void sendAPMessage(MsgEvent msg) {
         if (this.ap == null) {
-            System.out.println("AP is null");
+            logger.debug("AP is null");
             return;
         }
         this.ap.sendMessage(msg);
