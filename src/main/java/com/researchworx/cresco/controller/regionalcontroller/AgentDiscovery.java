@@ -18,11 +18,11 @@ public class AgentDiscovery {
 
     public void perfupdate(MsgEvent pe) {
         //send to controller if global WatchPerf
-        //System.out.println("WatchPerf: " + pe.getParamsString());
+        //logger.debug("WatchPerf: " + pe.getParamsString());
         /*
        if(!PluginEngine.controllerChannel.updatePerf(pe))
 	   {
-			System.out.println("Controller : AgentDiscovery : Failed to updatePerf for WatchPerf on Controller");
+			logger.debug("Controller : AgentDiscovery : Failed to updatePerf for WatchPerf on Controller");
 	   }
 	   */
     }
@@ -30,29 +30,30 @@ public class AgentDiscovery {
     public void discover(MsgEvent le) {
         try {
             String discoverString = le.getParam("src_region") + "-" + le.getParam("src_agent") + "-" + le.getParam("src_plugin");
-
+            logger.debug("discoveryString : " + discoverString);
             if (plugin.getDiscoveryMap().containsKey(discoverString)) {
-                System.out.println("Discovery underway for : discoverString=" + discoverString);
+                logger.info("Discovery underway for : discoverString=" + discoverString);
             } else {
 
                 plugin.getDiscoveryMap().put(discoverString, System.currentTimeMillis());
 
                 if ((le.getMsgType() == MsgEvent.Type.CONFIG) && (le.getMsgBody().equals("disabled"))) {
                     //if we see a agent enable command respond to it
-                    System.out.println("Remove Node: " + le.getParams());
+
+                    logger.debug("Remove Node: " + le.getParams());
                     if (le.getParam("src_plugin") == null) //if plugin discover plugin info as well
                     {
                         plugin.getGDB().removeNode(le.getParam("src_region"), le.getParam("src_agent"), null);
-                        System.out.println("AGENT REMOVED: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
+                        logger.debug("AGENT REMOVED: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
                     } else {
                         plugin.getGDB().removeNode(le.getParam("src_region"), le.getParam("src_agent"), le.getParam("src_plugin"));
-                        System.out.println("PLUGIN REMOVED: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent") + " Plugin:" + le.getParam("src_plugin"));
+                        logger.debug("PLUGIN REMOVED: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent") + " Plugin:" + le.getParam("src_plugin"));
 
                     }
 
                 } else if ((le.getMsgType() == MsgEvent.Type.CONFIG) && (le.getMsgBody().equals("enabled"))) {
                     //if we see a agent enable command respond to it
-                    System.out.println("AGENTDISCOVER: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
+                    logger.debug("AGENTDISCOVER: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
                     le.setMsgPlugin(null);
                     le.setMsgRegion(le.getParam("src_region"));
                     le.setMsgAgent(le.getParam("src_agent"));
@@ -121,7 +122,7 @@ public class AgentDiscovery {
 
                             if (oldRunTime > watchRunTime) //if plugin config has been reset refresh
                             {
-                                System.out.println("AGENT CONFIGRUATION RESET");
+                                logger.debug("AGENT CONFIGRUATION RESET");
                                 MsgEvent newDep = refreshCmd(le);
                                 PluginEngine.gdb.setNodeParams(le.getParam("src_region"), le.getParam("src_agent"), null, newDep.getParams());
                             } else {
@@ -149,7 +150,7 @@ public class AgentDiscovery {
                             long oldRunTime = 0l;
                             if (oldRunTime > watchRunTime) //if plugin config has been reset refresh
                             {
-                                System.out.println("PLUGIN CONFIGRUATION RESET");
+                                logger.debug("PLUGIN CONFIGRUATION RESET");
                                 //PluginEngine.gdb.setNodeParam(le.getMsgRegion(), le.getMsgAgent(),null,"runtime",)
                                 MsgEvent newDep = refreshCmd(le);
                                 PluginEngine.gdb.setNodeParams(le.getParam("src_region"), le.getParam("src_agent"), le.getParam("src_plugin"), newDep.getParams());
@@ -170,7 +171,7 @@ public class AgentDiscovery {
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            System.out.println("Controller : AgentDiscovery run() : " + ex.toString());
+            logger.debug("Controller : AgentDiscovery run() : " + ex.toString());
 
         }
     }
@@ -211,10 +212,10 @@ public class AgentDiscovery {
 
 
         } catch (Exception ex) {
-            System.out.println("Controller : AgentDiscovery refreshCmd : " + ex.toString());
-            System.out.println("MsgType=" + me.getMsgType().toString());
-            System.out.println("Region=" + me.getMsgRegion() + " Agent=" + me.getMsgAgent() + " plugin=" + me.getMsgPlugin());
-            System.out.println("params=" + me.getParams());
+            logger.debug("Controller : AgentDiscovery refreshCmd : " + ex.toString());
+            logger.debug("MsgType=" + me.getMsgType().toString());
+            logger.debug("Region=" + me.getMsgRegion() + " Agent=" + me.getMsgAgent() + " plugin=" + me.getMsgPlugin());
+            logger.debug("params=" + me.getParams());
             return null;
         }
     }
@@ -230,7 +231,7 @@ public class AgentDiscovery {
   	    	        
   	    	        String region = pairs.getKey().toString();
   	    	        Map<String, AgentNode> regionMap = (Map<String, AgentNode>) pairs.getValue();
-  	    	        //System.out.println("Cleanup Region:" + region);
+  	    	        //logger.debug("Cleanup Region:" + region);
 	    	        
   	    	        Iterator it2 = regionMap.entrySet().iterator();
   	    	        while (it2.hasNext()) 
@@ -239,14 +240,14 @@ public class AgentDiscovery {
     	    	        
     	    	        String agent = pairs2.getKey().toString();
     	    	        AgentNode aNode = (AgentNode) pairs2.getValue();
-      	    	        //System.out.println("Cleanup Agent:" + agent);
+      	    	        //logger.debug("Cleanup Agent:" + agent);
       	    	        MsgEvent de = aNode.getAgentDe();
       	    	        long deTimeStamp = Long.parseLong(de.getParam("timestamp"));
       	    	        deTimeStamp = deTimeStamp + PluginEngine.config.getWatchDogTimer() * 3;
       	    	        if(deTimeStamp < timeStamp)
       	    	        {
       	    	        	regionMap.remove(agent);
-      	    	        	System.out.println("Removed Region:" + region + " Agent:" + agent);
+      	    	        	logger.debug("Removed Region:" + region + " Agent:" + agent);
       	    	        }
       	    	        else
       	    	        {
@@ -254,14 +255,14 @@ public class AgentDiscovery {
       	    	        	for(String plugin : pluginList)
       	    	        	{
       	    	        		MsgEvent dep = aNode.getPluginDe(plugin);
-      	    	        		//System.out.println("Cleanup Agent:" + agent + " Plugin:" + plugin);
+      	    	        		//logger.debug("Cleanup Agent:" + agent + " Plugin:" + plugin);
       	    	        		long depTimeStamp = Long.parseLong(dep.getParam("timestamp"));
       	      	    	        depTimeStamp = depTimeStamp + PluginEngine.config.getWatchDogTimer() * 3;
       	      	    	        if(depTimeStamp < timeStamp)
       	      	    	        {
       	      	    	        	aNode.removePlugin(plugin);
-      	      	    	        	System.out.println("Removed Region:" + region + " Agent:" + agent + " plugin:" + plugin);
-      	      	    	            //System.out.println("Removed Agent:" + agent + " plugin:" + plugin);
+      	      	    	        	logger.debug("Removed Region:" + region + " Agent:" + agent + " plugin:" + plugin);
+      	      	    	            //logger.debug("Removed Agent:" + agent + " plugin:" + plugin);
       	      	    	        }
       	    	        	}
       	    	        }
