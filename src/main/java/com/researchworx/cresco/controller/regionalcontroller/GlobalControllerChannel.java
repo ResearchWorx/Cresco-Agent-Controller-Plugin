@@ -26,7 +26,7 @@ public class GlobalControllerChannel {
 
 
     private String controllerUrl;
-    private String performanceUrl;
+    private String KPIUrl;
 
     public GlobalControllerChannel(Launcher plugin) {
         this.plugin = plugin;
@@ -36,7 +36,7 @@ public class GlobalControllerChannel {
             } else {
                 controllerUrl = "http://" + plugin.getConfig().getStringParam("globalcontroller_host") + ":32000/API";
             }
-            performanceUrl = "http://" + plugin.getConfig().getStringParam("globalcontroller_host") + ":32002/API";
+            KPIUrl = "http://" + plugin.getConfig().getStringParam("globalcontroller_host") + ":32002/API";
 
             //Create pooling agent
             startTS = System.currentTimeMillis();
@@ -383,7 +383,7 @@ public class GlobalControllerChannel {
                 type = le.getMsgType().toString();
             }
             //String url = controllerUrl + urlFromMsg(type,leMap);
-            String url = performanceUrl + urlFromMsg(type, leMap);
+            String url = KPIUrl + urlFromMsg(type, leMap);
             URL obj = new URL(url);
             HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 

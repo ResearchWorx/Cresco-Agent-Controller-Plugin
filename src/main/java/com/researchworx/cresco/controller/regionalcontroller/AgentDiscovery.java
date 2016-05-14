@@ -167,7 +167,7 @@ public class AgentDiscovery {
 //end watch
                 } else if (le.getMsgType() == MsgEvent.Type.KPI) {
                     logger.info("KPI: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
-
+                    plugin.getGlobalControllerChannel().updatePerf(le);
                 }
                 else if (le.getMsgType() == MsgEvent.Type.INFO) {
                     logger.info("INFO: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
