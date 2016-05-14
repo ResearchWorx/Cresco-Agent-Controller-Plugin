@@ -80,6 +80,7 @@ public class AgentDiscovery {
                     } catch (Exception ex) {
                         logger.debug("WATCHDOG : " + ex.getMessage());
                     }
+
                     /*
                     long watchRunTime = 0; //determine message runtime
                     long watchTimeStamp = 0; //determine message timestamp
@@ -164,7 +165,11 @@ public class AgentDiscovery {
                     }
                     */
 //end watch
+                } else if (le.getMsgType() == MsgEvent.Type.KPI) {
+                    logger.info("KPI: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
+
                 }
+
                 else {
                     logger.error("UNKNOWN DISCOVERY PATH! : MsgType=" + le.getMsgType() + " " +  le.getParams());
                 }

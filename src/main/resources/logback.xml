@@ -14,7 +14,7 @@
     <logger name="com.researchworx.cresco.controller.regionalcontroller.ControllerDB" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="com.researchworx.cresco.controller.regionalcontroller.AgentDiscovery" level="debug" additivity="false">
+    <logger name="com.researchworx.cresco.controller.regionalcontroller.AgentDiscovery" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
     <logger name="com.researchworx.cresco.controller.communication.ActiveAgentConsumer" level="info" additivity="false">
