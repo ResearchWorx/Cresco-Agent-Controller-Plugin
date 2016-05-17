@@ -372,6 +372,7 @@ public class Launcher extends CPlugin {
                 String cbrokerAddress = null;
                 String cbrokerValidatedAuthenication = null;
 
+
                 String cRegion = null;
                 int brokerCount = -1;
                 for (MsgEvent bm : discoveryList) {
