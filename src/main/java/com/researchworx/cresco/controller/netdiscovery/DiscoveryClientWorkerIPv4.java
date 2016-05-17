@@ -192,8 +192,12 @@ class DiscoveryClientWorkerIPv4 {
             } else if (rme.getParam("discovery_type").equals(DiscoveryType.GLOBAL.name())) {
                 discoverySecret = plugin.getConfig().getStringParam("discovery_secret_global");
             }
-            decryptedString = discoveryCrypto.decrypt(rme.getParam("validated_authenication"),discoverySecret);
-
+            if(rme.getParam("validated_authenication") != null) {
+                decryptedString = discoveryCrypto.decrypt(rme.getParam("validated_authenication"), discoverySecret);
+            }
+            else {
+                logger.error("[validated_authenication] record not found!");
+            }
         }
         catch(Exception ex) {
             logger.error(ex.getMessage());
