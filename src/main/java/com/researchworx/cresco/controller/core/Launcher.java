@@ -246,21 +246,31 @@ public class Launcher extends CPlugin {
             this.brokerAddressAgent = null;
             this.isIPv6 = isIPv6();
 
-            List<MsgEvent> discoveryList = new ArrayList<>();
+            //List<MsgEvent> discoveryList = new ArrayList<>();
+            List<MsgEvent> discoveryList = null;
 
-            this.dcv4 = new DiscoveryClientIPv4(this);
-            this.dcv6 = new DiscoveryClientIPv6(this);
+            if(getConfig().getStringParam("regional_controller_host") != null) {
+                //do directed discovery
+                LOG.debug("Broker Search Static...");
+                DiscoveryStatic ds = new DiscoveryStatic(this);
+                discoveryList = ds.discover(DiscoveryType.AGENT, 2000, getConfig().getStringParam("regional_controller_host"));
+                LOG.debug("Static Broker count = {}" + discoveryList.size());
 
-            if (this.isIPv6) {
-                LOG.debug("Broker Search (IPv6)...");
-                discoveryList = this.dcv6.getDiscoveryResponse(DiscoveryType.AGENT, 2000);
-                LOG.debug("IPv6 Broker count = {}" + discoveryList.size());
+            } else {
+                this.dcv4 = new DiscoveryClientIPv4(this);
+                this.dcv6 = new DiscoveryClientIPv6(this);
+
+                if (this.isIPv6) {
+                    LOG.debug("Broker Search (IPv6)...");
+                    discoveryList = this.dcv6.getDiscoveryResponse(DiscoveryType.AGENT, 2000);
+                    LOG.debug("IPv6 Broker count = {}" + discoveryList.size());
+                }
+                LOG.debug("Broker Search (IPv4)...");
+                discoveryList.addAll(this.dcv4.getDiscoveryResponse(DiscoveryType.AGENT, 2000));
+                LOG.debug("Broker count = {}" + discoveryList.size());
             }
-            LOG.debug("Broker Search (IPv4)...");
-            discoveryList.addAll(this.dcv4.getDiscoveryResponse(DiscoveryType.AGENT, 2000));
-            LOG.debug("Broker count = {}" + discoveryList.size());
 
-            if ((discoveryList.isEmpty() && (getConfig().getStringParam("regional_controller_host") == null)) || getConfig().getBooleanParam("regional_controller_force", false)) {
+            if (discoveryList.isEmpty()) {
                 //generate regional ident if not assigned
                 //String oldRegion = region; //keep old region if assigned
 
@@ -282,14 +292,14 @@ public class Launcher extends CPlugin {
                 //logger.debug("IPv6 DiscoveryEngine Started..");
 
                 LOG.debug("Broker starting");
-                if((getConfig().getStringParam("regional_broker_username") != null) && (getConfig().getStringParam("regional_broker_password") != null)) {
-                    brokerUserNameAgent = getConfig().getStringParam("regional_broker_username");
-                    brokerPasswordAgent = getConfig().getStringParam("regional_broker_password");
-                }
-                else {
+                //if((getConfig().getStringParam("regional_broker_username") != null) && (getConfig().getStringParam("regional_broker_password") != null)) {
+                //    brokerUserNameAgent = getConfig().getStringParam("regional_broker_username");
+                //    brokerPasswordAgent = getConfig().getStringParam("regional_broker_password");
+                //}
+                //else {
                     brokerUserNameAgent = java.util.UUID.randomUUID().toString();
                     brokerPasswordAgent = java.util.UUID.randomUUID().toString();
-                }
+                //}
                 this.broker = new ActiveBroker(this.agentpath,brokerUserNameAgent,brokerPasswordAgent);
 
                 //broker manager
@@ -350,14 +360,15 @@ public class Launcher extends CPlugin {
                         LOG.debug("Global Controller : Unable to Contact!");
                     }
                 }
-            } else if((getConfig().getStringParam("regional_controller_host") != null) && (getConfig().getStringParam("regional_broker_username") != null) && (getConfig().getStringParam("regional_broker_password") != null)) {
+            } else if(getConfig().getStringParam("regional_controller_host") != null) {
 
                 String cbrokerAddress = getConfig().getStringParam("regional_controller_host");
+                String cbrokerValidatedAuthenication = null;
 
                 LOG.info("Using static configuration to connect to regional controller: " + cbrokerAddress);
-                    brokerUserNameAgent = getConfig().getStringParam("regional_broker_username");
-                    brokerPasswordAgent = getConfig().getStringParam("regional_broker_password");
-                    //set broker ip
+
+
+                //set broker ip
                     InetAddress remoteAddress = InetAddress.getByName(cbrokerAddress);
                     if (remoteAddress instanceof Inet6Address) {
                         cbrokerAddress = "[" + cbrokerAddress + "]";
