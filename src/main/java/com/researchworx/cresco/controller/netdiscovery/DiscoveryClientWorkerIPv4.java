@@ -198,6 +198,7 @@ class DiscoveryClientWorkerIPv4 {
             else {
                 logger.error("[validated_authenication] record not found!");
             }
+
         }
         catch(Exception ex) {
             logger.error(ex.getMessage());
