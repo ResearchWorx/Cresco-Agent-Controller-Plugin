@@ -352,7 +352,7 @@ public class Launcher extends CPlugin {
                 }
             } else if((getConfig().getStringParam("regional_controller_host") != null) && (getConfig().getStringParam("regional_broker_username") != null) && (getConfig().getStringParam("regional_broker_password") != null)) {
 
-                String cbrokerAddress = getConfig().getStringParam("regionalcontroller_host");
+                String cbrokerAddress = getConfig().getStringParam("regional_controller_host");
 
                 LOG.info("Using static configuration to connect to regional controller: " + cbrokerAddress);
                     brokerUserNameAgent = getConfig().getStringParam("regional_broker_username");
