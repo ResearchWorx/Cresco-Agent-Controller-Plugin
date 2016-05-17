@@ -110,10 +110,10 @@ public class DiscoveryStatic {
                             //logger.trace("Building sendPacket for {}", inAddr.toString());
                             String sendJson = gson.toJson(sme);
                             byte[] sendData = sendJson.getBytes();
-                            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet4Address.getByName(hostAddress), 32005);
+                            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(hostAddress), 32005);
                             synchronized (c) {
                                 c.send(sendPacket);
-                                //logger.trace("Sent sendPacket via {}", inAddr.toString());
+                                logger.trace("Sent sendPacket to {}", hostAddress);
                             }
                             while (!c.isClosed()) {
                                 try {
