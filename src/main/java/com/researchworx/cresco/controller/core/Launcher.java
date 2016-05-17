@@ -352,10 +352,12 @@ public class Launcher extends CPlugin {
                 }
             } else if((getConfig().getStringParam("regionalcontroller_host") != null) && (getConfig().getStringParam("regional_broker_username") != null) && (getConfig().getStringParam("regional_broker_password") != null)) {
 
+                String cbrokerAddress = getConfig().getStringParam("regionalcontroller_host");
+
+                LOG.info("Using static configuration to connect to regional controller: " + cbrokerAddress);
                     brokerUserNameAgent = getConfig().getStringParam("regional_broker_username");
                     brokerPasswordAgent = getConfig().getStringParam("regional_broker_password");
                     //set broker ip
-                    String cbrokerAddress = getConfig().getStringParam("regionalcontroller_host");
                     InetAddress remoteAddress = InetAddress.getByName(cbrokerAddress);
                     if (remoteAddress instanceof Inet6Address) {
                         cbrokerAddress = "[" + cbrokerAddress + "]";
