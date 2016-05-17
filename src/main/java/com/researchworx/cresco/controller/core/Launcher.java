@@ -245,6 +245,8 @@ public class Launcher extends CPlugin {
             this.outgoingMessages = new ConcurrentLinkedQueue<>();
             this.brokerAddressAgent = null;
             this.isIPv6 = isIPv6();
+            this.dcv4 = new DiscoveryClientIPv4(this);
+            this.dcv6 = new DiscoveryClientIPv6(this);
 
             //List<MsgEvent> discoveryList = new ArrayList<>();
             List<MsgEvent> discoveryList = null;
@@ -257,8 +259,6 @@ public class Launcher extends CPlugin {
                 LOG.debug("Static Broker count = {}" + discoveryList.size());
 
             } else {
-                this.dcv4 = new DiscoveryClientIPv4(this);
-                this.dcv6 = new DiscoveryClientIPv6(this);
 
                 if (this.isIPv6) {
                     LOG.debug("Broker Search (IPv6)...");
@@ -339,6 +339,7 @@ public class Launcher extends CPlugin {
 
                 //start regional discovery
                 discoveryList.clear();
+
                 if (this.isIPv6)
                     discoveryList = this.dcv6.getDiscoveryResponse(DiscoveryType.REGION, 2000);
                 discoveryList.addAll(this.dcv4.getDiscoveryResponse(DiscoveryType.REGION, 2000));
