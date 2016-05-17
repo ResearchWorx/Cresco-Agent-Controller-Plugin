@@ -350,7 +350,7 @@ public class Launcher extends CPlugin {
                         LOG.debug("Global Controller : Unable to Contact!");
                     }
                 }
-            } else if((getConfig().getStringParam("regionalcontroller_host") != null) && (getConfig().getStringParam("regional_broker_username") != null) && (getConfig().getStringParam("regional_broker_password") != null)) {
+            } else if((getConfig().getStringParam("regional_controller_host") != null) && (getConfig().getStringParam("regional_broker_username") != null) && (getConfig().getStringParam("regional_broker_password") != null)) {
 
                 String cbrokerAddress = getConfig().getStringParam("regionalcontroller_host");
 
