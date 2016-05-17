@@ -260,7 +260,7 @@ public class Launcher extends CPlugin {
             discoveryList.addAll(this.dcv4.getDiscoveryResponse(DiscoveryType.AGENT, 2000));
             LOG.debug("Broker count = {}" + discoveryList.size());
 
-            if (discoveryList.isEmpty() || getConfig().getBooleanParam("regional_controller_force", false)) {
+            if ((discoveryList.isEmpty() && (getConfig().getStringParam("regionalcontroller_host") == null)) || getConfig().getBooleanParam("regional_controller_force", false)) {
                 //generate regional ident if not assigned
                 //String oldRegion = region; //keep old region if assigned
 
