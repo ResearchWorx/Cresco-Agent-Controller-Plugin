@@ -131,6 +131,7 @@ public class DiscoveryEngine implements Runnable {
                 }
             } catch (Exception ex) {
                 logger.error("Run : Interface = {} : Error = {}", networkInterface.getDisplayName(), ex.getMessage());
+                ex.printStackTrace();
             }
         }
 
