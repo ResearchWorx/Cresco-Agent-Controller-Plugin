@@ -197,6 +197,7 @@ class DiscoveryClientWorkerIPv4 {
             }
             else {
                 logger.error("[validated_authenication] record not found!");
+                logger.error(rme.getParams().toString());
             }
 
         }
