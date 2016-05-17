@@ -260,15 +260,15 @@ public class Launcher extends CPlugin {
             discoveryList.addAll(this.dcv4.getDiscoveryResponse(DiscoveryType.AGENT, 2000));
             LOG.debug("Broker count = {}" + discoveryList.size());
 
-            if (discoveryList.isEmpty()) {
+            if (discoveryList.isEmpty() || getConfig().getBooleanParam("regional_controller_force", false)) {
                 //generate regional ident if not assigned
                 //String oldRegion = region; //keep old region if assigned
 
                 if ((this.region.equals("init")) && (this.agent.equals("init"))) {
                     region = "region-" + java.util.UUID.randomUUID().toString();
                     agent = "agent-" + java.util.UUID.randomUUID().toString();
+                    LOG.debug("Generated regionid=" + this.region);
                 }
-                LOG.debug("Generated regionid=" + this.region);
                 this.agentpath = this.region + "_" + this.agent;
                 LOG.debug("AgentPath=" + this.agentpath);
                 //Start controller services
@@ -282,8 +282,14 @@ public class Launcher extends CPlugin {
                 //logger.debug("IPv6 DiscoveryEngine Started..");
 
                 LOG.debug("Broker starting");
-                brokerUserNameAgent = java.util.UUID.randomUUID().toString();
-                brokerPasswordAgent = java.util.UUID.randomUUID().toString();
+                if((getConfig().getStringParam("regional_broker_username") != null) && (getConfig().getStringParam("regional_broker_password") != null)) {
+                    brokerUserNameAgent = getConfig().getStringParam("regional_broker_username");
+                    brokerPasswordAgent = getConfig().getStringParam("regional_broker_password");
+                }
+                else {
+                    brokerUserNameAgent = java.util.UUID.randomUUID().toString();
+                    brokerPasswordAgent = java.util.UUID.randomUUID().toString();
+                }
                 this.broker = new ActiveBroker(this.agentpath,brokerUserNameAgent,brokerPasswordAgent);
 
                 //broker manager
@@ -344,7 +350,23 @@ public class Launcher extends CPlugin {
                         LOG.debug("Global Controller : Unable to Contact!");
                     }
                 }
-            } else {
+            } else if((getConfig().getStringParam("regionalcontroller_host") != null) && (getConfig().getStringParam("regional_broker_username") != null) && (getConfig().getStringParam("regional_broker_password") != null)) {
+
+                    brokerUserNameAgent = getConfig().getStringParam("regional_broker_username");
+                    brokerPasswordAgent = getConfig().getStringParam("regional_broker_password");
+                    //set broker ip
+                    String cbrokerAddress = getConfig().getStringParam("regionalcontroller_host");
+                    InetAddress remoteAddress = InetAddress.getByName(cbrokerAddress);
+                    if (remoteAddress instanceof Inet6Address) {
+                        cbrokerAddress = "[" + cbrokerAddress + "]";
+                    }
+
+                    this.brokerAddressAgent = cbrokerAddress;
+
+                    this.agentpath = this.region + "_" + this.agent;
+                    LOG.debug("AgentPath=" + this.agentpath);
+            }
+            else {
                 //determine least loaded broker
                 //need to use additional metrics to determine best fit broker
                 String cbrokerAddress = null;
@@ -385,7 +407,6 @@ public class Launcher extends CPlugin {
                     LOG.info("Assigned regionid=" + this.region);
                     this.agentpath = this.region + "_" + this.agent;
                     LOG.debug("AgentPath=" + this.agentpath);
-
 
                 }
                 this.isRegionalController = false;
