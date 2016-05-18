@@ -255,18 +255,18 @@ public class Launcher extends CPlugin {
                 //do directed discovery
                 LOG.debug("Broker Search Static...");
                 DiscoveryStatic ds = new DiscoveryStatic(this);
-                discoveryList = ds.discover(DiscoveryType.AGENT, 5000, getConfig().getStringParam("regional_controller_host"));
+                discoveryList = ds.discover(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_static_agent_timeout",10000), getConfig().getStringParam("regional_controller_host"));
                 LOG.debug("Static Broker count = {}" + discoveryList.size());
 
             } else {
 
                 if (this.isIPv6) {
                     LOG.debug("Broker Search (IPv6)...");
-                    discoveryList = this.dcv6.getDiscoveryResponse(DiscoveryType.AGENT, 2000);
+                    discoveryList = this.dcv6.getDiscoveryResponse(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_ipv6_agent_timeout", 2000));
                     LOG.debug("IPv6 Broker count = {}" + discoveryList.size());
                 }
                 LOG.debug("Broker Search (IPv4)...");
-                discoveryList.addAll(this.dcv4.getDiscoveryResponse(DiscoveryType.AGENT, 2000));
+                discoveryList.addAll(this.dcv4.getDiscoveryResponse(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_ipv4_agent_timeout", 2000)));
                 LOG.debug("Broker count = {}" + discoveryList.size());
             }
             if(getConfig().getStringParam("regional_controller_host") != null) {
@@ -359,8 +359,8 @@ public class Launcher extends CPlugin {
                 discoveryList.clear();
 
                 if (this.isIPv6)
-                    discoveryList = this.dcv6.getDiscoveryResponse(DiscoveryType.REGION, 2000);
-                discoveryList.addAll(this.dcv4.getDiscoveryResponse(DiscoveryType.REGION, 2000));
+                    discoveryList = this.dcv6.getDiscoveryResponse(DiscoveryType.REGION, getConfig().getIntegerParam("discovery_ipv6_region_timeout", 2000));
+                    discoveryList.addAll(this.dcv4.getDiscoveryResponse(DiscoveryType.REGION, getConfig().getIntegerParam("discovery_ipv4_region_timeout", 2000)));
                 if (!discoveryList.isEmpty()) {
                     for (MsgEvent ime : discoveryList) {
                         this.incomingCanidateBrokers.offer(ime);
