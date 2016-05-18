@@ -48,6 +48,7 @@ public class DiscoveryStatic {
     private synchronized void processIncoming(DatagramPacket packet) {
         synchronized (packet) {
             String json = new String(packet.getData()).trim();
+            logger.trace(json);
             try {
                 MsgEvent me = gson.fromJson(json, MsgEvent.class);
                 if (me != null) {
