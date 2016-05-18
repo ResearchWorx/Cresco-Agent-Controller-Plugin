@@ -227,6 +227,7 @@ public class DiscoveryEngine implements Runnable {
                         if (rme != null) {
                             //check for static discovery
                             //&& (sourceAddress != null)
+                            logger.trace("Static Discovery Status = " + rme.getParam("discovery_static_agent"));
                             if ((sourceAddress != null) || (rme.getParam("discovery_static_agent") != null)) {
                             //if (sourceAddress != null) {
 
