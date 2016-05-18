@@ -314,10 +314,14 @@ public class DiscoveryEngine implements Runnable {
                             logger.debug("getAgentMsg = " + me.getParams().toString());
                         }
                     } else {
+                        logger.error("src_region=" + rme.getParam("src_region") + " validatedAuthenication=" + validatedAuthenication);
                         if ((rme.getParam("src_region").equals(plugin.getRegion())) && plugin.isRegionalController()) {
                             logger.error("{}", "!reconnect attempt!");
                         }
                     }
+                }
+                else {
+                    logger.debug("Agent count too hight.. not responding to discovery");
                 }
 
             } catch (Exception ex) {
