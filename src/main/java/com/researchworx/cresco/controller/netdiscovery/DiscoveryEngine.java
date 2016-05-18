@@ -115,6 +115,10 @@ public class DiscoveryEngine implements Runnable {
                                     logger.trace("Sent Discovery packet!");
                                     plugin.responds.incrementAndGet();
                                 }
+                                else {
+                                    logger.trace("Discovery Return Packet = Null");
+                                }
+
                             }
                         } catch (IOException e) {
                             logger.trace("Socket closed");
