@@ -122,7 +122,7 @@ public class ActiveProducer {
                     //add startup key
                     synchronized (producerWorkersInProcess) {
                         while(producerWorkersInProcess.containsKey(dstPath)) {
-                            logger.debug("ActiveProducerWorker waiting for " + dstPath);
+                            logger.debug("ActiveProducerWorker waiting for CODY " + dstPath);
                             Thread.sleep(1000);
                         }
                         producerWorkersInProcess.put(dstPath, System.currentTimeMillis()); //add inprocess record
