@@ -156,6 +156,7 @@ public class DiscoveryEngine implements Runnable {
             try {
                 for (Map.Entry<String, String> entry : intAddr.entrySet()) {
                     String cdirAddress = entry.getKey() + "/" + entry.getValue();
+                    logger.trace("getSourceAddress : cdirAddress: " + cdirAddress + " remoteAddress: " + remoteAddress);
                     CIDRUtils cutil = new CIDRUtils(cdirAddress);
                     if (cutil.isInRange(remoteAddress)) {
                         sAddress = entry.getKey();
