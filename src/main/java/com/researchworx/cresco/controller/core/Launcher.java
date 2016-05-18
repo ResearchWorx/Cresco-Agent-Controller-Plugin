@@ -257,6 +257,9 @@ public class Launcher extends CPlugin {
                 DiscoveryStatic ds = new DiscoveryStatic(this);
                 discoveryList = ds.discover(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_static_agent_timeout",10000), getConfig().getStringParam("regional_controller_host"));
                 LOG.debug("Static Broker count = {}" + discoveryList.size());
+                if(discoveryList.size() == 0) {
+                    System.exit(0); //if static does not work exit
+                }
 
             } else {
 
