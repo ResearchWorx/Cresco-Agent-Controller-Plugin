@@ -6,6 +6,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
@@ -16,7 +17,7 @@ import com.google.gson.Gson;
 
 public class DiscoveryEngine implements Runnable {
     private Launcher plugin;
-    private static Map<NetworkInterface, MulticastSocket> workers = new HashMap<>();
+    private static Map<NetworkInterface, MulticastSocket> workers = new ConcurrentHashMap<>();
     private DiscoveryCrypto discoveryCrypto;
     private Gson gson;
 
@@ -85,6 +86,10 @@ public class DiscoveryEngine implements Runnable {
                     socket = new MulticastSocket(null);
                     socket.bind(sa);
                     workers.put(networkInterface, socket);
+                    //ditry hack for possible race condition
+                    while(!workers.containsKey(networkInterface)) {
+                        Thread.sleep(1000);
+                    }
                     logger.trace("Bound to interface [{}] address [::]", networkInterface.getDisplayName());
 
                     if (plugin.isIPv6()) {
