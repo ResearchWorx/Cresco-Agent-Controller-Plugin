@@ -66,6 +66,9 @@ public class DiscoveryStatic {
                     me.setParam("validated_authenication",ValidatedAuthenication(me));
 
                     discoveredList.add(me);
+                    logger.trace("Added Static discovered host to discoveredList.");
+                    logger.trace("discoveredList contains " + discoveredList.size() + " items.");
+
                 }
             } catch (Exception ex) {
                 logger.error("DiscoveryClientWorker in loop {}", ex.getMessage());
