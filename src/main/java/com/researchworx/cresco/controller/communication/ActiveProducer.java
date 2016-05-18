@@ -1,5 +1,6 @@
 package com.researchworx.cresco.controller.communication;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.Map.Entry;
@@ -47,7 +48,7 @@ public class ActiveProducer {
         this.brokerPasswordAgent = brokerPasswordAgent;
 		try {
 			producerWorkers = new ConcurrentHashMap<>();
-            producerWorkersInProcess = new ConcurrentHashMap<>();
+            producerWorkersInProcess = new HashMap<>();
 
 			this.URI = URI;
 			timer = new Timer();
@@ -90,15 +91,6 @@ public class ActiveProducer {
 			}
 			*/
 
-            if(producerWorkersInProcess.containsKey(dstPath))
-            {
-                while(!producerWorkers.containsKey(dstPath)) {
-                    logger.debug("ActiveProducerWorker waiting for " + dstPath);
-                    Thread.sleep(1000);
-                }
-
-            }
-
 
             if(producerWorkers.containsKey(dstPath)) {
 				if(this.plugin.isReachableAgent(dstPath)) {
@@ -114,18 +106,34 @@ public class ActiveProducer {
                     Thread.sleep(1000);
                 }
                 */
-                //add startup key
-                producerWorkersInProcess.put(dstPath,System.currentTimeMillis()); //add inprocess record
+                /*
+                if(producerWorkersInProcess.containsKey(dstPath))
+                {
+                    while(!producerWorkers.containsKey(dstPath)) {
+                        logger.debug("ActiveProducerWorker waiting for " + dstPath);
+                        Thread.sleep(1000);
+                    }
+
+                }
+                */
 
 				if (this.plugin.isReachableAgent(dstPath)) {
 
-					System.out.println("Creating new ActiveProducerWorker [" + dstPath + "]");
-
-					apw = new ActiveProducerWorker(dstPath, URI, brokerUserNameAgent, brokerPasswordAgent);
-					if(apw.isActive) {
-                        producerWorkers.put(dstPath, apw);
+                    //add startup key
+                    synchronized (producerWorkersInProcess) {
+                        while(producerWorkersInProcess.containsKey(dstPath)) {
+                            logger.debug("ActiveProducerWorker waiting for " + dstPath);
+                            Thread.sleep(1000);
+                        }
+                        producerWorkersInProcess.put(dstPath, System.currentTimeMillis()); //add inprocess record
+                        if(!producerWorkers.containsKey(dstPath)) {
+                            apw = new ActiveProducerWorker(dstPath, URI, brokerUserNameAgent, brokerPasswordAgent);
+                            if (apw.isActive) {
+                                producerWorkers.put(dstPath, apw);
+                            }
+                        }
+                        producerWorkersInProcess.remove(dstPath); //remove from that
                     }
-                    producerWorkersInProcess.remove(dstPath); //remove from that
 
 				} else {
 					System.out.println(dstPath + " is unreachable...");
