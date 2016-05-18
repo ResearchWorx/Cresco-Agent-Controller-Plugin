@@ -227,8 +227,8 @@ public class DiscoveryEngine implements Runnable {
                         if (rme != null) {
                             //check for static discovery
                             //&& (sourceAddress != null)
-                            //if ((sourceAddress != null) || (rme.getParam("discovery_static_agent") != null)) {
-                            if (sourceAddress != null) {
+                            if ((sourceAddress != null) || (rme.getParam("discovery_static_agent") != null)) {
+                            //if (sourceAddress != null) {
 
                                 rme.setParam("src_ip", remoteAddress);
                                 rme.setParam("src_port", String.valueOf(packet.getPort()));
