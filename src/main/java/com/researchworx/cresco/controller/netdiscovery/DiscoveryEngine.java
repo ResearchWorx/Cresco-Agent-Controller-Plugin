@@ -202,8 +202,9 @@ public class DiscoveryEngine implements Runnable {
                 String sourceAddress = getSourceAddress(intAddr, remoteAddress); //determine send address
 
 
-                if (!(intAddr.containsKey(remoteAddress)) && (isGlobal) && (sourceAddress != null)) {
-                    //Packet received
+                //if (!(intAddr.containsKey(remoteAddress)) && (isGlobal) && (sourceAddress != null)) {
+                if (!(intAddr.containsKey(remoteAddress)) && (isGlobal)) {
+                        //Packet received
                     //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
                     //System.out.println(getClass().getName() + ">>>Packet received; data: " + new String(packet.getData()));
 
@@ -226,7 +227,8 @@ public class DiscoveryEngine implements Runnable {
                         if (rme != null) {
                             //check for static discovery
                             //&& (sourceAddress != null)
-                            if ((sourceAddress != null) || (rme.getParam("discovery_static_agent") != null)) {
+                            //if ((sourceAddress != null) || (rme.getParam("discovery_static_agent") != null)) {
+                            if (sourceAddress != null) {
 
                                 rme.setParam("src_ip", remoteAddress);
                                 rme.setParam("src_port", String.valueOf(packet.getPort()));
