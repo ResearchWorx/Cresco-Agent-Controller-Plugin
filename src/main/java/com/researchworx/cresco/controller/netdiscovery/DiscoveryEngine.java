@@ -300,7 +300,7 @@ public class DiscoveryEngine implements Runnable {
 
 
                     if ((rme.getParam("src_region") != null) && (validatedAuthenication != null)) {
-                        if (rme.getParam("src_region").equals("init")) {
+                        //if (rme.getParam("src_region").equals("init")) {
                             //System.out.println(getClass().getName() + "1 " + Thread.currentThread().getId());
                             me = new MsgEvent(MsgEvent.Type.DISCOVER, plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), "Broadcast discovery response.");
                             me.setParam("dst_region", plugin.getRegion());
@@ -313,7 +313,7 @@ public class DiscoveryEngine implements Runnable {
                             me.setParam("discovery_type", DiscoveryType.AGENT.name());
                             me.setParam("validated_authenication",validatedAuthenication);
                             logger.debug("getAgentMsg = " + me.getParams().toString());
-                        }
+                        //}
                     } else {
                         logger.error("src_region=" + rme.getParam("src_region") + " validatedAuthenication=" + validatedAuthenication);
                         if ((rme.getParam("src_region").equals(plugin.getRegion())) && plugin.isRegionalController()) {
