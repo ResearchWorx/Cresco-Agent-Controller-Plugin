@@ -105,24 +105,29 @@ public class ActiveProducer {
                     synchronized (producerWorkersInProcess) {
                         isInProcess = producerWorkersInProcess.containsKey(dstPath);
                     }
-                    while(isInProcess/*producerWorkersInProcess.containsKey(dstPath)*/) {
-                        logger.debug("ActiveProducerWorker waiting for " + dstPath);
-                        Thread.sleep(1000);
+                    if (isInProcess) {
+                        while (isInProcess/*producerWorkersInProcess.containsKey(dstPath)*/) {
+                            logger.debug("ActiveProducerWorker waiting for " + dstPath);
+                            Thread.sleep(1000);
+                            synchronized (producerWorkersInProcess) {
+                                isInProcess = producerWorkersInProcess.containsKey(dstPath);
+                            }
+                            if (!isInProcess)
+                                apw = producerWorkers.get(dstPath);
+                        }
+                    } else {
                         synchronized (producerWorkersInProcess) {
-                            isInProcess = producerWorkersInProcess.containsKey(dstPath);
+                            producerWorkersInProcess.put(dstPath, System.currentTimeMillis()); //add inprocess record
                         }
-                    }
-                    synchronized (producerWorkersInProcess) {
-                        producerWorkersInProcess.put(dstPath, System.currentTimeMillis()); //add inprocess record
-                    }
-                    if(!producerWorkers.containsKey(dstPath)) {
-                        apw = new ActiveProducerWorker(dstPath, URI, brokerUserNameAgent, brokerPasswordAgent);
-                        if (apw.isActive) {
-                            producerWorkers.put(dstPath, apw);
+                        if (!producerWorkers.containsKey(dstPath)) {
+                            apw = new ActiveProducerWorker(dstPath, URI, brokerUserNameAgent, brokerPasswordAgent);
+                            if (apw.isActive) {
+                                producerWorkers.put(dstPath, apw);
+                            }
                         }
-                    }
-                    synchronized (producerWorkersInProcess) {
-                        producerWorkersInProcess.remove(dstPath); //remove from that
+                        synchronized (producerWorkersInProcess) {
+                            producerWorkersInProcess.remove(dstPath); //remove from that
+                        }
                     }
 
 				} else {
