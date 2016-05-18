@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 public class ActiveProducer {
 	public Map<String,ActiveProducerWorker> producerWorkers;
 
+    public Map<String,Long> producerWorkersInProcess;
+
 	private Launcher plugin;
 	private String URI;
 	private Timer timer;
@@ -45,6 +47,8 @@ public class ActiveProducer {
         this.brokerPasswordAgent = brokerPasswordAgent;
 		try {
 			producerWorkers = new ConcurrentHashMap<>();
+            producerWorkersInProcess = new ConcurrentHashMap<>();
+
 			this.URI = URI;
 			timer = new Timer();
 			timer.scheduleAtFixedRate(new ClearProducerTask(), 5000, 5000);
@@ -85,6 +89,12 @@ public class ActiveProducer {
 				dstPath = sm.getParam("dst_region"); //send to broker for routing
 			}
 			*/
+
+            while(producerWorkersInProcess.containsKey(dstPath)) {
+                logger.debug("ActiveProducerWorker waiting for " + dstPath);
+                Thread.sleep(1000);
+            }
+
 			if(producerWorkers.containsKey(dstPath)) {
 				if(this.plugin.isReachableAgent(dstPath)) {
 					apw = producerWorkers.get(dstPath);
@@ -94,8 +104,14 @@ public class ActiveProducer {
 			} else {
 				if (this.plugin.isReachableAgent(dstPath)) {
 					System.out.println("Creating new ActiveProducerWorker [" + dstPath + "]");
+                    //add startup key
+                    producerWorkersInProcess.put(dstPath,System.currentTimeMillis()); //add inprocess record
 					apw = new ActiveProducerWorker(dstPath, URI, brokerUserNameAgent, brokerPasswordAgent);
-					producerWorkers.put(dstPath, apw);
+					if(apw.isActive) {
+                        producerWorkers.put(dstPath, apw);
+                    }
+                    producerWorkersInProcess.remove(dstPath); //remove from that
+
 				} else {
 					System.out.println(dstPath + " is unreachable...");
 				}
