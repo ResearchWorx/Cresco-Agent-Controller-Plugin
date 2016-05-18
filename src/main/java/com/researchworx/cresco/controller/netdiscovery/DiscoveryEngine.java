@@ -105,13 +105,14 @@ public class DiscoveryEngine implements Runnable {
                         try {
                             synchronized (socket) {
                                 socket.receive(recPacket); //rec broadcast packet, could be IPv6 or IPv4
-                                logger.trace("Received packet!");
+                                logger.trace("Received Discovery packet!");
                             }
 
                             synchronized (socket) {
                                 DatagramPacket sendPacket = sendPacket(recPacket);
                                 if (sendPacket != null) {
                                     socket.send(sendPacket);
+                                    logger.trace("Sent Discovery packet!");
                                     plugin.responds.incrementAndGet();
                                 }
                             }
