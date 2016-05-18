@@ -195,7 +195,7 @@ public class DiscoveryEngine implements Runnable {
                 String sourceAddress = getSourceAddress(intAddr, remoteAddress); //determine send address
 
                 logger.trace("sendpacket 1");
-
+                logger.trace("Discovery packet from " + sourceAddress + " to " + remoteAddress);
                 if (!(intAddr.containsKey(remoteAddress)) && (isGlobal) && (sourceAddress != null)) {
                     //Packet received
                     //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
