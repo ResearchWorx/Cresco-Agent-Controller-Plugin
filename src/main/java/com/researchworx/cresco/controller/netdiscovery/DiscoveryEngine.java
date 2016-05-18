@@ -264,7 +264,10 @@ public class DiscoveryEngine implements Runnable {
 
                                 }
                             }//
+                        } else {
+                            packet = null;
                         }
+
                     } catch (Exception ex) {
                         logger.error("{}", ex.getMessage());
                     }
