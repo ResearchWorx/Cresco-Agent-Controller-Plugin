@@ -75,7 +75,7 @@
     <logger name="com.researchworx.cresco.library.plugin.core.CExecutor" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="com.researchworx.cresco.controller.core.MsgRoute" level="info" additivity="false">
+    <logger name="com.researchworx.cresco.controller.core.MsgRoute" level="trace" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
     <logger name="plugincore.WatchDog" level="info" additivity="false">
