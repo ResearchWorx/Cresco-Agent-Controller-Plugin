@@ -202,8 +202,8 @@ public class DiscoveryEngine implements Runnable {
                 String sourceAddress = getSourceAddress(intAddr, remoteAddress); //determine send address
 
 
-                if (!(intAddr.containsKey(remoteAddress)) && (isGlobal) && (sourceAddress != null)) {
-                //if (!(intAddr.containsKey(remoteAddress)) && (isGlobal)) {
+                //if (!(intAddr.containsKey(remoteAddress)) && (isGlobal) && (sourceAddress != null)) {
+                if (!(intAddr.containsKey(remoteAddress)) && (isGlobal)) {
                         //Packet received
                     //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
                     //System.out.println(getClass().getName() + ">>>Packet received; data: " + new String(packet.getData()));
@@ -267,7 +267,9 @@ public class DiscoveryEngine implements Runnable {
                                     logger.trace("sendpacket 4e");
 
                                 }
-                            }//
+                            } else {
+                                packet = null;
+                            }
                         } else {
                             packet = null;
                         }
