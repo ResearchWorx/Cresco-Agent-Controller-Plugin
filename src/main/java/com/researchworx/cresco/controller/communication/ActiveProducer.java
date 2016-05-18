@@ -90,6 +90,7 @@ public class ActiveProducer {
 			}
 			*/
 
+
 			if(producerWorkers.containsKey(dstPath)) {
 				if(this.plugin.isReachableAgent(dstPath)) {
 					apw = producerWorkers.get(dstPath);
@@ -98,16 +99,25 @@ public class ActiveProducer {
 				}
 			} else {
 
+                /*
                 while(producerWorkersInProcess.containsKey(dstPath)) {
                     logger.debug("ActiveProducerWorker waiting for " + dstPath);
                     Thread.sleep(1000);
                 }
+                */
+                if(producerWorkersInProcess.containsKey(dstPath))
+                {
+                    return false;
+                }
+                //add startup key
+                producerWorkersInProcess.put(dstPath,System.currentTimeMillis()); //add inprocess record
 
 				if (this.plugin.isReachableAgent(dstPath)) {
+
+
+
 					System.out.println("Creating new ActiveProducerWorker [" + dstPath + "]");
 
-                    //add startup key
-                    producerWorkersInProcess.put(dstPath,System.currentTimeMillis()); //add inprocess record
 
 					apw = new ActiveProducerWorker(dstPath, URI, brokerUserNameAgent, brokerPasswordAgent);
 					if(apw.isActive) {
