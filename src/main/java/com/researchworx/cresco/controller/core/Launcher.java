@@ -255,7 +255,7 @@ public class Launcher extends CPlugin {
                 //do directed discovery
                 LOG.debug("Broker Search Static...");
                 DiscoveryStatic ds = new DiscoveryStatic(this);
-                discoveryList = ds.discover(DiscoveryType.AGENT, 2000, getConfig().getStringParam("regional_controller_host"));
+                discoveryList = ds.discover(DiscoveryType.AGENT, 5000, getConfig().getStringParam("regional_controller_host"));
                 LOG.debug("Static Broker count = {}" + discoveryList.size());
 
             } else {
