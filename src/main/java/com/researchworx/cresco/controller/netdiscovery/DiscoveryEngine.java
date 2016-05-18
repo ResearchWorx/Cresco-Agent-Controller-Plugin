@@ -196,12 +196,10 @@ public class DiscoveryEngine implements Runnable {
                 boolean isGlobal = true;
                 if (returnAddr instanceof Inet6Address)
                     isGlobal = !returnAddr.isSiteLocalAddress() && !returnAddr.isLinkLocalAddress();
-                String sourceAddress = getSourceAddress(intAddr, remoteAddress); //determine send address
-
                 logger.trace("sendpacket 1");
-                logger.trace("Discovery packet from " + remoteAddress + " to " + sourceAddress);
+                //logger.trace("Discovery packet from " + remoteAddress + " to " + sourceAddress);
 
-                if (!(intAddr.containsKey(remoteAddress)) && (isGlobal) && (sourceAddress != null)) {
+                if (!(intAddr.containsKey(remoteAddress)) && (isGlobal)) {
                     //Packet received
                     //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
                     //System.out.println(getClass().getName() + ">>>Packet received; data: " + new String(packet.getData()));
@@ -223,45 +221,50 @@ public class DiscoveryEngine implements Runnable {
                         }
                         //System.out.println(getClass().getName() + "0.1 " + Thread.currentThread().getId());
                         if (rme != null) {
-                            rme.setParam("src_ip", remoteAddress);
-                            rme.setParam("src_port", String.valueOf(packet.getPort()));
+                            //check for static discovery
+                            String sourceAddress = getSourceAddress(intAddr, remoteAddress); //determine send address
+                            //&& (sourceAddress != null)
+                            if ((sourceAddress != null) || (rme.getParam("discovery_static_agent") != null)) {
 
-                            MsgEvent me = null;
-                            if (rme.getParam("discovery_type") != null) {
-                                if (rme.getParam("discovery_type").equals(DiscoveryType.AGENT.name())) {
-                                    logger.debug("{}", "agent discovery");
-                                    me = getAgentMsg(rme); //generate payload
-                                } else if (rme.getParam("discovery_type").equals(DiscoveryType.REGION.name())) {
-                                    logger.debug("{}", "regional discovery");
-                                    me = getRegionMsg(rme);
-                                } else if (rme.getParam("discovery_type").equals(DiscoveryType.GLOBAL.name())) {
-                                    logger.debug("{}", "regional global");
+                                rme.setParam("src_ip", remoteAddress);
+                                rme.setParam("src_port", String.valueOf(packet.getPort()));
+
+                                MsgEvent me = null;
+                                if (rme.getParam("discovery_type") != null) {
+                                    if (rme.getParam("discovery_type").equals(DiscoveryType.AGENT.name())) {
+                                        logger.debug("{}", "agent discovery");
+                                        me = getAgentMsg(rme); //generate payload
+                                    } else if (rme.getParam("discovery_type").equals(DiscoveryType.REGION.name())) {
+                                        logger.debug("{}", "regional discovery");
+                                        me = getRegionMsg(rme);
+                                    } else if (rme.getParam("discovery_type").equals(DiscoveryType.GLOBAL.name())) {
+                                        logger.debug("{}", "regional global");
+                                    }
                                 }
-                            }
 
 
-                            if (me != null) {
+                                if (me != null) {
 
-                                String json = gson.toJson(me);
-                                logger.trace(me.getParams().toString());
-                                byte[] sendData = json.getBytes();
-                                //returnAddr = InetAddress.getByName(me.getParam("dst_ip"));
-                                int returnPort = Integer.parseInt(me.getParam("dst_port"));
-                                logger.debug("returnAddr: " + remoteAddress + " returnPort: " + returnPort);
-                                //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
-                                packet.setData(sendData);
-                                packet.setLength(sendData.length);
-                                packet.setAddress(returnAddr);
-                                packet.setPort(returnPort);
-                                logger.trace("sendpacket 3");
+                                    String json = gson.toJson(me);
+                                    logger.trace(me.getParams().toString());
+                                    byte[] sendData = json.getBytes();
+                                    //returnAddr = InetAddress.getByName(me.getParam("dst_ip"));
+                                    int returnPort = Integer.parseInt(me.getParam("dst_port"));
+                                    logger.debug("returnAddr: " + remoteAddress + " returnPort: " + returnPort);
+                                    //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
+                                    packet.setData(sendData);
+                                    packet.setLength(sendData.length);
+                                    packet.setAddress(returnAddr);
+                                    packet.setPort(returnPort);
+                                    logger.trace("sendpacket 3");
 
-                            } else {
-                                packet = null; //make sure packet is null
-                                logger.trace("sendpacket 4e");
+                                } else {
+                                    packet = null; //make sure packet is null
+                                    logger.trace("sendpacket 4e");
 
-                            }
+                                }
+                            }//
                         }
-
                     } catch (Exception ex) {
                         logger.error("{}", ex.getMessage());
                     }
