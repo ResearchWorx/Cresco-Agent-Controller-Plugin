@@ -199,7 +199,10 @@ public class DiscoveryEngine implements Runnable {
                 logger.trace("sendpacket 1");
                 //logger.trace("Discovery packet from " + remoteAddress + " to " + sourceAddress);
 
-                if (!(intAddr.containsKey(remoteAddress)) && (isGlobal)) {
+                String sourceAddress = getSourceAddress(intAddr, remoteAddress); //determine send address
+
+
+                if (!(intAddr.containsKey(remoteAddress)) && (isGlobal) && (sourceAddress != null)) {
                     //Packet received
                     //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
                     //System.out.println(getClass().getName() + ">>>Packet received; data: " + new String(packet.getData()));
@@ -222,7 +225,6 @@ public class DiscoveryEngine implements Runnable {
                         //System.out.println(getClass().getName() + "0.1 " + Thread.currentThread().getId());
                         if (rme != null) {
                             //check for static discovery
-                            String sourceAddress = getSourceAddress(intAddr, remoteAddress); //determine send address
                             //&& (sourceAddress != null)
                             if ((sourceAddress != null) || (rme.getParam("discovery_static_agent") != null)) {
 
@@ -267,9 +269,9 @@ public class DiscoveryEngine implements Runnable {
                         } else {
                             packet = null;
                         }
-
                     } catch (Exception ex) {
                         logger.error("{}", ex.getMessage());
+                        packet = null;
                     }
                 } else {
                     packet = null;
