@@ -148,7 +148,6 @@ public class DiscoveryStatic {
         return discoveredList;
     }
 
-
     private String ValidatedAuthenication(MsgEvent rme) {
         String decryptedString = null;
         try {

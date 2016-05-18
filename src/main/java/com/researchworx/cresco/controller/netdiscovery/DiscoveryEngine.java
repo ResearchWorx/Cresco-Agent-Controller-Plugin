@@ -53,14 +53,6 @@ public class DiscoveryEngine implements Runnable {
         }
     }
 
-	/*public static DiscoveryEngine getInstance() {
-        return DiscoveryThreadHolder.INSTANCE;
-	}
-
-	private static class DiscoveryThreadHolder {
-		private static final DiscoveryEngine INSTANCE = new DiscoveryEngine();
-	}*/
-
     class DiscoveryEngineWorker implements Runnable {
         private final Logger logger = LoggerFactory.getLogger(DiscoveryEngineWorker.class);
 
@@ -232,9 +224,11 @@ public class DiscoveryEngine implements Runnable {
                             if (me != null) {
 
                                 String json = gson.toJson(me);
+                                logger.trace(me.getParams().toString());
                                 byte[] sendData = json.getBytes();
                                 //returnAddr = InetAddress.getByName(me.getParam("dst_ip"));
                                 int returnPort = Integer.parseInt(me.getParam("dst_port"));
+                                logger.debug("returnAddr: " + remoteAddress + " returnPort: " + returnPort);
                                 //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, returnAddr, returnPort);
                                 packet.setData(sendData);
                                 packet.setLength(sendData.length);
