@@ -174,6 +174,7 @@ public class DiscoveryEngine implements Runnable {
 
         private synchronized DatagramPacket sendPacket(DatagramPacket packet) {
             synchronized (packet) {
+                logger.trace("sendpacket 0");
                 Map<String, String> intAddr = getInterfaceAddresses();
                 InetAddress returnAddr = packet.getAddress();
 
@@ -183,6 +184,8 @@ public class DiscoveryEngine implements Runnable {
                     isGlobal = !returnAddr.isSiteLocalAddress() && !returnAddr.isLinkLocalAddress();
                 String sourceAddress = getSourceAddress(intAddr, remoteAddress); //determine send address
 
+                logger.trace("sendpacket 1");
+
                 if (!(intAddr.containsKey(remoteAddress)) && (isGlobal) && (sourceAddress != null)) {
                     //Packet received
                     //System.out.println(getClass().getName() + ">>>Discovery packet received from: " + packet.getAddress().getHostAddress());
@@ -190,6 +193,7 @@ public class DiscoveryEngine implements Runnable {
 
                     //See if the packet holds the right command (message)
                     String message = new String(packet.getData()).trim();
+                    logger.trace("sendpacket 2");
 
                     MsgEvent rme = null;
 
@@ -234,8 +238,12 @@ public class DiscoveryEngine implements Runnable {
                                 packet.setLength(sendData.length);
                                 packet.setAddress(returnAddr);
                                 packet.setPort(returnPort);
+                                logger.trace("sendpacket 3");
+
                             } else {
                                 packet = null; //make sure packet is null
+                                logger.trace("sendpacket 4e");
+
                             }
                         }
 
@@ -245,6 +253,8 @@ public class DiscoveryEngine implements Runnable {
                 } else {
                     packet = null;
                 }
+                logger.trace("sendpacket 5");
+
                 return packet;
             }
         }
