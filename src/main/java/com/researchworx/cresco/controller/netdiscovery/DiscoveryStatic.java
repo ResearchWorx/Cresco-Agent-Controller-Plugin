@@ -64,7 +64,6 @@ public class DiscoveryStatic {
                     me.setParam("dst_region", me.getParam("src_region"));
                     me.setParam("dst_agent", me.getParam("src_agent"));
                     me.setParam("validated_authenication",ValidatedAuthenication(me));
-                    me.setParam("discovery_static_agent","true");
 
                     discoveredList.add(me);
                     logger.trace("Added Static discovered host to discoveredList.");
@@ -107,6 +106,8 @@ public class DiscoveryStatic {
                             logger.trace("Discovery type unknown");
                             sme = null;
                         }
+                        //set for static discovery
+                        sme.setParam("discovery_static_agent","true");
 
                         //set crypto message for discovery
                         sme.setParam("discovery_validator",generateValidateMessage(sme));
