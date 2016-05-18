@@ -298,6 +298,7 @@ public class DiscoveryEngine implements Runnable {
 
                     String validatedAuthenication = validateMsgEvent(rme); //create auth string
 
+
                     if ((rme.getParam("src_region") != null) && (validatedAuthenication != null)) {
                         if (rme.getParam("src_region").equals("init")) {
                             //System.out.println(getClass().getName() + "1 " + Thread.currentThread().getId());
