@@ -16,10 +16,10 @@ public class DiscoveryStatic {
     private Launcher plugin;
     private DatagramSocket c;
     private Gson gson;
-    private Timer timer;
+    //private Timer timer;
     //private int discoveryTimeout;
     //private DiscoveryType disType;
-    private boolean timerActive = false;
+    //private boolean timerActive = false;
     private List<MsgEvent> discoveredList;
     private DiscoveryCrypto discoveryCrypto;
 
@@ -31,6 +31,7 @@ public class DiscoveryStatic {
         this.discoveryCrypto = new DiscoveryCrypto();
     }
 
+    /*
     private class StopListenerTask extends TimerTask {
         public void run() {
             try {
@@ -44,7 +45,7 @@ public class DiscoveryStatic {
             }
         }
     }
-
+    */
     private synchronized void processIncoming(DatagramPacket packet) {
         synchronized (packet) {
             String json = new String(packet.getData()).trim();
@@ -89,9 +90,9 @@ public class DiscoveryStatic {
 
                         c = new DatagramSocket();
 
-                        timer = new Timer();
-                        timer.schedule(new StopListenerTask(), discoveryTimeout);
-                        timerActive = true;
+                        //timer = new Timer();
+                        //timer.schedule(new StopListenerTask(), discoveryTimeout);
+                        //timerActive = true;
 
                         MsgEvent sme = new MsgEvent(MsgEvent.Type.DISCOVER, this.plugin.getRegion(), this.plugin.getAgent(), this.plugin.getPluginID(), "Discovery request.");
                         sme.setParam("discover_ip", hostAddress);
@@ -124,12 +125,14 @@ public class DiscoveryStatic {
                                     byte[] recvBuf = new byte[15000];
                                     DatagramPacket receivePacket = new DatagramPacket(recvBuf, recvBuf.length);
                                     synchronized (c) {
+                                        logger.trace("Static Discovery Timeout=" + c.getSoTimeout());
                                         c.receive(receivePacket);
                                         logger.trace("Received packet");
+                                        /*
                                         if (timerActive) {
                                             logger.trace("Restarting listening timer");
                                             timer.schedule(new StopListenerTask(), discoveryTimeout);
-                                        }
+                                        }*/
                                     }
                                     synchronized (receivePacket) {
                                         processIncoming(receivePacket);
