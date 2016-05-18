@@ -125,6 +125,7 @@ public class DiscoveryStatic {
                                     byte[] recvBuf = new byte[15000];
                                     DatagramPacket receivePacket = new DatagramPacket(recvBuf, recvBuf.length);
                                     synchronized (c) {
+                                        c.setSoTimeout(discoveryTimeout);
                                         logger.trace("Static Discovery Timeout=" + c.getSoTimeout());
                                         c.receive(receivePacket);
                                         logger.trace("Received packet");
