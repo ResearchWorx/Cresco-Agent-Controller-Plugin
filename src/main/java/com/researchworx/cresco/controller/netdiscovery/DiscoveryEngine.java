@@ -320,6 +320,9 @@ public class DiscoveryEngine implements Runnable {
             MsgEvent me = null;
             try {
                 if (plugin.isRegionalController()) {
+
+                    String validatedAuthenication = validateMsgEvent(rme); //create auth string
+
                     //System.out.println(getClass().getName() + "1 " + Thread.currentThread().getId());
                     me = new MsgEvent(MsgEvent.Type.DISCOVER, plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), "Broadcast discovery response.");
                     me.setParam("dst_region", plugin.getRegion());
@@ -330,6 +333,7 @@ public class DiscoveryEngine implements Runnable {
                     me.setParam("dst_port", rme.getParam("src_port"));
                     me.setParam("agent_count", String.valueOf(plugin.reachableAgents().size()));
                     me.setParam("discovery_type", DiscoveryType.REGION.name());
+                    me.setParam("validated_authenication",validatedAuthenication);
                 }
 
             } catch (Exception ex) {
