@@ -269,8 +269,26 @@ public class Launcher extends CPlugin {
                 discoveryList.addAll(this.dcv4.getDiscoveryResponse(DiscoveryType.AGENT, 2000));
                 LOG.debug("Broker count = {}" + discoveryList.size());
             }
+            if(getConfig().getStringParam("regional_controller_host") != null) {
 
-            if (discoveryList.isEmpty()) {
+                String cbrokerAddress = getConfig().getStringParam("regional_controller_host");
+                String cbrokerValidatedAuthenication = null;
+
+                LOG.info("Using static configuration to connect to regional controller: " + cbrokerAddress);
+
+
+                //set broker ip
+                InetAddress remoteAddress = InetAddress.getByName(cbrokerAddress);
+                if (remoteAddress instanceof Inet6Address) {
+                    cbrokerAddress = "[" + cbrokerAddress + "]";
+                }
+
+                this.brokerAddressAgent = cbrokerAddress;
+
+                this.agentpath = this.region + "_" + this.agent;
+                LOG.debug("AgentPath=" + this.agentpath);
+
+            }else if (discoveryList.isEmpty()) {
                 //generate regional ident if not assigned
                 //String oldRegion = region; //keep old region if assigned
 
@@ -361,24 +379,6 @@ public class Launcher extends CPlugin {
                         LOG.debug("Global Controller : Unable to Contact!");
                     }
                 }
-            } else if(getConfig().getStringParam("regional_controller_host") != null) {
-
-                String cbrokerAddress = getConfig().getStringParam("regional_controller_host");
-                String cbrokerValidatedAuthenication = null;
-
-                LOG.info("Using static configuration to connect to regional controller: " + cbrokerAddress);
-
-
-                //set broker ip
-                    InetAddress remoteAddress = InetAddress.getByName(cbrokerAddress);
-                    if (remoteAddress instanceof Inet6Address) {
-                        cbrokerAddress = "[" + cbrokerAddress + "]";
-                    }
-
-                    this.brokerAddressAgent = cbrokerAddress;
-
-                    this.agentpath = this.region + "_" + this.agent;
-                    LOG.debug("AgentPath=" + this.agentpath);
             }
             else {
                 //determine least loaded broker
