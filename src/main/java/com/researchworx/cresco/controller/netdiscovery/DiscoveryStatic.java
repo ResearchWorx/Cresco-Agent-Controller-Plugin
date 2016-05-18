@@ -120,7 +120,7 @@ public class DiscoveryStatic {
                                 c.send(sendPacket);
                                 logger.trace("Sent sendPacket to {}", hostAddress);
                             }
-                            while (!c.isClosed()) {
+                            if (!c.isClosed()) {
                                 try {
                                     byte[] recvBuf = new byte[15000];
                                     DatagramPacket receivePacket = new DatagramPacket(recvBuf, recvBuf.length);
@@ -136,6 +136,7 @@ public class DiscoveryStatic {
                                     }
                                     synchronized (receivePacket) {
                                         processIncoming(receivePacket);
+                                        c.close();
                                     }
                                 } catch (SocketException se) {
                                     // Eat the message, this is normal
