@@ -160,6 +160,7 @@ public class DiscoveryEngine implements Runnable {
                     CIDRUtils cutil = new CIDRUtils(cdirAddress);
                     if (cutil.isInRange(remoteAddress)) {
                         sAddress = entry.getKey();
+                        logger.trace("Found address in range : cdirAddress: " + cdirAddress + "== remoteAddress: " + remoteAddress);
                     }
                 }
             } catch (Exception ex) {
