@@ -274,24 +274,45 @@ public class Launcher extends CPlugin {
             }
             if(getConfig().getStringParam("regional_controller_host") != null) {
 
-                String cbrokerAddress = getConfig().getStringParam("regional_controller_host");
+                //determine least loaded broker
+                //need to use additional metrics to determine best fit broker
                 String cbrokerValidatedAuthenication = null;
+                String cRegion = null;
+                logger.trace("commInit {}" + discoveryList.get(0).getParams().toString());
+                cbrokerValidatedAuthenication = discoveryList.get(0).getParam("validated_authenication");
+                cRegion = discoveryList.get(0).getParam("src_region");
 
-                LOG.info("Using static configuration to connect to regional controller: " + cbrokerAddress);
+                if ((cbrokerValidatedAuthenication != null)) {
 
+                    //set agent broker auth
+                    String cbrokerAddress = getConfig().getStringParam("regional_controller_host");
+                    LOG.info("Using static configuration to connect to regional controller: " + cbrokerAddress);
 
-                //set broker ip
-                InetAddress remoteAddress = InetAddress.getByName(cbrokerAddress);
-                if (remoteAddress instanceof Inet6Address) {
-                    cbrokerAddress = "[" + cbrokerAddress + "]";
+                    String[] tmpAuth = cbrokerValidatedAuthenication.split(",");
+                    this.brokerUserNameAgent = tmpAuth[0];
+                    this.brokerPasswordAgent = tmpAuth[1];
+
+                    //set broker ip
+                    InetAddress remoteAddress = InetAddress.getByName(cbrokerAddress);
+                    if (remoteAddress instanceof Inet6Address) {
+                        cbrokerAddress = "[" + cbrokerAddress + "]";
+                    }
+                    if ((this.region.equals("init")) && (this.agent.equals("init"))) {
+                        //RandomString rs = new RandomString(4);
+                        this.agent = "agent-" + java.util.UUID.randomUUID().toString();//rs.nextString();
+                        //logger.warn("Agent region changed from :" + oldRegion + " to " + region);
+                    }
+                    this.brokerAddressAgent = cbrokerAddress;
+
+                    this.region = cRegion;
+                    LOG.info("Assigned regionid=" + this.region);
+                    this.agentpath = this.region + "_" + this.agent;
+                    LOG.debug("AgentPath=" + this.agentpath);
+
                 }
+                this.isRegionalController = false;
 
-                this.brokerAddressAgent = cbrokerAddress;
-
-                this.agentpath = this.region + "_" + this.agent;
-                LOG.debug("AgentPath=" + this.agentpath);
-
-            }else if (discoveryList.isEmpty()) {
+            } else if (discoveryList.isEmpty()) {
                 //generate regional ident if not assigned
                 //String oldRegion = region; //keep old region if assigned
 
