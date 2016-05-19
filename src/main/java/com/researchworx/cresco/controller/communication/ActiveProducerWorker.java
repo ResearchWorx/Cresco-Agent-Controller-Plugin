@@ -65,8 +65,8 @@ public class ActiveProducerWorker {
 	public boolean sendMessage(MsgEvent se) {
 		try {
 			String sendJson = gson.toJson(se);
-			logger.trace("sendMessage to : " + queueName + " message:" + se.getParams().toString());
 			producer.send(this.sess.createTextMessage(sendJson));
+			logger.trace("sendMessage to : " + queueName + " message:" + se.getParams().toString());
 			return true;
 		} catch (JMSException jmse) {
 			System.out.println("ActiveProducerWorker : sendMessage : " + se.getParams() + " : " + jmse.getMessage());

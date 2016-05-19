@@ -135,6 +135,7 @@ public class Launcher extends CPlugin {
 
     @Override
     public void msgIn(MsgEvent msg) {
+        logger.trace("msgIn : " + msg.getParams().toString());
         this.msgInProcessQueue.submit(new MsgRoute(this, msg));
     }
 
