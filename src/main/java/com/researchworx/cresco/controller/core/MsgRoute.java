@@ -28,6 +28,7 @@ public class MsgRoute implements Runnable {
                     if (rm.getParam("configtype") != null) {
                         if (rm.getParam("configtype").equals("comminit")) {
                             logger.debug("CONTROLLER SENDING REGIONAL MESSAGE 0");
+                            logger.trace(rm.getParams().toString());
                             //PluginEngine.msgInQueue.offer(rm);
                             plugin.sendMsgEvent(rm);
                         }
@@ -36,6 +37,7 @@ public class MsgRoute implements Runnable {
                 case 48:  //System.out.println("CONTROLLER ROUTE TO REGIONAL AGENT : 52 " + rm.getParams()); //also where regional messages go
                     if ((/*PluginEngine.isRegionalController*/ plugin.isRegionalController()) && (rm.getParam("dst_agent") == null)) { //if this is the regional controller consume the message
                         logger.debug("CONTROLLER SENDING REGIONAL MESSAGE 48");
+                        logger.trace(rm.getParams().toString());
                         regionalSend();
                     } else {
                         externalSend();
@@ -44,6 +46,7 @@ public class MsgRoute implements Runnable {
                 case 52:  //System.out.println("CONTROLLER ROUTE TO REGIONAL AGENT : 52 " + rm.getParams()); //also where regional messages go
                     if ((/*PluginEngine.isRegionalController*/ plugin.isRegionalController()) && (rm.getParam("dst_agent") == null)) { //if this is the regional controller consume the message
                         logger.debug("CONTROLLER SENDING REGIONAL MESSAGE 52");
+                        logger.trace(rm.getParams().toString());
                         regionalSend();
                     } else {
                         externalSend();
@@ -52,6 +55,7 @@ public class MsgRoute implements Runnable {
                 case 53:  //System.out.println("CONTROLLER ROUTE TO REGIONAL AGENT : 53 " + rm.getParams());
                     if ((/*PluginEngine.isRegionalController*/ plugin.isRegionalController()) && (rm.getParam("dst_agent") == null)) { //if this is the regional controller consume the message
                         logger.debug("CONTROLLER SENDING REGIONAL MESSAGE 53");
+                        logger.trace(rm.getParams().toString());
                         regionalSend();
                     } else {
                         externalSend();
@@ -60,17 +64,17 @@ public class MsgRoute implements Runnable {
                 case 56:  //System.out.println("CONTROLLER ROUTE TO LOCAL AGENT : 56 "  + rm.getParams());
                     //PluginEngine.msgInQueue.offer(rm);
                     logger.debug("CONTROLLER SENDING REGIONAL MESSAGE 56");
-
+                    logger.trace(rm.getParams().toString());
                     plugin.sendMsgEvent(rm);
                     break;
                 case 58:  //System.out.println("CONTROLLER ROUTE TO COMMANDEXEC : 58 "  + rm.getParams());
                     logger.debug("CONTROLLER SENDING REGIONAL MESSAGE 58");
-
+                    logger.trace(rm.getParams().toString());
                     re = getCommandExec();
                     break;
                 case 62:  //System.out.println("CONTROLLER ROUTE TO COMMANDEXEC : 62 "  + rm.getParams());
                     logger.debug("CONTROLLER SENDING REGIONAL MESSAGE 62");
-
+                    logger.trace(rm.getParams().toString());
                     re = getCommandExec();
                     break;
                 //case 42:  System.out.println("CONTROLLER ROUTE LOCAL PLUGIN TO LOCAL AGNET");
@@ -79,7 +83,7 @@ public class MsgRoute implements Runnable {
                 default:
                     //System.out.println("CONTROLLER ROUTE CASE " + routePath + " " + rm.getParams());
                     logger.debug("CONTROLLER ROUTE CASE " + routePath + " " + rm.getParams());
-
+                    logger.trace(rm.getParams().toString());
                     break;
             }
             if (re != null) {
