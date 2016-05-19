@@ -62,7 +62,7 @@ public class ActiveAgentConsumer implements Runnable {
 					*/
 				}
                 else {
-                    logger.trace("Agent Consumer Connection Details:");
+                    logger.trace("Agent Consumer Connection Details: Queue : " + RXqueue);
                     logger.trace("isStarted=" + conn.isStarted() + " isClosed=" + conn.isClosed() + " ClientId=" + conn.getInitializedClientID());
                     logger.trace("brokerName=" + conn.getBrokerName() + " username=" + conn.getConnectionInfo().getUserName() + " password=" + conn.getConnectionInfo().getPassword());
                 }
