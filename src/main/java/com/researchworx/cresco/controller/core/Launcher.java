@@ -519,9 +519,11 @@ public class Launcher extends CPlugin {
         boolean isIPv6 = false;
         try {
 
-            if (getConfig().getBooleanParam("isIPv6", false)) {
-                    isIPv6 = true;
-            } else {
+
+            if (getConfig().getStringParam("isIPv6") != null) {
+                isIPv6 = getConfig().getBooleanParam("isIPv6", false);
+            }
+            else {
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             while (interfaces.hasMoreElements()) {
                 NetworkInterface networkInterface = interfaces.nextElement();
