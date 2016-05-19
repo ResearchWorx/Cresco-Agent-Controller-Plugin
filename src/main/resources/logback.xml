@@ -26,10 +26,10 @@
     <logger name="com.researchworx.cresco.controller.communication.ActiveBroker" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="com.researchworx.cresco.controller.communication.ActiveProducer" level="info" additivity="false">
+    <logger name="com.researchworx.cresco.controller.communication.ActiveProducer" level="trace" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="com.researchworx.cresco.controller.communication.ActiveProducerWorker" level="info" additivity="false">
+    <logger name="com.researchworx.cresco.controller.communication.ActiveProducerWorker" level="trace" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
     <logger name="com.researchworx.cresco.controller.communication.ActiveBrokerManager" level="info" additivity="false">
