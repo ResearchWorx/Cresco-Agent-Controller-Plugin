@@ -10,6 +10,7 @@ import com.researchworx.cresco.library.core.WatchDog;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.plugin.core.CPlugin;
 import org.apache.activemq.command.ActiveMQDestination;
+import org.apache.commons.logging.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -250,29 +251,28 @@ public class Launcher extends CPlugin {
             this.dcv6 = new DiscoveryClientIPv6(this);
 
             //List<MsgEvent> discoveryList = new ArrayList<>();
-            List<MsgEvent> discoveryList = null;
+            List<MsgEvent> discoveryList = new ArrayList<>();
 
             if(getConfig().getStringParam("regional_controller_host") != null) {
                 //do directed discovery
-                LOG.debug("Broker Search Static...");
-                DiscoveryStatic ds = new DiscoveryStatic(this);
-                discoveryList = ds.discover(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_static_agent_timeout",10000), getConfig().getStringParam("regional_controller_host"));
-                LOG.debug("Static Broker count = {}" + discoveryList.size());
-                if(discoveryList.size() == 0) {
-                    System.exit(0); //if static does not work exit
+                while(discoveryList.size() == 0) {
+                    LOG.info("Static Broker Connection to Host : " + getConfig().getStringParam("regional_controller_host"));
+                    DiscoveryStatic ds = new DiscoveryStatic(this);
+                    discoveryList.addAll(ds.discover(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_static_agent_timeout",10000), getConfig().getStringParam("regional_controller_host")));
+                    LOG.debug("Static Broker count = {}" + discoveryList.size());
+                    if(discoveryList.size() == 0) {
+                        LOG.info("Static Broker Connection to Host : " + getConfig().getStringParam("regional_controller_host") + " failed! - Restarting Discovery!");
+                    }
                 }
 
             } else {
 
                 if (this.isIPv6) {
                     LOG.debug("Broker Search (IPv6)...");
-                    discoveryList = this.dcv6.getDiscoveryResponse(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_ipv6_agent_timeout", 2000));
+                    discoveryList.addAll(this.dcv6.getDiscoveryResponse(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_ipv6_agent_timeout", 2000)));
                     LOG.debug("IPv6 Broker count = {}" + discoveryList.size());
                 }
                 LOG.debug("Broker Search (IPv4)...");
-                if(discoveryList == null) {
-                    discoveryList = new ArrayList<>();
-                }
                 discoveryList.addAll(this.dcv4.getDiscoveryResponse(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_ipv4_agent_timeout", 2000)));
                 LOG.debug("Broker count = {}" + discoveryList.size());
             }
