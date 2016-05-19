@@ -20,6 +20,7 @@ public class ActiveAgentConsumer implements Runnable {
 
 	public ActiveAgentConsumer(Launcher plugin, String RXQueueName, String URI, String brokerUserNameAgent, String brokerPasswordAgent) {
 		logger.debug("Agent Consumer initialized : Queue : " + RXQueueName);
+        logger.trace("RXQueue=" + RXQueueName + " URI=" + URI + " brokerUserNameAgent=" + brokerPasswordAgent + " brokerPasswordAgent=" + brokerPasswordAgent);
 		this.plugin = plugin;
 		try {
 			conn = (ActiveMQConnection)new ActiveMQConnectionFactory(brokerUserNameAgent,brokerPasswordAgent,URI).createConnection();
