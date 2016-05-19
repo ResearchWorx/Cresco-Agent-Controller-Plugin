@@ -270,6 +270,9 @@ public class Launcher extends CPlugin {
                     LOG.debug("IPv6 Broker count = {}" + discoveryList.size());
                 }
                 LOG.debug("Broker Search (IPv4)...");
+                if(discoveryList == null) {
+                    discoveryList = new ArrayList<>();
+                }
                 discoveryList.addAll(this.dcv4.getDiscoveryResponse(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_ipv4_agent_timeout", 2000)));
                 LOG.debug("Broker count = {}" + discoveryList.size());
             }
