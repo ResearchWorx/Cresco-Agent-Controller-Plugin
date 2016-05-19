@@ -518,6 +518,10 @@ public class Launcher extends CPlugin {
     public boolean isIPv6() {
         boolean isIPv6 = false;
         try {
+
+            if (getConfig().getBooleanParam("isIPv6", false)) {
+                    isIPv6 = true;
+            } else {
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             while (interfaces.hasMoreElements()) {
                 NetworkInterface networkInterface = interfaces.nextElement();
@@ -532,6 +536,7 @@ public class Launcher extends CPlugin {
                     }
                 }
             }
+        }
         } catch (Exception ex) {
             LOG.error("isIPv6 Error: {}", ex.getMessage());
         }
