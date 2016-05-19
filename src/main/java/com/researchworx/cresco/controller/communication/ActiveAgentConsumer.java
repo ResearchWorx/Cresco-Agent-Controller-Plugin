@@ -42,9 +42,10 @@ public class ActiveAgentConsumer implements Runnable {
 			while (this.plugin.isConsumerThreadActive()) {
 				TextMessage msg = (TextMessage) consumer.receive(1000);
 				if (msg != null) {
+                    logger.debug("Incoming Queue : " + RXqueue);
 					MsgEvent me = gson.fromJson(msg.getText(), MsgEvent.class);
 					this.plugin.msgIn(me);
-					logger.debug("Incoming Queue : " + RXqueue + " Message : "  + me.getParams().toString());
+					logger.debug("Message : "  + me.getParams().toString());
 					/*
 					if (me.getMsgBody().toLowerCase().equals("ping")) {
 						String pingAgent = me.getParam("src_region") + "_" + me.getParam("src_agent");
