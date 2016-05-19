@@ -19,7 +19,7 @@ public class ActiveAgentConsumer implements Runnable {
 	private static final Logger logger = LoggerFactory.getLogger(ActiveAgentConsumer.class);
 
 	public ActiveAgentConsumer(Launcher plugin, String RXQueueName, String URI, String brokerUserNameAgent, String brokerPasswordAgent) {
-		logger.debug("Agent Consumer initialized");
+		logger.debug("Agent Consumer initialized : Queue : " + RXQueueName);
 		this.plugin = plugin;
 		try {
 			conn = (ActiveMQConnection)new ActiveMQConnectionFactory(brokerUserNameAgent,brokerPasswordAgent,URI).createConnection();
@@ -33,7 +33,7 @@ public class ActiveAgentConsumer implements Runnable {
 
 	@Override
 	public void run() {
-		logger.info("Agent Consumer started");
+		logger.info("Agent Consumer started : Queue : " + RXqueue);
 		Gson gson = new Gson();
 		try {
 			this.plugin.setConsumerThreadActive(true);
