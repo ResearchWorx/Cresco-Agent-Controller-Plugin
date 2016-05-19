@@ -292,7 +292,8 @@ public class Launcher extends CPlugin {
                     String[] tmpAuth = cbrokerValidatedAuthenication.split(",");
                     this.brokerUserNameAgent = tmpAuth[0];
                     this.brokerPasswordAgent = tmpAuth[1];
-
+                    LOG.trace("regional_controller_host : brokerUserNameAgent=" + brokerUserNameAgent);
+                    LOG.trace("regional_controller_host : brokerPasswordAgent=" + brokerPasswordAgent);
 
                     //set broker ip
                     InetAddress remoteAddress = InetAddress.getByName(cbrokerAddress);
