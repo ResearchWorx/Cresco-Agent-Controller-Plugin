@@ -1,5 +1,6 @@
 package com.researchworx.cresco.controller.core;
 
+import com.google.auto.service.AutoService;
 import com.researchworx.cresco.controller.communication.*;
 import com.researchworx.cresco.controller.netdiscovery.*;
 import com.researchworx.cresco.controller.regionalcontroller.AgentDiscovery;
@@ -25,6 +26,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@AutoService(CPlugin.class)
 public class Launcher extends CPlugin {
     private static final Logger LOG = LoggerFactory.getLogger(CPlugin.class);
 
@@ -126,8 +128,9 @@ public class Launcher extends CPlugin {
         this.rpcMap = new ConcurrentHashMap<>();
     }
 
+    @Override
     public void setExecutor() {
-        this.setExec(new com.researchworx.cresco.controller.core.Executor(this));
+        setExec(new Executor(this));
     }
 
     public void start() {
@@ -468,10 +471,11 @@ public class Launcher extends CPlugin {
             this.ap = new ActiveProducer(this, "tcp://" + this.brokerAddressAgent + ":32010", brokerUserNameAgent, brokerPasswordAgent);
 
             //watchDogProcess = new plugincore.WatchDog();
-            stopWatchDog();
-            setWatchDog(new WatchDog(region, agent, pluginID, logger, config));
-            startWatchDog();
-            LOG.info("WatchDog started");
+            //stopWatchDog();
+            //setWatchDog(new WatchDog(region, agent, pluginID, logger, config));
+            //startWatchDog();
+            updateWatchDog();
+            LOG.info("WatchDog configuration updated");
             this.healthWatcher = new HealthWatcher(this);
             LOG.info("HealthWatcher started");
         } catch (Exception e) {
