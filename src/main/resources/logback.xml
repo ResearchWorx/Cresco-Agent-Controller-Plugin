@@ -44,7 +44,6 @@
     <logger name="com.researchworx.cresco.controller.communication.BrokerMonitor" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-
     <logger name="com.researchworx.cresco.controller.netdiscovery.DiscoveryClientWorkerIPv6" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
