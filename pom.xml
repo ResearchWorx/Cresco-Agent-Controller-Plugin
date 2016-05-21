@@ -40,18 +40,18 @@
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
 			<artifactId>activemq-broker</artifactId>
-			<version>5.13.0</version>
+			<version>5.13.3</version>
 		</dependency>
 
         <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>activemq-jaas</artifactId>
-            <version>5.13.0</version>
+            <version>5.13.3</version>
         </dependency>
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
 			<artifactId>activemq-kahadb-store</artifactId>
-			<version>5.13.0</version>
+			<version>5.13.3</version>
 		</dependency>
 
 		<dependency>
