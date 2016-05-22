@@ -86,6 +86,7 @@ public class MsgRoute implements Runnable {
                     logger.trace(rm.getParams().toString());
                     break;
             }
+
             if (re != null) {
                 re.setReturn(); //reverse to-from for return
                 //PluginEngine.msgInQueue.offer(re);
