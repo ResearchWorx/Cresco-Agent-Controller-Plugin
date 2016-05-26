@@ -16,6 +16,7 @@ import org.apache.activemq.command.ActiveMQDestination;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 
+import java.io.File;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
@@ -249,7 +250,13 @@ public class Launcher extends CPlugin {
                 SshServer sshd = SshServer.setUpDefaultServer();
                 sshd.setPasswordAuthenticator(new InAppPasswordAuthenticator(this));
                 sshd.setPort(config.getIntegerParam("sshd_port",5222));
-                sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider());
+                try {
+                    sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider(new File(config.getStringParam("sshd_rsa_key_path"))));
+                }
+                catch (Exception ex) {
+                    sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider());
+                }
+
 
                 AppShellFactory ssh_shell = new AppShellFactory(this);
                 sshd.setShellFactory(ssh_shell);
