@@ -247,7 +247,7 @@ public class Launcher extends CPlugin {
 
             if(getConfig().getBooleanParam("enable_sshd",false)) {
                 SshServer sshd = SshServer.setUpDefaultServer();
-                sshd.setPasswordAuthenticator(new InAppPasswordAuthenticator());
+                sshd.setPasswordAuthenticator(new InAppPasswordAuthenticator(this));
                 sshd.setPort(config.getIntegerParam("sshd_port",5222));
                 sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider());
 
@@ -255,9 +255,6 @@ public class Launcher extends CPlugin {
                 sshd.setShellFactory(ssh_shell);
                 sshd.start();
                 logger.info("Enabled SSH Shell");
-            }
-            else {
-                logger.info("SSH Shell Disabled");
             }
 
             this.brokeredAgents = new ConcurrentHashMap<>();
