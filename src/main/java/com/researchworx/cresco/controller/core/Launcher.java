@@ -14,6 +14,7 @@ import com.researchworx.cresco.library.plugin.core.CPlugin;
 import com.researchworx.cresco.library.utilities.CLogger;
 import org.apache.activemq.command.ActiveMQDestination;
 import org.apache.sshd.server.SshServer;
+import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -248,6 +249,7 @@ public class Launcher extends CPlugin {
                 SshServer sshd = SshServer.setUpDefaultServer();
                 sshd.setPasswordAuthenticator(new InAppPasswordAuthenticator());
                 sshd.setPort(5222);
+                sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider());
 
                 AppShellFactory ssh_shell = new AppShellFactory();
                 sshd.setShellFactory(ssh_shell);
