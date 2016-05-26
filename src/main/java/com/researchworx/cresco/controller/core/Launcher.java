@@ -7,6 +7,7 @@ import com.researchworx.cresco.controller.regionalcontroller.AgentDiscovery;
 import com.researchworx.cresco.controller.regionalcontroller.ControllerDB;
 import com.researchworx.cresco.controller.regionalcontroller.GlobalControllerChannel;
 import com.researchworx.cresco.controller.regionalcontroller.HealthWatcher;
+import com.researchworx.cresco.controller.shell.AppShellFactory;
 import com.researchworx.cresco.library.core.WatchDog;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.plugin.core.CPlugin;
@@ -245,6 +246,13 @@ public class Launcher extends CPlugin {
         LOG.info("Initializing services");
         setActive(true);
         try {
+
+            if(getConfig().getBooleanParam("enable_sshd",false)) {
+                AppShellFactory ssh_shell = new AppShellFactory();
+                ssh_shell.create();
+                logger.info("Enabled SSH Shell");
+            }
+
             this.brokeredAgents = new ConcurrentHashMap<>();
             this.incomingCanidateBrokers = new ConcurrentLinkedQueue<>();
             this.outgoingMessages = new ConcurrentLinkedQueue<>();
