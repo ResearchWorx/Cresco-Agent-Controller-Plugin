@@ -224,6 +224,7 @@ public class AppShellFactory implements Factory {
                 writer.println("with no expectation of privacy. All possible abuse and criminal activity may");
                 writer.println("be handed over to the proper law enforcement officials for investigation and");
                 writer.println("prosecution. Use implies consent to all of the conditions stated within this");
+                writer.println("Warning Notification.");
                 writer.println("");
                 writer.flush();
 
