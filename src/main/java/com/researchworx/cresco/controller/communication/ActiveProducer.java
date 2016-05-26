@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
+import com.researchworx.cresco.library.utilities.CLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,15 +19,16 @@ public class ActiveProducer {
     public Map<String,Long> producerWorkersInProcess;
 
 	private Launcher plugin;
+	private CLogger logger;
 	private String URI;
 	private Timer timer;
 	private String brokerUserNameAgent;
 	private String brokerPasswordAgent;
 
-	private static final Logger logger = LoggerFactory.getLogger(ActiveProducer.class);
+	//private static final Logger logger = LoggerFactory.getLogger(ActiveProducer.class);
 
 	class ClearProducerTask extends TimerTask {
-		private Logger logger = LoggerFactory.getLogger(ClearProducerTask.class);
+		//private Logger logger = LoggerFactory.getLogger(ClearProducerTask.class);
 	    public void run()  {
 	    	logger.trace("Tick");
 	    	for (Entry<String, ActiveProducerWorker> entry : producerWorkers.entrySet()) {
@@ -44,6 +46,7 @@ public class ActiveProducer {
 	
 	public ActiveProducer(Launcher plugin, String URI,String brokerUserNameAgent, String brokerPasswordAgent)  {
 		this.plugin = plugin;
+		this.logger = new CLogger(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
         this.brokerUserNameAgent = brokerUserNameAgent;
         this.brokerPasswordAgent = brokerPasswordAgent;
 		try {
@@ -120,7 +123,7 @@ public class ActiveProducer {
                             producerWorkersInProcess.put(dstPath, System.currentTimeMillis()); //add inprocess record
                         }
                         if (!producerWorkers.containsKey(dstPath)) {
-                            apw = new ActiveProducerWorker(dstPath, URI, brokerUserNameAgent, brokerPasswordAgent);
+                            apw = new ActiveProducerWorker(plugin, dstPath, URI, brokerUserNameAgent, brokerPasswordAgent);
                             if (apw.isActive) {
                                 producerWorkers.put(dstPath, apw);
                             }

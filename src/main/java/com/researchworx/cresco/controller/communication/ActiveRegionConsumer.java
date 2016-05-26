@@ -5,6 +5,7 @@ import javax.jms.*;
 import com.google.gson.Gson;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
+import com.researchworx.cresco.library.utilities.CLogger;
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
@@ -13,12 +14,14 @@ import org.slf4j.LoggerFactory;
 
 public class ActiveRegionConsumer implements Runnable {
 	private Launcher plugin;
+	private CLogger logger;
 	private Queue RXqueue; 
 	private Session sess;
 	private ActiveMQConnection conn;
-	private static final Logger logger = LoggerFactory.getLogger(ActiveRegionConsumer.class);
+	//private static final Logger logger = LoggerFactory.getLogger(ActiveRegionConsumer.class);
 	
 	public ActiveRegionConsumer(Launcher plugin, String RXQueueName, String URI, String brokerUserNameAgent, String brokerPasswordAgent) {
+		this.logger = new CLogger(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
 		logger.debug("Region Consumer initialized");
 		this.plugin = plugin;
 		try {

@@ -2,17 +2,20 @@ package com.researchworx.cresco.controller.core;
 
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.plugin.core.CExecutor;
+import com.researchworx.cresco.library.utilities.CLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Executor extends CExecutor {
-    private static final Logger logger = LoggerFactory.getLogger(CExecutor.class);
+    //private static final Logger logger = LoggerFactory.getLogger(CExecutor.class);
 
     private Launcher mainPlugin;
+    private CLogger logger;
 
     public Executor(Launcher plugin) {
         super(plugin);
         this.mainPlugin = plugin;
+        this.logger = new CLogger(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
     }
 
     @Override

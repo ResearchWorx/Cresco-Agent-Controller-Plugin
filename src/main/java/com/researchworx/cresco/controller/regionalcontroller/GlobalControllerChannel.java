@@ -16,14 +16,16 @@ import com.google.gson.GsonBuilder;
 
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
+import com.researchworx.cresco.library.utilities.CLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class GlobalControllerChannel {
-    private static final Logger logger = LoggerFactory.getLogger(GlobalControllerChannel.class);
+    //private static final Logger logger = LoggerFactory.getLogger(GlobalControllerChannel.class);
 
     private final String USER_AGENT = "Cresco-Agent-Controller-Plugin/0.5.0";
     private Launcher plugin;
+    private CLogger logger;
     private Timer timer;
     private long startTS;
 
@@ -32,6 +34,7 @@ public class GlobalControllerChannel {
     private String KPIUrl;
 
     public GlobalControllerChannel(Launcher plugin) {
+        this.logger = new CLogger(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
         this.plugin = plugin;
         if (plugin.getConfig().getStringParam("globalcontroller_host") != null) {
             if (plugin.getConfig().getStringParam("globalcontroller_port") != null) {

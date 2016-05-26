@@ -10,24 +10,22 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.researchworx.cresco.library.utilities.CLogger;
 
 import com.google.gson.Gson;
 
 public class DiscoveryEngine implements Runnable {
     private Launcher plugin;
+    private CLogger logger;
     private static Map<NetworkInterface, MulticastSocket> workers = new ConcurrentHashMap<>();
     private DiscoveryCrypto discoveryCrypto;
     private Gson gson;
 
-
-    private static final Logger logger = LoggerFactory.getLogger(DiscoveryEngine.class);
-
     public DiscoveryEngine(Launcher plugin) {
+        this.logger = new CLogger(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
         logger.trace("Discovery Engine initialized");
         this.plugin = plugin;
-        discoveryCrypto = new DiscoveryCrypto();
+        discoveryCrypto = new DiscoveryCrypto(plugin);
         gson = new Gson();
 
     }
@@ -55,9 +53,6 @@ public class DiscoveryEngine implements Runnable {
     }
 
     class DiscoveryEngineWorker implements Runnable {
-        private final Logger logger = LoggerFactory.getLogger(DiscoveryEngineWorker.class);
-
-
         private NetworkInterface networkInterface;
         private MulticastSocket socket;
         private Launcher plugin;

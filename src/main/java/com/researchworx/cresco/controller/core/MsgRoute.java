@@ -1,17 +1,20 @@
 package com.researchworx.cresco.controller.core;
 
 import com.researchworx.cresco.library.messaging.MsgEvent;
+import com.researchworx.cresco.library.utilities.CLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MsgRoute implements Runnable {
-    private static final Logger logger = LoggerFactory.getLogger(MsgRoute.class);
+    //private static final Logger logger = LoggerFactory.getLogger(MsgRoute.class);
 
     private MsgEvent rm;
     private Launcher plugin;
+    private CLogger logger;
 
     public MsgRoute(Launcher plugin, MsgEvent rm) {
         this.plugin = plugin;
+        this.logger = new CLogger(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Debug);
         this.rm = rm;
     }
 
@@ -107,7 +110,7 @@ public class MsgRoute implements Runnable {
             //PluginEngine.agentDiscover.discover(rm);
             plugin.discover(rm);
         } catch (Exception ex) {
-            logger.error(ex.getMessage());
+            logger.error("regionalSend - " + ex.getMessage());
         }
     }
 
@@ -116,13 +119,14 @@ public class MsgRoute implements Runnable {
             String callId = "callId-" + /*PluginEngine.region*/plugin.getRegion() + "_" + /*PluginEngine.agent*/plugin.getAgent() + "_" + /*PluginEngine.plugin*/plugin.getPluginID(); //calculate callID
             if (rm.getParam(callId) != null) { //send message to RPC hash
                 //PluginEngine.rpcMap.put(rm.getParam(callId), rm);
-                plugin.putRPCMap(rm.getParam(callId), rm);
+                plugin.receiveRPC(rm.getParam(callId), rm);
             } else {
                 //return PluginEngine.commandExec.cmdExec(rm);
                 return plugin.execute(rm);
             }
         } catch (Exception ex) {
-            logger.error(ex.getMessage());
+            logger.error("getCommandExec - " + ex.getMessage());
+            ex.printStackTrace();
         }
         return null;
     }

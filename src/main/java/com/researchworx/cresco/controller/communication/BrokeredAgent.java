@@ -1,6 +1,7 @@
 package com.researchworx.cresco.controller.communication;
 
 import com.researchworx.cresco.controller.core.Launcher;
+import com.researchworx.cresco.library.utilities.CLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,9 +16,11 @@ public class BrokeredAgent {
 	public String agentPath;
 	public BrokerMonitor bm;
 	private Launcher plugin;
-	private static final Logger logger = LoggerFactory.getLogger(BrokeredAgent.class);
+	private CLogger logger;
+	//private static final Logger logger = LoggerFactory.getLogger(BrokeredAgent.class);
 
 	public BrokeredAgent(Launcher plugin, String activeAddress, String agentPath) {
+		this.logger = new CLogger(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
 		logger.debug("Creating BrokerAgent : " + agentPath + " address: " + activeAddress);
 		System.out.print("Name of Agent to message [q to quit]: ");
 		this.plugin = plugin;

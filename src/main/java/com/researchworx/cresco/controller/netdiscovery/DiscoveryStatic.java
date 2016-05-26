@@ -3,6 +3,7 @@ package com.researchworx.cresco.controller.netdiscovery;
 import com.google.gson.Gson;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
+import com.researchworx.cresco.library.utilities.CLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,9 +12,10 @@ import java.net.*;
 import java.util.*;
 
 public class DiscoveryStatic {
-    private static final Logger logger = LoggerFactory.getLogger(DiscoveryStatic.class);
+    //private static final Logger logger = LoggerFactory.getLogger(DiscoveryStatic.class);
 
     private Launcher plugin;
+    private CLogger logger;
     private DatagramSocket c;
     private Gson gson;
     //private Timer timer;
@@ -24,11 +26,12 @@ public class DiscoveryStatic {
     private DiscoveryCrypto discoveryCrypto;
 
     public DiscoveryStatic(Launcher plugin) {
+        this.logger = new CLogger(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
         this.plugin = plugin;
         gson = new Gson();
         //this.discoveryTimeout = discoveryTimeout;
         //this.disType = disType;
-        this.discoveryCrypto = new DiscoveryCrypto();
+        this.discoveryCrypto = new DiscoveryCrypto(plugin);
     }
 
     /*

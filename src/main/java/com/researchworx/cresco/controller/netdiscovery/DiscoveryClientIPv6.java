@@ -6,15 +6,18 @@ import java.util.List;
 
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
+import com.researchworx.cresco.library.utilities.CLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DiscoveryClientIPv6 {
-    private static final Logger logger = LoggerFactory.getLogger(DiscoveryClientIPv6.class);
+    //private static final Logger logger = LoggerFactory.getLogger(DiscoveryClientIPv6.class);
     //private int discoveryTimeout;
     private Launcher plugin;
+    private CLogger logger;
 
     public DiscoveryClientIPv6(Launcher plugin) {
+        this.logger = new CLogger(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
         this.plugin = plugin;
         //discoveryTimeout = Integer.parseInt(PluginEngine.config.getParam("discoverytimeout"));
         //System.out.println("DiscoveryClient : discoveryTimeout = " + discoveryTimeout);
