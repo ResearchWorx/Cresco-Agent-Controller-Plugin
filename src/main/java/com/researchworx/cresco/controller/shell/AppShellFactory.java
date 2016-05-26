@@ -253,7 +253,10 @@ public class AppShellFactory implements Factory {
 
             String response;
             if (line.equalsIgnoreCase(SHELL_CMD_VERSION))
-                response = "unknown-static";
+                response = System.getProperty("os.name").toString();
+                //response = "unknown-static";
+            //System.out.println("OS Name: " + System.getProperty("os.name"));
+
 
             else if (line.equalsIgnoreCase(SHELL_CMD_HELP))
                 response = "Help is not implemented yet...";
