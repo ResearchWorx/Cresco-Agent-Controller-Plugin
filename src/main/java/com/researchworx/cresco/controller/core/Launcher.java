@@ -258,6 +258,7 @@ public class Launcher extends CPlugin {
                     }
                     catch (Exception ex) {
                         logger.error("Invalid RSA Key File = " +  keypairPath + " Message=" + ex.getMessage());
+                        System.exit(0);
                     }
                 }
                 else {
