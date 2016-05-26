@@ -38,8 +38,11 @@ public class AppShellFactory implements Factory {
     private static String word;
     private static List<Completer> completors;
     private static Map<String, String> cmdMap;
+    private Launcher plugin;
+
 
     public AppShellFactory(Launcher plugin) {
+        this.plugin = plugin;
         if (logger == null)
             logger = new CLogger(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
     }
@@ -56,7 +59,7 @@ public class AppShellFactory implements Factory {
             e.printStackTrace();
         }
 
-        return new InAppShell();
+        return new InAppShell(plugin);
     }
 
     public static void genCompletors() {
@@ -84,12 +87,15 @@ public class AppShellFactory implements Factory {
                         new ArgumentCompleter(new StringsCompleter(InAppShell.SHELL_CMD_QUIT,InAppShell.SHELL_CMD_EXIT, InAppShell.SHELL_CMD_VERSION, InAppShell.SHELL_CMD_HELP))));
     }
 
-
-    private static class InAppShell implements Command, Runnable {
+    private class InAppShell implements Command, Runnable {
+        private Launcher plugin;
+        public InAppShell(Launcher plugin) {
+            this.plugin = plugin;
+        }
 
         //private static final Logger log = LoggerFactory.getLogger(InAppShell.class);
 
-        public static final boolean IS_MAC_OSX = System.getProperty("os.name").startsWith("Mac OS X");
+        public final boolean IS_MAC_OSX = System.getProperty("os.name").startsWith("Mac OS X");
 
         private static final String SHELL_THREAD_NAME = "InAppShell";
         private static final String SHELL_PROMPT = "cresco> ";
@@ -254,7 +260,7 @@ public class AppShellFactory implements Factory {
 
             String response;
             if (line.equalsIgnoreCase(SHELL_CMD_VERSION))
-                response = System.getProperty("os.name").toString();
+                response = System.getProperty("os.name").toString() + " " + plugin.getVersion();
                 //response = "unknown-static";
             //System.out.println("OS Name: " + System.getProperty("os.name"));
 
@@ -273,7 +279,7 @@ public class AppShellFactory implements Factory {
         }
     }
 
-    public static String cmdExec(String cmdString) throws Exception {
+    public String cmdExec(String cmdString) throws Exception {
 
         String[] s_string = cmdString.split("_");
         List<String> cmdList = new ArrayList<String>();
