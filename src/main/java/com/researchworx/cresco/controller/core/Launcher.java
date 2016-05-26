@@ -251,7 +251,7 @@ public class Launcher extends CPlugin {
 
                 AppShellFactory ssh_shell = new AppShellFactory();
                 sshd.setShellFactory(ssh_shell);
-
+                sshd.start();
                 logger.info("Enabled SSH Shell");
             }
             else {
