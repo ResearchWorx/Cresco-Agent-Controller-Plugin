@@ -15,6 +15,7 @@ import com.researchworx.cresco.library.utilities.CLogger;
 import org.apache.activemq.command.ActiveMQDestination;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
+import sun.reflect.generics.reflectiveObjects.LazyReflectiveObjectGenerator;
 
 import java.io.File;
 import java.net.Inet6Address;
@@ -250,12 +251,19 @@ public class Launcher extends CPlugin {
                 SshServer sshd = SshServer.setUpDefaultServer();
                 sshd.setPasswordAuthenticator(new InAppPasswordAuthenticator(this));
                 sshd.setPort(config.getIntegerParam("sshd_port",5222));
-                try {
-                    sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider(new File(config.getStringParam("sshd_rsa_key_path"))));
+                String keypairPath = config.getStringParam("sshd_rsa_key_path");
+                if(keypairPath != null) {
+                    try {
+                        sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider(new File(keypairPath)));
+                    }
+                    catch (Exception ex) {
+                        logger.error("Invalid RSA Key File = " +  keypairPath + " Message=" + ex.getMessage());
+                    }
                 }
-                catch (Exception ex) {
+                else {
                     sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider());
                 }
+
 
 
                 AppShellFactory ssh_shell = new AppShellFactory(this);
