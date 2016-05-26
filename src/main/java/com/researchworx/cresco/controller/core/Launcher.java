@@ -248,7 +248,7 @@ public class Launcher extends CPlugin {
             if(getConfig().getBooleanParam("enable_sshd",false)) {
                 SshServer sshd = SshServer.setUpDefaultServer();
                 sshd.setPasswordAuthenticator(new InAppPasswordAuthenticator());
-                sshd.setPort(5222);
+                sshd.setPort(config.getIntegerParam("sshd_port",5222));
                 sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider());
 
                 AppShellFactory ssh_shell = new AppShellFactory();

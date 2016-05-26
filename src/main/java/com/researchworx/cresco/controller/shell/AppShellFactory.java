@@ -79,8 +79,6 @@ public class AppShellFactory implements Factory {
         completors.add(
                 new AggregateCompleter(
                         new ArgumentCompleter(new StringsCompleter(InAppShell.SHELL_CMD_QUIT,InAppShell.SHELL_CMD_EXIT, InAppShell.SHELL_CMD_VERSION, InAppShell.SHELL_CMD_HELP))));
-
-
     }
 
 
