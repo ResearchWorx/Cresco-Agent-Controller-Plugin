@@ -252,6 +252,9 @@ public class Launcher extends CPlugin {
                 ssh_shell.create();
                 logger.info("Enabled SSH Shell");
             }
+            else {
+                logger.info("SSH Shell Disabled");
+            }
 
             this.brokeredAgents = new ConcurrentHashMap<>();
             this.incomingCanidateBrokers = new ConcurrentLinkedQueue<>();
