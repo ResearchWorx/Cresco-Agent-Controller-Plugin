@@ -250,10 +250,10 @@ public class Launcher extends CPlugin {
             if(getConfig().getBooleanParam("enable_sshd",false)) {
                 AppShellFactory ssh_shell = new AppShellFactory();
                 ssh_shell.create();
-                logger.info("Enabled SSH Shell");
+                LOG.info("Enabled SSH Shell");
             }
             else {
-                logger.info("SSH Shell Disabled");
+                LOG.info("SSH Shell Disabled");
             }
 
             this.brokeredAgents = new ConcurrentHashMap<>();
