@@ -8,10 +8,12 @@ import com.researchworx.cresco.controller.regionalcontroller.ControllerDB;
 import com.researchworx.cresco.controller.regionalcontroller.GlobalControllerChannel;
 import com.researchworx.cresco.controller.regionalcontroller.HealthWatcher;
 import com.researchworx.cresco.controller.shell.AppShellFactory;
+import com.researchworx.cresco.controller.shell.InAppPasswordAuthenticator;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.plugin.core.CPlugin;
 import com.researchworx.cresco.library.utilities.CLogger;
 import org.apache.activemq.command.ActiveMQDestination;
+import org.apache.sshd.server.SshServer;
 
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -243,8 +245,13 @@ public class Launcher extends CPlugin {
         try {
 
             if(getConfig().getBooleanParam("enable_sshd",false)) {
+                SshServer sshd = SshServer.setUpDefaultServer();
+                sshd.setPasswordAuthenticator(new InAppPasswordAuthenticator());
+                sshd.setPort(5222);
+
                 AppShellFactory ssh_shell = new AppShellFactory();
-                ssh_shell.create();
+                sshd.setShellFactory(ssh_shell);
+
                 logger.info("Enabled SSH Shell");
             }
             else {
