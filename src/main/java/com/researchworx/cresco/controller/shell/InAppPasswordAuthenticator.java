@@ -4,11 +4,6 @@ import com.researchworx.cresco.controller.core.Launcher;
 import org.apache.sshd.server.auth.password.PasswordAuthenticator;
 import org.apache.sshd.server.session.ServerSession;
 
-/**
- * Created by vcbumg2 on 5/26/16.
- */
-
-
 public class InAppPasswordAuthenticator implements PasswordAuthenticator {
 
     private Launcher plugin;

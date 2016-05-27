@@ -1,9 +1,5 @@
 package com.researchworx.cresco.controller.shell;
 
-/**
- * Created by vcbumg2 on 5/26/16.
- */
-
 import java.io.FilterInputStream;
 import java.io.FilterOutputStream;
 import java.io.IOException;
@@ -147,7 +143,6 @@ public class AppShellFactory implements Factory {
         }
 
         public void start(Environment env) throws IOException {
-            System.out.println("OS Name: " + System.getProperty("os.name"));
             environment = env;
             thread = new Thread(this, SHELL_THREAD_NAME);
             thread.start();
@@ -282,7 +277,7 @@ public class AppShellFactory implements Factory {
     public String cmdExec(String cmdString) throws Exception {
 
         String[] s_string = cmdString.split("_");
-        List<String> cmdList = new ArrayList<String>();
+        List<String> cmdList = new ArrayList<>();
         StringBuilder sb = null;
 
         String cmd = new String();
