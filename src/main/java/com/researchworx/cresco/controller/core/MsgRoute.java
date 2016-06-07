@@ -14,7 +14,7 @@ public class MsgRoute implements Runnable {
 
     public MsgRoute(Launcher plugin, MsgEvent rm) {
         this.plugin = plugin;
-        this.logger = new CLogger(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Debug);
+        this.logger = new CLogger(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
         this.rm = rm;
     }
 
