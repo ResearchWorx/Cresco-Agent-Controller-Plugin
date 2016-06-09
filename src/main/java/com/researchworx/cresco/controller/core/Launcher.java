@@ -7,14 +7,17 @@ import com.researchworx.cresco.controller.regionalcontroller.AgentDiscovery;
 import com.researchworx.cresco.controller.regionalcontroller.ControllerDB;
 import com.researchworx.cresco.controller.regionalcontroller.GlobalControllerChannel;
 import com.researchworx.cresco.controller.regionalcontroller.HealthWatcher;
-import com.researchworx.cresco.library.core.WatchDog;
+import com.researchworx.cresco.controller.shell.AppShellFactory;
+import com.researchworx.cresco.controller.shell.InAppPasswordAuthenticator;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.plugin.core.CPlugin;
+import com.researchworx.cresco.library.utilities.CLogger;
 import org.apache.activemq.command.ActiveMQDestination;
-import org.apache.commons.logging.Log;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.sshd.server.SshServer;
+import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
+import sun.reflect.generics.reflectiveObjects.LazyReflectiveObjectGenerator;
 
+import java.io.File;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
@@ -28,7 +31,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @AutoService(CPlugin.class)
 public class Launcher extends CPlugin {
-    private static final Logger LOG = LoggerFactory.getLogger(CPlugin.class);
 
     private String agentpath;
 
@@ -125,7 +127,6 @@ public class Launcher extends CPlugin {
 
     public Launcher() {
         this.msgInProcessQueue = Executors.newFixedThreadPool(4);
-        this.rpcMap = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -134,13 +135,13 @@ public class Launcher extends CPlugin {
     }
 
     public void start() {
-        this.config = new ControllerConfig(this.config.getConfig());
+        this.config = new ControllerConfig(config.getConfig());
     }
 
     @Override
     public void msgIn(MsgEvent msg) {
         logger.trace("msgIn : " + msg.getParams().toString());
-        this.msgInProcessQueue.submit(new MsgRoute(this, msg));
+        msgInProcessQueue.submit(new MsgRoute(this, msg));
     }
 
     @Override
@@ -151,15 +152,15 @@ public class Launcher extends CPlugin {
     public void closeCommunications() {
         try {
             if (this.restartOnShutdown)
-                LOG.info("Tearing down services");
+                logger.info("Tearing down services");
             else
-                LOG.info("Shutting down");
+                logger.info("Shutting down");
             this.DiscoveryActive = false;
             this.ConsumerThreadRegionActive = false;
             this.ConsumerThreadActive = false;
             this.ActiveBrokerManagerActive = false;
             if (this.discoveryEngineThread != null) {
-                LOG.trace("Discovery Engine shutting down");
+                logger.trace("Discovery Engine shutting down");
                 DiscoveryEngine.shutdown();
                 this.discoveryEngineThread.join();
                 this.discoveryEngineThread = null;
@@ -174,27 +175,27 @@ public class Launcher extends CPlugin {
                 this.healthWatcher = null;
             }
             if (this.consumerRegionThread != null) {
-                LOG.trace("Region Consumer shutting down");
+                logger.trace("Region Consumer shutting down");
                 this.consumerRegionThread.join();
                 this.consumerRegionThread = null;
             }
             if (this.consumerAgentThread != null) {
-                LOG.trace("Agent Consumer shutting down");
+                logger.trace("Agent Consumer shutting down");
                 this.consumerAgentThread.join();
                 this.consumerAgentThread = null;
             }
             if (this.activeBrokerManagerThread != null) {
-                LOG.trace("Active Broker Manager shutting down");
+                logger.trace("Active Broker Manager shutting down");
                 this.activeBrokerManagerThread.join();
                 this.activeBrokerManagerThread = null;
             }
             if (this.ap != null) {
-                LOG.trace("Producer shutting down");
+                logger.trace("Producer shutting down");
                 this.ap.shutdown();
                 this.ap = null;
             }
             if (this.broker != null) {
-                LOG.trace("Broker shutting down");
+                logger.trace("Broker shutting down");
                 this.broker.stopBroker();
                 this.broker = null;
             }
@@ -217,7 +218,7 @@ public class Launcher extends CPlugin {
                 this.restartOnShutdown = false;
             }
         } catch (Exception ex) {
-            LOG.error("shutdown {}", ex.getMessage());
+            logger.error("shutdown {}", ex.getMessage());
         }
     }
 
@@ -242,9 +243,36 @@ public class Launcher extends CPlugin {
     }
 
     public void commInit() {
-        LOG.info("Initializing services");
+        logger.info("Initializing services");
         setActive(true);
         try {
+
+            if(getConfig().getBooleanParam("enable_sshd",false)) {
+                SshServer sshd = SshServer.setUpDefaultServer();
+                sshd.setPasswordAuthenticator(new InAppPasswordAuthenticator(this));
+                sshd.setPort(config.getIntegerParam("sshd_port",5222));
+                String keypairPath = config.getStringParam("sshd_rsa_key_path");
+                if(keypairPath != null) {
+                    try {
+                        sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider(new File(keypairPath)));
+                    }
+                    catch (Exception ex) {
+                        logger.error("Invalid RSA Key File = " +  keypairPath + " Message=" + ex.getMessage());
+                        System.exit(0);
+                    }
+                }
+                else {
+                    sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider());
+                }
+
+
+
+                AppShellFactory ssh_shell = new AppShellFactory(this);
+                sshd.setShellFactory(ssh_shell);
+                sshd.start();
+                logger.info("Enabled SSH Shell");
+            }
+
             this.brokeredAgents = new ConcurrentHashMap<>();
             this.incomingCanidateBrokers = new ConcurrentLinkedQueue<>();
             this.outgoingMessages = new ConcurrentLinkedQueue<>();
@@ -259,25 +287,25 @@ public class Launcher extends CPlugin {
             if(getConfig().getStringParam("regional_controller_host") != null) {
                 //do directed discovery
                 while(discoveryList.size() == 0) {
-                    LOG.info("Static Broker Connection to Host : " + getConfig().getStringParam("regional_controller_host"));
+                    logger.info("Static Broker Connection to Host : " + getConfig().getStringParam("regional_controller_host"));
                     DiscoveryStatic ds = new DiscoveryStatic(this);
                     discoveryList.addAll(ds.discover(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_static_agent_timeout",10000), getConfig().getStringParam("regional_controller_host")));
-                    LOG.debug("Static Broker count = {}" + discoveryList.size());
+                    logger.debug("Static Broker count = {}" + discoveryList.size());
                     if(discoveryList.size() == 0) {
-                        LOG.info("Static Broker Connection to Host : " + getConfig().getStringParam("regional_controller_host") + " failed! - Restarting Discovery!");
+                        logger.info("Static Broker Connection to Host : " + getConfig().getStringParam("regional_controller_host") + " failed! - Restarting Discovery!");
                     }
                 }
 
             } else {
 
                 if (this.isIPv6) {
-                    LOG.debug("Broker Search (IPv6)...");
+                    logger.debug("Broker Search (IPv6)...");
                     discoveryList.addAll(this.dcv6.getDiscoveryResponse(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_ipv6_agent_timeout", 2000)));
-                    LOG.debug("IPv6 Broker count = {}" + discoveryList.size());
+                    logger.debug("IPv6 Broker count = {}" + discoveryList.size());
                 }
-                LOG.debug("Broker Search (IPv4)...");
+                logger.debug("Broker Search (IPv4)...");
                 discoveryList.addAll(this.dcv4.getDiscoveryResponse(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_ipv4_agent_timeout", 2000)));
-                LOG.debug("Broker count = {}" + discoveryList.size());
+                logger.debug("Broker count = {}" + discoveryList.size());
             }
             if(getConfig().getStringParam("regional_controller_host") != null) {
 
@@ -293,13 +321,13 @@ public class Launcher extends CPlugin {
 
                     //set agent broker auth
                     String cbrokerAddress = getConfig().getStringParam("regional_controller_host");
-                    LOG.info("Using static configuration to connect to regional controller: " + cbrokerAddress);
+                    logger.info("Using static configuration to connect to regional controller: " + cbrokerAddress);
 
                     String[] tmpAuth = cbrokerValidatedAuthenication.split(",");
                     this.brokerUserNameAgent = tmpAuth[0];
                     this.brokerPasswordAgent = tmpAuth[1];
-                    LOG.trace("regional_controller_host : brokerUserNameAgent=" + brokerUserNameAgent);
-                    LOG.trace("regional_controller_host : brokerPasswordAgent=" + brokerPasswordAgent);
+                    logger.trace("regional_controller_host : brokerUserNameAgent=" + brokerUserNameAgent);
+                    logger.trace("regional_controller_host : brokerPasswordAgent=" + brokerPasswordAgent);
 
                     //set broker ip
                     InetAddress remoteAddress = InetAddress.getByName(cbrokerAddress);
@@ -314,9 +342,9 @@ public class Launcher extends CPlugin {
                     this.brokerAddressAgent = cbrokerAddress;
 
                     this.region = cRegion;
-                    LOG.info("Assigned regionid=" + this.region);
+                    logger.info("Assigned regionid=" + this.region);
                     this.agentpath = this.region + "_" + this.agent;
-                    LOG.debug("AgentPath=" + this.agentpath);
+                    logger.debug("AgentPath=" + this.agentpath);
 
                 }
                 this.isRegionalController = false;
@@ -328,10 +356,10 @@ public class Launcher extends CPlugin {
                 if ((this.region.equals("init")) && (this.agent.equals("init"))) {
                     region = "region-" + java.util.UUID.randomUUID().toString();
                     agent = "agent-" + java.util.UUID.randomUUID().toString();
-                    LOG.debug("Generated regionid=" + this.region);
+                    logger.debug("Generated regionid=" + this.region);
                 }
                 this.agentpath = this.region + "_" + this.agent;
-                LOG.debug("AgentPath=" + this.agentpath);
+                logger.debug("AgentPath=" + this.agentpath);
                 //Start controller services
 
                 //discovery engine
@@ -342,7 +370,7 @@ public class Launcher extends CPlugin {
                 }
                 //logger.debug("IPv6 DiscoveryEngine Started..");
 
-                LOG.debug("Broker starting");
+                logger.debug("Broker starting");
                 //if((getConfig().getStringParam("regional_broker_username") != null) && (getConfig().getStringParam("regional_broker_password") != null)) {
                 //    brokerUserNameAgent = getConfig().getStringParam("regional_broker_username");
                 //    brokerPasswordAgent = getConfig().getStringParam("regional_broker_password");
@@ -351,10 +379,10 @@ public class Launcher extends CPlugin {
                     brokerUserNameAgent = java.util.UUID.randomUUID().toString();
                     brokerPasswordAgent = java.util.UUID.randomUUID().toString();
                 //}
-                this.broker = new ActiveBroker(this.agentpath,brokerUserNameAgent,brokerPasswordAgent);
+                this.broker = new ActiveBroker(this, this.agentpath,brokerUserNameAgent,brokerPasswordAgent);
 
                 //broker manager
-                LOG.debug("Starting Broker Manager");
+                logger.debug("Starting Broker Manager");
                 this.activeBrokerManagerThread = new Thread(new ActiveBrokerManager(this));
                 this.activeBrokerManagerThread.start();
                 /*synchronized (activeBrokerManagerThread) {
@@ -381,9 +409,9 @@ public class Launcher extends CPlugin {
 
                 this.gdb = new ControllerDB(this); //start graphdb service
                 this.discoveryMap = new ConcurrentHashMap<>(); //discovery map
-                LOG.debug("AgentDiscover Service Started");
+                logger.debug("AgentDiscover Service Started");
                 this.agentDiscover = new AgentDiscovery(this); //discovery service
-                LOG.debug("ControllerDB Service Started");
+                logger.debug("ControllerDB Service Started");
 
                 this.isRegionalController = true;
                 //start regional init
@@ -403,13 +431,17 @@ public class Launcher extends CPlugin {
                 }
                 //global init
                 if (/*PluginEngine.config.getStringParam("globalcontroller_host") != null*/this.config.getStringParam("globalcontroller_host") != null) {
-                    LOG.info("Global Controller : Config Found Starting...");
-                    this.globalControllerChannel = new GlobalControllerChannel(this);
-                    this.hasGlobalController = this.globalControllerChannel.getController();
-                    if (this.hasGlobalController) {
-                        LOG.debug("Global Controller : Connected...");
-                    } else {
-                        LOG.debug("Global Controller : Unable to Contact!");
+                    logger.info("Global Controller : Config Found Starting...");
+                    try {
+                        this.globalControllerChannel = new GlobalControllerChannel(this);
+                        this.hasGlobalController = this.globalControllerChannel.getController();
+                        if (this.hasGlobalController) {
+                            logger.debug("Global Controller : Connected...");
+                        } else {
+                            logger.debug("Global Controller : Unable to Contact!");
+                        }
+                    } catch (Exception e) {
+                        logger.error(e.getMessage());
                     }
                 }
             }
@@ -452,13 +484,15 @@ public class Launcher extends CPlugin {
                     this.brokerAddressAgent = cbrokerAddress;
 
                     this.region = cRegion;
-                    LOG.info("Assigned regionid=" + this.region);
+                    logger.info("Assigned regionid=" + this.region);
                     this.agentpath = this.region + "_" + this.agent;
-                    LOG.debug("AgentPath=" + this.agentpath);
+                    logger.debug("AgentPath=" + this.agentpath);
 
                 }
                 this.isRegionalController = false;
             }
+
+            this.logger = new CLogger(msgOutQueue, region, agent, pluginID);
 
             //consumer agent
             this.consumerAgentThread = new Thread(new ActiveAgentConsumer(this, this.agentpath, "tcp://" + this.brokerAddressAgent + ":32010",brokerUserNameAgent,brokerPasswordAgent));
@@ -466,7 +500,7 @@ public class Launcher extends CPlugin {
             while (!this.ConsumerThreadActive) {
                 Thread.sleep(1000);
             }
-            LOG.debug("Agent ConsumerThread Started..");
+            logger.debug("Agent ConsumerThread Started..");
 
             this.ap = new ActiveProducer(this, "tcp://" + this.brokerAddressAgent + ":32010", brokerUserNameAgent, brokerPasswordAgent);
 
@@ -475,9 +509,9 @@ public class Launcher extends CPlugin {
             //setWatchDog(new WatchDog(region, agent, pluginID, logger, config));
             //startWatchDog();
             updateWatchDog();
-            LOG.info("WatchDog configuration updated");
+            logger.info("WatchDog configuration updated");
             this.healthWatcher = new HealthWatcher(this);
-            LOG.info("HealthWatcher started");
+            logger.info("HealthWatcher started");
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("commInit " + e.getMessage());
@@ -517,7 +551,7 @@ public class Launcher extends CPlugin {
                 }
             }
         } catch (Exception ex) {
-            LOG.error("localAddresses Error: {}", ex.getMessage());
+            logger.error("localAddresses Error: {}", ex.getMessage());
         }
         return localAddressList;
     }
@@ -547,7 +581,7 @@ public class Launcher extends CPlugin {
             }
         }
         } catch (Exception ex) {
-            LOG.error("isIPv6 Error: {}", ex.getMessage());
+            logger.error("isIPv6 Error: {}", ex.getMessage());
         }
         return isIPv6;
     }
@@ -567,7 +601,7 @@ public class Launcher extends CPlugin {
                 rAgents.add(this.region); //just return regional controller
             }
         } catch (Exception ex) {
-            LOG.error("isReachableAgent Error: {}", ex.getMessage());
+            logger.error("isReachableAgent Error: {}", ex.getMessage());
         }
         return rAgents;
     }
@@ -586,7 +620,7 @@ public class Launcher extends CPlugin {
                     }
                 }
             } catch (Exception ex) {
-                LOG.error("isReachableAgent Error: {}", ex.getMessage());
+                logger.error("isReachableAgent Error: {}", ex.getMessage());
             }
         } else {
             isReachableAgent = true; //send all messages to regional controller if not broker

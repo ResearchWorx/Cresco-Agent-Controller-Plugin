@@ -13,7 +13,7 @@ public class AgentDiscovery {
 
     public AgentDiscovery(Launcher plugin) throws Exception {
         this.plugin = plugin;
-        rpc = new RPC(plugin.getMsgOutQueue(), plugin.getRPCMap(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), null);
+        rpc = new RPC(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), null);
     }
 
     public void perfupdate(MsgEvent pe) {

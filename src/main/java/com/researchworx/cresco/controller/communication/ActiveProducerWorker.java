@@ -6,7 +6,9 @@ import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 
+import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
+import com.researchworx.cresco.library.utilities.CLogger;
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
@@ -17,8 +19,7 @@ import org.slf4j.LoggerFactory;
 //import shared.MsgEvent;
 
 public class ActiveProducerWorker {
-	private static final Logger logger = LoggerFactory.getLogger(ActiveProducerWorker.class);
-
+	private CLogger logger;
 	private Session sess;
 	private ActiveMQConnection  conn;
 	private MessageProducer producer;
@@ -26,12 +27,12 @@ public class ActiveProducerWorker {
 	public boolean isActive;
 	private String queueName;
 	
-	public ActiveProducerWorker(String TXQueueName, String URI, String brokerUserNameAgent, String brokerPasswordAgent)  {
+	public ActiveProducerWorker(Launcher plugin, String TXQueueName, String URI, String brokerUserNameAgent, String brokerPasswordAgent)  {
+		this.logger = new CLogger(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
 		try {
 			queueName = TXQueueName;
 			gson = new Gson();
-			//conn = (ActiveMQConnection) new ActiveMQConnectionFactory(URI).createConnection();
-			conn = (ActiveMQConnection)new ActiveMQConnectionFactory(brokerUserNameAgent,brokerPasswordAgent,URI).createConnection();
+			conn = (ActiveMQConnection)new ActiveMQConnectionFactory(brokerUserNameAgent, brokerPasswordAgent, URI).createConnection();
 			conn.start();
 			this.sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
 			Destination destination = sess.createQueue(TXQueueName);
@@ -70,7 +71,6 @@ public class ActiveProducerWorker {
 			return true;
 		} catch (JMSException jmse) {
 			System.out.println("ActiveProducerWorker : sendMessage : " + se.getParams() + " : " + jmse.getMessage());
-			//System.out.println(jmse.getErrorCode());
 			return false;
 		}
 	}

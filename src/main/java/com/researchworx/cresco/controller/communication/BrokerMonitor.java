@@ -4,6 +4,7 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 
 import com.researchworx.cresco.controller.core.Launcher;
+import com.researchworx.cresco.library.utilities.CLogger;
 import org.apache.activemq.network.NetworkBridge;
 import org.apache.activemq.network.NetworkConnector;
 
@@ -12,13 +13,15 @@ import org.slf4j.LoggerFactory;
 
 class BrokerMonitor implements Runnable {
 	private Launcher plugin;
+	private CLogger logger;
 	private String agentPath;
 	private NetworkConnector bridge;
 	public boolean MonitorActive;
 
-	private static final Logger logger = LoggerFactory.getLogger(BrokerMonitor.class);
+	//private static final Logger logger = LoggerFactory.getLogger(BrokerMonitor.class);
 
 	public BrokerMonitor(Launcher plugin, String agentPath) {
+		this.logger = new CLogger(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
 		this.plugin = plugin;
 		this.agentPath = agentPath;
 	}

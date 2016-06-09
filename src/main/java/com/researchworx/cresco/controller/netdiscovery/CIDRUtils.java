@@ -25,8 +25,6 @@ package com.researchworx.cresco.controller.netdiscovery;
 *
 * */
 
-//package edazdarevic.commons.net;
-
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;

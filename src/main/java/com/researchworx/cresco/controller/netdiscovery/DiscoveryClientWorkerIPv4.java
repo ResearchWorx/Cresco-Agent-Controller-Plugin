@@ -6,15 +6,17 @@ import java.util.*;
 
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
+import com.researchworx.cresco.library.utilities.CLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 
 class DiscoveryClientWorkerIPv4 {
-    private static final Logger logger = LoggerFactory.getLogger(DiscoveryClientWorkerIPv4.class);
+    //private static final Logger logger = LoggerFactory.getLogger(DiscoveryClientWorkerIPv4.class);
 
     private Launcher plugin;
+    private CLogger logger;
     private DatagramSocket c;
     private Gson gson;
     private Timer timer;
@@ -26,12 +28,13 @@ class DiscoveryClientWorkerIPv4 {
     private DiscoveryCrypto discoveryCrypto;
 
     DiscoveryClientWorkerIPv4(Launcher plugin, DiscoveryType disType, int discoveryTimeout, String broadCastNetwork) {
+        this.logger = new CLogger(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
         this.plugin = plugin;
         gson = new Gson();
         this.discoveryTimeout = discoveryTimeout;
         this.broadCastNetwork = broadCastNetwork;
         this.disType = disType;
-        discoveryCrypto = new DiscoveryCrypto();
+        discoveryCrypto = new DiscoveryCrypto(plugin);
     }
 
     private class StopListenerTask extends TimerTask {
