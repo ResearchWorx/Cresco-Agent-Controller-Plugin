@@ -37,7 +37,7 @@ public class ActiveProducerWorker {
 			this.sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
 			Destination destination = sess.createQueue(TXQueueName);
 			producer = this.sess.createProducer(destination);
-			producer.setTimeToLive(300000L);
+			producer.setTimeToLive(3000L);
 			producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
 			isActive = true;
 			logger.debug("Producer Worker [{}] initialized", queueName);
