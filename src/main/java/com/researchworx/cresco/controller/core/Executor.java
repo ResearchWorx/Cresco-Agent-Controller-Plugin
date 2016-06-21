@@ -16,7 +16,7 @@ class Executor extends CExecutor {
 
     @Override
     public MsgEvent processConfig(MsgEvent msg) {
-        logger.info("Processing Config message");
+        logger.trace("Processing Config message");
         if (msg.getParam("configtype") == null || msg.getMsgBody() == null) return null;
         logger.debug("Config-type is properly set, as well as message body");
         switch (msg.getParam("configtype")) {
