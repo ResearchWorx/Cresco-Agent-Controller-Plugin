@@ -2,8 +2,6 @@ package com.researchworx.cresco.controller.core;
 
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class MsgRoute implements Runnable {
     //private static final Logger logger = LoggerFactory.getLogger(MsgRoute.class);
@@ -210,6 +208,65 @@ public class MsgRoute implements Runnable {
         //System.out.println("REGIONAL CONTROLLER ROUTEPATH=" + routePath + " MsgType=" + rm.getMsgType() + " Params=" + rm.getParams());
 
         return routePath;
+    }
+
+    private int getRoutePath2() {
+        /*
+         * rE aE pE  rM aM pM   Logic                                             Values   Action
+         * -- -- --  -- -- --   ------------------------------------------------  -------  ---------------------------------------
+         *  0  X  X   X  X  X   Global Broadcast Message                          0 - 31   Broadcast to Global
+         *  1  0  0   0  X  X   Regional Broadcast Message (External Region)      32 - 35  Forward to Global
+         *  1  0  0   1  X  X   Regional Broadcast Message (Current Region)       36 - 39  Broadcast to Region
+         *  1  0  1   0  X  X   Regional Broadcast Message (External Region)      40 - 43  Forward to Global
+         *  1  0  1   1  X  0   Regional Broadcast Message (Current Region)       44 - 47  Broadcast to Region
+         *  1  0  1   1  X  1   Regional Broadcast Message (Current Region)       44 - 47  Broadcast to Region & Execute
+         *  1  1  0   0  X  X   Agent Message (External Agent / External Region)  48 - 51  Forward to Global
+         *  1  1  0   1  0  X   Agent Message (External Agent / Current Region)   52 - 53  Forward to Regional Controller or Agent
+         *  1  1  0   1  1  X   Agent Message                                     54 - 55  Forward to Agent
+         *  1  1  1   0  X  X   Plugin Message (External Region)                  56 - 59  Forward to Global
+         *  1  1  1   1  0  X   Plugin Message (External Agent / Current Region)  60 - 61  Forward to Regional Controller or Agent
+         *  1  1  1   1  1  0   Plugin Message (External Plugin / Current Agent)  62       Forward to Agent
+         *  1  1  1   1  1  1   Plugin Message (Current Plugin / Current Agent)   63       Execute
+         *
+         *  Results:
+         *  --------
+         *  GlobalForward & Broadcast       0-31
+         *  GlobalForward                   32-35, 40-43, 48-51, 56-59
+         *  RegionalForward & Broadcast     36-39
+         *  RegionalForward & Execute       44-47
+         *  RegionalForward                 52-53, 60-61
+         *  AgentForward                    54-55, 62
+         *  Execute                         63
+         */
+        try {
+            String rExists = "0";
+            String aExists = "0";
+            String pExists = "0";
+            String rMatches = "0";
+            String aMatches = "0";
+            String pMatches = "0";
+
+            if (rm.getParam("dst_region") != null) {
+                rExists = "1";
+                if (rm.getParam("dst_region").equals(plugin.getRegion()))
+                    rMatches = "1";
+            }
+            if (rm.getParam("dst_agent") != null) {
+                aExists = "1";
+                if (rm.getParam("dst_agent").equals(plugin.getAgent()))
+                    aMatches = "1";
+            }
+            if (rm.getParam("dst_plugin") != null) {
+                pExists = "1";
+                if (rm.getParam("dst_plugin").equals(plugin.getPluginID()))
+                    pMatches = "1";
+            }
+
+            return Integer.parseInt(rExists + aExists + pExists + rMatches + aMatches + pMatches);
+        } catch (Exception e) {
+            logger.error("getRoutePath2 Error : {}", e.getMessage());
+            return -1;
+        }
     }
 
     private boolean getTTL() {
