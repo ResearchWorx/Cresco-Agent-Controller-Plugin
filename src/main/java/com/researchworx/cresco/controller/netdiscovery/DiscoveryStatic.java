@@ -4,12 +4,14 @@ import com.google.gson.Gson;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.*;
-import java.util.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DiscoveryStatic {
     //private static final Logger logger = LoggerFactory.getLogger(DiscoveryStatic.class);
@@ -26,7 +28,7 @@ public class DiscoveryStatic {
     private DiscoveryCrypto discoveryCrypto;
 
     public DiscoveryStatic(Launcher plugin) {
-        this.logger = new CLogger(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
+        this.logger = new CLogger(DiscoveryStatic.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
         this.plugin = plugin;
         gson = new Gson();
         //this.discoveryTimeout = discoveryTimeout;

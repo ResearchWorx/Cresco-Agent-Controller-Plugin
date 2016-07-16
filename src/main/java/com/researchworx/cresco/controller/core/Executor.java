@@ -11,7 +11,7 @@ class Executor extends CExecutor {
     Executor(Launcher plugin) {
         super(plugin);
         this.mainPlugin = plugin;
-        this.logger = new CLogger(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
+        this.logger = new CLogger(Executor.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
     }
 
     @Override

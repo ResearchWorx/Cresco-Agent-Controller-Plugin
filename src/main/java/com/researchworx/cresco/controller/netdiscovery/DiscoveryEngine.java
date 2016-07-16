@@ -1,18 +1,16 @@
 package com.researchworx.cresco.controller.netdiscovery;
 
+import com.google.gson.Gson;
+import com.researchworx.cresco.controller.core.Launcher;
+import com.researchworx.cresco.library.messaging.MsgEvent;
+import com.researchworx.cresco.library.utilities.CLogger;
+
 import java.io.IOException;
 import java.net.*;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-
-import com.researchworx.cresco.controller.core.Launcher;
-import com.researchworx.cresco.library.messaging.MsgEvent;
-import com.researchworx.cresco.library.utilities.CLogger;
-
-import com.google.gson.Gson;
 
 public class DiscoveryEngine implements Runnable {
     private Launcher plugin;
@@ -22,8 +20,8 @@ public class DiscoveryEngine implements Runnable {
     private Gson gson;
 
     public DiscoveryEngine(Launcher plugin) {
-        this.logger = new CLogger(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
-        logger.trace("Discovery Engine initialized");
+        this.logger = new CLogger(DiscoveryEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
+        logger.trace("Initializing");
         this.plugin = plugin;
         discoveryCrypto = new DiscoveryCrypto(plugin);
         gson = new Gson();
@@ -37,7 +35,7 @@ public class DiscoveryEngine implements Runnable {
     }
 
     public void run() {
-        logger.info("Discovery Engine started");
+        logger.info("Starting");
         try {
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             while (interfaces.hasMoreElements()) {
@@ -46,13 +44,13 @@ public class DiscoveryEngine implements Runnable {
                 thread.start();
             }
             this.plugin.setDiscoveryActive(true);
-            logger.trace("Discovery Engine has shutdown");
+            logger.trace("Shutdown");
         } catch (Exception ex) {
             logger.error("Run {}", ex.getMessage());
         }
     }
 
-    class DiscoveryEngineWorker implements Runnable {
+    private class DiscoveryEngineWorker implements Runnable {
         private NetworkInterface networkInterface;
         private MulticastSocket socket;
         private Launcher plugin;

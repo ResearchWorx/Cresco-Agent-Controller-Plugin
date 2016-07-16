@@ -2,8 +2,6 @@ package com.researchworx.cresco.controller.regionalcontroller;
 
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.utilities.CLogger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -17,8 +15,8 @@ public class HealthWatcher {
     //private static final Logger logger = LoggerFactory.getLogger(HealthWatcher.class);
 
     public HealthWatcher(Launcher plugin) {
-        this.logger = new CLogger(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
-        logger.debug("HealthWatcher initialized");
+        this.logger = new CLogger(HealthWatcher.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
+        logger.debug("Initializing");
         this.plugin = plugin;
         wdTimer = 1000;
         startTS = System.currentTimeMillis();
@@ -28,7 +26,7 @@ public class HealthWatcher {
 
     public void shutdown() {
         timer.cancel();
-        logger.debug("HealthWatcher has shutdown");
+        logger.debug("Shutdown");
     }
 
     class HealthWatcherTask extends TimerTask {

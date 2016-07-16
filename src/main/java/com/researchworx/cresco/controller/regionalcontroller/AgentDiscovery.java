@@ -3,16 +3,17 @@ package com.researchworx.cresco.controller.regionalcontroller;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.messaging.RPC;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.researchworx.cresco.library.utilities.CLogger;
 
 public class AgentDiscovery {
-    private static final Logger logger = LoggerFactory.getLogger(AgentDiscovery.class);
+    //private static final Logger logger = LoggerFactory.getLogger(AgentDiscovery.class);
     private Launcher plugin;
+    private CLogger logger;
     private static RPC rpc;
 
     public AgentDiscovery(Launcher plugin) throws Exception {
         this.plugin = plugin;
+        logger = new CLogger(AgentDiscovery.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
         rpc = new RPC(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), null);
     }
 

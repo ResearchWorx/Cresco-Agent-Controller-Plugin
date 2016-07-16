@@ -4,15 +4,13 @@ import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 
 public class MsgRoute implements Runnable {
-    //private static final Logger logger = LoggerFactory.getLogger(MsgRoute.class);
-
     private MsgEvent rm;
     private Launcher plugin;
     private CLogger logger;
 
     public MsgRoute(Launcher plugin, MsgEvent rm) {
         this.plugin = plugin;
-        this.logger = new CLogger(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+        this.logger = new CLogger(MsgRoute.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
         this.rm = rm;
     }
 

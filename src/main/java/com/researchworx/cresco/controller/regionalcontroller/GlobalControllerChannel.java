@@ -1,5 +1,11 @@
 package com.researchworx.cresco.controller.regionalcontroller;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.researchworx.cresco.controller.core.Launcher;
+import com.researchworx.cresco.library.messaging.MsgEvent;
+import com.researchworx.cresco.library.utilities.CLogger;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -11,17 +17,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import com.researchworx.cresco.controller.core.Launcher;
-import com.researchworx.cresco.library.messaging.MsgEvent;
-import com.researchworx.cresco.library.utilities.CLogger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class GlobalControllerChannel {
-    //private static final Logger logger = LoggerFactory.getLogger(GlobalControllerChannel.class);
 
     private final String USER_AGENT = "Cresco-Agent-Controller-Plugin/0.5.0";
     private Launcher plugin;
@@ -34,7 +30,7 @@ public class GlobalControllerChannel {
     private String KPIUrl;
 
     public GlobalControllerChannel(Launcher plugin) {
-        this.logger = new CLogger(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
+        this.logger = new CLogger(GlobalControllerChannel.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
         this.plugin = plugin;
         if (plugin.getConfig().getStringParam("globalcontroller_host") != null) {
             if (plugin.getConfig().getStringParam("globalcontroller_port") != null) {

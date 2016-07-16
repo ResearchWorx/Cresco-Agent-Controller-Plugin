@@ -8,7 +8,6 @@ import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 import javax.jms.*;
-//import shared.MsgEvent;
 
 public class ActiveProducerWorker {
 	private CLogger logger;
@@ -20,7 +19,7 @@ public class ActiveProducerWorker {
 	private String queueName;
 	
 	public ActiveProducerWorker(Launcher plugin, String TXQueueName, String URI, String brokerUserNameAgent, String brokerPasswordAgent)  {
-		this.logger = new CLogger(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
+		this.logger = new CLogger(ActiveProducerWorker.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
 		try {
 			queueName = TXQueueName;
 			gson = new Gson();
@@ -32,7 +31,7 @@ public class ActiveProducerWorker {
 			producer.setTimeToLive(300000L);
 			producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
 			isActive = true;
-			logger.debug("Producer Worker [{}] initialized", queueName);
+			logger.debug("Initialized", queueName);
 		} catch (Exception e) {
 			logger.error("Constructor {}", e.getMessage());
 		}
@@ -59,10 +58,10 @@ public class ActiveProducerWorker {
 		try {
 			String sendJson = gson.toJson(se);
 			producer.send(this.sess.createTextMessage(sendJson));
-			logger.trace("sendMessage to : " + queueName + " message:" + se.getParams().toString());
+			logger.trace("sendMessage to : " + queueName + " message:" + se.getParams());
 			return true;
 		} catch (JMSException jmse) {
-			logger.error("ActiveProducerWorker : sendMessage : " + se.getParams() + " : " + jmse.getMessage());
+			logger.error("sendMessage: {} : {}", se.getParams(), jmse.getMessage());
 			return false;
 		}
 	}

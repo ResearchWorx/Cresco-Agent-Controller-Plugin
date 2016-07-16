@@ -1,13 +1,11 @@
 package com.researchworx.cresco.controller.regionalcontroller;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ControllerDB {
     //private static final Logger logger = LoggerFactory.getLogger(ControllerDB.class);
@@ -17,7 +15,7 @@ public class ControllerDB {
     private CLogger logger;
 
     public ControllerDB(Launcher plugin) {
-        this.logger = new CLogger(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
+        this.logger = new CLogger(ControllerDB.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
         this.plugin = plugin;
         this.agentMap = new ConcurrentHashMap<>();
     }

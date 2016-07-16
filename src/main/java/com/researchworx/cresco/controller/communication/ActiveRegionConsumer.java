@@ -1,7 +1,5 @@
 package com.researchworx.cresco.controller.communication;
 
-import javax.jms.*;
-
 import com.google.gson.Gson;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
@@ -9,8 +7,10 @@ import com.researchworx.cresco.library.utilities.CLogger;
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.jms.MessageConsumer;
+import javax.jms.Queue;
+import javax.jms.Session;
+import javax.jms.TextMessage;
 
 public class ActiveRegionConsumer implements Runnable {
 	private Launcher plugin;
@@ -18,14 +18,12 @@ public class ActiveRegionConsumer implements Runnable {
 	private Queue RXqueue; 
 	private Session sess;
 	private ActiveMQConnection conn;
-	//private static final Logger logger = LoggerFactory.getLogger(ActiveRegionConsumer.class);
 	
 	public ActiveRegionConsumer(Launcher plugin, String RXQueueName, String URI, String brokerUserNameAgent, String brokerPasswordAgent) {
-		this.logger = new CLogger(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
-		logger.debug("Region Consumer initialized");
+		this.logger = new CLogger(ActiveRegionConsumer.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
+		logger.debug("Initializing");
 		this.plugin = plugin;
 		try {
-			//conn = (ActiveMQConnection)new ActiveMQConnectionFactory(URI).createConnection();
 			conn = (ActiveMQConnection)new ActiveMQConnectionFactory(brokerUserNameAgent,brokerPasswordAgent,URI).createConnection();
 			conn.start();
 			this.sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -37,7 +35,7 @@ public class ActiveRegionConsumer implements Runnable {
 
 	@Override
 	public void run() {
-		logger.info("Region Consumer started");
+		logger.info("Starting");
 		Gson gson = new Gson();
 		try {
 			this.plugin.setConsumerThreadRegionActive(true);
@@ -66,11 +64,11 @@ public class ActiveRegionConsumer implements Runnable {
 					*/
 				}
 			}
-			logger.debug("Cleaning up ActiveRegionConsumer");
+			logger.debug("Cleaning up");
 			sess.close();
 			conn.cleanup();
 			conn.close();
-			logger.debug("Region Consumer has shutdown");
+			logger.debug("Shutdown");
 		} catch (Exception ex) {
 			logger.error("Run {}", ex.toString());
 			this.plugin.setConsumerThreadRegionActive(false);

@@ -3,8 +3,6 @@ package com.researchworx.cresco.controller.netdiscovery;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.utilities.CLogger;
 import org.apache.commons.net.util.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
@@ -13,13 +11,11 @@ import java.security.MessageDigest;
 import java.util.Arrays;
 
 public class DiscoveryCrypto {
-
-    //private static final Logger logger = LoggerFactory.getLogger(DiscoveryCrypto.class);
     private CLogger logger;
     private static final String ALGORITHM = "AES";
 
     public DiscoveryCrypto(Launcher plugin) {
-        this.logger = new CLogger(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
+        this.logger = new CLogger(DiscoveryCrypto.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
     }
 
     private Key generateKeyFromString(final String secKey) throws Exception {

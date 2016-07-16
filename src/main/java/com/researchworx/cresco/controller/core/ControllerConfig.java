@@ -1,8 +1,6 @@
 package com.researchworx.cresco.controller.core;
 
 import com.researchworx.cresco.library.core.Config;
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.HierarchicalINIConfiguration;
 import org.apache.commons.configuration.SubnodeConfiguration;
 
 import java.util.HashMap;
@@ -11,9 +9,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class ControllerConfig extends Config {
-    //public ControllerConfig(String configFile) throws ConfigurationException {
-    //    super(configFile);
-    //}
 
     public ControllerConfig (SubnodeConfiguration config) {
         super(config);

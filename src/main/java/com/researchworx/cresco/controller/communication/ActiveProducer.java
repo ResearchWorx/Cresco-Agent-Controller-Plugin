@@ -1,17 +1,15 @@
 package com.researchworx.cresco.controller.communication;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Timer;
-import java.util.Map.Entry;
-import java.util.TimerTask;
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ActiveProducer {
 	public Map<String,ActiveProducerWorker> producerWorkers;
@@ -25,10 +23,7 @@ public class ActiveProducer {
 	private String brokerUserNameAgent;
 	private String brokerPasswordAgent;
 
-	//private static final Logger logger = LoggerFactory.getLogger(ActiveProducer.class);
-
 	class ClearProducerTask extends TimerTask {
-		//private Logger logger = LoggerFactory.getLogger(ClearProducerTask.class);
 	    public void run()  {
 	    	logger.trace("Tick");
 	    	for (Entry<String, ActiveProducerWorker> entry : producerWorkers.entrySet()) {
@@ -46,7 +41,7 @@ public class ActiveProducer {
 	
 	public ActiveProducer(Launcher plugin, String URI,String brokerUserNameAgent, String brokerPasswordAgent)  {
 		this.plugin = plugin;
-		this.logger = new CLogger(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
+		this.logger = new CLogger(ActiveProducer.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
         this.brokerUserNameAgent = brokerUserNameAgent;
         this.brokerPasswordAgent = brokerPasswordAgent;
 		try {

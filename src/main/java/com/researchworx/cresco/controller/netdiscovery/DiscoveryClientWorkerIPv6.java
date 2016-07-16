@@ -1,31 +1,15 @@
 package com.researchworx.cresco.controller.netdiscovery;
 
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.Inet6Address;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.InterfaceAddress;
-import java.net.NetworkInterface;
-import java.net.SocketAddress;
-import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-
+import com.google.gson.Gson;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import com.google.gson.Gson;
+import java.io.IOException;
+import java.net.*;
+import java.util.*;
 
 public class DiscoveryClientWorkerIPv6 {
-    //public static final Logger logger = LoggerFactory.getLogger(DiscoveryClientWorkerIPv6.class);
     private Launcher plugin;
     private CLogger logger;
     private DatagramSocket c;
@@ -41,7 +25,7 @@ public class DiscoveryClientWorkerIPv6 {
 
 
     public DiscoveryClientWorkerIPv6(Launcher plugin, DiscoveryType disType, int discoveryTimeout, String multiCastNetwork) {
-        this.logger = new CLogger(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
+        this.logger = new CLogger(DiscoveryClientWorkerIPv6.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
         this.plugin = plugin;
         gson = new Gson();
         //timer = new Timer();
