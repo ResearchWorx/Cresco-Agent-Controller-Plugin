@@ -1,13 +1,13 @@
 package com.researchworx.cresco.controller.communication;
 
-import javax.jms.*;
-
 import com.google.gson.Gson;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
+
+import javax.jms.*;
 
 public class ActiveAgentConsumer implements Runnable {
 	private Launcher plugin;
@@ -17,17 +17,29 @@ public class ActiveAgentConsumer implements Runnable {
 	private ActiveMQConnection conn;
 
 	public ActiveAgentConsumer(Launcher plugin, String RXQueueName, String URI, String brokerUserNameAgent, String brokerPasswordAgent) {
-		this.logger = new CLogger(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
+		logger = new CLogger(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
 		logger.debug("Agent Consumer initialized : Queue : " + RXQueueName);
 		logger.trace("RXQueue=" + RXQueueName + " URI=" + URI + " brokerUserNameAgent=" + brokerUserNameAgent + " brokerPasswordAgent=" + brokerPasswordAgent);
 		this.plugin = plugin;
 		try {
-			conn = (ActiveMQConnection)new ActiveMQConnectionFactory(brokerUserNameAgent,brokerPasswordAgent,URI).createConnection();
+			conn = (ActiveMQConnection) new ActiveMQConnectionFactory(brokerUserNameAgent, brokerPasswordAgent, URI).createConnection();
 			conn.start();
-			this.sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
-			this.RXqueue = sess.createQueue(RXQueueName);
+			sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
+			RXqueue = sess.createQueue(RXQueueName);
+		} catch (JMSException je) {
+			try {
+				Thread.sleep(500);
+				conn = (ActiveMQConnection) new ActiveMQConnectionFactory(brokerUserNameAgent, brokerPasswordAgent, URI).createConnection();
+				conn.start();
+				sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
+				RXqueue = sess.createQueue(RXQueueName);
+			} catch (InterruptedException e) {
+				logger.trace("Connect was interrupted");
+			} catch (JMSException e) {
+				logger.error("Encountered JMS Exception: {}", e.getMessage());
+			}
 		} catch(Exception ex) {
-			plugin.getLogger().error("Init {}", ex.getMessage());
+			logger.error("Init {}", ex.getMessage());
 		}
 	}
 
