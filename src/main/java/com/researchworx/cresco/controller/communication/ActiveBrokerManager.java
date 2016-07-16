@@ -1,27 +1,24 @@
 package com.researchworx.cresco.controller.communication;
 
-import java.util.Map.Entry;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map.Entry;
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class ActiveBrokerManager implements Runnable  {
-	//private MulticastSocket socket;
 	private Launcher plugin;
 	private CLogger logger;
 	private Timer timer;
-	//private static final Logger logger = LoggerFactory.getLogger(ActiveBrokerManager.class);
 	public ActiveBrokerManager(Launcher plugin) {
-		this.logger = new CLogger(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
+		this.logger = new CLogger(ActiveBrokerManager.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
 		logger.debug("Active Broker Manger initialized");
 		this.plugin = plugin;
 		timer = new Timer();
-	    //timer.scheduleAtFixedRate(new BrokerWatchDog(), 500, 300000);//remote 
 		timer.scheduleAtFixedRate(new BrokerWatchDog(), 500, 15000);//remote 
 	}
 	  

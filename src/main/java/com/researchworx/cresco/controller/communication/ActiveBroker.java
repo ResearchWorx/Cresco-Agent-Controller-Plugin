@@ -10,17 +10,12 @@ import org.apache.activemq.broker.region.policy.PolicyMap;
 import org.apache.activemq.network.NetworkConnector;
 import org.apache.activemq.util.ServiceStopper;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.URI;
 
 public class ActiveBroker {
-	//private static final Logger logger = LoggerFactory.getLogger(ActiveBroker.class);
-	private Launcher plugin;
 	private CLogger logger;
 	private TransportConnector connector;
 	private CrescoAuthenticationPlugin authenticationPlugin;
@@ -29,9 +24,8 @@ public class ActiveBroker {
 	public BrokerService broker;
 
 	public ActiveBroker(Launcher plugin, String brokerName, String brokerUserNameAgent, String brokerPasswordAgent) {
-		this.plugin = plugin;
-		this.logger = new CLogger(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
-		logger.info("Broker initialized");
+		this.logger = new CLogger(ActiveBroker.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
+		logger.info("Initialized");
 		try {
 			if(portAvailable(32010)) {
 				PolicyEntry entry = new PolicyEntry();

@@ -18,7 +18,7 @@ public class ActiveAgentConsumer implements Runnable {
 
 	public ActiveAgentConsumer(Launcher plugin, String RXQueueName, String URI, String brokerUserNameAgent, String brokerPasswordAgent) {
 		logger = new CLogger(ActiveAgentConsumer.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
-		logger.debug("Agent Consumer initialized : Queue : " + RXQueueName);
+		logger.debug("Queue: {}", RXQueueName);
 		logger.trace("RXQueue=" + RXQueueName + " URI=" + URI + " brokerUserNameAgent=" + brokerUserNameAgent + " brokerPasswordAgent=" + brokerPasswordAgent);
 		this.plugin = plugin;
 		int retryCount = 10;
@@ -32,15 +32,13 @@ public class ActiveAgentConsumer implements Runnable {
 			} catch (JMSException je) {
 				try {
 				    logger.error("JMSException: {}", je.getMessage());
-                    logger.error("Retrying connection");
+                    logger.error("Retrying initialization");
 					Thread.sleep(500);
 				} catch (InterruptedException e) {
-					logger.trace("Connect was interrupted");
-				} catch (Exception e) {
-					logger.error("Encountered Exception: {}", e.getMessage());
+					logger.trace("Initialization was interrupted");
 				}
 			} catch (Exception ex) {
-				logger.error("Init {}", ex.getMessage());
+				logger.error("Constructor: {}", ex.getMessage());
 				break;
 			}
 		}
@@ -48,7 +46,7 @@ public class ActiveAgentConsumer implements Runnable {
 
 	@Override
 	public void run() {
-		logger.info("Agent Consumer started : Queue : " + RXqueue);
+		logger.info("Queue: {}", RXqueue);
 		Gson gson = new Gson();
 		try {
 			plugin.setConsumerThreadActive(true);
@@ -56,26 +54,26 @@ public class ActiveAgentConsumer implements Runnable {
 			while (plugin.isConsumerThreadActive()) {
 				TextMessage msg = (TextMessage) consumer.receive(1000);
 				if (msg != null) {
-					logger.debug("Incoming Queue : " + RXqueue);
+					logger.debug("Incoming Queue: {}", RXqueue);
 					MsgEvent me = gson.fromJson(msg.getText(), MsgEvent.class);
 					plugin.msgIn(me);
-					logger.debug("Message : "  + me.getParams().toString());
+					logger.debug("Message: {}", me.getParams().toString());
 				}
                 else {
-					logger.trace("Agent Consumer Connection Details: Queue : " + RXqueue);
+					logger.trace("Queue Details: {}", RXqueue);
 					logger.trace("isStarted=" + conn.isStarted() + " isClosed=" + conn.isClosed() + " ClientId=" + conn.getInitializedClientID());
 					logger.trace("brokerName=" + conn.getBrokerName() + " username=" + conn.getConnectionInfo().getUserName() + " password=" + conn.getConnectionInfo().getPassword());
                 }
 			}
-			logger.debug("Cleaning up ActiveAgentConsumer");
+			logger.debug("Cleaning up");
 			sess.close();
 			conn.cleanup();
 			conn.close();
-			logger.debug("Agent Consumer has shutdown");
+			logger.debug("Shutdown complete");
 		} catch (JMSException e) {
 			plugin.setConsumerThreadActive(false);
 		} catch (Exception ex) {
-			logger.error("Run {}", ex.getMessage());
+			logger.error("Run: {}", ex.getMessage());
 			plugin.setConsumerThreadActive(false);
 		}
 	}
