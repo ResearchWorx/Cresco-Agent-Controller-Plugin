@@ -1,21 +1,13 @@
 package com.researchworx.cresco.controller.communication;
 
-import javax.jms.DeliveryMode;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.MessageProducer;
-import javax.jms.Session;
-
+import com.google.gson.Gson;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
-import com.google.gson.Gson;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.jms.*;
 //import shared.MsgEvent;
 
 public class ActiveProducerWorker {
@@ -70,7 +62,7 @@ public class ActiveProducerWorker {
 			logger.trace("sendMessage to : " + queueName + " message:" + se.getParams().toString());
 			return true;
 		} catch (JMSException jmse) {
-			System.out.println("ActiveProducerWorker : sendMessage : " + se.getParams() + " : " + jmse.getMessage());
+			logger.error("ActiveProducerWorker : sendMessage : " + se.getParams() + " : " + jmse.getMessage());
 			return false;
 		}
 	}

@@ -31,6 +31,8 @@ public class ActiveAgentConsumer implements Runnable {
 				break;
 			} catch (JMSException je) {
 				try {
+				    logger.error("JMSException: {}", je.getMessage());
+                    logger.error("Retrying connection");
 					Thread.sleep(500);
 				} catch (InterruptedException e) {
 					logger.trace("Connect was interrupted");
