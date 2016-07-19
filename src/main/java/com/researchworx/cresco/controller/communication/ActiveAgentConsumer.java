@@ -32,6 +32,7 @@ public class ActiveAgentConsumer implements Runnable {
 			} catch (JMSException je) {
 				try {
 				    logger.error("JMSException: {}", je.getMessage());
+					logger.debug("brokerUserNameAgent={}, brokerPasswordAgent={},URI={}", brokerUserNameAgent, brokerPasswordAgent, URI);
                     logger.error("Retrying initialization");
 					Thread.sleep(500);
 				} catch (InterruptedException e) {
