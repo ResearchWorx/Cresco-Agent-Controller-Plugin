@@ -47,8 +47,10 @@ public class ActiveBroker {
 				broker.setPlugins(new BrokerPlugin[]{authorizationPlugin,authenticationPlugin});
 
                 connector = new TransportConnector();
-
-				connector.setUri(new URI("tcp://[::]:32010"));
+				if (plugin.isIPv6())
+					connector.setUri(new URI("tcp://[::]:32010"));
+				else
+					connector.setUri(new URI("tcp://0.0.0.0:32010"));
 
 				broker.addConnector(connector);
 
