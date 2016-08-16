@@ -25,9 +25,9 @@ public class ActiveProducerWorker {
 			gson = new Gson();
 			conn = (ActiveMQConnection)new ActiveMQConnectionFactory(brokerUserNameAgent, brokerPasswordAgent, URI).createConnection();
 			conn.start();
-			this.sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
+			sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
 			Destination destination = sess.createQueue(TXQueueName);
-			producer = this.sess.createProducer(destination);
+			producer = sess.createProducer(destination);
 			producer.setTimeToLive(300000L);
 			producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
 			isActive = true;
@@ -56,8 +56,7 @@ public class ActiveProducerWorker {
 	}
 	public boolean sendMessage(MsgEvent se) {
 		try {
-			String sendJson = gson.toJson(se);
-			producer.send(this.sess.createTextMessage(sendJson));
+			producer.send(sess.createTextMessage(gson.toJson(se)));
 			logger.trace("sendMessage to : " + queueName + " message:" + se.getParams());
 			return true;
 		} catch (JMSException jmse) {
