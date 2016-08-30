@@ -18,6 +18,7 @@ public class ControllerDB {
         this.logger = new CLogger(ControllerDB.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
         this.plugin = plugin;
         this.agentMap = new ConcurrentHashMap<>();
+
     }
 
     public Boolean isNode(String region, String agent, String plugin) {

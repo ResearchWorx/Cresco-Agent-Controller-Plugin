@@ -3,10 +3,7 @@ package com.researchworx.cresco.controller.core;
 import com.google.auto.service.AutoService;
 import com.researchworx.cresco.controller.communication.*;
 import com.researchworx.cresco.controller.netdiscovery.*;
-import com.researchworx.cresco.controller.regionalcontroller.AgentDiscovery;
-import com.researchworx.cresco.controller.regionalcontroller.ControllerDB;
-import com.researchworx.cresco.controller.regionalcontroller.GlobalControllerChannel;
-import com.researchworx.cresco.controller.regionalcontroller.HealthWatcher;
+import com.researchworx.cresco.controller.regionalcontroller.*;
 import com.researchworx.cresco.controller.shell.AppShellFactory;
 import com.researchworx.cresco.controller.shell.InAppPasswordAuthenticator;
 import com.researchworx.cresco.library.messaging.MsgEvent;
@@ -47,6 +44,8 @@ public class Launcher extends CPlugin {
 
     private boolean ActiveBrokerManagerActive = false;
     private boolean ActiveDestManagerActive = false;
+
+
 
     private boolean ConsumerThreadActive = false;
     private boolean ConsumerThreadRegionActive = false;
@@ -414,6 +413,17 @@ public class Launcher extends CPlugin {
                 logger.debug("AgentDiscover Service Started");
                 this.agentDiscover = new AgentDiscovery(this); //discovery service
                 logger.debug("ControllerDB Service Started");
+
+                //Test new DB
+                /*
+                dbServer dbs = new dbServer();
+                dbs.startServer();
+                 */
+                logger.info("Starting Graph DB");
+                GraphDBEngine gdbe = new GraphDBEngine();
+                gdbe.startServer();
+                logger.info("Started Graph DB");
+                //End Test new DV
 
                 this.isRegionalController = true;
                 //start regional init

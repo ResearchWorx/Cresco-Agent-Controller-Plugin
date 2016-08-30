@@ -324,6 +324,7 @@ public class AppShellFactory implements Factory {
 
 
                 if ((cmd.length() > 0) && (cmdList.size() == 0)) {
+
                     //CmdEvent ce = cs.call(new CmdEvent("execute",cmd));
                     //return ce.getCmdResult();
                     //MsgEvent me = new MsgEvent(MsgEventType.EXEC,"test","controller2","plugin/0","shell command");
