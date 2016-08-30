@@ -49,7 +49,7 @@ public class ActiveProducer {
 
             this.URI = URI;
             timer = new Timer();
-            timer.scheduleAtFixedRate(new ClearProducerTask(), 30000, 30000);
+            timer.scheduleAtFixedRate(new ClearProducerTask(), 15000, 15000);
             logger.debug("Producer initialized");
         } catch (Exception ex) {
             logger.error("Constructor " + ex.toString());
