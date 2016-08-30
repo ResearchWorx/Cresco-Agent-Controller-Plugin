@@ -15,7 +15,6 @@ import com.researchworx.cresco.library.utilities.CLogger;
 import org.apache.activemq.command.ActiveMQDestination;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
-import sun.reflect.generics.reflectiveObjects.LazyReflectiveObjectGenerator;
 
 import java.io.File;
 import java.net.Inet6Address;
@@ -26,7 +25,10 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @AutoService(CPlugin.class)
@@ -146,7 +148,7 @@ public class Launcher extends CPlugin {
 
     @Override
     public void cleanUp() {
-        closeCommunications();
+        //closeCommunications();
     }
 
     public void closeCommunications() {
