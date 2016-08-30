@@ -36,7 +36,7 @@ public class ActiveProducerWorker {
 			logger.error("Constructor {}", e.getMessage());
 		}
 	}
-
+//BDB\em{?}
 	public boolean shutdown() {
 		boolean isShutdown = false;
 		try {
