@@ -1,4 +1,4 @@
-package com.researchworx.cresco.controller.regionalcontroller;
+package com.researchworx.cresco.controller.graphdb;
 
 import com.orientechnologies.orient.client.remote.OServerAdmin;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
@@ -6,6 +6,8 @@ import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.metadata.schema.OSchema;
 import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.sql.OCommandSQL;
+import com.researchworx.cresco.controller.core.Launcher;
+import com.researchworx.cresco.library.utilities.CLogger;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.orient.OrientGraph;
@@ -22,14 +24,18 @@ public class GraphDBEngine {
 	
 	public OrientGraphFactory factory;
 	private OrientGraph odb;
-	//public Cache<String, String> nodePathCache;
-	//public Cache<String, Edge> appPathCache;
-	public String[] aNodeIndexParams = {"platform","environment","location"};
+    private Launcher plugin;
+    private CLogger logger;
+
+    public String[] aNodeIndexParams = {"platform","environment","location"};
 	
 	public int retryCount = 50;
 	
-	public GraphDBEngine()
+	public GraphDBEngine(Launcher plugin, Boolean isMemory)
 	{
+        this.plugin = plugin;
+        logger = new CLogger(GraphDBEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Debug);
+
 		/*
 		nodePathCache = CacheBuilder.newBuilder()
 			    .concurrencyLevel(4)
@@ -49,38 +55,32 @@ public class GraphDBEngine {
 		//String connection_string = "remote:" + Launcher.conf.getGraphDBServer() + "/" + Launcher.conf.getGraphDBName();
 		//String username = Launcher.conf.getGraphDBLogin();
 		//String password = Launcher.conf.getGraphDBPassword();
-		/*
-        String host = ControllerEngine.config.getParam("gdb_host");
-		String username = ControllerEngine.config.getParam("gdb_username");
-		String password = ControllerEngine.config.getParam("gdb_password");
-		String dbname = ControllerEngine.config.getParam("gdb_dbname");
-		
-		String connection_string = "remote:" + host + "/" + dbname;
-
-
-        if(dropDBIfExists(connection_string, username, password)) {
-            System.out.println("Dropped existing database!");
-            //System.exit(0);
+		if(isMemory) {
+            ODatabaseDocumentTx db = new ODatabaseDocumentTx("memory:internalDb").create();
+            factory = new OrientGraphFactory("memory:internalDb");
         }
+        else {
+            String host = plugin.getConfig().getStringParam("gdb_host");
+            String username = plugin.getConfig().getStringParam("gdb_username");
+            String password = plugin.getConfig().getStringParam("gdb_password");
+            String dbname = plugin.getConfig().getStringParam("gdb_dbname");
 
-        if(!dbCheck(connection_string, username, password))
-        {
-            System.out.println("DBCheck failed");
-            System.exit(0);
+            String connection_string = "remote:" + host + "/" + dbname;
+
+
+            if (dropDBIfExists(connection_string, username, password)) {
+                logger.debug("Dropped existing database!");
+                //System.exit(0);
+            }
+
+            if (!dbCheck(connection_string, username, password)) {
+                logger.debug("DBCheck failed");
+                System.exit(0);
+            }
+            factory = new OrientGraphFactory(connection_string, username, password).setupPool(10, 100);
         }
-
-        factory = new OrientGraphFactory(connection_string,username,password).setupPool(10, 100);
-
         initCrescoDB();
-        System.out.println("Post Init!");
-        ControllerEngine.GDBActive = true;
-        */
-
-
-        ODatabaseDocumentTx db = new ODatabaseDocumentTx("memory:MyDb").create();
-        factory = new OrientGraphFactory("memory:MyDb");
-        initCrescoDB();
-        System.out.println("Post Init!");
+        logger.debug("Post Init!");
 
     }
 
@@ -145,7 +145,7 @@ public class GraphDBEngine {
         }
         catch(Exception ex)
         {
-            System.out.println("GraphDBEngine : getINodeID : Error " + ex.toString());
+            logger.debug("GraphDBEngine : getINodeID : Error " + ex.toString());
         }
         finally
         {
@@ -184,7 +184,7 @@ public class GraphDBEngine {
         }
         catch(Exception ex)
         {
-            System.out.println("GraphDBEngine : getANodeFromIndex : Error " + ex.toString());
+            logger.debug("GraphDBEngine : getANodeFromIndex : Error " + ex.toString());
             nodeList = null;
         }
         finally
@@ -220,7 +220,7 @@ public class GraphDBEngine {
         }
         catch(Exception ex)
         {
-            System.out.println("GraphDBEngine : getResourceNodeID : Error " + ex.toString());
+            logger.debug("GraphDBEngine : getResourceNodeID : Error " + ex.toString());
         }
         finally
         {
@@ -303,7 +303,7 @@ public class GraphDBEngine {
         }
         catch(Exception ex)
         {
-            System.out.println("GraphDBEngine : getNodeID : Error " + ex.toString());
+            logger.debug("GraphDBEngine : getNodeID : Error " + ex.toString());
         }
         finally
         {
@@ -346,7 +346,7 @@ public class GraphDBEngine {
         }
         catch(Exception ex)
         {
-            System.out.println("GraphDBEngine : getResourceEdgeId : Error " + ex.toString());
+            logger.debug("GraphDBEngine : getResourceEdgeId : Error " + ex.toString());
         }
         finally
         {
@@ -389,7 +389,7 @@ public class GraphDBEngine {
         }
         catch(Exception ex)
         {
-            System.out.println("GraphDBEngine : getIsAssignedEdgeId : Error " + ex.toString());
+            logger.debug("GraphDBEngine : getIsAssignedEdgeId : Error " + ex.toString());
         }
         finally
         {
@@ -435,7 +435,7 @@ public class GraphDBEngine {
         }
         catch(Exception ex)
         {
-            System.out.println("GraphDBEngine : getIsAssignedEdgeId : Error " + ex.toString());
+            logger.debug("GraphDBEngine : getIsAssignedEdgeId : Error " + ex.toString());
         }
         finally
         {
@@ -464,7 +464,7 @@ public class GraphDBEngine {
         }
         catch(Exception ex)
         {
-            System.out.println("GraphDBEngine : getIsAssignedParam : Error " + ex.toString());
+            logger.debug("GraphDBEngine : getIsAssignedParam : Error " + ex.toString());
         }
         finally
         {
@@ -553,7 +553,7 @@ public class GraphDBEngine {
         }
         catch(Exception ex)
         {
-            System.out.println("GrapgDBEngine : getNodeList : Error " + ex.toString());
+            logger.debug("GrapgDBEngine : getNodeList : Error " + ex.toString());
         }
         finally
         {
@@ -617,7 +617,7 @@ public class GraphDBEngine {
         }
         catch(Exception ex)
         {
-            System.out.println("GrapgDBEngine : getNodeList : Error " + ex.toString());
+            logger.debug("GrapgDBEngine : getNodeList : Error " + ex.toString());
         }
         finally
         {
@@ -648,7 +648,7 @@ public class GraphDBEngine {
         }
         catch(Exception ex)
         {
-            System.out.println("getINodeParam: Error " + ex.toString());
+            logger.debug("getINodeParam: Error " + ex.toString());
         }
         finally
         {
@@ -681,12 +681,12 @@ public class GraphDBEngine {
 
             if((paramVal == null) && (count == retryCount))
             {
-                System.out.println("GraphDBEngine : getNodeParam : Failed to add node in " + count + " retrys");
+                logger.debug("GraphDBEngine : getNodeParam : Failed to add node in " + count + " retrys");
             }
         }
         catch(Exception ex)
         {
-            System.out.println("GraphDBEngine : getNodeParam : Error " + ex.toString());
+            logger.debug("GraphDBEngine : getNodeParam : Error " + ex.toString());
         }
 
         return paramVal;
@@ -714,12 +714,12 @@ public class GraphDBEngine {
 
             if((paramVal == null) && (count == retryCount))
             {
-                System.out.println("GraphDBEngine : getNodeParam : Failed to add node in " + count + " retrys");
+                logger.debug("GraphDBEngine : getNodeParam : Failed to add node in " + count + " retrys");
             }
         }
         catch(Exception ex)
         {
-            System.out.println("GraphDBEngine : getNodeParam : Error " + ex.toString());
+            logger.debug("GraphDBEngine : getNodeParam : Error " + ex.toString());
         }
 
         return paramVal;
@@ -739,7 +739,7 @@ public class GraphDBEngine {
         }
         catch(Exception ex)
         {
-            System.out.println("IgetNodeParam: Error " + ex.toString());
+            logger.debug("IgetNodeParam: Error " + ex.toString());
         }
         finally
         {
@@ -775,12 +775,12 @@ public class GraphDBEngine {
 
             if((edge_id == null) && (count == retryCount))
             {
-                System.out.println("GraphDBEngine : addIsAttachedEdge : Failed to add edge in " + count + " retrys");
+                logger.debug("GraphDBEngine : addIsAttachedEdge : Failed to add edge in " + count + " retrys");
             }
         }
         catch(Exception ex)
         {
-            System.out.println("GraphDBEngine : addIsAttachedEdge : Error " + ex.toString());
+            logger.debug("GraphDBEngine : addIsAttachedEdge : Error " + ex.toString());
         }
 
         return edge_id;
@@ -795,7 +795,7 @@ public class GraphDBEngine {
             edge_id = getResourceEdgeId(resource_id,inode_id,region,agent);
             if(edge_id != null)
             {
-                //System.out.println("Node already Exist: region=" + region + " agent=" + agent + " plugin=" + plugin);
+                //logger.debug("Node already Exist: region=" + region + " agent=" + agent + " plugin=" + plugin);
             }
             else
             {
@@ -826,17 +826,17 @@ public class GraphDBEngine {
                     {
                         if(inode_node_id != null)
                         {
-                            System.out.println("IaddIsAttachedEdge: iNode does not exist : " + inode_id);
+                            logger.debug("IaddIsAttachedEdge: iNode does not exist : " + inode_id);
                         }
                         if(pnode_node_id != null)
                         {
-                            System.out.println("IaddIsAttachedEdge: pNode does not exist : " + region + agent + plugin);
+                            logger.debug("IaddIsAttachedEdge: pNode does not exist : " + region + agent + plugin);
                         }
                     }
                 }
                 else
                 {
-                    System.out.println("IaddIsAttachedEdge: required input is null : " + resource_id + "," + inode_id + "," + region + "," + agent + "," + plugin);
+                    logger.debug("IaddIsAttachedEdge: required input is null : " + resource_id + "," + inode_id + "," + region + "," + agent + "," + plugin);
 
                 }
 
@@ -846,17 +846,17 @@ public class GraphDBEngine {
         catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException exc)
         {
             //eat exception.. this is not normal and should log somewhere
-            System.out.println("IaddIsAttachedEdge: ORecordDuplicatedException : " + exc.toString());
+            logger.debug("IaddIsAttachedEdge: ORecordDuplicatedException : " + exc.toString());
         }
         catch(com.orientechnologies.orient.core.exception.OConcurrentModificationException exc)
         {
             //eat exception.. this is normal
-            System.out.println("IaddIsAttachedEdge: OConcurrentModificationException : " + exc.toString());
+            logger.debug("IaddIsAttachedEdge: OConcurrentModificationException : " + exc.toString());
         }
         catch(Exception ex)
         {
             long threadId = Thread.currentThread().getId();
-            System.out.println("IaddIsAttachedEdge: thread_id: " + threadId + " Error " + ex.toString());
+            logger.debug("IaddIsAttachedEdge: thread_id: " + threadId + " Error " + ex.toString());
         }
         finally
         {
@@ -890,12 +890,12 @@ public class GraphDBEngine {
 
             if((node_id == null) && (count == retryCount))
             {
-                System.out.println("GraphDBEngine : addINode : Failed to add node in " + count + " retrys");
+                logger.debug("GraphDBEngine : addINode : Failed to add node in " + count + " retrys");
             }
         }
         catch(Exception ex)
         {
-            System.out.println("GraphDBEngine : addINode : Error " + ex.toString());
+            logger.debug("GraphDBEngine : addINode : Error " + ex.toString());
         }
 
         return node_id;
@@ -911,11 +911,11 @@ public class GraphDBEngine {
 
             if(node_id != null)
             {
-                //System.out.println("Node already Exist: region=" + region + " agent=" + agent + " plugin=" + plugin);
+                //logger.debug("Node already Exist: region=" + region + " agent=" + agent + " plugin=" + plugin);
             }
             else
             {
-                //System.out.println("Adding Node : region=" + region + " agent=" + agent + " plugin=" + plugin);
+                //logger.debug("Adding Node : region=" + region + " agent=" + agent + " plugin=" + plugin);
                 if((region != null) && (agent == null) && (plugin == null))
                 {
                     graph = factory.getTx();
@@ -930,7 +930,7 @@ public class GraphDBEngine {
 
                     if(region_id == null)
                     {
-                        //System.out.println("Must add region=" + region + " before adding agent=" + agent);
+                        //logger.debug("Must add region=" + region + " before adding agent=" + agent);
                         region_id = addNode(region,null,null);
 
                     }
@@ -953,19 +953,19 @@ public class GraphDBEngine {
 				    	String edge_id = addEdge(region,agent,null,region,null,null,"isAgent");
 				    	if(edge_id == null)
 				    	{
-				    		System.out.println("Unable to add isAgent Edge between region=" + region + " and agent=" + agent);
+				    		logger.debug("Unable to add isAgent Edge between region=" + region + " and agent=" + agent);
 				    	}
 						 */
                     }
                 }
                 else if((region != null) && (agent != null) && (plugin != null))
                 {
-                    //System.out.println("Adding Plugin : region=" + region + " agent=" + agent + " plugin=" + plugin);
+                    //logger.debug("Adding Plugin : region=" + region + " agent=" + agent + " plugin=" + plugin);
 
                     String agent_id = getNodeId(region,agent,null);
                     if(agent_id == null)
                     {
-                        //System.out.println("For region=" + region + " we must add agent=" + agent + " before adding plugin=" + plugin);
+                        //logger.debug("For region=" + region + " we must add agent=" + agent + " before adding plugin=" + plugin);
                         agent_id = addNode(region,agent,null);
 
                     }
@@ -988,7 +988,7 @@ public class GraphDBEngine {
 					    String edge_id = addEdge(region,agent,plugin,region,agent,null,"isPlugin");
 					    if(edge_id == null)
 					    {
-					    	System.out.println("Unable to add isPlugin Edge between region=" + region + " agent=" + "agent=" + region + " and agent=" + agent);
+					    	logger.debug("Unable to add isPlugin Edge between region=" + region + " agent=" + "agent=" + region + " and agent=" + agent);
 					    }
 					    */
                         node_id = v.getId().toString();
@@ -1008,7 +1008,7 @@ public class GraphDBEngine {
         catch(Exception ex)
         {
             long threadId = Thread.currentThread().getId();
-            System.out.println("IaddNode: thread_id: " + threadId + " Error " + ex.toString());
+            logger.debug("IaddNode: thread_id: " + threadId + " Error " + ex.toString());
         }
         finally
         {
@@ -1032,7 +1032,7 @@ public class GraphDBEngine {
             {
                 if(count > 0)
                 {
-                    //System.out.println("ADDNODE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
+                    //logger.debug("ADDNODE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
                     Thread.sleep((long)(Math.random() * 1000)); //random wait to prevent sync error
                 }
                 node_id = IaddNode(region, agent, plugin);
@@ -1042,12 +1042,12 @@ public class GraphDBEngine {
 
             if((node_id == null) && (count == retryCount))
             {
-                System.out.println("GraphDBEngine : addNode : Failed to add node in " + count + " retrys");
+                logger.debug("GraphDBEngine : addNode : Failed to add node in " + count + " retrys");
             }
         }
         catch(Exception ex)
         {
-            System.out.println("GraphDBEngine : addNode : Error " + ex.toString());
+            logger.debug("GraphDBEngine : addNode : Error " + ex.toString());
         }
 
         return node_id;
@@ -1064,7 +1064,7 @@ public class GraphDBEngine {
             node_id = getINodeId(resource_id,inode_id);
             if(node_id != null)
             {
-                //System.out.println("Node already Exist: region=" + region + " agent=" + agent + " plugin=" + plugin);
+                //logger.debug("Node already Exist: region=" + region + " agent=" + agent + " plugin=" + plugin);
             }
             else
             {
@@ -1095,17 +1095,17 @@ public class GraphDBEngine {
         catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException exc)
         {
             //eat exception.. this is not normal and should log somewhere
-            System.out.println("Error 0 " + exc.getMessage());
+            logger.debug("Error 0 " + exc.getMessage());
         }
         catch(com.orientechnologies.orient.core.exception.OConcurrentModificationException exc)
         {
             //eat exception.. this is normal
-            System.out.println("Error 1 " + exc.getMessage());
+            logger.debug("Error 1 " + exc.getMessage());
         }
         catch(Exception ex)
         {
             long threadId = Thread.currentThread().getId();
-            System.out.println("IaddINode: thread_id: " + threadId + " Error " + ex.toString());
+            logger.debug("IaddINode: thread_id: " + threadId + " Error " + ex.toString());
         }
         finally
         {
@@ -1130,7 +1130,7 @@ public class GraphDBEngine {
             {
                 if(count > 0)
                 {
-                    //System.out.println("ADDNODE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
+                    //logger.debug("ADDNODE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
                     Thread.sleep((long)(Math.random() * 1000)); //random wait to prevent sync error
                 }
                 node_id = IaddResourceNode(resource_id);
@@ -1140,12 +1140,12 @@ public class GraphDBEngine {
 
             if((node_id == null) && (count == retryCount))
             {
-                System.out.println("GraphDBEngine : addINode : Failed to add node in " + count + " retrys");
+                logger.debug("GraphDBEngine : addINode : Failed to add node in " + count + " retrys");
             }
         }
         catch(Exception ex)
         {
-            System.out.println("GraphDBEngine : addINode : Error " + ex.toString());
+            logger.debug("GraphDBEngine : addINode : Error " + ex.toString());
         }
 
         return node_id;
@@ -1161,7 +1161,7 @@ public class GraphDBEngine {
 
             if(node_id != null)
             {
-                //System.out.println("Node already Exist: region=" + region + " agent=" + agent + " plugin=" + plugin);
+                //logger.debug("Node already Exist: region=" + region + " agent=" + agent + " plugin=" + plugin);
             }
             else
             {
@@ -1185,7 +1185,7 @@ public class GraphDBEngine {
         catch(Exception ex)
         {
             long threadId = Thread.currentThread().getId();
-            System.out.println("addResourceNode: thread_id: " + threadId + " Error " + ex.toString());
+            logger.debug("addResourceNode: thread_id: " + threadId + " Error " + ex.toString());
         }
         finally
         {
@@ -1213,12 +1213,12 @@ public class GraphDBEngine {
 
             if((edge_id == null) && (count == retryCount))
             {
-                System.out.println("GraphDBEngine : addEdge : Failed to add node in " + count + " retrys");
+                logger.debug("GraphDBEngine : addEdge : Failed to add node in " + count + " retrys");
             }
         }
         catch(Exception ex)
         {
-            System.out.println("GraphDBEngine : addEdge : Error " + ex.toString());
+            logger.debug("GraphDBEngine : addEdge : Error " + ex.toString());
         }
 
         return edge_id;
@@ -1247,7 +1247,7 @@ public class GraphDBEngine {
         }
         catch(Exception ex)
         {
-            System.out.println("addEdge Error: " + ex.toString());
+            logger.debug("addEdge Error: " + ex.toString());
 
         }
         return edge_id;
@@ -1265,7 +1265,7 @@ public class GraphDBEngine {
             {
                 if(count > 0)
                 {
-                    //System.out.println("REMOVENODE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
+                    //logger.debug("REMOVENODE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
                     Thread.sleep((long)(Math.random() * 1000)); //random wait to prevent sync error
                 }
                 nodeRemoved = IremoveNode(region, agent, plugin);
@@ -1275,12 +1275,12 @@ public class GraphDBEngine {
 
             if((!nodeRemoved) && (count == retryCount))
             {
-                System.out.println("GraphDBEngine : removeNode : Failed to add node in " + count + " retrys");
+                logger.debug("GraphDBEngine : removeNode : Failed to add node in " + count + " retrys");
             }
         }
         catch(Exception ex)
         {
-            System.out.println("GraphDBEngine : removeNode : Error " + ex.toString());
+            logger.debug("GraphDBEngine : removeNode : Error " + ex.toString());
         }
 
         return nodeRemoved;
@@ -1296,7 +1296,7 @@ public class GraphDBEngine {
             String node_id = getNodeId(region,agent,plugin);
             if(node_id == null)
             {
-                //System.out.println("Tried to remove missing node : " + pathname);
+                //logger.debug("Tried to remove missing node : " + pathname);
                 nodeRemoved = true;
             }
             else
@@ -1361,7 +1361,7 @@ public class GraphDBEngine {
         catch(Exception ex)
         {
             long threadId = Thread.currentThread().getId();
-            System.out.println("GrapgDBEngine : removeNode :  thread_id: " + threadId + " Error " + ex.toString());
+            logger.debug("GrapgDBEngine : removeNode :  thread_id: " + threadId + " Error " + ex.toString());
         }
         finally
         {
@@ -1385,7 +1385,7 @@ public class GraphDBEngine {
             {
                 if(count > 0)
                 {
-                    //System.out.println("REMOVENODE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
+                    //logger.debug("REMOVENODE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
                     Thread.sleep((long)(Math.random() * 1000)); //random wait to prevent sync error
                 }
                 nodeRemoved = IremoveINode(resource_id, inode_id);
@@ -1395,12 +1395,12 @@ public class GraphDBEngine {
 
             if((!nodeRemoved) && (count == retryCount))
             {
-                System.out.println("GraphDBEngine : removeINode : Failed to add node in " + count + " retrys");
+                logger.debug("GraphDBEngine : removeINode : Failed to add node in " + count + " retrys");
             }
         }
         catch(Exception ex)
         {
-            System.out.println("GraphDBEngine : removeINode : Error " + ex.toString());
+            logger.debug("GraphDBEngine : removeINode : Error " + ex.toString());
         }
 
         return nodeRemoved;
@@ -1416,7 +1416,7 @@ public class GraphDBEngine {
             String node_id = getINodeId(resource_id, inode_id);
             if(node_id == null)
             {
-                System.out.println("Tried to remove missing node : resource_id=" + resource_id + " inode_id=" + inode_id);
+                logger.debug("Tried to remove missing node : resource_id=" + resource_id + " inode_id=" + inode_id);
                 nodeRemoved = true;
             }
             else
@@ -1435,7 +1435,7 @@ public class GraphDBEngine {
         catch(Exception ex)
         {
             long threadId = Thread.currentThread().getId();
-            System.out.println("GrapgDBEngine : removeNode :  thread_id: " + threadId + " Error " + ex.toString());
+            logger.debug("GrapgDBEngine : removeNode :  thread_id: " + threadId + " Error " + ex.toString());
         }
         finally
         {
@@ -1459,7 +1459,7 @@ public class GraphDBEngine {
             {
                 if(count > 0)
                 {
-                    //System.out.println("REMOVENODE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
+                    //logger.debug("REMOVENODE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
                     Thread.sleep((long)(Math.random() * 1000)); //random wait to prevent sync error
                 }
                 nodeRemoved = IremoveResourceNode(resource_id);
@@ -1469,12 +1469,12 @@ public class GraphDBEngine {
 
             if((!nodeRemoved) && (count == retryCount))
             {
-                System.out.println("GraphDBEngine : removeResourceNode : Failed to add node in " + count + " retrys");
+                logger.debug("GraphDBEngine : removeResourceNode : Failed to add node in " + count + " retrys");
             }
         }
         catch(Exception ex)
         {
-            System.out.println("GraphDBEngine : removeResourceNode : Error " + ex.toString());
+            logger.debug("GraphDBEngine : removeResourceNode : Error " + ex.toString());
         }
 
         return nodeRemoved;
@@ -1490,7 +1490,7 @@ public class GraphDBEngine {
             String node_id = getResourceNodeId(resource_id);
             if(node_id == null)
             {
-                System.out.println("Tried to remove missing node : resource_id=" + resource_id);
+                logger.debug("Tried to remove missing node : resource_id=" + resource_id);
                 nodeRemoved = true;
             }
             else
@@ -1523,7 +1523,7 @@ public class GraphDBEngine {
         catch(Exception ex)
         {
             long threadId = Thread.currentThread().getId();
-            System.out.println("GraphDBEngine : IremoveResourceNode :  thread_id: " + threadId + " Error " + ex.toString());
+            logger.debug("GraphDBEngine : IremoveResourceNode :  thread_id: " + threadId + " Error " + ex.toString());
         }
         finally
         {
@@ -1569,7 +1569,7 @@ public class GraphDBEngine {
         catch(Exception ex)
         {
             long threadId = Thread.currentThread().getId();
-            System.out.println("setINodeParams: thread_id: " + threadId + " Error " + ex.toString());
+            logger.debug("setINodeParams: thread_id: " + threadId + " Error " + ex.toString());
         }
         finally
         {
@@ -1592,7 +1592,7 @@ public class GraphDBEngine {
             {
                 if(count > 0)
                 {
-                    //System.out.println("iNODEUPDATE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
+                    //logger.debug("iNODEUPDATE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
                     Thread.sleep((long)(Math.random() * 1000)); //random wait to prevent sync error
                 }
                 isUpdated = IsetINodeParams(resource_id,inode_id, paramMap);
@@ -1602,12 +1602,12 @@ public class GraphDBEngine {
 
             if((!isUpdated) && (count == retryCount))
             {
-                System.out.println("GraphDBEngine : setINodeParams : Failed to add node in " + count + " retrys");
+                logger.debug("GraphDBEngine : setINodeParams : Failed to add node in " + count + " retrys");
             }
         }
         catch(Exception ex)
         {
-            System.out.println("GraphDBEngine : setINodeParams : Error " + ex.toString());
+            logger.debug("GraphDBEngine : setINodeParams : Error " + ex.toString());
         }
 
         return isUpdated;
@@ -1624,7 +1624,7 @@ public class GraphDBEngine {
             {
                 if(count > 0)
                 {
-                    //System.out.println("iNODEUPDATE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
+                    //logger.debug("iNODEUPDATE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
                     Thread.sleep((long)(Math.random() * 1000)); //random wait to prevent sync error
                 }
                 isUpdated = IsetNodeParams(region, agent, plugin, paramMap);
@@ -1634,12 +1634,12 @@ public class GraphDBEngine {
 
             if((!isUpdated) && (count == retryCount))
             {
-                System.out.println("GraphDBEngine : setINodeParams : Failed to add node in " + count + " retrys");
+                logger.debug("GraphDBEngine : setINodeParams : Failed to add node in " + count + " retrys");
             }
         }
         catch(Exception ex)
         {
-            System.out.println("GraphDBEngine : setINodeParams : Error " + ex.toString());
+            logger.debug("GraphDBEngine : setINodeParams : Error " + ex.toString());
         }
 
         return isUpdated;
@@ -1679,7 +1679,7 @@ public class GraphDBEngine {
         catch(Exception ex)
         {
             long threadId = Thread.currentThread().getId();
-            System.out.println("setINodeParams: thread_id: " + threadId + " Error " + ex.toString());
+            logger.debug("setINodeParams: thread_id: " + threadId + " Error " + ex.toString());
         }
         finally
         {
@@ -1702,7 +1702,7 @@ public class GraphDBEngine {
             {
                 if(count > 0)
                 {
-                    //System.out.println("iNODEUPDATE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
+                    //logger.debug("iNODEUPDATE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
                     Thread.sleep((long)(Math.random() * 1000)); //random wait to prevent sync error
                 }
                 isUpdated = IsetINodeParam(resource_id, inode_id, paramKey, paramValue);
@@ -1712,12 +1712,12 @@ public class GraphDBEngine {
 
             if((!isUpdated) && (count == retryCount))
             {
-                System.out.println("GraphDBEngine : setINodeParam : Failed to add node in " + count + " retrys");
+                logger.debug("GraphDBEngine : setINodeParam : Failed to add node in " + count + " retrys");
             }
         }
         catch(Exception ex)
         {
-            System.out.println("GraphDBEngine : setINodeParam : Error " + ex.toString());
+            logger.debug("GraphDBEngine : setINodeParam : Error " + ex.toString());
         }
 
         return isUpdated;
@@ -1751,7 +1751,7 @@ public class GraphDBEngine {
         catch(Exception ex)
         {
             long threadId = Thread.currentThread().getId();
-            System.out.println("setINodeParams: thread_id: " + threadId + " Error " + ex.toString());
+            logger.debug("setINodeParams: thread_id: " + threadId + " Error " + ex.toString());
         }
         finally
         {
@@ -1774,7 +1774,7 @@ public class GraphDBEngine {
             {
                 if(count > 0)
                 {
-                    //System.out.println("iNODEUPDATE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
+                    //logger.debug("iNODEUPDATE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
                     Thread.sleep((long)(Math.random() * 1000)); //random wait to prevent sync error
                 }
                 isUpdated = IsetNodeParam(region, agent, plugin, paramKey, paramValue);
@@ -1784,12 +1784,12 @@ public class GraphDBEngine {
 
             if((!isUpdated) && (count == retryCount))
             {
-                System.out.println("GraphDBEngine : setINodeParam : Failed to add node in " + count + " retrys");
+                logger.debug("GraphDBEngine : setINodeParam : Failed to add node in " + count + " retrys");
             }
         }
         catch(Exception ex)
         {
-            System.out.println("GraphDBEngine : setINodeParam : Error " + ex.toString());
+            logger.debug("GraphDBEngine : setINodeParam : Error " + ex.toString());
         }
 
         return isUpdated;
@@ -1839,7 +1839,7 @@ public class GraphDBEngine {
         catch(Exception ex)
         {
             long threadId = Thread.currentThread().getId();
-            System.out.println("setINodeParams: thread_id: " + threadId + " Error " + ex.toString());
+            logger.debug("setINodeParams: thread_id: " + threadId + " Error " + ex.toString());
         }
         finally
         {
@@ -1858,61 +1858,61 @@ public class GraphDBEngine {
         {
             //index properties
 
-            System.out.println("Create Region Vertex Class");
+            logger.debug("Create Region Vertex Class");
             String[] rProps = {"region"}; //Property names
             createVertexClass("rNode", rProps);
 
-            System.out.println("Create Agent Vertex Class");
+            logger.debug("Create Agent Vertex Class");
             String[] aProps = {"region", "agent"}; //Property names
             createVertexClass("aNode", aProps);
 
             //indexes for searching
-            System.out.println("Create Agent Vertex Class Index's");
+            logger.debug("Create Agent Vertex Class Index's");
             for(String indexName : aNodeIndexParams)
             {
                 createVertexIndex("aNode", indexName, false);
             }
 
-            System.out.println("Create Plugin Vertex Class");
+            logger.debug("Create Plugin Vertex Class");
             String[] pProps = {"region", "agent", "plugin"}; //Property names
             createVertexClass("pNode", pProps);
 
 
-            System.out.println("Create resourceNode Vertex Class");
+            logger.debug("Create resourceNode Vertex Class");
             String[] resourceProps = {"resource_id"}; //Property names
             createVertexClass("resourceNode", resourceProps);
 
-            System.out.println("Create iNode Vertex Class");
+            logger.debug("Create iNode Vertex Class");
             String[] iProps = {"resource_id", "inode_id"}; //Property names
             createVertexClass("iNode", iProps);
 
 
-            System.out.println("Create isAgent Edge Class");
+            logger.debug("Create isAgent Edge Class");
             String[] isAgentProps = {"edge_id"}; //Property names
             //createEdgeClass("isAgent",isAgentProps);
             createEdgeClass("isAgent",null);
 
-            System.out.println("Create isPlugin Edge Class");
+            logger.debug("Create isPlugin Edge Class");
             String[] isPluginProps = {"edge_id"}; //Property names
             //createEdgeClass("isPlugin",isPluginProps);
             createEdgeClass("isPlugin",null);
 
-            System.out.println("Create isConnected Edge Class");
+            logger.debug("Create isConnected Edge Class");
             String[] isConnectedProps = {"edge_id"}; //Property names
             //createEdgeClass("isConnected",isConnectedProps);
             createEdgeClass("isConnected",null);
 
-            System.out.println("Create isResource Edge Class");
+            logger.debug("Create isResource Edge Class");
             String[] isResourceProps = {"edge_id"}; //Property names
             //createEdgeClass("isResource",isResourceProps);
             createEdgeClass("isResource",null);
 
-            System.out.println("Create isReachable Edge Class");
+            logger.debug("Create isReachable Edge Class");
             String[] isReachableProps = {"edge_id"}; //Property names
             //createEdgeClass("isReachable",isReachableProps);
             createEdgeClass("isReachable",null);
 
-            System.out.println("Create isAssigned Edge Class");
+            logger.debug("Create isAssigned Edge Class");
             String[] isAssignedProps = {"resource_id","inode_id","region", "agent"}; //Property names
             createEdgeClass("isAssigned",isAssignedProps);
 
@@ -1924,13 +1924,13 @@ public class GraphDBEngine {
                 String resource_id = pAnchor + "_resource";
                 String inode_id = pAnchor + "_inode";
 
-                System.out.println("Creating " + pAnchor + " resource node.");
+                logger.debug("Creating " + pAnchor + " resource node.");
                 if(getResourceNodeId(resource_id) == null)
                 {
                     //create resource
                     addResourceNode(resource_id);
                 }
-                System.out.println("Creating " + pAnchor + " iNode.");
+                logger.debug("Creating " + pAnchor + " iNode.");
                 if(getINodeId(resource_id, inode_id) == null)
                 {
                     //create inode
@@ -1942,7 +1942,7 @@ public class GraphDBEngine {
         }
         catch(Exception ex)
         {
-            System.out.println("initCrescoDB Error: " + ex.toString());
+            logger.debug("initCrescoDB Error: " + ex.toString());
         }
     }
 
@@ -1977,7 +1977,7 @@ public class GraphDBEngine {
         }
         catch(Exception ex)
         {
-            System.out.println("GraphDBEngine : createVertexIndex : Error " + ex.toString());
+            logger.debug("GraphDBEngine : createVertexIndex : Error " + ex.toString());
         }
 
         return wasCreated;
@@ -2082,7 +2082,7 @@ public class GraphDBEngine {
         }
         catch(Exception ex)
         {
-            System.out.println("getNodeClass: Error " + ex.toString());
+            logger.debug("getNodeClass: Error " + ex.toString());
         }
         return null;
 
@@ -2099,7 +2099,7 @@ public class GraphDBEngine {
             {
                 if(count > 0)
                 {
-                    //System.out.println("ADDNODE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
+                    //logger.debug("ADDNODE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
                     Thread.sleep((long)(Math.random() * 1000)); //random wait to prevent sync error
                 }
                 isUpdated = IupdateEdge(edge_id, params);
@@ -2109,12 +2109,12 @@ public class GraphDBEngine {
 
             if((!isUpdated) && (count == retryCount))
             {
-                System.out.println("GraphDBEngine : updateEdge : Failed to update edge in " + count + " retrys");
+                logger.debug("GraphDBEngine : updateEdge : Failed to update edge in " + count + " retrys");
             }
         }
         catch(Exception ex)
         {
-            System.out.println("GraphDBEngine : updateEdge : Error " + ex.toString());
+            logger.debug("GraphDBEngine : updateEdge : Error " + ex.toString());
         }
 
         return isUpdated;
@@ -2139,7 +2139,7 @@ public class GraphDBEngine {
             }
             else
             {
-                System.out.println("IupdateEdge: no edge found for edge_id=" + edge_id);
+                logger.debug("IupdateEdge: no edge found for edge_id=" + edge_id);
             }
 
         }
@@ -2154,7 +2154,7 @@ public class GraphDBEngine {
         catch(Exception ex)
         {
             long threadId = Thread.currentThread().getId();
-            System.out.println("IupdateEdge: thread_id: " + threadId + " Error " + ex.toString());
+            logger.debug("IupdateEdge: thread_id: " + threadId + " Error " + ex.toString());
         }
         finally
         {
@@ -2186,7 +2186,7 @@ public class GraphDBEngine {
             }
             else
             {
-                System.out.println("IupdateEdge: no edge found for edge_id=" + edge_id);
+                logger.debug("IupdateEdge: no edge found for edge_id=" + edge_id);
             }
 
         }
@@ -2201,7 +2201,7 @@ public class GraphDBEngine {
         catch(Exception ex)
         {
             long threadId = Thread.currentThread().getId();
-            System.out.println("IupdateEdge: thread_id: " + threadId + " Error " + ex.toString());
+            logger.debug("IupdateEdge: thread_id: " + threadId + " Error " + ex.toString());
         }
         finally
         {
@@ -2228,7 +2228,7 @@ public class GraphDBEngine {
             //create node if not seen.. this needs to be changed.
             if(plugin_node_id == null) {
                 plugin_node_id = addNode(region,agent,plugin);
-                System.out.println("Added Node" + region + " " + agent + " " + plugin + " = " + plugin_node_id);
+                logger.debug("Added Node" + region + " " + agent + " " + plugin + " = " + plugin_node_id);
             }
 
             if((resource_node_id != null) && (inode_node_id != null) && (plugin_node_id != null))
@@ -2249,24 +2249,24 @@ public class GraphDBEngine {
                     }
                     else
                     {
-                        System.out.println("Controller : GraphDBEngine : Failed to updatePerf : Failed to update Edge params!");
+                        logger.debug("Controller : GraphDBEngine : Failed to updatePerf : Failed to update Edge params!");
                     }
                 }
                 else
                 {
-                    System.out.println("Controller : GraphDBEngine : Failed to updatePerf : edge_id not found!");
+                    logger.debug("Controller : GraphDBEngine : Failed to updatePerf : edge_id not found!");
                 }
             }
             else
             {
-                System.out.println("Can't update missing nodes : " + resource_id + "," + inode_id + "," + plugin);
-                System.out.println("Can't update missing nodes : " + resource_node_id + "," + inode_node_id + "," + plugin_node_id);
+                logger.debug("Can't update missing nodes : " + resource_id + "," + inode_id + "," + plugin);
+                logger.debug("Can't update missing nodes : " + resource_node_id + "," + inode_node_id + "," + plugin_node_id);
             }
 
         }
         catch(Exception ex)
         {
-            System.out.println("Controller : GraphDBEngine : Failed to updatePerf");
+            logger.debug("Controller : GraphDBEngine : Failed to updatePerf");
 
         }
         return isUpdated;

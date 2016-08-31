@@ -2,6 +2,7 @@ package com.researchworx.cresco.controller.core;
 
 import com.google.auto.service.AutoService;
 import com.researchworx.cresco.controller.communication.*;
+import com.researchworx.cresco.controller.graphdb.GraphDBEngine;
 import com.researchworx.cresco.controller.netdiscovery.*;
 import com.researchworx.cresco.controller.regionalcontroller.*;
 import com.researchworx.cresco.controller.shell.AppShellFactory;
@@ -412,20 +413,10 @@ public class Launcher extends CPlugin {
                 this.discoveryMap = new ConcurrentHashMap<>(); //discovery map
                 logger.debug("AgentDiscover Service Started");
                 this.agentDiscover = new AgentDiscovery(this); //discovery service
-                logger.debug("ControllerDB Service Started");
 
-                //Test new DB
-                /*
-                dbServer dbs = new dbServer();
-                dbs.startServer();
-                 */
-                logger.info("Starting Graph DB");
-                //GraphDBEngine_emb gdbe = new GraphDBEngine_emb();
-                //gdbe.startServer();
-                GraphDBEngine gdb = new GraphDBEngine();
+                GraphDBEngine gdb = new GraphDBEngine(this,true);
+                logger.debug("RegionalControllerDB Service Started");
 
-                logger.info("Started Graph DB");
-                //End Test new DV
 
                 this.isRegionalController = true;
                 //start regional init
