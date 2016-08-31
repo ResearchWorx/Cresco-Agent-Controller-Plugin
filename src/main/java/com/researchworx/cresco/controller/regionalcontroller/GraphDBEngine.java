@@ -75,6 +75,8 @@ public class GraphDBEngine {
         System.out.println("Post Init!");
         ControllerEngine.GDBActive = true;
         */
+
+
         ODatabaseDocumentTx db = new ODatabaseDocumentTx("memory:MyDb").create();
         factory = new OrientGraphFactory("memory:MyDb");
         initCrescoDB();
