@@ -420,8 +420,10 @@ public class Launcher extends CPlugin {
                 dbs.startServer();
                  */
                 logger.info("Starting Graph DB");
-                GraphDBEngine gdbe = new GraphDBEngine();
-                gdbe.startServer();
+                //GraphDBEngine_emb gdbe = new GraphDBEngine_emb();
+                //gdbe.startServer();
+                GraphDBEngine gdb = new GraphDBEngine();
+
                 logger.info("Started Graph DB");
                 //End Test new DV
 
