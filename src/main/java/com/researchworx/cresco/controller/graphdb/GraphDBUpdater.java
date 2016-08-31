@@ -27,7 +27,12 @@ public class GraphDBUpdater {
             String nodeId = rgdb.getNodeId(region,agent,plugin);
             if(nodeId != null) {
                 logger.trace("region: " + region + " agent:" + agent + " plugin:" + plugin + " id:" + nodeId);
-                //logger.trace("params: " + rgdb.getnode);
+                logger.trace("params: " + rgdb.getNodeParams(nodeId).toString());
+                if(plugin != null) {
+                    String nodeAgentId = rgdb.getNodeId(region,agent,null);
+                    logger.trace("region: " + region + " agent:" + agent + " plugin:" + " null id:" + nodeAgentId);
+                    logger.trace("params: " + rgdb.getNodeParams(nodeAgentId).toString());
+                }
                 isNode = true;
             }
 
