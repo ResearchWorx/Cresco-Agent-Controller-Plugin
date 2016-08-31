@@ -34,7 +34,7 @@ public class GraphDBEngine {
 	public GraphDBEngine(Launcher plugin, Boolean isMemory)
 	{
         this.plugin = plugin;
-        logger = new CLogger(GraphDBEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Debug);
+        logger = new CLogger(GraphDBEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
 
 		/*
 		nodePathCache = CacheBuilder.newBuilder()
