@@ -26,7 +26,8 @@ public class GraphDBUpdater {
         try {
             String nodeId = rgdb.getNodeId(region,agent,plugin);
             if(nodeId != null) {
-                System.out.println("region: " + region + " agent:" + agent + " plugin:" + plugin + " id:" + nodeId);
+                logger.trace("region: " + region + " agent:" + agent + " plugin:" + plugin + " id:" + nodeId);
+                //logger.trace("params: " + rgdb.getnode);
                 isNode = true;
             }
 
@@ -65,11 +66,12 @@ public class GraphDBUpdater {
         return ce;
     }
 
-    public void addNode(String region, String agent, String plugin) {
+    public void addNode(String region, String agent, String plugin, Map<String,String> params) {
         logger.info("Adding Node: " + region + " " + agent + " " + plugin);
         try {
             rgdb.addNode(region, agent,plugin);
-
+            rgdb.setNodeParams(region,agent,plugin, params);
+            //le.getParams()
             /*
             if ((region != null) && (agent != null) && (plugin == null)) {
                 AgentNode aNode = new AgentNode(agent);

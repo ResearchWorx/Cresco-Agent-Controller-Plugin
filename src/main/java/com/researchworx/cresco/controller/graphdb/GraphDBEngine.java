@@ -14,10 +14,7 @@ import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 public class GraphDBEngine {
@@ -751,6 +748,64 @@ public class GraphDBEngine {
         return node_param;
     }
 
+    public Map<String,String> IgetNodeParams(String node_id)
+    {
+        OrientGraph graph = null;
+        Map<String,String> params = new HashMap();
+
+        try
+        {
+            graph = factory.getTx();
+            Vertex iNode = graph.getVertex(node_id);
+            for(String key : iNode.getPropertyKeys()) {
+                params.put(key,iNode.getProperty(key).toString());
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.debug("IgetNodeParams: Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return params;
+    }
+
+    public Map<String,String> getNodeParams(String node_id)
+    {
+        Map<String,String> paramsVal = null;
+
+        int count = 0;
+        try
+        {
+
+            while((paramsVal == null) && (count != retryCount))
+            {
+                if(count > 0)
+                {
+                    Thread.sleep((long)(Math.random() * 1000)); //random wait to prevent sync error
+                }
+                paramsVal = IgetNodeParams(node_id);
+                count++;
+
+            }
+
+            if((paramsVal == null) && (count == retryCount))
+            {
+                logger.debug("GraphDBEngine : getNodeParams : Failed to add node in " + count + " retrys");
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.debug("GraphDBEngine : getNodeParams : Error " + ex.toString());
+        }
+
+        return paramsVal;
+    }
 
     //WRITES
 

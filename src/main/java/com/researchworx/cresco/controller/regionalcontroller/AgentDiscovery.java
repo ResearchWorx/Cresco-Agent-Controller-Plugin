@@ -71,11 +71,11 @@ public class AgentDiscovery {
                     try {
                         if ((le.getParam("src_region") != null) && (le.getParam("src_agent") != null) && (le.getParam("src_plugin")) == null) { //agent
                             if (!plugin.getGDB().isNode(le.getParam("src_region"), le.getParam("src_agent"), null)) { //add if it does not exist
-                                plugin.getGDB().addNode(le.getParam("src_region"), le.getParam("src_agent"), null);
+                                plugin.getGDB().addNode(le.getParam("src_region"), le.getParam("src_agent"), null, le.getParams());
                             }
                         } else if ((le.getParam("src_region") != null) && (le.getParam("src_agent") != null) && (le.getParam("src_plugin")) != null) { //plugin
                             if (!plugin.getGDB().isNode(le.getParam("src_region"), le.getParam("src_agent"), le.getParam("src_plugin"))) { //add if it does not exist
-                                plugin.getGDB().addNode(le.getParam("src_region"), le.getParam("src_agent"), le.getParam("src_plugin"));
+                                plugin.getGDB().addNode(le.getParam("src_region"), le.getParam("src_agent"), le.getParam("src_plugin"), le.getParams());
                             }
                         }
                     } catch (Exception ex) {
