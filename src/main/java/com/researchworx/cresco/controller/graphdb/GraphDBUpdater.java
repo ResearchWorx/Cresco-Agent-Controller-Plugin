@@ -24,8 +24,12 @@ public class GraphDBUpdater {
     public Boolean isNode(String region, String agent, String plugin) {
         boolean isNode = false;
         try {
-            if(rgdb.getNodeId(region,agent,plugin) == null)
+            String nodeId = rgdb.getNodeId(region,agent,plugin);
+            if(nodeId != null) {
+                System.out.println("region: " + region + " agent:" + agent + " plugin:" + plugin + " id:" + nodeId);
                 isNode = true;
+            }
+
             /*
             logger.debug("AGENTMAP = " + this.agentMap.size() + this.agentMap);
             if ((region != null) && (agent != null) && (plugin == null)) {
