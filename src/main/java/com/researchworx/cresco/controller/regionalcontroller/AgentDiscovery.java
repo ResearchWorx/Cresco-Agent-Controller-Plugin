@@ -13,7 +13,7 @@ public class AgentDiscovery {
     public AgentDiscovery(Launcher plugin) throws Exception {
         this.plugin = plugin;
         logger = new CLogger(AgentDiscovery.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
-        rpc = new RPC(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), null);
+        //rpc = new RPC(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), null);
     }
 
     public void discover(MsgEvent le) {
@@ -43,6 +43,7 @@ public class AgentDiscovery {
 
                 } else if ((le.getMsgType() == MsgEvent.Type.CONFIG) && (le.getMsgBody().equals("enabled"))) {
                     //if we see a agent enable command respond to it
+                    plugin.getGDB().addNode(le);
                     logger.debug("CONFIG : AGENTDISCOVER: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
                     le.setMsgPlugin(null);
                     le.setMsgRegion(le.getParam("src_region"));
@@ -57,6 +58,8 @@ public class AgentDiscovery {
                 } else if (le.getMsgType() == MsgEvent.Type.WATCHDOG) {
                     logger.debug("WATCHDOG : AGENTDISCOVER: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
                     try {
+                        plugin.getGDB().addNode(le);
+                        /*
                         if ((le.getParam("src_region") != null) && (le.getParam("src_agent") != null) && (le.getParam("src_plugin")) == null) { //agent
                             if (!plugin.getGDB().isNode(le.getParam("src_region"), le.getParam("src_agent"), null)) { //add if it does not exist
                                 plugin.getGDB().addNode(le.getParam("src_region"), le.getParam("src_agent"), null, le.getParams());
@@ -66,6 +69,7 @@ public class AgentDiscovery {
                                 plugin.getGDB().addNode(le.getParam("src_region"), le.getParam("src_agent"), le.getParam("src_plugin"), le.getParams());
                             }
                         }
+                        */
                     } catch (Exception ex) {
                         logger.debug("WATCHDOG : " + ex.getMessage());
                     }
