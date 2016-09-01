@@ -30,7 +30,7 @@ public class AgentDiscovery {
                 if ((le.getMsgType() == MsgEvent.Type.CONFIG) && (le.getMsgBody().equals("disabled"))) {
                     //if we see a agent enable command respond to it
 
-                    logger.debug("Remove Node: " + le.getParams());
+                    logger.info("Remove Node: " + le.getParams());
                     plugin.getGDB().removeNode(le);
                     /*
                     if (le.getParam("src_plugin") == null) //if plugin discover plugin info as well
@@ -46,7 +46,7 @@ public class AgentDiscovery {
 
                 } else if ((le.getMsgType() == MsgEvent.Type.CONFIG) && (le.getMsgBody().equals("enabled"))) {
                     //if we see a agent enable command respond to it
-                    logger.debug("CONFIG : AGENTDISCOVER: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
+                    logger.info("CONFIG : AGENTDISCOVER: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
                     plugin.getGDB().addNode(le);
                     /*
                     logger.debug("CONFIG : AGENTDISCOVER: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));

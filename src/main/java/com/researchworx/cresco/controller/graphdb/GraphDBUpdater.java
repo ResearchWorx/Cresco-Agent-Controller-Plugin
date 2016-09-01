@@ -180,7 +180,7 @@ public class GraphDBUpdater {
         return isRemoved;
     }
 
-    /*
+
     public void removeNode(String region, String agent, String plugin) {
         try {
             rgdb.removeNode(region,agent,plugin);
@@ -189,7 +189,7 @@ public class GraphDBUpdater {
             System.out.println("GraphDBUpdater : removeNode ERROR : " + ex.toString());
         }
     }
-    */
+
 
 
 }
