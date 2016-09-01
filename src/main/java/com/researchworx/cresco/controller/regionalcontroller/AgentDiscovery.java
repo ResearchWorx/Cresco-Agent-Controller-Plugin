@@ -31,6 +31,8 @@ public class AgentDiscovery {
                     //if we see a agent enable command respond to it
 
                     logger.debug("Remove Node: " + le.getParams());
+                    plugin.getGDB().removeNode(le);
+                    /*
                     if (le.getParam("src_plugin") == null) //if plugin discover plugin info as well
                     {
                         plugin.getGDB().removeNode(le.getParam("src_region"), le.getParam("src_agent"), null);
@@ -40,10 +42,13 @@ public class AgentDiscovery {
                         logger.debug("PLUGIN REMOVED: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent") + " Plugin:" + le.getParam("src_plugin"));
 
                     }
+                    */
 
                 } else if ((le.getMsgType() == MsgEvent.Type.CONFIG) && (le.getMsgBody().equals("enabled"))) {
                     //if we see a agent enable command respond to it
+                    logger.debug("CONFIG : AGENTDISCOVER: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
                     plugin.getGDB().addNode(le);
+                    /*
                     logger.debug("CONFIG : AGENTDISCOVER: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
                     le.setMsgPlugin(null);
                     le.setMsgRegion(le.getParam("src_region"));
@@ -55,6 +60,7 @@ public class AgentDiscovery {
                     le.setSrc(plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
                     //le.setDst(me.getParam("src_region"),me.getParam("src_agent"),me.getParam("src_plugin"));
                     plugin.sendMsgEvent(le);
+                    */
                 } else if (le.getMsgType() == MsgEvent.Type.WATCHDOG) {
                     logger.debug("WATCHDOG : AGENTDISCOVER: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
                     try {

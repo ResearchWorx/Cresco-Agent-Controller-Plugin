@@ -164,35 +164,32 @@ public class GraphDBUpdater {
         }
     }
 
+    public Boolean removeNode(MsgEvent de) {
+        boolean isRemoved = false;
+        try {
+
+            String region = de.getParam("src_region");
+            String agent = de.getParam("src_agent");
+            String plugin = de.getParam("src_plugin");
+
+            isRemoved = rgdb.removeNode(region,agent,plugin);
+
+        } catch (Exception ex) {
+            System.out.println("GraphDBUpdater : removeNode ERROR : " + ex.toString());
+        }
+        return isRemoved;
+    }
+
+    /*
     public void removeNode(String region, String agent, String plugin) {
         try {
             rgdb.removeNode(region,agent,plugin);
-            /*
-            if ((region != null) && (agent != null) && (plugin == null)) //agent node
-            {
-                agentMap.remove(agent);
-                //controller
-                if (this.plugin.hasGlobalController()) {
-                    if (!this.plugin.getGlobalControllerChannel().removeNode(controllerMsgEvent(region, agent, plugin, "removenode"))) {
-                        System.out.println("Controller : ControllerDB : Failed to addNode to Controller");
-                    }
-                }
-            } else if ((region != null) && (agent != null) && (plugin != null)) //plugin node
-            {
-                agentMap.get(agent).removePlugin(plugin);
-                //controller
-                if (this.plugin.hasGlobalController()) {
-                    if (!this.plugin.getGlobalControllerChannel().removeNode(controllerMsgEvent(region, agent, plugin, "removenode"))) {
-                        System.out.println("Controller : ControllerDB : Failed to addNode to Controller");
-                    }
-                }
-            }
-            */
+
         } catch (Exception ex) {
             System.out.println("GraphDBUpdater : removeNode ERROR : " + ex.toString());
         }
     }
-
+    */
 
 
 }
