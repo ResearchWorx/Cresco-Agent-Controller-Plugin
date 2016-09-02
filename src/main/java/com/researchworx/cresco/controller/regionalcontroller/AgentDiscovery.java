@@ -27,60 +27,24 @@ public class AgentDiscovery {
 
                 plugin.getDiscoveryMap().put(discoverString, System.currentTimeMillis());
 
-                if ((le.getMsgType() == MsgEvent.Type.CONFIG) && (le.getMsgBody().equals("disabled"))) {
-                    //if we see a agent enable command respond to it
-
-                    logger.debug("Remove Node: " + le.getParams());
-                    plugin.getGDB().removeNode(le);
-                    /*
-                    if (le.getParam("src_plugin") == null) //if plugin discover plugin info as well
-                    {
-                        plugin.getGDB().removeNode(le.getParam("src_region"), le.getParam("src_agent"), null);
-                        logger.debug("AGENT REMOVED: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
-                    } else {
-                        plugin.getGDB().removeNode(le.getParam("src_region"), le.getParam("src_agent"), le.getParam("src_plugin"));
-                        logger.debug("PLUGIN REMOVED: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent") + " Plugin:" + le.getParam("src_plugin"));
-
+                if (le.getMsgType() == MsgEvent.Type.CONFIG) {
+                    if(le.getMsgBody().equals("disabled")) {
+                        logger.debug("CONFIG : AGENTDISCOVER REMOVE: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
+                        logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
+                        plugin.getGDB().removeNode(le);
+                        le.setMsgBody("ack");
+                        le.setReturn();
+                        plugin.sendMsgEvent(le);
+                    } else if (le.getMsgBody().equals("enabled")) {
+                        logger.debug("CONFIG : AGENTDISCOVER ADD: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
+                        logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
+                        plugin.getGDB().addNode(le);
                     }
-                    */
-                } else if ((le.getMsgType() == MsgEvent.Type.CONFIG) && (le.getMsgBody().equals("enabled"))) {
-                    //if we see a agent enable command respond to it
-                    logger.debug("CONFIG : AGENTDISCOVER: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
-                    logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
-                    plugin.getGDB().addNode(le);
-                    /*
-                    logger.debug("CONFIG : AGENTDISCOVER: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
-                    le.setMsgPlugin(null);
-                    le.setMsgRegion(le.getParam("src_region"));
-                    le.setMsgAgent(le.getParam("src_agent"));
-                    le.removeParam("src_plugin");
-                    le.setMsgBody("controllerenabled");
-                    le.setParam("dst_region", le.getParam("src_region"));
-                    le.setParam("dst_agent", le.getParam("src_agent"));
-                    le.setSrc(plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
-                    //le.setDst(me.getParam("src_region"),me.getParam("src_agent"),me.getParam("src_plugin"));
-                    plugin.sendMsgEvent(le);
-                    */
+
                 } else if (le.getMsgType() == MsgEvent.Type.WATCHDOG) {
                     logger.debug("WATCHDOG : AGENTDISCOVER: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
                     logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
-
-                    try {
-                        //plugin.getGDB().addNode(le);
-                        /*
-                        if ((le.getParam("src_region") != null) && (le.getParam("src_agent") != null) && (le.getParam("src_plugin")) == null) { //agent
-                            if (!plugin.getGDB().isNode(le.getParam("src_region"), le.getParam("src_agent"), null)) { //add if it does not exist
-                                plugin.getGDB().addNode(le.getParam("src_region"), le.getParam("src_agent"), null, le.getParams());
-                            }
-                        } else if ((le.getParam("src_region") != null) && (le.getParam("src_agent") != null) && (le.getParam("src_plugin")) != null) { //plugin
-                            if (!plugin.getGDB().isNode(le.getParam("src_region"), le.getParam("src_agent"), le.getParam("src_plugin"))) { //add if it does not exist
-                                plugin.getGDB().addNode(le.getParam("src_region"), le.getParam("src_agent"), le.getParam("src_plugin"), le.getParams());
-                            }
-                        }
-                        */
-                    } catch (Exception ex) {
-                        logger.debug("WATCHDOG : " + ex.getMessage());
-                    }
+                    plugin.getGDB().watchDogUpdate(le);
 
                 } else if (le.getMsgType() == MsgEvent.Type.KPI) {
                     logger.debug("KPI: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));

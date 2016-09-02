@@ -31,7 +31,7 @@ public class GraphDBEngine {
 	public GraphDBEngine(Launcher plugin, Boolean isMemory)
 	{
         this.plugin = plugin;
-        logger = new CLogger(GraphDBEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
+        logger = new CLogger(GraphDBEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
 
 		/*
 		nodePathCache = CacheBuilder.newBuilder()
@@ -310,6 +310,93 @@ public class GraphDBEngine {
             }
         }
         return node_id;
+    }
+
+
+    public List<String> getNodeIds(String region, String agent, String plugin)
+    {
+        OrientGraph graph = null;
+        List<String> nodeIdList = null;
+        try
+        {
+            nodeIdList = new ArrayList();
+
+            if((region == null) && (agent == null) && (plugin == null))
+            {
+                //OrientGraphNoTx graph = factory.getNoTx();
+                graph = factory.getTx();
+
+                Iterable<Vertex> resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:rNode.nodePath")).execute();
+
+                Iterator<Vertex> iter = resultIterator.iterator();
+                while(iter.hasNext())
+                {
+                    Vertex v = iter.next();
+                    String node_id = v.getProperty("rid").toString();
+
+                    if(node_id != null)
+                    {
+                        node_id = node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
+                        nodeIdList.add(node_id);
+
+                    }
+
+                }
+
+            }
+            else if((region != null) && (agent == null) && (plugin == null))
+            {
+                //OrientGraph graph = factory.getTx();
+                //OrientGraphNoTx graph = factory.getNoTx();
+                graph = factory.getTx();
+                Iterable<Vertex> resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:aNode.nodePath")).execute();
+                Iterator<Vertex> iter = resultIterator.iterator();
+                while(iter.hasNext())
+                {
+                    Vertex v = iter.next();
+                    String node_id = v.getProperty("rid").toString();
+                    if(node_id != null)
+                    {
+                        node_id = node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
+                        nodeIdList.add(node_id);
+
+                    }
+                }
+
+            }
+            else if((region != null) && (agent != null) && (plugin == null))
+            {
+                //OrientGraph graph = factory.getTx();
+                //OrientGraphNoTx graph = factory.getNoTx();
+                graph = factory.getTx();
+                Iterable<Vertex> resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:pNode.nodePath")).execute();
+                Iterator<Vertex> iter = resultIterator.iterator();
+                while(iter.hasNext())
+                {
+                    Vertex v = iter.next();
+                    String node_id = v.getProperty("rid").toString();
+                    if(node_id != null)
+                    {
+                        node_id = node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
+                        nodeIdList.add(node_id);
+
+                    }
+                }
+            }
+
+        }
+        catch(Exception ex)
+        {
+            logger.debug("GraphDBEngine : getNodeID : Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return nodeIdList;
     }
 
     public String getResourceEdgeId(String resource_id, String inode_id, String region, String agent)

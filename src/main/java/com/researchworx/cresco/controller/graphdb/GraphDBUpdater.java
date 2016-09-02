@@ -1,11 +1,14 @@
 package com.researchworx.cresco.controller.graphdb;
 
+import com.researchworx.cresco.controller.communication.ActiveBrokerManager;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.controller.regionalcontroller.AgentNode;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class GraphDBUpdater {
 
@@ -13,12 +16,16 @@ public class GraphDBUpdater {
     private Launcher plugin;
     private CLogger logger;
     private GraphDBEngine rgdb;
+    private Timer regionalUpdateTimer;
+
 
     public GraphDBUpdater(Launcher plugin) {
         this.logger = new CLogger(GraphDBUpdater.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
 
         this.plugin = plugin;
         rgdb = new GraphDBEngine(plugin,true);
+        regionalUpdateTimer = new Timer();
+        regionalUpdateTimer.scheduleAtFixedRate(new GraphDBUpdater.RegionalWatchDog(logger), 500, 15000);//remote
     }
 
     /*
@@ -78,9 +85,10 @@ public class GraphDBUpdater {
                 }
             }
             else {
-                logger.info("Adding Node: " + de.getParams().toString());
+                logger.debug("Adding Node: " + de.getParams().toString());
                 rgdb.addNode(region, agent,plugin);
                 rgdb.setNodeParams(region,agent,plugin, de.getParams());
+                rgdb.setNodeParam(region,agent,plugin, "watchdog_ts", String.valueOf(System.currentTimeMillis()));
                 wasAdded = true;
             }
 
@@ -89,6 +97,32 @@ public class GraphDBUpdater {
         }
         return wasAdded;
     }
+
+    public Boolean watchDogUpdate(MsgEvent de) {
+        Boolean wasUpdated = false;
+
+        try {
+
+            String region = de.getParam("src_region");
+            String agent = de.getParam("src_agent");
+            String plugin = de.getParam("src_plugin");
+
+            String nodeId = rgdb.getNodeId(region,agent,plugin);
+            if(nodeId != null) {
+                logger.debug("Updating WatchDog Node: " + de.getParams().toString());
+                rgdb.setNodeParam(region,agent,plugin, "watchdog_ts", String.valueOf(System.currentTimeMillis()));
+                wasUpdated = true;
+            }
+            else {
+                logger.error("watchDogUpdate : Can't update missing node : " + de.getParams().toString());
+            }
+
+        } catch (Exception ex) {
+            logger.error("GraphDBUpdater : watchDogUpdate ERROR : " + ex.toString());
+        }
+        return wasUpdated;
+    }
+
     /*
     public void addNode(String region, String agent, String plugin, Map<String,String> params) {
         logger.info("Adding Node: " + region + " " + agent + " " + plugin);
@@ -165,31 +199,72 @@ public class GraphDBUpdater {
     }
 
     public Boolean removeNode(MsgEvent de) {
-        boolean isRemoved = false;
+        Boolean wasRemoved = false;
+
         try {
 
             String region = de.getParam("src_region");
             String agent = de.getParam("src_agent");
             String plugin = de.getParam("src_plugin");
 
-            isRemoved = rgdb.removeNode(region,agent,plugin);
+            String nodeId = rgdb.getNodeId(region,agent,plugin);
+            if(nodeId != null) {
+                logger.debug("Removing Node: " + de.getParams().toString());
+                rgdb.removeNode(region, agent,plugin);
+                wasRemoved = true;
+            }
+            else {
+                logger.error("region: " + region + " agent:" + agent + " plugin:" + plugin + " does not exist!");
+            }
 
         } catch (Exception ex) {
-            System.out.println("GraphDBUpdater : removeNode ERROR : " + ex.toString());
+            logger.error("GraphDBUpdater : removeNode ERROR : " + ex.toString());
         }
-        return isRemoved;
+        return wasRemoved;
     }
 
+    public Boolean removeNode(String region, String agent, String plugin) {
+        Boolean wasRemoved = false;
 
-    public void removeNode(String region, String agent, String plugin) {
         try {
-            rgdb.removeNode(region,agent,plugin);
+
+            String nodeId = rgdb.getNodeId(region,agent,plugin);
+            if(nodeId != null) {
+                logger.debug("Removing Node: " + "region: " + region + " agent:" + agent + " plugin:" + plugin);
+                rgdb.removeNode(region, agent,plugin);
+                wasRemoved = true;
+            }
+            else {
+                logger.error("region: " + region + " agent:" + agent + " plugin:" + plugin + " does not exist!");
+            }
 
         } catch (Exception ex) {
-            System.out.println("GraphDBUpdater : removeNode ERROR : " + ex.toString());
+            logger.error("GraphDBUpdater : removeNode ERROR : " + ex.toString());
         }
+        return wasRemoved;
     }
 
+    class RegionalWatchDog extends TimerTask {
+        private CLogger logger;
+
+        public RegionalWatchDog(CLogger logger) {
+            this.logger = logger;
+        }
+        public void run() {
+            for(String node_id : rgdb.getNodeIds("region",null,null)) {
+                Map<String,String> nodeParams = rgdb.getNodeParams(node_id);
+
+                long watchdog_ts = Long.parseLong(nodeParams.get("watchdog_ts"));
+                long watchdog_rate = Long.parseLong(nodeParams.get("watchdog_rate"));
+                long watchdog_diff = System.currentTimeMillis() - watchdog_ts;
+
+                logger.info("node_id: " + node_id + " [" + rgdb.getNodeParams(node_id).toString() + "]");
+                logger.info("WatchDog Diff = " + String.valueOf(watchdog_diff) + " watchdog_rate: " + watchdog_rate);
+
+            }
+
+        }
+    }
 
 
 }

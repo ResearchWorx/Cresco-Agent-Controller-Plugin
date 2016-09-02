@@ -25,8 +25,11 @@ public class ActiveProducer {
 
     private class ClearProducerTask extends TimerTask {
         public void run() {
+
             for (Entry<String, ActiveProducerWorker> entry : producerWorkers.entrySet()) {
                 ActiveProducerWorker apw = entry.getValue();
+                logger.trace("ActiveProducerWorker = " + entry.getKey().toString());
+
                 if (apw.isActive) {
                     apw.isActive = false;
                 } else {
@@ -40,7 +43,7 @@ public class ActiveProducer {
 
     public ActiveProducer(Launcher plugin, String URI, String brokerUserNameAgent, String brokerPasswordAgent) {
         this.plugin = plugin;
-        this.logger = new CLogger(ActiveProducer.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
+        this.logger = new CLogger(ActiveProducer.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
         this.brokerUserNameAgent = brokerUserNameAgent;
         this.brokerPasswordAgent = brokerPasswordAgent;
         try {

@@ -15,7 +15,7 @@ public class ActiveBrokerManager implements Runnable  {
 	private CLogger logger;
 	private Timer timer;
 	public ActiveBrokerManager(Launcher plugin) {
-		this.logger = new CLogger(ActiveBrokerManager.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
+		this.logger = new CLogger(ActiveBrokerManager.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
 
 		logger.debug("Active Broker Manger initialized");
 		this.plugin = plugin;
@@ -93,8 +93,7 @@ public class ActiveBrokerManager implements Runnable  {
             this.logger = logger;
         }
 		public void run() {
-		    logger.error("COME AT ME");
-            for (Entry<String, BrokeredAgent> entry : plugin.getBrokeredAgents().entrySet()) {
+		    for (Entry<String, BrokeredAgent> entry : plugin.getBrokeredAgents().entrySet()) {
 				//System.out.println(entry.getKey() + "/" + entry.getValue());
 				BrokeredAgent ba = entry.getValue();
 				if(ba.brokerStatus == BrokerStatusType.FAILED) {
