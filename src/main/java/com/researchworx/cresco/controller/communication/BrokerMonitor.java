@@ -16,7 +16,7 @@ class BrokerMonitor implements Runnable {
 	public boolean MonitorActive;
 
 	public BrokerMonitor(Launcher plugin, String agentPath) {
-		this.logger = new CLogger(BrokerMonitor.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
+		this.logger = new CLogger(BrokerMonitor.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
 		this.plugin = plugin;
 		this.agentPath = agentPath;
 	}

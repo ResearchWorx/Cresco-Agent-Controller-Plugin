@@ -20,7 +20,7 @@ public class AgentDiscovery {
         try {
 
             String discoverString = le.getParam("src_region") + "-" + le.getParam("src_agent") + "-" + le.getParam("src_plugin");
-            logger.debug("MsgType: [" + le.getMsgType() + "] Params: [" + le.getParams() + "]");
+            logger.trace("MsgType: [" + le.getMsgType() + "] Params: [" + le.getParams() + "]");
             if (plugin.getDiscoveryMap().containsKey(discoverString)) {
                 logger.info("Discovery underway for : discoverString=" + discoverString);
             } else {
@@ -43,9 +43,6 @@ public class AgentDiscovery {
 
                     }
                     */
-                } else if (le.getMsgType() == MsgEvent.Type.CONFIG) {
-                    logger.error(le.getParams().toString());
-
                 } else if ((le.getMsgType() == MsgEvent.Type.CONFIG) && (le.getMsgBody().equals("enabled"))) {
                     //if we see a agent enable command respond to it
                     logger.debug("CONFIG : AGENTDISCOVER: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));

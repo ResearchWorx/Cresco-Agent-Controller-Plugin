@@ -15,11 +15,12 @@ public class ActiveBrokerManager implements Runnable  {
 	private CLogger logger;
 	private Timer timer;
 	public ActiveBrokerManager(Launcher plugin) {
-		this.logger = new CLogger(ActiveBrokerManager.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
+		this.logger = new CLogger(ActiveBrokerManager.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
+
 		logger.debug("Active Broker Manger initialized");
 		this.plugin = plugin;
 		timer = new Timer();
-		timer.scheduleAtFixedRate(new BrokerWatchDog(), 500, 15000);//remote 
+		timer.scheduleAtFixedRate(new BrokerWatchDog(logger), 500, 15000);//remote
 	}
 	  
 	public void shutdown() {
@@ -85,10 +86,15 @@ public class ActiveBrokerManager implements Runnable  {
 	}
 
 	class BrokerWatchDog extends TimerTask {
-		private final Logger logger = LoggerFactory.getLogger(BrokerWatchDog.class);
+		//private final Logger logger = LoggerFactory.getLogger(BrokerWatchDog.class);
+        private CLogger logger;
 
+        public BrokerWatchDog(CLogger logger) {
+            this.logger = logger;
+        }
 		public void run() {
-			for (Entry<String, BrokeredAgent> entry : plugin.getBrokeredAgents().entrySet()) {
+		    logger.error("COME AT ME");
+            for (Entry<String, BrokeredAgent> entry : plugin.getBrokeredAgents().entrySet()) {
 				//System.out.println(entry.getKey() + "/" + entry.getValue());
 				BrokeredAgent ba = entry.getValue();
 				if(ba.brokerStatus == BrokerStatusType.FAILED) {
@@ -97,6 +103,7 @@ public class ActiveBrokerManager implements Runnable  {
 		    		logger.info("Cleared agentPath: " + ba.agentPath);
 		    		plugin.getBrokeredAgents().remove(entry.getKey());//remove agent
 				}
+                logger.trace("Brokered Agents: " + ba.agentPath);
 			}
 		}
 	}
