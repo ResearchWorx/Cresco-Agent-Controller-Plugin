@@ -12,7 +12,7 @@ public class AgentDiscovery {
 
     public AgentDiscovery(Launcher plugin) throws Exception {
         this.plugin = plugin;
-        logger = new CLogger(AgentDiscovery.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+        logger = new CLogger(AgentDiscovery.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
         //rpc = new RPC(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), null);
     }
 
@@ -20,7 +20,7 @@ public class AgentDiscovery {
         try {
 
             String discoverString = le.getParam("src_region") + "-" + le.getParam("src_agent") + "-" + le.getParam("src_plugin");
-            logger.debug("MsgType : " + le.getMsgType() + " Params: " + le.getParams());
+            logger.debug("MsgType: [" + le.getMsgType() + "] Params: [" + le.getParams() + "]");
             if (plugin.getDiscoveryMap().containsKey(discoverString)) {
                 logger.info("Discovery underway for : discoverString=" + discoverString);
             } else {
@@ -46,7 +46,8 @@ public class AgentDiscovery {
 
                 } else if ((le.getMsgType() == MsgEvent.Type.CONFIG) && (le.getMsgBody().equals("enabled"))) {
                     //if we see a agent enable command respond to it
-                    logger.info("CONFIG : AGENTDISCOVER: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
+                    logger.debug("CONFIG : AGENTDISCOVER: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
+                    logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
                     plugin.getGDB().addNode(le);
                     /*
                     logger.debug("CONFIG : AGENTDISCOVER: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
@@ -63,8 +64,10 @@ public class AgentDiscovery {
                     */
                 } else if (le.getMsgType() == MsgEvent.Type.WATCHDOG) {
                     logger.debug("WATCHDOG : AGENTDISCOVER: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
+                    logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
+
                     try {
-                        plugin.getGDB().addNode(le);
+                        //plugin.getGDB().addNode(le);
                         /*
                         if ((le.getParam("src_region") != null) && (le.getParam("src_agent") != null) && (le.getParam("src_plugin")) == null) { //agent
                             if (!plugin.getGDB().isNode(le.getParam("src_region"), le.getParam("src_agent"), null)) { //add if it does not exist
@@ -88,6 +91,7 @@ public class AgentDiscovery {
                 }
                 else if (le.getMsgType() == MsgEvent.Type.INFO) {
                     logger.debug("INFO: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
+                    logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
                 }
                 else {
                     logger.error("UNKNOWN DISCOVERY PATH! : MsgType=" + le.getMsgType() + " " +  le.getParams());
