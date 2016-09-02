@@ -12,7 +12,7 @@ public class AgentDiscovery {
 
     public AgentDiscovery(Launcher plugin) throws Exception {
         this.plugin = plugin;
-        logger = new CLogger(AgentDiscovery.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
+        logger = new CLogger(AgentDiscovery.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
         //rpc = new RPC(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), null);
     }
 
@@ -30,7 +30,7 @@ public class AgentDiscovery {
                 if ((le.getMsgType() == MsgEvent.Type.CONFIG) && (le.getMsgBody().equals("disabled"))) {
                     //if we see a agent enable command respond to it
 
-                    logger.info("Remove Node: " + le.getParams());
+                    logger.debug("Remove Node: " + le.getParams());
                     plugin.getGDB().removeNode(le);
                     /*
                     if (le.getParam("src_plugin") == null) //if plugin discover plugin info as well
@@ -43,6 +43,8 @@ public class AgentDiscovery {
 
                     }
                     */
+                } else if (le.getMsgType() == MsgEvent.Type.CONFIG) {
+                    logger.error(le.getParams().toString());
 
                 } else if ((le.getMsgType() == MsgEvent.Type.CONFIG) && (le.getMsgBody().equals("enabled"))) {
                     //if we see a agent enable command respond to it
