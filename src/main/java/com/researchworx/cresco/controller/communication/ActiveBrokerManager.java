@@ -45,7 +45,8 @@ public class ActiveBrokerManager implements Runnable  {
 					if(!this.plugin.isLocal(agentIP)) { //ignore local responses
 						boolean addBroker = false;
 						String agentPath = cb.getParam("dst_region") + "_" + cb.getParam("dst_agent");
-						//System.out.println(getClass().getName() + ">>> canidate boker :" + agentPath + " canidate ip:" + agentIP) ;
+						logger.trace("Trying to connect to: " + agentPath);
+						//logger.trace(getClass().getName() + ">>> canidate boker :" + agentPath + " canidate ip:" + agentIP) ;
 	 		      
 						BrokeredAgent ba;
 						if(this.plugin.getBrokeredAgents().containsKey(agentPath)) {
@@ -59,19 +60,36 @@ public class ActiveBrokerManager implements Runnable  {
 								ba.activeAddress = agentIP;
 								ba.brokerStatus = BrokerStatusType.INIT;
 								addBroker = true;
-								//System.out.println("BA EXIST ADDING agentPath: " + agentPath + " remote_ip: " + agentIP);
+								logger.trace("BA EXIST ADDING agentPath: " + agentPath + " remote_ip: " + agentIP);
 							}
-							//System.out.println("BA EXIST ADDING agentPath: " + agentPath + " remote_ip: " + agentIP);
+							logger.trace("BA EXIST ADDING agentPath: " + agentPath + " remote_ip: " + agentIP);
 						} else {
-							ba = new BrokeredAgent(this.plugin, agentIP,agentPath);
+						    //This might not work everwhere
+                            String cbrokerAddress = null;
+                            String cbrokerValidatedAuthenication = null;
+                            cbrokerAddress = cb.getParam("dst_ip");
+                            cbrokerValidatedAuthenication = cb.getParam("validated_authenication");
+                            //set agent broker auth
+                            String[] tmpAuth = cbrokerValidatedAuthenication.split(",");
+						    //end
+							ba = new BrokeredAgent(this.plugin, agentPath, cbrokerAddress, tmpAuth[0], tmpAuth[1]);
 							this.plugin.getBrokeredAgents().put(agentPath, ba);
 							addBroker = true;
-							//System.out.println("BA NEW ADDING agentPath: " + agentPath + " remote_ip: " + agentIP);
+							logger.trace("BA NEW ADDING agentPath: " + agentPath + " remote_ip: " + agentIP);
 						}
 						//try and connect
 						if(addBroker && !this.plugin.isReachableAgent(agentPath)) {
-							addBroker(agentPath);
+                            addBroker(agentPath);
+                            int count = 0;
+                            while(!this.plugin.isReachableAgent(agentPath)) {
+                                logger.trace("Adding Broker : " + agentPath + " remote_ip: " + agentIP + " count:" + count);
+                                Thread.sleep(1000);
+                                count++;
+                            }
 						}
+						else {
+                            logger.trace("Not Adding Broker : " + agentPath + " remote_ip: " + agentIP);
+                        }
 					}
 		  			//Thread.sleep(500); //allow HM to catch up
 			  	} else {
@@ -79,6 +97,7 @@ public class ActiveBrokerManager implements Runnable  {
 				}
 			} catch (Exception ex) {
 				logger.error("Run {}", ex.getMessage());
+                ex.printStackTrace();
 			}
 		}
 		timer.cancel();
@@ -94,10 +113,10 @@ public class ActiveBrokerManager implements Runnable  {
         }
 		public void run() {
 		    for (Entry<String, BrokeredAgent> entry : plugin.getBrokeredAgents().entrySet()) {
-				//System.out.println(entry.getKey() + "/" + entry.getValue());
+				//logger.trace(entry.getKey() + "/" + entry.getValue());
 				BrokeredAgent ba = entry.getValue();
 				if(ba.brokerStatus == BrokerStatusType.FAILED) {
-					//System.out.println("stopping agentPath: " + ba.agentPath);
+					//logger.trace("stopping agentPath: " + ba.agentPath);
 		    		ba.setStop();
 		    		logger.info("Cleared agentPath: " + ba.agentPath);
 		    		plugin.getBrokeredAgents().remove(entry.getKey());//remove agent

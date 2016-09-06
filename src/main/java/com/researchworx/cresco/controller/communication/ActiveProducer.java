@@ -43,7 +43,7 @@ public class ActiveProducer {
 
     public ActiveProducer(Launcher plugin, String URI, String brokerUserNameAgent, String brokerPasswordAgent) {
         this.plugin = plugin;
-        this.logger = new CLogger(ActiveProducer.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+        this.logger = new CLogger(ActiveProducer.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
         this.brokerUserNameAgent = brokerUserNameAgent;
         this.brokerPasswordAgent = brokerPasswordAgent;
         try {
@@ -94,7 +94,7 @@ public class ActiveProducer {
                 if (plugin.isReachableAgent(dstPath)) {
                     apw = producerWorkers.get(dstPath);
                 } else {
-                    System.out.println(dstPath + " is unreachable...");
+                    logger.trace(dstPath + " is unreachable...");
                 }
             } else {
 
@@ -129,7 +129,7 @@ public class ActiveProducer {
                     }
 
                 } else {
-                    System.out.println(dstPath + " is unreachable...");
+                    logger.trace(dstPath + " is unreachable...");
                 }
             }
             if (apw != null) {
@@ -137,10 +137,10 @@ public class ActiveProducer {
                 apw.sendMessage(sm);
                 isSent = true;
             } else {
-                System.out.println("apw is null");
+                logger.trace("apw is null");
             }
         } catch (Exception ex) {
-            System.out.println("ActiveProducer : sendMessage Error " + ex.toString());
+            logger.trace("ActiveProducer : sendMessage Error " + ex.toString());
         }
         return isSent;
     }

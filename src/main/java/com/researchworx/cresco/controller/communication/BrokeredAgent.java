@@ -12,18 +12,25 @@ public class BrokeredAgent {
 	public BrokerStatusType brokerStatus;
 	public String activeAddress;
 	public String agentPath;
+
+    public String URI;
+    public String brokerUsername;
+    public String brokerPassword;
+
 	public BrokerMonitor bm;
 	private Launcher plugin;
 	private CLogger logger;
 
-	public BrokeredAgent(Launcher plugin, String activeAddress, String agentPath) {
-		this.logger = new CLogger(BrokeredAgent.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
+	public BrokeredAgent(Launcher plugin, String agentPath, String activeAddress, String brokerUsername, String brokerPassword) {
+		this.logger = new CLogger(BrokeredAgent.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
 		logger.debug("Initializing: " + agentPath + " address: " + activeAddress);
 		System.out.print("Name of Agent to message [q to quit]: ");
 		this.plugin = plugin;
 		this.bm = new BrokerMonitor(plugin, agentPath);
 		this.activeAddress = activeAddress;
 		this.agentPath = agentPath;
+        this.brokerUsername = brokerUsername;
+        this.brokerPassword = brokerPassword;
 		this.brokerStatus = BrokerStatusType.INIT;
 		this.addressMap = new HashMap<>();
 		this.addressMap.put(activeAddress, BrokerStatusType.INIT);
@@ -49,6 +56,7 @@ public class BrokeredAgent {
 		addressMap.put(activeAddress, BrokerStatusType.STARTING);
 		if(bm.MonitorActive) {
 			bm.shutdown();
+            logger.error("bm.MonitorActive : shutting down.. activeAddress: " + activeAddress.toString());
 		}
 		bm = new BrokerMonitor(plugin, agentPath);
 		new Thread(bm).start();

@@ -424,6 +424,7 @@ public class Launcher extends CPlugin {
                 //start regional discovery
                 discoveryList.clear();
 
+                //Try and discover other regions to connect with
                 if (this.isIPv6)
                     discoveryList = this.dcv6.getDiscoveryResponse(DiscoveryType.REGION, getConfig().getIntegerParam("discovery_ipv6_region_timeout", 2000));
                     discoveryList.addAll(this.dcv4.getDiscoveryResponse(DiscoveryType.REGION, getConfig().getIntegerParam("discovery_ipv4_region_timeout", 2000)));
@@ -434,21 +435,7 @@ public class Launcher extends CPlugin {
 
                     }
                 }
-                //global init
-                if (/*PluginEngine.config.getStringParam("globalcontroller_host") != null*/this.config.getStringParam("globalcontroller_host") != null) {
-                    logger.info("Global Controller : Config Found Starting...");
-                    try {
-                        this.globalControllerChannel = new GlobalControllerChannel(this);
-                        this.hasGlobalController = this.globalControllerChannel.getController();
-                        if (this.hasGlobalController) {
-                            logger.debug("Global Controller : Connected...");
-                        } else {
-                            logger.debug("Global Controller : Unable to Contact!");
-                        }
-                    } catch (Exception e) {
-                        logger.error(e.getMessage());
-                    }
-                }
+
             }
             else {
                 //determine least loaded broker
@@ -463,7 +450,7 @@ public class Launcher extends CPlugin {
 
                     int tmpBrokerCount = Integer.parseInt(bm.getParam("agent_count"));
                     if (brokerCount < tmpBrokerCount) {
-                        System.out.println("commInit {}" + bm.getParams().toString());
+                        logger.trace("commInit {}" + bm.getParams().toString());
                         cbrokerAddress = bm.getParam("dst_ip");
                         cbrokerValidatedAuthenication = bm.getParam("validated_authenication");
                         cRegion = bm.getParam("src_region");
@@ -497,7 +484,7 @@ public class Launcher extends CPlugin {
                 this.isRegionalController = false;
             }
 
-            this.logger = new CLogger(msgOutQueue, region, agent, pluginID);
+            this.logger = new CLogger(msgOutQueue, region, agent, pluginID, CLogger.Level.Info);
 
             //consumer agent
             this.consumerAgentThread = new Thread(new ActiveAgentConsumer(this, this.agentpath, "tcp://" + this.brokerAddressAgent + ":32010",brokerUserNameAgent,brokerPasswordAgent));
@@ -509,6 +496,8 @@ public class Launcher extends CPlugin {
 
             this.ap = new ActiveProducer(this, "tcp://" + this.brokerAddressAgent + ":32010", brokerUserNameAgent, brokerPasswordAgent);
 
+            logger.debug("Agent ProducerThread Started..");
+
             //watchDogProcess = new plugincore.WatchDog();
             //stopWatchDog();
             //setWatchDog(new WatchDog(region, agent, pluginID, logger, config));
@@ -517,9 +506,76 @@ public class Launcher extends CPlugin {
             logger.info("WatchDog configuration updated");
             this.healthWatcher = new HealthWatcher(this);
             logger.info("HealthWatcher started");
+
+            /*
+            if(isRegionalController) {
+                //post global controller config
+                //global init
+
+                if (this.config.getStringParam("globalcontroller_host") != null) {
+                    logger.info("Global Controller : Config Found Starting...");
+                    try {
+
+                        DiscoveryStatic ds = new DiscoveryStatic(this);
+                        discoveryList.addAll(ds.discover(DiscoveryType.GLOBAL, getConfig().getIntegerParam("discovery_static_agent_timeout",10000), getConfig().getStringParam("globalcontroller_host")));
+
+                        if(!discoveryList.isEmpty()) {
+                            MsgEvent gc = discoveryList.get(0);
+                            this.incomingCanidateBrokers.offer(gc);
+                            logger.debug("Global Found: " + gc.getParams());
+
+                            String gregion = gc.getParam("src_region");
+                            String gagent = gc.getParam("src_agent");
+                            String gplugin = gc.getParam("src_plugin");
+
+                            String targetAgent = gregion + "_" + gagent;
+
+                            int globalcontroller_try_count = 20;
+                            while(globalcontroller_try_count > 0) {
+
+                                Thread.sleep(1000);
+                                if(this.isReachableAgent(targetAgent)) {
+
+                                    logger.error("Totally Reachable : " + targetAgent);
+                                    MsgEvent ce = new MsgEvent(MsgEvent.Type.CONFIG, this.region, this.agent, null, "global register");
+                                    ce.setParam("src_region", this.region);
+                                    ce.setParam("src_agent", this.agent);
+                                    ce.setParam("src_plugin", this.pluginID);
+                                    ce.setParam("dst_region", gregion);
+                                    ce.setParam("dst_agent", gagent);
+                                    ce.setParam("dst_plugin", gplugin);
+                                    ce.setParam("is_global_client", Boolean.TRUE.toString());
+                                    ce.setParam("is_active", Boolean.TRUE.toString());
+                                    this.sendMsgEvent(ce);
+                                    logger.trace("SENT GLOBAL MESSAGE : " + targetAgent);
+
+                                    globalcontroller_try_count = 0;
+                                } else {
+                                    logger.trace("Waiting on Global Controller");
+
+                                    globalcontroller_try_count--;
+                                    if(globalcontroller_try_count == 0) {
+                                        logger.error("Global Controller Reach Timeout: " + targetAgent);
+                                    }
+                                }
+                            }
+                            logger.error("Post Reach : " + targetAgent);
+
+
+                        }
+
+
+
+                    } catch (Exception e) {
+                        logger.error(e.getMessage());
+                    }
+                }
+            }
+            */
+
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("commInit " + e.getMessage());
+            logger.trace("commInit " + e.getMessage());
         }
     }
 
@@ -617,13 +673,44 @@ public class Launcher extends CPlugin {
             try {
                 ActiveMQDestination[] er = this.broker.broker.getBroker().getDestinations();
                 for (ActiveMQDestination des : er) {
+                    //for(String despaths : des.getDestinationPaths()) {
+                    //    logger.info("isReachable destPaths: " + despaths);
+                    //}
                     if (des.isQueue()) {
                         String testPath = des.getPhysicalName();
+                        logger.info("isReachable isQueue: " + testPath);
                         if (testPath.equals(remoteAgentPath)) {
                             isReachableAgent = true;
                         }
                     }
                 }
+
+                er = this.broker.broker.getRegionBroker().getDestinations();
+                for (ActiveMQDestination des : er) {
+                    //for(String despaths : des.getDestinationPaths()) {
+                    //    logger.info("isReachable destPaths: " + despaths);
+                    //}
+                    if (des.isQueue()) {
+                        String testPath = des.getPhysicalName();
+                        logger.info("Regional isReachable isQueue: " + testPath);
+                        if (testPath.equals(remoteAgentPath)) {
+                            isReachableAgent = true;
+                        }
+                    }
+                }
+                /*
+                Map<String,BrokeredAgent> brokerAgentMap = this.getBrokeredAgents();
+                for (Map.Entry<String, BrokeredAgent> entry : brokerAgentMap.entrySet()) {
+                    String agentPath = entry.getKey();
+                    BrokeredAgent bAgent = entry.getValue();
+
+                    logger.info("isReachable : agentName: " + agentPath + " agentPath:" + bAgent.agentPath + " " + bAgent.activeAddress + " " + bAgent.brokerStatus.toString());
+                    if((remoteAgentPath.equals(agentPath)) && (bAgent.brokerStatus == BrokerStatusType.ACTIVE))
+                    {
+                        isReachableAgent = true;
+                    }
+                }
+                */
             } catch (Exception ex) {
                 logger.error("isReachableAgent Error: {}", ex.getMessage());
             }

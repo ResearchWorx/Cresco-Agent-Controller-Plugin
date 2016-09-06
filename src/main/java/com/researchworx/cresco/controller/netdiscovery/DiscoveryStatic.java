@@ -28,7 +28,7 @@ public class DiscoveryStatic {
     private DiscoveryCrypto discoveryCrypto;
 
     public DiscoveryStatic(Launcher plugin) {
-        this.logger = new CLogger(DiscoveryStatic.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
+        this.logger = new CLogger(DiscoveryStatic.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
         this.plugin = plugin;
         gson = new Gson();
         //this.discoveryTimeout = discoveryTimeout;

@@ -2,11 +2,14 @@ package com.researchworx.cresco.controller.communication;
 
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.utilities.CLogger;
+import org.apache.activemq.command.ActiveMQDestination;
 import org.apache.activemq.network.NetworkBridge;
 import org.apache.activemq.network.NetworkConnector;
 
 import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.util.List;
+import java.util.Set;
 
 class BrokerMonitor implements Runnable {
 	private Launcher plugin;
@@ -26,34 +29,67 @@ class BrokerMonitor implements Runnable {
 		MonitorActive = false;
 	}
 
-	public boolean connectToBroker(String brokerAddress) {
+	public boolean connectToBroker(String brokerAddress, String brokerUserName, String brokerPassword) {
+	    logger.trace("BrokerAddress: " + brokerAddress + " brokerUserName: " + brokerUserName + " brokerPassword:" + brokerPassword);
 		boolean isConnected = false;
 		try {
 			if((InetAddress.getByName(brokerAddress) instanceof Inet6Address)) {
 				brokerAddress = "[" + brokerAddress + "]";
 			}
-			bridge = this.plugin.getBroker().AddNetworkConnector(brokerAddress);
+			bridge = this.plugin.getBroker().AddNetworkConnector(brokerAddress, brokerUserName, brokerPassword);
 			bridge.start();
+            logger.trace("Starting Bridge: " + bridge.getBrokerName() + " brokerAddress: " + brokerAddress);
 			int connect_count = 0;
 			while((connect_count++ < 10) && !bridge.isStarted()) {
 				Thread.sleep(1000);
-			}
-			if (connect_count >= 10 && !bridge.isStarted()) {
+                logger.trace("Wating on Bridge to Start: " + bridge.getBrokerName());
+
+            }
+            logger.trace("Bridge.isStarted: " + bridge.isStarted() + " brokerName: " + bridge.getBrokerName());
+            //
+            //Send a message
+            /*
+            List<ActiveMQDestination> dest = bridge.getDynamicallyIncludedDestinations();
+            for(ActiveMQDestination ades : dest) {
+                logger.trace("MQDEST: " + ades.getPhysicalName() + " " + ades.getQualifiedName() + " " + ades.isQueue());
+            }
+            Set<ActiveMQDestination> dests = bridge.getDurableDestinations();
+            for(ActiveMQDestination ades : dests) {
+                logger.trace("MQDESTS: " + ades.getPhysicalName() + " " + ades.getQualifiedName() + " " + ades.isQueue());
+            }
+            */
+            //
+
+
+            if (connect_count >= 10 && !bridge.isStarted()) {
 				throw new Exception("Failed to start bridge after 10 attempts. Aborting.");
 			}
-			connect_count = 0;
+            logger.trace("Bridge isConnected 0 : " + isConnected);
+
+            //THIS SHOULD NOT BE HERE
+            isConnected = true;
+            //THIS SHOULD NOT BE HERE
+            logger.trace("Bridge isConnected 1 : " + isConnected);
+
+            connect_count = 0;
 			while((connect_count++ < 10) && !isConnected) {
-				for(NetworkBridge b : bridge.activeBridges()) {
-					String remoteBroker = b.getRemoteBrokerName();
-					if(remoteBroker != null) {
-						if(remoteBroker.equals(agentPath)) {
+                logger.trace("ActiveBridge Count: " + bridge.activeBridges().size());
+
+                for(NetworkBridge b : bridge.activeBridges()) {
+                    String remoteBroker = b.getRemoteBrokerName();
+
+                    logger.trace("RemoteBroker: " + b.getRemoteBrokerName() + " " + b.getRemoteAddress() + " " + b.getLocalAddress() + " " + b.getLocalBrokerName());
+                    if(remoteBroker != null) {
+                        logger.trace("RemoteBroker: " + remoteBroker + " agentPath: " + agentPath);
+                        if(remoteBroker.equals(agentPath)) {
 	    					isConnected = true;
 	    				}
 					}
 					Thread.sleep(1000);
 				}
 			}
-		} catch(Exception ex) {
+
+        } catch(Exception ex) {
 			logger.error(getClass().getName() + " connectToBroker Error " + ex.toString());
 		}
 		return isConnected;
@@ -71,23 +107,44 @@ class BrokerMonitor implements Runnable {
 	  
 	public void run() {
 		try {
+		    /*
+            while(this.plugin.getBrokeredAgents().get(agentPath).brokerStatus == BrokerStatusType.STARTING) {
+                logger.trace("Waiting on agentpath: " + agentPath + " brokerstatus: " + this.plugin.getBrokeredAgents().get(agentPath).brokerStatus.toString());
+                Thread.sleep(1000);
+            }
+		    */
+            /*
 			String brokerAddress = this.plugin.getBrokeredAgents().get(agentPath).activeAddress;
 			if (connectToBroker(brokerAddress)) { //connect to broker
 				MonitorActive = true;
 				this.plugin.getBrokeredAgents().get(agentPath).brokerStatus = BrokerStatusType.ACTIVE;
 			}
-			while (MonitorActive) {
+            */
+
+            String brokerAddress = this.plugin.getBrokeredAgents().get(agentPath).activeAddress;
+            String brokerUsername = this.plugin.getBrokeredAgents().get(agentPath).brokerUsername;
+            String brokerPassword = this.plugin.getBrokeredAgents().get(agentPath).brokerPassword;
+            if (connectToBroker(brokerAddress,brokerUsername,brokerPassword)) { //connect to broker
+                MonitorActive = true;
+                this.plugin.getBrokeredAgents().get(agentPath).brokerStatus = BrokerStatusType.ACTIVE;
+            }
+            while (MonitorActive) {
 				MonitorActive = false;
 				for (NetworkBridge b : bridge.activeBridges()) {
-					if (b.getRemoteBrokerName().equals(agentPath)) {
-						MonitorActive = true;
-					}
-				}
+				    logger.trace("Check Broker Name: " + b.getRemoteBrokerName() + " for agentPath: " + agentPath);
+
+                    //if (b.getRemoteBrokerName().equals(agentPath)) {
+					    MonitorActive = true;
+					//}
+
+                }
 				Thread.sleep(5000);
 			}
+			logger.trace("agentpath: " + agentPath + " is being shutdown");
 			shutdown();
 		} catch(Exception ex) {
 			logger.error("Run {}", ex.getMessage());
+            logger.error(ex.getStackTrace().toString());
 		}
 	}
 }

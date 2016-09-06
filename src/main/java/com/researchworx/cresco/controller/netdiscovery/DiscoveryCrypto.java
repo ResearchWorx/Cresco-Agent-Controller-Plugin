@@ -61,9 +61,12 @@ public class DiscoveryCrypto {
             //byte[] valueDecoded= Base64.decodeBase64(bytesEncoded );
             final byte[] decValue = c.doFinal(decorVal);
             decryptedValue = new String(decValue);
-        } catch(Exception ex) {
+        } catch(javax.crypto.BadPaddingException bx) {
+            logger.debug(bx.getMessage() + " bad password error");
+        }
+        catch(Exception ex) {
             logger.error(ex.getMessage());
-            ex.printStackTrace();
+            //ex.printStackTrace();
         }
 
         return decryptedValue;

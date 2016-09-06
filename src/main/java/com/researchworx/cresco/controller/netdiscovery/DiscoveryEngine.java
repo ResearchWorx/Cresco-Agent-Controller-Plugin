@@ -20,7 +20,7 @@ public class DiscoveryEngine implements Runnable {
     private Gson gson;
 
     public DiscoveryEngine(Launcher plugin) {
-        this.logger = new CLogger(DiscoveryEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
+        this.logger = new CLogger(DiscoveryEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
         logger.trace("Initializing");
         this.plugin = plugin;
         discoveryCrypto = new DiscoveryCrypto(plugin);
@@ -40,6 +40,7 @@ public class DiscoveryEngine implements Runnable {
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             while (interfaces.hasMoreElements()) {
                 NetworkInterface networkInterface = interfaces.nextElement();
+                logger.info("Found: " + networkInterface.getDisplayName());
                 Thread thread = new Thread(new DiscoveryEngineWorker(networkInterface, plugin));
                 thread.start();
             }
@@ -193,7 +194,11 @@ public class DiscoveryEngine implements Runnable {
                 //logger.trace("Discovery packet from " + remoteAddress + " to " + sourceAddress);
 
                 String sourceAddress = getSourceAddress(intAddr, remoteAddress); //determine send address
-
+                //packet.getSocketAddress().
+                if(sourceAddress == null) {
+                    logger.trace("No local interface subnet address found for " + remoteAddress);
+                    logger.trace("SocketAddress " + packet.getSocketAddress().toString());
+                }
 
                 //if (!(intAddr.containsKey(remoteAddress)) && (isGlobal) && (sourceAddress != null)) {
                 if (!(intAddr.containsKey(remoteAddress)) && (isGlobal)) {
@@ -236,7 +241,9 @@ public class DiscoveryEngine implements Runnable {
                                         logger.debug("{}", "regional discovery");
                                         me = getRegionMsg(rme);
                                     } else if (rme.getParam("discovery_type").equals(DiscoveryType.GLOBAL.name())) {
-                                        logger.debug("{}", "regional global");
+                                        logger.debug("{}", "global discovery");
+                                        me = getGlobalMsg(rme);
+
                                     }
                                 }
 
@@ -258,11 +265,14 @@ public class DiscoveryEngine implements Runnable {
 
                                 } else {
                                     packet = null; //make sure packet is null
+                                    logger.trace("(me != null)");
                                     logger.trace("sendpacket 4e");
+
 
                                 }
                             } else {
                                 packet = null;
+                                logger.trace("(sourceAddress != null) || (rme.getParam(\"discovery_static_agent\") != null)");
                             }
                         } else {
                             packet = null;
@@ -307,19 +317,53 @@ public class DiscoveryEngine implements Runnable {
                             me.setParam("validated_authenication",validatedAuthenication);
                             logger.debug("getAgentMsg = " + me.getParams().toString());
                         //}
-                    } else {
+                    }
+                    /*
+                    else {
+
                         logger.error("src_region=" + rme.getParam("src_region") + " validatedAuthenication=" + validatedAuthenication);
                         if ((rme.getParam("src_region").equals(plugin.getRegion())) && plugin.isRegionalController()) {
                             logger.error("{}", "!reconnect attempt!");
                         }
+
                     }
+                    */
                 }
                 else {
                     logger.debug("Agent count too hight.. not responding to discovery");
                 }
 
             } catch (Exception ex) {
-                logger.error("{}", ex.getMessage());
+                logger.error("getAgentMsg " + ex.getMessage());
+            }
+            return me;
+        }
+
+        private MsgEvent getGlobalMsg(MsgEvent rme) {
+            MsgEvent me = null;
+            try {
+                if (plugin.isRegionalController()) {
+
+                    String validatedAuthenication = validateMsgEvent(rme); //create auth string
+                    if (validatedAuthenication != null) {
+
+                        //System.out.println(getClass().getName() + "1 " + Thread.currentThread().getId());
+                        me = new MsgEvent(MsgEvent.Type.DISCOVER, plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), "Broadcast discovery response.");
+                        me.setParam("dst_region", plugin.getRegion());
+                        me.setParam("dst_agent", rme.getParam("src_agent"));
+                        me.setParam("src_region", plugin.getRegion());
+                        me.setParam("src_agent", plugin.getAgent());
+                        me.setParam("src_plugin", plugin.getPluginID());
+                        me.setParam("dst_ip", rme.getParam("src_ip"));
+                        me.setParam("dst_port", rme.getParam("src_port"));
+                        me.setParam("agent_count", String.valueOf(plugin.reachableAgents().size()));
+                        me.setParam("discovery_type", DiscoveryType.GLOBAL.name());
+                        me.setParam("validated_authenication", validatedAuthenication);
+                    }
+                }
+
+            } catch (Exception ex) {
+                logger.error("getGlobalMsg " + ex.getMessage());
             }
             return me;
         }
@@ -330,22 +374,24 @@ public class DiscoveryEngine implements Runnable {
                 if (plugin.isRegionalController()) {
 
                     String validatedAuthenication = validateMsgEvent(rme); //create auth string
+                    if (validatedAuthenication != null) {
 
-                    //System.out.println(getClass().getName() + "1 " + Thread.currentThread().getId());
-                    me = new MsgEvent(MsgEvent.Type.DISCOVER, plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), "Broadcast discovery response.");
-                    me.setParam("dst_region", plugin.getRegion());
-                    me.setParam("dst_agent", rme.getParam("src_agent"));
-                    me.setParam("src_region", plugin.getRegion());
-                    me.setParam("src_agent", plugin.getAgent());
-                    me.setParam("dst_ip", rme.getParam("src_ip"));
-                    me.setParam("dst_port", rme.getParam("src_port"));
-                    me.setParam("agent_count", String.valueOf(plugin.reachableAgents().size()));
-                    me.setParam("discovery_type", DiscoveryType.REGION.name());
-                    me.setParam("validated_authenication",validatedAuthenication);
+                        //System.out.println(getClass().getName() + "1 " + Thread.currentThread().getId());
+                        me = new MsgEvent(MsgEvent.Type.DISCOVER, plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), "Broadcast discovery response.");
+                        me.setParam("dst_region", plugin.getRegion());
+                        me.setParam("dst_agent", rme.getParam("src_agent"));
+                        me.setParam("src_region", plugin.getRegion());
+                        me.setParam("src_agent", plugin.getAgent());
+                        me.setParam("dst_ip", rme.getParam("src_ip"));
+                        me.setParam("dst_port", rme.getParam("src_port"));
+                        me.setParam("agent_count", String.valueOf(plugin.reachableAgents().size()));
+                        me.setParam("discovery_type", DiscoveryType.REGION.name());
+                        me.setParam("validated_authenication", validatedAuthenication);
+                    }
                 }
 
             } catch (Exception ex) {
-                logger.error("{}", ex.getMessage());
+                logger.error("getRegionalMsg " + ex.getMessage());
             }
             return me;
         }
@@ -369,12 +415,14 @@ public class DiscoveryEngine implements Runnable {
                 String verifyMessage = "DISCOVERY_MESSAGE_VERIFIED";
                 String discoveryValidator = rme.getParam("discovery_validator");
                 String decryptedString = discoveryCrypto.decrypt(discoveryValidator,discoverySecret);
-                if(decryptedString.equals(verifyMessage)) {
-                    //plugin.brokerUserNameAgent
-                    //isValidated = true;
-                    //String verifyMessage = "DISCOVERY_MESSAGE_VERIFIED";
-                    //encryptedString = discoveryCrypto.encrypt(verifyMessage,discoverySecret);
-                    validatedAuthenication = discoveryCrypto.encrypt(plugin.brokerUserNameAgent + "," + plugin.brokerPasswordAgent + "," + groupName,discoverySecret);
+                if(decryptedString != null) {
+                    if (decryptedString.equals(verifyMessage)) {
+                        //plugin.brokerUserNameAgent
+                        //isValidated = true;
+                        //String verifyMessage = "DISCOVERY_MESSAGE_VERIFIED";
+                        //encryptedString = discoveryCrypto.encrypt(verifyMessage,discoverySecret);
+                        validatedAuthenication = discoveryCrypto.encrypt(plugin.brokerUserNameAgent + "," + plugin.brokerPasswordAgent + "," + groupName, discoverySecret);
+                    }
                 }
             }
             catch(Exception ex) {

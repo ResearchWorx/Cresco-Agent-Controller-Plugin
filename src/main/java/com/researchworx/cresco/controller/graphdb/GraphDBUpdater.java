@@ -114,7 +114,8 @@ public class GraphDBUpdater {
                 wasUpdated = true;
             }
             else {
-                logger.error("watchDogUpdate : Can't update missing node : " + de.getParams().toString());
+                //This must be fixed
+                //logger.error("watchDogUpdate : Can't update missing node : " + de.getParams().toString());
             }
 
         } catch (Exception ex) {
@@ -258,8 +259,8 @@ public class GraphDBUpdater {
                 long watchdog_rate = Long.parseLong(nodeParams.get("watchdog_rate"));
                 long watchdog_diff = System.currentTimeMillis() - watchdog_ts;
 
-                logger.info("node_id: " + node_id + " [" + rgdb.getNodeParams(node_id).toString() + "]");
-                logger.info("WatchDog Diff = " + String.valueOf(watchdog_diff) + " watchdog_rate: " + watchdog_rate);
+                logger.debug("node_id: " + node_id + " [" + rgdb.getNodeParams(node_id).toString() + "]");
+                logger.debug("WatchDog Diff = " + String.valueOf(watchdog_diff) + " watchdog_rate: " + watchdog_rate);
 
             }
 

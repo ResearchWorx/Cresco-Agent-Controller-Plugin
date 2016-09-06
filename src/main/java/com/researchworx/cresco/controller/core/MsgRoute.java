@@ -10,7 +10,7 @@ public class MsgRoute implements Runnable {
 
     public MsgRoute(Launcher plugin, MsgEvent rm) {
         this.plugin = plugin;
-        this.logger = new CLogger(MsgRoute.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
+        this.logger = new CLogger(MsgRoute.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
         this.rm = rm;
     }
 
@@ -31,6 +31,15 @@ public class MsgRoute implements Runnable {
                             //PluginEngine.msgInQueue.offer(rm);
                             plugin.sendMsgEvent(rm);
                         }
+                    }
+                    break;
+                case 21:  //System.out.println("CONTROLLER ROUTE TO REGIONAL AGENT : 52 " + rm.getParams()); //also where regional messages go
+                    if ((/*PluginEngine.isRegionalController*/ plugin.isRegionalController()) && (rm.getParam("dst_agent") == null)) { //if this is the regional controller consume the message
+                        logger.debug("CONTROLLER SENDING INTER-REGIONAL MESSAGE 21");
+                        logger.trace(rm.getParams().toString());
+                        regionalSend();
+                    } else {
+                        externalSend();
                     }
                     break;
                 case 48:  //System.out.println("CONTROLLER ROUTE TO REGIONAL AGENT : 52 " + rm.getParams()); //also where regional messages go

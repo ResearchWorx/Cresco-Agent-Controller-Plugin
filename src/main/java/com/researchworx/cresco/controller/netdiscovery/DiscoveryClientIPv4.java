@@ -14,7 +14,7 @@ public class DiscoveryClientIPv4 {
     private CLogger logger;
 
     public DiscoveryClientIPv4(Launcher plugin) {
-        this.logger = new CLogger(DiscoveryClientIPv4.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
+        this.logger = new CLogger(DiscoveryClientIPv4.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
         this.plugin = plugin;
         //discoveryTimeout = Integer.parseInt(PluginEngine.config.getParam("discoverytimeout"));
         //System.out.println("DiscoveryClient : discoveryTimeout = " + discoveryTimeout);
@@ -24,8 +24,6 @@ public class DiscoveryClientIPv4 {
     public List<MsgEvent> getDiscoveryResponse(DiscoveryType disType, int discoveryTimeout) {
         List<MsgEvent> discoveryList = new ArrayList<>();
         try {
-
-
             while (this.plugin.isClientDiscoveryActiveIPv4()) {
                 logger.debug("Discovery already underway, waiting..");
                 Thread.sleep(2500);
@@ -33,6 +31,7 @@ public class DiscoveryClientIPv4 {
             this.plugin.setClientDiscoveryActiveIPv4(true);
             //Searching local network 255.255.255.255
             String broadCastNetwork = "255.255.255.255";
+
             DiscoveryClientWorkerIPv4 dcw = new DiscoveryClientWorkerIPv4(this.plugin, disType, discoveryTimeout, broadCastNetwork);
             //populate map with possible peers
             logger.debug("Searching {}", broadCastNetwork);

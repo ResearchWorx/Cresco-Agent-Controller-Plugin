@@ -63,7 +63,7 @@ public class ActiveBroker {
 				addPolicy(">", "agent");
 
             } else {
-				System.out.println("Constructor : portAvailable(32010) == false");
+				logger.trace("Constructor : portAvailable(32010) == false");
 			}
 		} catch(Exception ex) {
 			//ex.printStackTrace();
@@ -138,13 +138,13 @@ public class ActiveBroker {
 		
 	}
 
-	public NetworkConnector AddNetworkConnector(String URI) {
+	public NetworkConnector AddNetworkConnector(String URI, String brokerUserName, String brokerPassword) {
 		NetworkConnector bridge = null;
 		try {
 			bridge = broker.addNetworkConnector(new URI("static:tcp://" + URI + ":32010"));
 			//RandomString rs = new RandomString(5);
-			bridge.setUserName("cody");
-            bridge.setPassword("cody");
+			bridge.setUserName(brokerUserName);
+            bridge.setPassword(brokerPassword);
 			bridge.setName(java.util.UUID.randomUUID().toString());
 			bridge.setDuplex(true);
 			bridge.setDynamicOnly(true);
