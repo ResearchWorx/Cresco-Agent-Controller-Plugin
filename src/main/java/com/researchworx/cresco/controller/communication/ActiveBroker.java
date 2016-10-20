@@ -24,7 +24,7 @@ public class ActiveBroker {
 	public BrokerService broker;
 
 	public ActiveBroker(Launcher plugin, String brokerName, String brokerUserNameAgent, String brokerPasswordAgent) {
-		this.logger = new CLogger(ActiveBroker.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
+		this.logger = new CLogger(ActiveBroker.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Trace);
 		logger.info("Initialized");
 		try {
 			if(portAvailable(32010)) {
@@ -138,9 +138,29 @@ public class ActiveBroker {
 		
 	}
 
+    public NetworkConnector AddNetworkConnectorURI(String URI, String brokerUserName, String brokerPassword) {
+        NetworkConnector bridge = null;
+        try {
+            logger.trace("URI: " + URI + " brokerUserName: " + brokerUserName + " brokerPassword: " + brokerPassword);
+            bridge = broker.addNetworkConnector(new URI(URI));
+            //RandomString rs = new RandomString(5);
+            bridge.setUserName(brokerUserName);
+            bridge.setPassword(brokerPassword);
+            bridge.setName(java.util.UUID.randomUUID().toString());
+            bridge.setDuplex(true);
+            bridge.setDynamicOnly(true);
+            bridge.setPrefetchSize(1);
+
+        } catch(Exception ex) {
+            logger.error("AddNetworkConnector {}", ex.getMessage());
+        }
+        return bridge;
+    }
+
 	public NetworkConnector AddNetworkConnector(String URI, String brokerUserName, String brokerPassword) {
 		NetworkConnector bridge = null;
 		try {
+		    logger.trace("URI: static:tcp://" + URI + ":32010" + " brokerUserName: " + brokerUserName + " brokerPassword: " + brokerPassword);
 			bridge = broker.addNetworkConnector(new URI("static:tcp://" + URI + ":32010"));
 			//RandomString rs = new RandomString(5);
 			bridge.setUserName(brokerUserName);
@@ -149,6 +169,7 @@ public class ActiveBroker {
 			bridge.setDuplex(true);
 			bridge.setDynamicOnly(true);
 			bridge.setPrefetchSize(1);
+
 		} catch(Exception ex) {
 			logger.error("AddNetworkConnector {}", ex.getMessage());
 		}

@@ -6,6 +6,8 @@ import org.apache.activemq.command.ActiveMQDestination;
 import org.apache.activemq.network.NetworkBridge;
 import org.apache.activemq.network.NetworkConnector;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.List;
@@ -45,14 +47,16 @@ class BrokerMonitor implements Runnable {
                 logger.trace("Wating on Bridge to Start: " + bridge.getBrokerName());
 
             }
-            logger.trace("Bridge.isStarted: " + bridge.isStarted() + " brokerName: " + bridge.getBrokerName());
+            logger.trace("Bridge.isStarted: " + bridge.isStarted() + " brokerName: " + bridge.getBrokerName() + " name: " + bridge.getName());
             //
             //Send a message
+
             /*
             List<ActiveMQDestination> dest = bridge.getDynamicallyIncludedDestinations();
             for(ActiveMQDestination ades : dest) {
                 logger.trace("MQDEST: " + ades.getPhysicalName() + " " + ades.getQualifiedName() + " " + ades.isQueue());
             }
+
             Set<ActiveMQDestination> dests = bridge.getDurableDestinations();
             for(ActiveMQDestination ades : dests) {
                 logger.trace("MQDESTS: " + ades.getPhysicalName() + " " + ades.getQualifiedName() + " " + ades.isQueue());
@@ -91,6 +95,10 @@ class BrokerMonitor implements Runnable {
 
         } catch(Exception ex) {
 			logger.error(getClass().getName() + " connectToBroker Error " + ex.toString());
+			StringWriter sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			ex.printStackTrace(pw);
+			logger.error(sw.toString()); // stack trace as a string
 		}
 		return isConnected;
 	}
@@ -124,6 +132,9 @@ class BrokerMonitor implements Runnable {
             String brokerAddress = this.plugin.getBrokeredAgents().get(agentPath).activeAddress;
             String brokerUsername = this.plugin.getBrokeredAgents().get(agentPath).brokerUsername;
             String brokerPassword = this.plugin.getBrokeredAgents().get(agentPath).brokerPassword;
+
+            logger.trace("Connecting to brokerAddress: " + brokerAddress + " brokerUserName: " + brokerUsername + " brokerPassword: " + brokerPassword);
+
             if (connectToBroker(brokerAddress,brokerUsername,brokerPassword)) { //connect to broker
                 MonitorActive = true;
                 this.plugin.getBrokeredAgents().get(agentPath).brokerStatus = BrokerStatusType.ACTIVE;

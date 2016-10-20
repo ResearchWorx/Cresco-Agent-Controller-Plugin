@@ -11,6 +11,8 @@ import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.plugin.core.CPlugin;
 import com.researchworx.cresco.library.utilities.CLogger;
 import org.apache.activemq.command.ActiveMQDestination;
+import org.apache.activemq.network.NetworkBridge;
+import org.apache.activemq.network.NetworkConnector;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 
@@ -506,6 +508,28 @@ public class Launcher extends CPlugin {
             logger.info("WatchDog configuration updated");
             this.healthWatcher = new HealthWatcher(this);
             logger.info("HealthWatcher started");
+
+
+            //NetworkConnector nc = broker.AddNetworkConnectorURI("static:tcp://10.163.6.244:61616?maximumConnections=1000&wireFormat.maxFrameSize=104857600","admin","admin");
+            if(this.broker == null) {
+                logger.error("BROKER NULL");
+            }
+            else {
+                logger.error("Broker IsHealthy: " + this.broker.isHealthy());
+            }
+            NetworkConnector nc = this.broker.AddNetworkConnectorURI("static:tcp://10.163.6.244:61616","admin","admin");
+            nc.start();
+
+            while(!nc.isStarted()) {
+                logger.info("WAIT!! Starting BROKER");
+            }
+            while(nc.isStarted()) {
+                for (NetworkBridge b : nc.activeBridges()) {
+                    logger.info("Check Broker Name: " + b.getRemoteBrokerName());
+
+                }
+                Thread.sleep(1000);
+            }
 
             /*
             if(isRegionalController) {
