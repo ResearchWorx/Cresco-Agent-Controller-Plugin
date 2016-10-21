@@ -16,20 +16,23 @@ public class ActiveAgentConsumer implements Runnable {
 	private Session sess;
 	private ActiveMQConnection conn;
 
-	public ActiveAgentConsumer(Launcher plugin, String RXQueueName, String URI, String brokerUserNameAgent, String brokerPasswordAgent) {
+	public ActiveAgentConsumer(Launcher plugin, String RXQueueName, String URI, String brokerUserNameAgent, String brokerPasswordAgent) throws JMSException {
 		logger = new CLogger(ActiveAgentConsumer.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
 		logger.debug("Queue: {}", RXQueueName);
 		logger.trace("RXQueue=" + RXQueueName + " URI=" + URI + " brokerUserNameAgent=" + brokerUserNameAgent + " brokerPasswordAgent=" + brokerPasswordAgent);
 		this.plugin = plugin;
 		int retryCount = 10;
-		while (((conn == null) || !conn.isStarted()) && retryCount-- > 0) {
-			try {
+
+		//while (((conn == null) || !conn.isStarted()) && retryCount-- > 0) {
+			//try {
 				conn = (ActiveMQConnection) new ActiveMQConnectionFactory(brokerUserNameAgent, brokerPasswordAgent, URI).createConnection();
 				conn.start();
 				sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
 				RXqueue = sess.createQueue(RXQueueName);
-				break;
-			} catch (JMSException je) {
+				//break;
+			//}
+			/*
+			catch (JMSException je) {
 				try {
 				    logger.error("JMSException: {}", je.getMessage());
 					logger.debug("brokerUserNameAgent={}, brokerPasswordAgent={},URI={}", brokerUserNameAgent, brokerPasswordAgent, URI);
@@ -38,11 +41,16 @@ public class ActiveAgentConsumer implements Runnable {
 				} catch (InterruptedException e) {
 					logger.trace("Initialization was interrupted");
 				}
-			} catch (Exception ex) {
-				logger.error("Constructor: {}", ex.getMessage());
-				break;
 			}
-		}
+
+			catch (Exception ex) {
+				logger.error("Constructor: {}", ex.getMessage());
+				//break;
+
+			}
+			*/
+
+		//}
 	}
 
 	@Override
