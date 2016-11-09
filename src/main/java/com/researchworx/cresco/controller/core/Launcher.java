@@ -16,7 +16,10 @@ import org.apache.activemq.network.NetworkConnector;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 
+import javax.jms.JMSException;
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
@@ -223,6 +226,10 @@ public class Launcher extends CPlugin {
             }
         } catch (Exception ex) {
             logger.error("shutdown {}", ex.getMessage());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString());
         }
     }
 
@@ -488,14 +495,26 @@ public class Launcher extends CPlugin {
 
             this.logger = new CLogger(msgOutQueue, region, agent, pluginID, CLogger.Level.Info);
 
-            //consumer agent
-            this.consumerAgentThread = new Thread(new ActiveAgentConsumer(this, this.agentpath, "tcp://" + this.brokerAddressAgent + ":32010",brokerUserNameAgent,brokerPasswordAgent));
-            this.consumerAgentThread.start();
-            while (!this.ConsumerThreadActive) {
-                Thread.sleep(1000);
+            boolean consumerAgentConnected = false; //loop to catch expections on JMX connect of consumer
+            int consumerAgentConnectCount = 0;
+            while(!consumerAgentConnected && (consumerAgentConnectCount < 10)) {
+                try {
+                    //consumer agent
+                    this.consumerAgentThread = new Thread(new ActiveAgentConsumer(this, this.agentpath, "tcp://" + this.brokerAddressAgent + ":32010", brokerUserNameAgent, brokerPasswordAgent));
+                    this.consumerAgentThread.start();
+                    while (!this.ConsumerThreadActive) {
+                        Thread.sleep(1000);
+                    }
+                    consumerAgentConnected = true;
+                    logger.debug("Agent ConsumerThread Started..");
+                } catch (JMSException jmx) {
+                    logger.error("Agent ConsumerThread " + jmx.getMessage());
+                }
+                catch (Exception ex) {
+                    logger.error("Agent ConsumerThread " + ex.getMessage());
+                }
+                consumerAgentConnectCount++;
             }
-            logger.debug("Agent ConsumerThread Started..");
-
             this.ap = new ActiveProducer(this, "tcp://" + this.brokerAddressAgent + ":32010", brokerUserNameAgent, brokerPasswordAgent);
 
             logger.debug("Agent ProducerThread Started..");
