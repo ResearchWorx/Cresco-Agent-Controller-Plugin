@@ -43,7 +43,7 @@ public class ActiveProducer {
 
     public ActiveProducer(Launcher plugin, String URI, String brokerUserNameAgent, String brokerPasswordAgent) {
         this.plugin = plugin;
-        this.logger = new CLogger(ActiveProducer.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
+        this.logger = new CLogger(ActiveProducer.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
         this.brokerUserNameAgent = brokerUserNameAgent;
         this.brokerPasswordAgent = brokerPasswordAgent;
         try {

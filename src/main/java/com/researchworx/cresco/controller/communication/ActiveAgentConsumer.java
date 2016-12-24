@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
+import com.sun.media.jfxmedia.logging.Logger;
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
@@ -17,7 +18,8 @@ public class ActiveAgentConsumer implements Runnable {
 	private ActiveMQConnection conn;
 
 	public ActiveAgentConsumer(Launcher plugin, String RXQueueName, String URI, String brokerUserNameAgent, String brokerPasswordAgent) throws JMSException {
-		logger = new CLogger(ActiveAgentConsumer.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
+		//logger = new CLogger(ActiveAgentConsumer.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), Logger.INFO);
+		this.logger = new CLogger(ActiveAgentConsumer.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
 		logger.debug("Queue: {}", RXQueueName);
 		logger.trace("RXQueue=" + RXQueueName + " URI=" + URI + " brokerUserNameAgent=" + brokerUserNameAgent + " brokerPasswordAgent=" + brokerPasswordAgent);
 		this.plugin = plugin;
@@ -55,7 +57,7 @@ public class ActiveAgentConsumer implements Runnable {
 
 	@Override
 	public void run() {
-		logger.info("Queue: {}", RXqueue);
+		logger.trace("Queue: {}", RXqueue);
 		Gson gson = new Gson();
 		try {
 			plugin.setConsumerThreadActive(true);

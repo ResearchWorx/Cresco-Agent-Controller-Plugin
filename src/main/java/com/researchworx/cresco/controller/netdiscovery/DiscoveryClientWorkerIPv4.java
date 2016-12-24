@@ -75,7 +75,7 @@ class DiscoveryClientWorkerIPv4 {
 
     List<MsgEvent> discover() {
         // Find the server using UDP broadcast
-        logger.info("Discovery (IPv4) started");
+        logger.info(disType.toString() + " Discovery (IPv4) started ");
         try {
             discoveredList = new ArrayList<>();
 

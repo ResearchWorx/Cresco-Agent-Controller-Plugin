@@ -29,10 +29,18 @@ public class ActiveBrokerManager implements Runnable  {
 
 	public void addBroker(String agentPath) {
 		BrokeredAgent ba = this.plugin.getBrokeredAgents().get(agentPath);
+		//logger.error("addBroker: agentPath = " + agentPath + " status 0 = " + ba.brokerStatus.toString());
 		if(ba.brokerStatus == BrokerStatusType.INIT) {
 			//Fire up new thread.
 			ba.setStarting();
 		}
+		/*
+		logger.error("addBroker: agentPath = " + agentPath + " status 1 = " + ba.brokerStatus.toString());
+		if(ba.brokerStatus == BrokerStatusType.STARTING) {
+			ba.setActive();
+		}
+		logger.error("addBroker: agentPath = " + agentPath + " status 2 = " + ba.brokerStatus.toString());
+		*/
 	}
 	public void run() {
 		logger.info("Active Broker Manager started");
@@ -81,11 +89,24 @@ public class ActiveBrokerManager implements Runnable  {
 						if(addBroker && !this.plugin.isReachableAgent(agentPath)) {
                             addBroker(agentPath);
                             int count = 0;
-                            while(!this.plugin.isReachableAgent(agentPath)) {
-                                logger.trace("Adding Broker : " + agentPath + " remote_ip: " + agentIP + " count:" + count);
-                                Thread.sleep(1000);
+                            //while(!this.plugin.isReachableAgent(agentPath)) {
+
+                            	/*
+                            	MsgEvent sme = new MsgEvent(MsgEvent.Type.DISCOVER, this.plugin.getRegion(), this.plugin.getAgent(), this.plugin.getPluginID(), "Discovery request.");
+								sme.setParam("src_region", this.plugin.getRegion());
+								sme.setParam("src_agent", this.plugin.getAgent());
+								String[] regionAgent = agentPath.split("_");
+								sme.setParam("dst_region",regionAgent[0]);
+								sme.setParam("dst_agent",regionAgent[1]);
+								plugin.sendMsgEvent(sme);
+								*/
+
+								logger.trace("Waiting on Broker : " + agentPath + " remote_ip: " + agentIP + " count:" + count);
+								logger.trace("Status : " + ba.brokerStatus.toString() + " URI : " + ba.URI + " Address : " + ba.activeAddress);
+								logger.trace("isReachable : " + this.plugin.isReachableAgent(agentPath));
+								Thread.sleep(1000);
                                 count++;
-                            }
+                            //}
 						}
 						else {
                             logger.trace("Not Adding Broker : " + agentPath + " remote_ip: " + agentIP);

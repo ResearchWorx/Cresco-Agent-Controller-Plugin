@@ -30,6 +30,10 @@ public class GraphDBEngine {
 	
 	public GraphDBEngine(Launcher plugin, Boolean isMemory)
 	{
+        //For logging, does not seem to work.
+        //System.setProperty("log.console.level", "FINE");
+        //System.setProperty("orientdb.installCustomFormatter", "false");
+
         this.plugin = plugin;
         logger = new CLogger(GraphDBEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
 

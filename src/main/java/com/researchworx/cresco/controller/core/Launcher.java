@@ -2,6 +2,7 @@ package com.researchworx.cresco.controller.core;
 
 import com.google.auto.service.AutoService;
 import com.researchworx.cresco.controller.communication.*;
+import com.researchworx.cresco.controller.globalcontroller.*;
 import com.researchworx.cresco.controller.graphdb.GraphDBUpdater;
 import com.researchworx.cresco.controller.netdiscovery.*;
 import com.researchworx.cresco.controller.regionalcontroller.*;
@@ -11,8 +12,6 @@ import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.plugin.core.CPlugin;
 import com.researchworx.cresco.library.utilities.CLogger;
 import org.apache.activemq.command.ActiveMQDestination;
-import org.apache.activemq.network.NetworkBridge;
-import org.apache.activemq.network.NetworkConnector;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 
@@ -52,7 +51,6 @@ public class Launcher extends CPlugin {
     private boolean ActiveDestManagerActive = false;
 
 
-
     private boolean ConsumerThreadActive = false;
     private boolean ConsumerThreadRegionActive = false;
 
@@ -77,6 +75,17 @@ public class Launcher extends CPlugin {
     }
 
     private Thread activeBrokerManagerThread;
+
+    public Thread getGlobalControllerManagerThread() {
+        return globalControllerManagerThread;
+    }
+
+    public void setGlobalControllerManagerThread(Thread GlobalControllerManagerThread) {
+        this.globalControllerManagerThread = globalControllerManagerThread;
+    }
+
+    private Thread globalControllerManagerThread;
+
 
     public Thread getConsumerRegionThread() {
         return consumerRegionThread;
@@ -107,6 +116,11 @@ public class Launcher extends CPlugin {
 
 
     private boolean isRegionalController = false;
+
+    public boolean isGlobalController = false;
+    public String globalControllerPath;
+    private boolean GlobalControllerManagerActive = false;
+
     private Map<String, Long> discoveryMap;
     private AgentDiscovery agentDiscover;
 
@@ -166,6 +180,8 @@ public class Launcher extends CPlugin {
             this.ConsumerThreadRegionActive = false;
             this.ConsumerThreadActive = false;
             this.ActiveBrokerManagerActive = false;
+            this.GlobalControllerManagerActive = false;
+
             if (this.discoveryEngineThread != null) {
                 logger.trace("Discovery Engine shutting down");
                 DiscoveryEngine.shutdown();
@@ -180,6 +196,11 @@ public class Launcher extends CPlugin {
             if (this.healthWatcher != null) {
                 this.healthWatcher.timer.cancel();
                 this.healthWatcher = null;
+            }
+            if (this.globalControllerManagerThread!= null) {
+                logger.trace("Region Consumer shutting down");
+                this.globalControllerManagerThread.join();
+                this.globalControllerManagerThread = null;
             }
             if (this.consumerRegionThread != null) {
                 logger.trace("Region Consumer shutting down");
@@ -298,12 +319,12 @@ public class Launcher extends CPlugin {
             if(getConfig().getStringParam("regional_controller_host") != null) {
                 //do directed discovery
                 while(discoveryList.size() == 0) {
-                    logger.info("Static Broker Connection to Host : " + getConfig().getStringParam("regional_controller_host"));
+                    logger.info("Static Agent Connection to Regional Controller : " + getConfig().getStringParam("regional_controller_host"));
                     DiscoveryStatic ds = new DiscoveryStatic(this);
                     discoveryList.addAll(ds.discover(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_static_agent_timeout",10000), getConfig().getStringParam("regional_controller_host")));
-                    logger.debug("Static Broker count = {}" + discoveryList.size());
+                    logger.debug("Static Agent Connection count = {}" + discoveryList.size());
                     if(discoveryList.size() == 0) {
-                        logger.info("Static Broker Connection to Host : " + getConfig().getStringParam("regional_controller_host") + " failed! - Restarting Discovery!");
+                        logger.info("Static Agent Connection to Regional Controller : " + getConfig().getStringParam("regional_controller_host") + " failed! - Restarting Discovery!");
                     }
                 }
 
@@ -433,16 +454,26 @@ public class Launcher extends CPlugin {
                 //start regional discovery
                 discoveryList.clear();
 
-                //Try and discover other regions to connect with
-                if (this.isIPv6)
+                //Try and discover other regions, connect to as many as possible.
+                if (this.isIPv6) {
                     discoveryList = this.dcv6.getDiscoveryResponse(DiscoveryType.REGION, getConfig().getIntegerParam("discovery_ipv6_region_timeout", 2000));
+                }
                     discoveryList.addAll(this.dcv4.getDiscoveryResponse(DiscoveryType.REGION, getConfig().getIntegerParam("discovery_ipv4_region_timeout", 2000)));
+
                 if (!discoveryList.isEmpty()) {
                     for (MsgEvent ime : discoveryList) {
                         this.incomingCanidateBrokers.offer(ime);
-                        logger.debug("Region Found: " + ime.getParams());
-
+                        logger.info("Regional Controller Found: " + ime.getParams());
                     }
+                }
+
+                discoveryList.clear();
+                //do global discovery here
+                this.globalControllerManagerThread = new Thread(new GlobalControllerMonitor(this, dcv4, dcv6));
+                this.globalControllerManagerThread.start();
+                while (!this.GlobalControllerManagerActive) {
+                    Thread.sleep(1000);
+                    logger.trace("Wait loop for Global Controller");
                 }
 
             }
@@ -528,14 +559,16 @@ public class Launcher extends CPlugin {
             this.healthWatcher = new HealthWatcher(this);
             logger.info("HealthWatcher started");
 
+            /*
 
             //NetworkConnector nc = broker.AddNetworkConnectorURI("static:tcp://10.163.6.244:61616?maximumConnections=1000&wireFormat.maxFrameSize=104857600","admin","admin");
             if(this.broker == null) {
                 logger.error("BROKER NULL");
             }
             else {
-                logger.error("Broker IsHealthy: " + this.broker.isHealthy());
+                logger.info("Broker IsHealthy: " + this.broker.isHealthy());
             }
+
             NetworkConnector nc = this.broker.AddNetworkConnectorURI("static:tcp://10.163.6.244:61616","admin","admin");
             nc.start();
 
@@ -549,7 +582,7 @@ public class Launcher extends CPlugin {
                 }
                 Thread.sleep(1000);
             }
-
+            */
             /*
             if(isRegionalController) {
                 //post global controller config
@@ -721,7 +754,8 @@ public class Launcher extends CPlugin {
                     //}
                     if (des.isQueue()) {
                         String testPath = des.getPhysicalName();
-                        logger.info("isReachable isQueue: " + testPath);
+
+                        logger.trace("isReachable isQueue: physical = " + testPath + " qualified = " + des.getQualifiedName());
                         if (testPath.equals(remoteAgentPath)) {
                             isReachableAgent = true;
                         }
@@ -733,9 +767,10 @@ public class Launcher extends CPlugin {
                     //for(String despaths : des.getDestinationPaths()) {
                     //    logger.info("isReachable destPaths: " + despaths);
                     //}
+
                     if (des.isQueue()) {
                         String testPath = des.getPhysicalName();
-                        logger.info("Regional isReachable isQueue: " + testPath);
+                        logger.trace("Regional isReachable isQueue: physical = " + testPath + " qualified = " + des.getQualifiedName());
                         if (testPath.equals(remoteAgentPath)) {
                             isReachableAgent = true;
                         }
@@ -789,6 +824,13 @@ public class Launcher extends CPlugin {
     }
     public void setActiveBrokerManagerActive(boolean activeBrokerManagerActive) {
         ActiveBrokerManagerActive = activeBrokerManagerActive;
+    }
+
+    public boolean isGlobalControllerManagerActive() {
+        return GlobalControllerManagerActive;
+    }
+    public void setGlobalControllerManagerActive(boolean activeBrokerManagerActive) {
+        GlobalControllerManagerActive = activeBrokerManagerActive;
     }
 
     public boolean isConsumerThreadRegionActive() {

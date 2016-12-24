@@ -37,7 +37,9 @@ public class CrescoAuthorizationPlugin implements BrokerPlugin {
         this.map = map;
     }
 
+
     public void addEntry(String channelName, String groupName) throws Exception {
+
         AuthorizationEntry authEntryTopic = new AuthorizationEntry();
         authEntryTopic.setGroupClass("org.apache.activemq.jaas.GroupPrincipal");
         authEntryTopic.setTopic(channelName);
@@ -45,6 +47,7 @@ public class CrescoAuthorizationPlugin implements BrokerPlugin {
         authEntryTopic.setWrite(groupName);
         authEntryTopic.setAdmin(groupName);
         map.addAuthorizationEntry(authEntryTopic);
+
         AuthorizationEntry authEntryQueue = new AuthorizationEntry();
         authEntryQueue.setGroupClass("org.apache.activemq.jaas.GroupPrincipal");
         authEntryQueue.setQueue(channelName);
@@ -52,6 +55,7 @@ public class CrescoAuthorizationPlugin implements BrokerPlugin {
         authEntryQueue.setWrite(groupName);
         authEntryQueue.setAdmin(groupName);
         map.addAuthorizationEntry(authEntryQueue);
+
         Set<AuthorizationEntry> currentEntries = new HashSet<>();
         currentEntries.add(authEntryTopic);
         currentEntries.add(authEntryQueue);

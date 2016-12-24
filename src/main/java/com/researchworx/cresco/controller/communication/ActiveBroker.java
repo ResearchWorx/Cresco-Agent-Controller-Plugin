@@ -7,6 +7,7 @@ import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.broker.TransportConnector;
 import org.apache.activemq.broker.region.policy.PolicyEntry;
 import org.apache.activemq.broker.region.policy.PolicyMap;
+import org.apache.activemq.command.ActiveMQDestination;
 import org.apache.activemq.network.NetworkConnector;
 import org.apache.activemq.util.ServiceStopper;
 
@@ -14,6 +15,8 @@ import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ActiveBroker {
 	private CLogger logger;
@@ -24,7 +27,7 @@ public class ActiveBroker {
 	public BrokerService broker;
 
 	public ActiveBroker(Launcher plugin, String brokerName, String brokerUserNameAgent, String brokerPasswordAgent) {
-		this.logger = new CLogger(ActiveBroker.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Trace);
+		this.logger = new CLogger(ActiveBroker.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
 		logger.info("Initialized");
 		try {
 			if(portAvailable(32010)) {
@@ -42,9 +45,9 @@ public class ActiveBroker {
 				broker.setDestinationPolicy(map);
 				broker.setUseJmx(false);
 
-				authorizationPlugin = new CrescoAuthorizationPlugin();
-				authenticationPlugin = new CrescoAuthenticationPlugin();
-				broker.setPlugins(new BrokerPlugin[]{authorizationPlugin,authenticationPlugin});
+				//authorizationPlugin = new CrescoAuthorizationPlugin();
+				//authenticationPlugin = new CrescoAuthenticationPlugin();
+				//broker.setPlugins(new BrokerPlugin[]{authorizationPlugin,authenticationPlugin});
 
                 connector = new TransportConnector();
 				if (plugin.isIPv6())
@@ -56,13 +59,15 @@ public class ActiveBroker {
 
                 broker.start();
 
+
                 while(!broker.isStarted()) {
 			    	Thread.sleep(1000);
                 }
-				addUser(brokerUserNameAgent,brokerPasswordAgent,"agent");
-				addPolicy(">", "agent");
+				//addUser(brokerUserNameAgent,brokerPasswordAgent,"agent");
+				//addPolicy(">", "agent");
 
-            } else {
+
+			} else {
 				logger.trace("Constructor : portAvailable(32010) == false");
 			}
 		} catch(Exception ex) {
@@ -157,7 +162,14 @@ public class ActiveBroker {
         return bridge;
     }
 
-	public NetworkConnector AddNetworkConnector(String URI, String brokerUserName, String brokerPassword) {
+    public List<ActiveMQDestination> getDest(String agentPath) {
+		List<ActiveMQDestination> dstList = new ArrayList<>();
+		ActiveMQDestination dst = ActiveMQDestination.createDestination("queue://" + agentPath, ActiveMQDestination.QUEUE_TYPE);
+		dstList.add(dst);
+		return dstList;
+	}
+
+	public NetworkConnector AddNetworkConnector(String URI, String brokerUserName, String brokerPassword, String agentPath) {
 		NetworkConnector bridge = null;
 		try {
 		    logger.trace("URI: static:tcp://" + URI + ":32010" + " brokerUserName: " + brokerUserName + " brokerPassword: " + brokerPassword);
@@ -167,8 +179,11 @@ public class ActiveBroker {
             bridge.setPassword(brokerPassword);
 			bridge.setName(java.util.UUID.randomUUID().toString());
 			bridge.setDuplex(true);
-			bridge.setDynamicOnly(true);
+			//bridge.setDynamicOnly(true);
+			//bridge.setDynamicallyIncludedDestinations(getDest(agentPath));
+
 			bridge.setPrefetchSize(1);
+
 
 		} catch(Exception ex) {
 			logger.error("AddNetworkConnector {}", ex.getMessage());

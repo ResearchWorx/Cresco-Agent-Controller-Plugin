@@ -1,6 +1,7 @@
 package com.researchworx.cresco.controller.communication;
 
 import com.researchworx.cresco.controller.core.Launcher;
+import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 import org.apache.activemq.command.ActiveMQDestination;
 import org.apache.activemq.network.NetworkBridge;
@@ -21,7 +22,7 @@ class BrokerMonitor implements Runnable {
 	public boolean MonitorActive;
 
 	public BrokerMonitor(Launcher plugin, String agentPath) {
-		this.logger = new CLogger(BrokerMonitor.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
+		this.logger = new CLogger(BrokerMonitor.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
 		this.plugin = plugin;
 		this.agentPath = agentPath;
 	}
@@ -31,28 +32,30 @@ class BrokerMonitor implements Runnable {
 		MonitorActive = false;
 	}
 
-	public boolean connectToBroker(String brokerAddress, String brokerUserName, String brokerPassword) {
+	public boolean connectToBroker(String brokerAddress, String brokerUserName, String brokerPassword, String agentPath) {
 	    logger.trace("BrokerAddress: " + brokerAddress + " brokerUserName: " + brokerUserName + " brokerPassword:" + brokerPassword);
 		boolean isConnected = false;
 		try {
 			if((InetAddress.getByName(brokerAddress) instanceof Inet6Address)) {
 				brokerAddress = "[" + brokerAddress + "]";
 			}
-			bridge = this.plugin.getBroker().AddNetworkConnector(brokerAddress, brokerUserName, brokerPassword);
+			bridge = this.plugin.getBroker().AddNetworkConnector(brokerAddress, brokerUserName, brokerPassword, agentPath);
 			bridge.start();
             logger.trace("Starting Bridge: " + bridge.getBrokerName() + " brokerAddress: " + brokerAddress);
 			int connect_count = 0;
+
 			while((connect_count++ < 10) && !bridge.isStarted()) {
 				Thread.sleep(1000);
                 logger.trace("Wating on Bridge to Start: " + bridge.getBrokerName());
-
-            }
+			}
             logger.trace("Bridge.isStarted: " + bridge.isStarted() + " brokerName: " + bridge.getBrokerName() + " name: " + bridge.getName());
-            //
+
+			//
             //Send a message
 
-            /*
+			/*
             List<ActiveMQDestination> dest = bridge.getDynamicallyIncludedDestinations();
+            //dest.addAll(bridge.getDurableDestinations());
             for(ActiveMQDestination ades : dest) {
                 logger.trace("MQDEST: " + ades.getPhysicalName() + " " + ades.getQualifiedName() + " " + ades.isQueue());
             }
@@ -61,19 +64,11 @@ class BrokerMonitor implements Runnable {
             for(ActiveMQDestination ades : dests) {
                 logger.trace("MQDESTS: " + ades.getPhysicalName() + " " + ades.getQualifiedName() + " " + ades.isQueue());
             }
-            */
-            //
-
+			*/
 
             if (connect_count >= 10 && !bridge.isStarted()) {
 				throw new Exception("Failed to start bridge after 10 attempts. Aborting.");
 			}
-            logger.trace("Bridge isConnected 0 : " + isConnected);
-
-            //THIS SHOULD NOT BE HERE
-            isConnected = true;
-            //THIS SHOULD NOT BE HERE
-            logger.trace("Bridge isConnected 1 : " + isConnected);
 
             connect_count = 0;
 			while((connect_count++ < 10) && !isConnected) {
@@ -82,8 +77,8 @@ class BrokerMonitor implements Runnable {
                 for(NetworkBridge b : bridge.activeBridges()) {
                     String remoteBroker = b.getRemoteBrokerName();
 
-                    logger.trace("RemoteBroker: " + b.getRemoteBrokerName() + " " + b.getRemoteAddress() + " " + b.getLocalAddress() + " " + b.getLocalBrokerName());
-                    if(remoteBroker != null) {
+                    logger.trace("RemoteBroker: " + b.getRemoteBrokerName() + " Remote Address: " + b.getRemoteAddress() + " Local Address: " + b.getLocalAddress() + " Local Name: " + b.getLocalBrokerName() + " Remote ID: " + b.getRemoteBrokerId() );
+					if(remoteBroker != null) {
                         logger.trace("RemoteBroker: " + remoteBroker + " agentPath: " + agentPath);
                         if(remoteBroker.equals(agentPath)) {
 	    					isConnected = true;
@@ -135,15 +130,21 @@ class BrokerMonitor implements Runnable {
 
             logger.trace("Connecting to brokerAddress: " + brokerAddress + " brokerUserName: " + brokerUsername + " brokerPassword: " + brokerPassword);
 
-            if (connectToBroker(brokerAddress,brokerUsername,brokerPassword)) { //connect to broker
+            if (connectToBroker(brokerAddress,brokerUsername,brokerPassword, agentPath)) { //connect to broker
                 MonitorActive = true;
-                this.plugin.getBrokeredAgents().get(agentPath).brokerStatus = BrokerStatusType.ACTIVE;
-            }
+                //this.plugin.getBrokeredAgents().get(agentPath).brokerStatus = BrokerStatusType.ACTIVE;
+				this.plugin.getBrokeredAgents().get(agentPath).setActive();
+                logger.trace("Connected to brokerAddress: " + brokerAddress + " brokerUserName: " + brokerUsername + " brokerPassword: " + brokerPassword);
+
+			}
+
             while (MonitorActive) {
 				MonitorActive = false;
 				for (NetworkBridge b : bridge.activeBridges()) {
 				    logger.trace("Check Broker Name: " + b.getRemoteBrokerName() + " for agentPath: " + agentPath);
+					logger.trace("found bridge[" + b + "] to " + b.getRemoteBrokerName() + " on broker :" + b.getLocalBrokerName());
 
+					//plugin.sendAPMessage(MsgEvent);
                     //if (b.getRemoteBrokerName().equals(agentPath)) {
 					    MonitorActive = true;
 					//}
