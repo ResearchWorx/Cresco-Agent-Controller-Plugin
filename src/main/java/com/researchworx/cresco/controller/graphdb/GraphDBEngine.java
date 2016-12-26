@@ -1,7 +1,11 @@
 package com.researchworx.cresco.controller.graphdb;
 
 import com.orientechnologies.orient.client.remote.OServerAdmin;
+import com.orientechnologies.orient.core.command.OCommandOutputListener;
+import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
+import com.orientechnologies.orient.core.db.tool.ODatabaseExport;
+import com.orientechnologies.orient.core.db.tool.ODatabaseImport;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.metadata.schema.OSchema;
 import com.orientechnologies.orient.core.metadata.schema.OType;
@@ -14,28 +18,227 @@ import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
 
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.Map.Entry;
 
 public class GraphDBEngine {
 	
 	public OrientGraphFactory factory;
+	private ODatabaseDocumentTx db;
 	private OrientGraph odb;
     private Launcher plugin;
     private CLogger logger;
+    private boolean isMemory = true;
 
     public String[] aNodeIndexParams = {"platform","environment","location"};
 	
 	public int retryCount = 50;
-	
-	public GraphDBEngine(Launcher plugin, Boolean isMemory)
-	{
+
+
+    public boolean setDBImport(String exportData) {
+        boolean isImported = false;
+        try {
+
+            InputStream is = new ByteArrayInputStream(exportData.getBytes(StandardCharsets.UTF_8));
+            DBImport dbImport = new DBImport(plugin, is, db, this);
+            isImported = dbImport.importDump();
+
+
+        }
+        catch(Exception ex) {
+            logger.error(ex.getMessage());
+            logger.error(ex.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString()); //
+        }
+        //export.exportDatabase();
+        //export.close();
+        //database.close();
+        return isImported;
+    }
+
+
+    public boolean setDBImportNative(String exportData) {
+        boolean isImported = false;
+        try {
+
+            OCommandOutputListener listener = new OCommandOutputListener() {
+                @Override
+                public void onMessage(String iText) {
+                    // System.out.print(iText);
+                    logger.info(iText);
+                }
+            };
+            //Not sure what this does, but is needed to dump database.
+            ODatabaseRecordThreadLocal.INSTANCE.set(db);
+            //create location for output stream
+
+            InputStream is = new ByteArrayInputStream(exportData.getBytes(StandardCharsets.UTF_8));
+
+            ODatabaseImport dbImport = new ODatabaseImport(db, is, listener);
+            //operation
+            dbImport.setMerge(true);
+            dbImport.setDeleteRIDMapping(true);
+            dbImport.setMigrateLinks(true);
+            //dbImport.setRebuildIndexes(true);
+
+            //filter export
+            dbImport.setIncludeInfo(false);
+            dbImport.setIncludeClusterDefinitions(false);
+            dbImport.setIncludeSchema(false);
+            dbImport.setIncludeIndexDefinitions(false);
+            dbImport.setIncludeManualIndexes(false);
+            dbImport.setIncludeSecurity(true);
+
+            dbImport.importDatabase();
+            dbImport.close();
+            isImported = true;
+
+
+
+        }
+        catch(Exception ex) {
+            logger.error(ex.getMessage());
+            logger.error(ex.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString()); //
+        }
+        //export.exportDatabase();
+        //export.close();
+        //database.close();
+        return isImported;
+    }
+
+	public String getDBExport() {
+	    String exportString = null;
+	    try {
+
+            Set<String> crescoDbClasses = new HashSet<String>();
+            crescoDbClasses.add("rnode".toUpperCase());
+            crescoDbClasses.add("anode".toUpperCase());
+            crescoDbClasses.add("pnode".toUpperCase());
+            //crescoDbClasses.add("resourcenode".toUpperCase());
+            //crescoDbClasses.add("inode".toUpperCase());
+            crescoDbClasses.add("isagent".toUpperCase());
+            crescoDbClasses.add("isplugin".toUpperCase());
+            //crescoDbClasses.add("isconnected".toUpperCase());
+            //crescoDbClasses.add("isresource".toUpperCase());
+            //crescoDbClasses.add("isreachable".toUpperCase());
+            //crescoDbClasses.add("isassigned".toUpperCase());
+            //System.out.println(crescoDbClasses);
+
+
+            OCommandOutputListener listener = new OCommandOutputListener() {
+                @Override
+                public void onMessage(String iText) {
+                    // System.out.print(iText);
+                }
+            };
+            //Not sure what this does, but is needed to dump database.
+            ODatabaseRecordThreadLocal.INSTANCE.set(db);
+            //create location for output stream
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+            ODatabaseExport export = new ODatabaseExport(db, os, listener);
+
+            //filter export
+
+
+            export.setIncludeInfo(false);
+            export.setIncludeClusterDefinitions(false);
+            export.setIncludeSchema(false);
+
+            export.setIncludeIndexDefinitions(false);
+            export.setIncludeManualIndexes(false);
+
+            export.setIncludeSecurity(false);
+            //include classes
+            export.setIncludeClasses(crescoDbClasses);
+
+
+            export.exportDatabase();
+
+            exportString = new String(os.toByteArray(),"UTF-8");
+
+            export.close();
+
+            /*
+            Set<String> abcd = new HashSet<String>();
+            //abcd.add("sample_demo1_OnlineShopping");
+            abcd.add("sample_demo1_OnlineShopping".toUpperCase());
+            System.out.println(abcd);
+
+            ODatabaseExport export = new ODatabaseExport(db, "DataCont/Data.gz", listener);
+
+            export.setIncludeInfo(false);
+            export.setIncludeClusterDefinitions(false);
+            export.setIncludeSchema(false);
+            export.setIncludeIndexDefinitions(false);
+            export.setIncludeManualIndexes(false);
+
+            export.setIncludeClasses(abcd);
+
+//          export.exportRecords();
+            export.exportDatabase();
+            export.close();
+            */
+
+
+        }
+        catch(Exception ex) {
+	        logger.error(ex.getMessage());
+        }
+        //export.exportDatabase();
+        //export.close();
+        //database.close();
+        return exportString;
+    }
+
+    public String getDBExport2() {
+        String exportString = null;
+        try {
+
+            OCommandOutputListener listener = new OCommandOutputListener() {
+                @Override
+                public void onMessage(String iText) {
+                    // System.out.print(iText);
+                }
+            };
+            //Not sure what this does, but is needed to dump database.
+            ODatabaseRecordThreadLocal.INSTANCE.set(db);
+            //create location for output stream
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+            ODatabaseExport export = new ODatabaseExport(db, os, listener);
+
+            export.exportDatabase();
+
+            exportString = new String(os.toByteArray(),"UTF-8");
+
+            export.close();
+
+        }
+        catch(Exception ex) {
+            logger.error(ex.getMessage());
+        }
+
+        return exportString;
+    }
+
+	public GraphDBEngine(Launcher plugin) {
         //For logging, does not seem to work.
         //System.setProperty("log.console.level", "FINE");
         //System.setProperty("orientdb.installCustomFormatter", "false");
 
         this.plugin = plugin;
-        logger = new CLogger(GraphDBEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+        logger = new CLogger(GraphDBEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
+
 
 		/*
 		nodePathCache = CacheBuilder.newBuilder()
@@ -52,20 +255,32 @@ public class GraphDBEngine {
 			    .expireAfterWrite(15, TimeUnit.MINUTES)
 			    .build();
 		*/
-		
-		//String connection_string = "remote:" + Launcher.conf.getGraphDBServer() + "/" + Launcher.conf.getGraphDBName();
-		//String username = Launcher.conf.getGraphDBLogin();
-		//String password = Launcher.conf.getGraphDBPassword();
-		if(isMemory) {
-            ODatabaseDocumentTx db = new ODatabaseDocumentTx("memory:internalDb").create();
+
+        String host = plugin.getConfig().getStringParam("gdb_host");
+        String username = plugin.getConfig().getStringParam("gdb_username");
+        String password = plugin.getConfig().getStringParam("gdb_password");
+        String dbname = plugin.getConfig().getStringParam("gdb_dbname");
+        if((host != null) && (username != null) && (password != null) && (dbname != null))
+        {
+            isMemory = false;
+        }
+
+        if(isMemory) {
+            db = new ODatabaseDocumentTx("memory:internalDb").create();
+
             factory = new OrientGraphFactory("memory:internalDb");
         }
         else {
-            String host = plugin.getConfig().getStringParam("gdb_host");
-            String username = plugin.getConfig().getStringParam("gdb_username");
-            String password = plugin.getConfig().getStringParam("gdb_password");
-            String dbname = plugin.getConfig().getStringParam("gdb_dbname");
 
+            //String connection_string = "plocal:/opt/cresco/db";
+            String connection_string = "plocal:/Users/vcbumg2/Downloads/orientdb-community-2.2.14/databases/cresco";
+            db = new  ODatabaseDocumentTx(connection_string).open(username, password);
+            factory = new OrientGraphFactory(connection_string, username, password).setupPool(10, 100);
+
+            //db = new ODatabaseDocumentTx(connection_string).create();
+
+            /*
+            //Orient.instance(). .instance(). .reg .registerEngine(new OEngineRemote());
             String connection_string = "remote:" + host + "/" + dbname;
 
 
@@ -78,7 +293,9 @@ public class GraphDBEngine {
                 logger.debug("DBCheck failed");
                 System.exit(0);
             }
+            db = new  ODatabaseDocumentTx(connection_string).open(username, password);
             factory = new OrientGraphFactory(connection_string, username, password).setupPool(10, 100);
+            */
         }
         initCrescoDB();
         logger.debug("Post Init!");

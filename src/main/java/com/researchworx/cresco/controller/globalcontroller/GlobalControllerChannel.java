@@ -1,4 +1,4 @@
-package com.researchworx.cresco.controller.regionalcontroller;
+package com.researchworx.cresco.controller.globalcontroller;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

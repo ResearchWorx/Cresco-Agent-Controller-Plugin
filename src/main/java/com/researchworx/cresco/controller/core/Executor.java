@@ -1,8 +1,13 @@
 package com.researchworx.cresco.controller.core;
 
+import com.researchworx.cresco.controller.graphdb.DBImport;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.plugin.core.CExecutor;
 import com.researchworx.cresco.library.utilities.CLogger;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 class Executor extends CExecutor {
     private Launcher mainPlugin;
@@ -26,12 +31,26 @@ class Executor extends CExecutor {
                 msg.setParam("set_region", this.plugin.getRegion());
                 msg.setParam("set_agent", this.plugin.getAgent());
                 msg.setParam("is_regional_controller", Boolean.toString(this.mainPlugin.isRegionalController()));
+                msg.setParam("is_global_controller", Boolean.toString(this.mainPlugin.isGlobalController()));
                 msg.setParam("is_active", Boolean.toString(this.plugin.isActive()));
                 logger.debug("Returning communication details to Cresco agent");
                 return msg;
+            //there has to be a better way to do this
+            case "regionalimport":
+                logger.info("regionalimport message type found");
+                logger.info(msg.getParam("exportdata"));
+                if(mainPlugin.getGDB().setRDBImport(msg.getParam("exportdata"))) {
+                    logger.info("Database Imported.");
+                }
+                else {
+                    logger.error("Database Import Failed!");
+                }
+
             default:
                 logger.debug("Unknown configtype found: {}", msg.getParam("configtype"));
                 return null;
         }
     }
+
+
 }

@@ -21,7 +21,7 @@ public class GlobalControllerMonitor implements Runnable {
 	private Map<String,String> global_host_map;
 
 	public GlobalControllerMonitor(Launcher plugin, DiscoveryClientIPv4 dcv4, DiscoveryClientIPv6 dcv6) {
-		this.logger = new CLogger(GlobalControllerMonitor.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
+		this.logger = new CLogger(GlobalControllerMonitor.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
 		this.plugin = plugin;
         this.dcv4 = dcv4;
         this.dcv6 = dcv6;
@@ -56,41 +56,41 @@ public class GlobalControllerMonitor implements Runnable {
             //Static Remote Global Controller
 	        String static_global_controller_host = plugin.getConfig().getStringParam("global_controller_host");
 	        if(static_global_controller_host != null) {
-                this.plugin.isGlobalController = false;
+                this.plugin.setGlobalController(false);
                 logger.trace("Starting Static Global Controller Check");
 	            if(global_host_map.containsKey(static_global_controller_host)) {
                     if(plugin.isReachableAgent(global_host_map.get(static_global_controller_host))) {
                         return;
                     }
                     else {
-                        plugin.globalControllerPath = null;
+                        this.plugin.setGlobalControllerPath(null);
                         global_host_map.remove(static_global_controller_host);
                     }
                 }
                 String globalPath = connectToGlobal(staticGlobalDiscovery());
                 if(globalPath == null) {
                     logger.error("Failed to connect to Global Controller Host :" + static_global_controller_host);
-                    this.plugin.globalControllerPath = null;
+                    this.plugin.setGlobalControllerPath(null);
                 }
                 else {
                     global_host_map.put(static_global_controller_host, globalPath);
-                    plugin.globalControllerPath = globalPath;
+                    plugin.setGlobalControllerPath(globalPath);
                 }
             }
-            else if(this.plugin.isGlobalController) {
+            else if(this.plugin.isGlobalController()) {
                 //Do nothing if already controller, will reinit on regional restart
                 logger.trace("Starting Local Global Controller Check");
             }
             else {
                 logger.trace("Starting Dynamic Global Controller Check");
                 //Check if the global controller path exist
-                if(plugin.isReachableAgent(this.plugin.globalControllerPath)) {
+                if(plugin.isReachableAgent(this.plugin.getGlobalControllerPath())) {
                    return;
                 }
                 else {
                     //global controller is not reachable, start dynamic discovery
-                    this.plugin.isGlobalController = false;
-                    this.plugin.globalControllerPath = null;
+                    this.plugin.setGlobalController(false);
+                    this.plugin.setGlobalControllerPath(null);
                     List<MsgEvent> discoveryList = dynamicGlobalDiscovery();
 
                     if(!discoveryList.isEmpty()) {
@@ -99,14 +99,14 @@ public class GlobalControllerMonitor implements Runnable {
                             logger.error("Failed to connect to Global Controller Host :" + globalPath);
                         }
                         else {
-                            plugin.globalControllerPath = globalPath;
+                            this.plugin.setGlobalControllerPath(globalPath);
                         }
                     }
                     else {
                         //No global controller found, starting global services
                         logger.info("No Global Controller Found: Starting Global Services");
                         //start global stuff
-                        this.plugin.isGlobalController = true;
+                        this.plugin.setGlobalController(true);
                     }
                 }
             }

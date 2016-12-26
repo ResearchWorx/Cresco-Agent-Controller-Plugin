@@ -56,7 +56,11 @@ public class MsgRoute implements Runnable {
                     logger.debug("INTER-REGIONAL MESSAGE INCOMING 40");
                     logger.trace(rm.getParams().toString());
                     plugin.sendMsgEvent(rm);
-
+                    break;
+                case 42:  //System.out.println("CONTROLLER ROUTE TO COMMANDEXEC : 42 "  + rm.getParams());
+                    logger.debug("INTER-REGIONAL PLUGIN-PLUGIN MESSAGE 42");
+                    logger.trace(rm.getParams().toString());
+                    re = getCommandExec();
                     break;
                 case 48:  //System.out.println("CONTROLLER ROUTE TO REGIONAL AGENT : 52 " + rm.getParams()); //also where regional messages go
                     if ((/*PluginEngine.isRegionalController*/ plugin.isRegionalController()) && (rm.getParam("dst_agent") == null)) { //if this is the regional controller consume the message

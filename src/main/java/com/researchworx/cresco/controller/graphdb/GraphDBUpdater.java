@@ -6,6 +6,9 @@ import com.researchworx.cresco.controller.regionalcontroller.AgentNode;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -23,10 +26,23 @@ public class GraphDBUpdater {
         this.logger = new CLogger(GraphDBUpdater.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
 
         this.plugin = plugin;
-        rgdb = new GraphDBEngine(plugin,true);
+        rgdb = new GraphDBEngine(plugin);
         regionalUpdateTimer = new Timer();
-        regionalUpdateTimer.scheduleAtFixedRate(new GraphDBUpdater.RegionalWatchDog(logger), 500, 15000);//remote
+        regionalUpdateTimer.scheduleAtFixedRate(new GraphDBUpdater.RegionalWatchDog(plugin, logger), 500, 15000);//remote
     }
+
+    public boolean setRDBImport(String exportData) {
+        return rgdb.setDBImport(exportData);
+    }
+
+    public String getRGBDExport() {
+        return rgdb.getDBExport();
+    }
+
+    public String getRGBDExport2() {
+        return rgdb.getDBExport2();
+    }
+
 
     /*
     public Boolean isNode(String region, String agent, String plugin) {
@@ -247,8 +263,9 @@ public class GraphDBUpdater {
 
     class RegionalWatchDog extends TimerTask {
         private CLogger logger;
-
-        public RegionalWatchDog(CLogger logger) {
+        private Launcher plugin;
+        public RegionalWatchDog(Launcher plugin, CLogger logger) {
+            this.plugin = plugin;
             this.logger = logger;
         }
         public void run() {
@@ -263,6 +280,35 @@ public class GraphDBUpdater {
                 logger.debug("WatchDog Diff = " + String.valueOf(watchdog_diff) + " watchdog_rate: " + watchdog_rate);
 
             }
+
+            //debugging export function
+            if(!this.plugin.isGlobalController()) {
+                if(this.plugin.getGlobalControllerPath() != null) {
+
+                    //logger.info("EXPORT" + getRGBDExport() + "EXPORT");
+
+                    //we have somewhere to send information
+                    String[] tmpStr = this.plugin.getGlobalControllerPath().split("_");
+
+                    MsgEvent me = new MsgEvent(MsgEvent.Type.CONFIG, this.plugin.getRegion(), this.plugin.getAgent(), this.plugin.getPluginID(), "global_");
+                    me.setParam("configtype", "regionalimport");
+                    me.setParam("src_region", this.plugin.getRegion());
+                    me.setParam("src_agent", this.plugin.getAgent());
+                    me.setParam("src_plugin", "plugin/0");
+                    me.setParam("dst_region", tmpStr[0]);
+                    me.setParam("dst_agent", tmpStr[1]);
+                    me.setParam("dst_plugin", "plugin/0");
+                    me.setParam("exportdata",getRGBDExport());
+
+                    //this.plugin.msgIn(me);
+                }
+
+            }
+            else {
+                //logger.info("EXPORT2" + getRGBDExport2() + "EXPORT2");
+
+            }
+
 
         }
     }

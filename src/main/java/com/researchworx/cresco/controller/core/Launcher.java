@@ -117,14 +117,14 @@ public class Launcher extends CPlugin {
 
     private boolean isRegionalController = false;
 
-    public boolean isGlobalController = false;
-    public String globalControllerPath;
+    private boolean isGlobalController = false;
+    private String globalControllerPath;
     private boolean GlobalControllerManagerActive = false;
 
     private Map<String, Long> discoveryMap;
     private AgentDiscovery agentDiscover;
 
-    private boolean hasGlobalController = false;
+    //private boolean hasGlobalController = false;
     private GlobalControllerChannel globalControllerChannel;
 
     private boolean isIPv6 = false;
@@ -875,8 +875,26 @@ public class Launcher extends CPlugin {
         isRegionalController = regionalController;
     }
 
+    public String getGlobalControllerPath() {
+        return this.globalControllerPath;
+    }
+
+    public void setGlobalControllerPath(String controllerPath) {
+        globalControllerPath = controllerPath;
+    }
+
+    public boolean isGlobalController() {
+        return this.isGlobalController;
+    }
+    public void setGlobalController(boolean globalController) {
+        isGlobalController = globalController;
+    }
+
     public boolean hasGlobalController() {
-        return this.hasGlobalController;
+        if(this.globalControllerPath != null)
+            return true;
+        else
+        return false;
     }
 
     public Map<String, Long> getDiscoveryMap() {

@@ -242,7 +242,7 @@ public class DiscoveryEngine implements Runnable {
                                         me = getRegionMsg(rme);
                                     } else if (rme.getParam("discovery_type").equals(DiscoveryType.GLOBAL.name())) {
                                         //if this is not a global controller, don't respond
-                                        if(plugin.isGlobalController) {
+                                        if(this.plugin.isGlobalController()) {
                                             logger.debug("{}", "global discovery");
                                             me = getGlobalMsg(rme);
                                         }
