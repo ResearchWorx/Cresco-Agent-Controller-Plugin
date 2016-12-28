@@ -1,6 +1,7 @@
 package com.researchworx.cresco.controller.globalcontroller;
 
 import com.researchworx.cresco.controller.core.Launcher;
+import com.researchworx.cresco.controller.graphdb.NodeStatusType;
 import com.researchworx.cresco.controller.netdiscovery.DiscoveryClientIPv4;
 import com.researchworx.cresco.controller.netdiscovery.DiscoveryClientIPv6;
 import com.researchworx.cresco.controller.netdiscovery.DiscoveryStatic;
@@ -8,29 +9,42 @@ import com.researchworx.cresco.controller.netdiscovery.DiscoveryType;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-public class GlobalControllerMonitor implements Runnable {
+public class GlobalHealthWatcher implements Runnable {
 	private Launcher plugin;
 	private CLogger logger;
 	private DiscoveryClientIPv4 dcv4;
 	private DiscoveryClientIPv6 dcv6;
 	private Map<String,String> global_host_map;
+    private Timer regionalUpdateTimer;
+    private Long gCheckInterval;
 
-	public GlobalControllerMonitor(Launcher plugin, DiscoveryClientIPv4 dcv4, DiscoveryClientIPv6 dcv6) {
-		this.logger = new CLogger(GlobalControllerMonitor.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+	public GlobalHealthWatcher(Launcher plugin, DiscoveryClientIPv4 dcv4, DiscoveryClientIPv6 dcv6) {
+		this.logger = new CLogger(GlobalHealthWatcher.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
 		this.plugin = plugin;
         this.dcv4 = dcv4;
         this.dcv6 = dcv6;
         global_host_map = new HashMap<>();
+        regionalUpdateTimer = new Timer();
+        regionalUpdateTimer.scheduleAtFixedRate(new GlobalHealthWatcher.GlobalNodeStatusWatchDog(plugin, logger), 500, 15000);//remote
+        gCheckInterval = plugin.getConfig().getLongParam("watchdogtimer",5000L);
 	}
 
 	public void shutdown() {
 
+        if(plugin.getGlobalControllerPath() != null) {
+            String[] globalPath = plugin.getGlobalControllerPath().split("_");
+            MsgEvent le = new MsgEvent(MsgEvent.Type.CONFIG, globalPath[0], globalPath[1], null, "disabled");
+            le.setParam("src_region", plugin.getRegion());
+            le.setParam("dst_region", globalPath[0]);
+            le.setParam("is_active", Boolean.FALSE.toString());
+            le.setParam("watchdogtimer", String.valueOf(plugin.getConfig().getLongParam("watchdogtimer",5000L)));
+            //MsgEvent re = new RPCCall().call(le);
+            MsgEvent re = plugin.getRPC().call(le);
+            logger.info("RPC DISABLE: " + re.getMsgBody() + " [" + re.getParams().toString() + "]");
 
+        }
 	}
 
 	public void run() {
@@ -41,15 +55,48 @@ public class GlobalControllerMonitor implements Runnable {
             logger.trace("GlobalControllerManager is Active");
 
             while (this.plugin.isActiveBrokerManagerActive()) {
-                Thread.sleep(5000);
+                Thread.sleep(gCheckInterval);
                 logger.trace("Loop gCheck");
                 gCheck();
+                gNotify();
 			}
 		} catch(Exception ex) {
 			logger.error("Run {}", ex.getMessage());
             logger.error(ex.getStackTrace().toString());
 		}
 	}
+
+	private void gNotify() {
+        try {
+            //if there is a remote global controller and it is reachable
+            String globalPath = plugin.getGlobalControllerPath();
+            if((globalPath != null) && (!plugin.isGlobalController())) {
+                //is the global controller reachable
+                if(plugin.isReachableAgent(plugin.getGlobalControllerPath())) {
+                    String[] gPath = globalPath.split("_");
+                    MsgEvent tick = new MsgEvent(MsgEvent.Type.WATCHDOG, plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), "WatchDog timer tick.");
+                    tick.setParam("src_region", plugin.getRegion());
+                    tick.setParam("dst_region", gPath[0]);
+                    tick.setParam("watchdog_ts", String.valueOf(System.currentTimeMillis()));
+                    tick.setParam("watchdogtimer", String.valueOf(gCheckInterval));
+                    plugin.msgIn(tick);
+                }
+            }
+            else if(plugin.isGlobalController()) {
+                //plugin.getGDB().watchDogUpdate()
+                MsgEvent tick = new MsgEvent(MsgEvent.Type.WATCHDOG, plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), "WatchDog timer tick.");
+                tick.setParam("src_region", plugin.getRegion());
+                tick.setParam("dst_region", plugin.getRegion());
+                tick.setParam("watchdog_ts", String.valueOf(System.currentTimeMillis()));
+                tick.setParam("watchdogtimer", String.valueOf(gCheckInterval));
+                plugin.getGDB().watchDogUpdate(tick);
+            }
+
+        }
+        catch(Exception ex) {
+            logger.error(ex.getMessage());
+        }
+    }
 
 	private void gCheck() {
 	    try{
@@ -75,6 +122,9 @@ public class GlobalControllerMonitor implements Runnable {
                 else {
                     global_host_map.put(static_global_controller_host, globalPath);
                     plugin.setGlobalControllerPath(globalPath);
+                    //register with global controller
+                    sendGlobalWatchDogRegister();
+
                 }
             }
             else if(this.plugin.isGlobalController()) {
@@ -100,6 +150,8 @@ public class GlobalControllerMonitor implements Runnable {
                         }
                         else {
                             this.plugin.setGlobalControllerPath(globalPath);
+                            //register with global controller
+                            sendGlobalWatchDogRegister();
                         }
                     }
                     else {
@@ -110,12 +162,12 @@ public class GlobalControllerMonitor implements Runnable {
                     }
                 }
             }
+
         }
         catch(Exception ex) {
 	        logger.error(ex.getMessage());
         }
 	}
-
 
     private String connectToGlobal(List<MsgEvent> discoveryList) {
         String globalPath = null;
@@ -166,14 +218,49 @@ public class GlobalControllerMonitor implements Runnable {
 
             }
 
-
         }
         catch(Exception ex) {
             logger.error(ex.getMessage());
         }
+
         return globalPath;
     }
 
+    private void sendGlobalWatchDogRegister() {
+
+	    try {
+            logger.error("Starting GR *" + plugin.getGlobalControllerPath() + "* isGlobal :" + plugin.isGlobalController());
+            String globalPath = plugin.getGlobalControllerPath();
+            if((globalPath != null) && (!plugin.isGlobalController())) {
+                logger.error("GR 1");
+                //is the global controller reachable
+                if(plugin.isReachableAgent(plugin.getGlobalControllerPath())) {
+                    logger.error("GR 2");
+                    String[] gPath = globalPath.split("_");
+                    MsgEvent le = new MsgEvent(MsgEvent.Type.CONFIG, plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), "enabled");
+                    le.setParam("src_region", plugin.getRegion());
+                    le.setParam("dst_region", gPath[0]);
+                    le.setParam("is_active", Boolean.TRUE.toString());
+                    le.setParam("watchdogtimer", String.valueOf(plugin.getConfig().getLongParam("watchdogtimer", 5000L)));
+                    //MsgEvent re = new RPCCall().call(le);
+                    logger.error("GR 3");
+
+                    //MsgEvent re = plugin.getRPC().call(le);
+                    plugin.msgIn(le);
+                    logger.error("GR 4");
+
+                    //logger.info("RPC ENABLE: " + re.getMsgBody() + " [" + re.getParams().toString() + "]");
+                    //now send export
+                    //re = plugin.getRPC().call(regionalDBexport());
+                    //logger.info("RPC DB Export: " + re.getMsgBody() + " [" + re.getParams().toString() + "]");
+
+                }}
+        }
+        catch(Exception ex) {
+	        logger.error(ex.getMessage());
+        }
+
+    }
 
     private List<MsgEvent> dynamicGlobalDiscovery() {
         List<MsgEvent> discoveryList = null;
@@ -217,50 +304,61 @@ public class GlobalControllerMonitor implements Runnable {
         return discoveryList;
     }
 
-    /*
-	private void globalDiscovery() {
-        List<MsgEvent> discoveryList = new ArrayList<>();
-	    //Either start global controller services, statically contact a global controller, or dynamically discover controller
-        //Try and discover global controller, connect to only one controller
-        //static discovery
-        if(plugin.getConfig().getStringParam("global_controller_host") != null) {
-            //do directed discovery
-            while(discoveryList.size() == 0) {
-                logger.info("Static Region Connection to Global Controller : " + plugin.getConfig().getStringParam("global_controller_host"));
-                DiscoveryStatic ds = new DiscoveryStatic(plugin);
-                discoveryList.addAll(ds.discover(DiscoveryType.GLOBAL, plugin.getConfig().getIntegerParam("discovery_static_agent_timeout",10000), plugin.getConfig().getStringParam("global_controller_host")));
-                logger.debug("Static Agent Connection count = {}" + discoveryList.size());
-                if(discoveryList.size() == 0) {
-                    logger.info("Static Region Connection to Global Controller : " + plugin.getConfig().getStringParam("global_controller_host") + " failed! - Restarting Global Discovery");
-                }
-                else {
-                    //plugin.getIncomingCanidateBrokers().offer(discoveryList.get(0)); //perhaps better way to do this
-                    logger.info("Global Controller Found: " + discoveryList.get(0).getParams());
-                }
-            }
-            //dynamic discovery of global controller
-        } else {
+    public MsgEvent regionalDBexport() {
+        MsgEvent me = null;
+	    try {
+            if(!this.plugin.isGlobalController()) {
+                if(this.plugin.getGlobalControllerPath() != null) {
 
-            if (plugin.isIPv6()) {
-                discoveryList = dcv6.getDiscoveryResponse(DiscoveryType.GLOBAL, plugin.getConfig().getIntegerParam("discovery_ipv6_global_timeout", 2000));
-            }
-            discoveryList.addAll(dcv4.getDiscoveryResponse(DiscoveryType.GLOBAL, plugin.getConfig().getIntegerParam("discovery_ipv4_global_timeout", 2000)));
+                    String dbexport = plugin.getGDB().getRGBDExport();
+                    logger.trace("EXPORT" + dbexport + "EXPORT");
 
-            if (!discoveryList.isEmpty()) {
-                for (MsgEvent ime : discoveryList) {
-                    //We only want to connect to a single global controller, so this needs work.
-                    //plugin.getIncomingCanidateBrokers().offer(ime);
-                    logger.info("Global Controller Found: " + ime.getParams());
+                    //we have somewhere to send information
+                    String[] tmpStr = this.plugin.getGlobalControllerPath().split("_");
+
+                    me = new MsgEvent(MsgEvent.Type.CONFIG, this.plugin.getRegion(), this.plugin.getAgent(), this.plugin.getPluginID(), "global_");
+                    me.setParam("configtype", "regionalimport");
+                    me.setParam("src_region", this.plugin.getRegion());
+                    me.setParam("src_agent", this.plugin.getAgent());
+                    me.setParam("src_plugin", "plugin/0");
+                    me.setParam("dst_region", tmpStr[0]);
+                    me.setParam("dst_agent", tmpStr[1]);
+                    me.setParam("dst_plugin", plugin.getPluginID());
+                    me.setParam("dst_plugin", "plugin/0");
+                    me.setParam("exportdata",dbexport);
+                    //this.plugin.msgIn(me);
                 }
-            }
-            else {//No global controller found, starting global services
-                logger.info("No Global Controller Found: Starting Global Services");
-                //start global stuff
+
             }
         }
-
-        //end
+        catch(Exception ex) {
+            logger.error(ex.getMessage());
+        }
+        return me;
     }
 
-*/
+
+
+    class GlobalNodeStatusWatchDog extends TimerTask {
+        private CLogger logger;
+        private Launcher plugin;
+        public GlobalNodeStatusWatchDog(Launcher plugin, CLogger logger) {
+            this.plugin = plugin;
+            this.logger = logger;
+
+        }
+        public void run() {
+            if(plugin.isGlobalController()) { //only run if node is a global controller
+                logger.debug("GlobalNodeStatusWatchDog");
+                Map<String, NodeStatusType> nodeStatus = plugin.getGDB().getNodeStatus(null, null, null);
+                for (Map.Entry<String, NodeStatusType> entry : nodeStatus.entrySet()) {
+                    logger.info("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());
+
+                    if(entry.getValue() == NodeStatusType.STALE) { //will include more items once nodes update correctly
+                        logger.error("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());
+                    }
+                }
+            }
+        }
+    }
 }

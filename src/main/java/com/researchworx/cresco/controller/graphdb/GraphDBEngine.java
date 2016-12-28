@@ -18,10 +18,13 @@ import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
 
+import javax.xml.bind.DatatypeConverter;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 public class GraphDBEngine {
 	
@@ -41,7 +44,14 @@ public class GraphDBEngine {
         boolean isImported = false;
         try {
 
-            InputStream is = new ByteArrayInputStream(exportData.getBytes(StandardCharsets.UTF_8));
+            //decode base64
+            byte[] exportDataRawCompressed = DatatypeConverter.parseBase64Binary(exportData);
+            InputStream iss = new ByteArrayInputStream(exportDataRawCompressed);
+            //uncompress
+            InputStream is = new GZIPInputStream(iss);
+
+
+            //InputStream is = new ByteArrayInputStream(exportData.getBytes(StandardCharsets.UTF_8));
             DBImport dbImport = new DBImport(plugin, is, db, this);
             isImported = dbImport.importDump();
 
@@ -164,30 +174,15 @@ public class GraphDBEngine {
 
             export.exportDatabase();
 
-            exportString = new String(os.toByteArray(),"UTF-8");
+            String exportStringRaw = new String(os.toByteArray(),"UTF-8");
 
             export.close();
 
-            /*
-            Set<String> abcd = new HashSet<String>();
-            //abcd.add("sample_demo1_OnlineShopping");
-            abcd.add("sample_demo1_OnlineShopping".toUpperCase());
-            System.out.println(abcd);
-
-            ODatabaseExport export = new ODatabaseExport(db, "DataCont/Data.gz", listener);
-
-            export.setIncludeInfo(false);
-            export.setIncludeClusterDefinitions(false);
-            export.setIncludeSchema(false);
-            export.setIncludeIndexDefinitions(false);
-            export.setIncludeManualIndexes(false);
-
-            export.setIncludeClasses(abcd);
-
-//          export.exportRecords();
-            export.exportDatabase();
-            export.close();
-            */
+            //Now Compress and Encode
+            exportString = DatatypeConverter.printBase64Binary(stringCompress(exportStringRaw));
+            //byte[] message = "hello world".getBytes("UTF-8");
+            //String encoded = DatatypeConverter.printBase64Binary(message);
+            //byte[] decoded = DatatypeConverter.parseBase64Binary(encoded);
 
 
         }
@@ -198,6 +193,41 @@ public class GraphDBEngine {
         //export.close();
         //database.close();
         return exportString;
+    }
+
+    private byte[] stringCompress(String str) {
+        byte[] dataToCompress = str.getBytes(StandardCharsets.UTF_8);
+        byte[] compressedData = null;
+        try
+        {
+            ByteArrayOutputStream byteStream =
+                    new ByteArrayOutputStream(dataToCompress.length);
+            try
+            {
+                GZIPOutputStream zipStream =
+                        new GZIPOutputStream(byteStream);
+                try
+                {
+                    zipStream.write(dataToCompress);
+                }
+                finally
+                {
+                    zipStream.close();
+                }
+            }
+            finally
+            {
+                byteStream.close();
+            }
+
+            compressedData = byteStream.toByteArray();
+
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+        return compressedData;
     }
 
     public String getDBExport2() {
@@ -237,7 +267,7 @@ public class GraphDBEngine {
         //System.setProperty("orientdb.installCustomFormatter", "false");
 
         this.plugin = plugin;
-        logger = new CLogger(GraphDBEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
+        logger = new CLogger(GraphDBEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
 
 
 		/*
@@ -534,7 +564,7 @@ public class GraphDBEngine {
     }
 
 
-    public List<String> getNodeIds(String region, String agent, String plugin)
+    public List<String> getNodeIds(String region, String agent, String plugin, boolean getAll)
     {
         OrientGraph graph = null;
         List<String> nodeIdList = null;
@@ -546,9 +576,8 @@ public class GraphDBEngine {
             {
                 //OrientGraphNoTx graph = factory.getNoTx();
                 graph = factory.getTx();
-
-                Iterable<Vertex> resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:rNode.nodePath")).execute();
-
+                Iterable<Vertex> resultIterator = null;
+                    resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:rNode.nodePath")).execute();
                 Iterator<Vertex> iter = resultIterator.iterator();
                 while(iter.hasNext())
                 {
@@ -570,7 +599,13 @@ public class GraphDBEngine {
                 //OrientGraph graph = factory.getTx();
                 //OrientGraphNoTx graph = factory.getNoTx();
                 graph = factory.getTx();
-                Iterable<Vertex> resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:aNode.nodePath")).execute();
+                Iterable<Vertex> resultIterator = null;
+                if(getAll) {
+                    resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:aNode.nodePath")).execute();
+                }
+                else {
+                    resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:aNode.nodePath WHERE key = [\"" + region + "\"]")).execute();
+                }
                 Iterator<Vertex> iter = resultIterator.iterator();
                 while(iter.hasNext())
                 {
@@ -590,7 +625,15 @@ public class GraphDBEngine {
                 //OrientGraph graph = factory.getTx();
                 //OrientGraphNoTx graph = factory.getNoTx();
                 graph = factory.getTx();
-                Iterable<Vertex> resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:pNode.nodePath")).execute();
+                Iterable<Vertex> resultIterator = null;
+
+                if(getAll) {
+                    resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:pNode.nodePath")).execute();
+                }
+                else {
+                    resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:pNode.nodePath WHERE key = [\"" + region + "\",\"" + agent + "\"]")).execute();
+                }
+
                 Iterator<Vertex> iter = resultIterator.iterator();
                 while(iter.hasNext())
                 {

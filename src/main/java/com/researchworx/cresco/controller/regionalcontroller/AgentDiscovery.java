@@ -36,8 +36,8 @@ public class AgentDiscovery {
                         le.setReturn();
                         plugin.sendMsgEvent(le);
                     } else if (le.getMsgBody().equals("enabled")) {
-                        logger.debug("CONFIG : AGENTDISCOVER ADD: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
-                        logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
+                        logger.info("CONFIG : AGENTDISCOVER ADD: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
+                        logger.info("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
                         plugin.getGDB().addNode(le);
                     }
 

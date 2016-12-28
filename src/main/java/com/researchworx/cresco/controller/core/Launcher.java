@@ -144,7 +144,7 @@ public class Launcher extends CPlugin {
 
     private ActiveBroker broker;
 
-    private HealthWatcher healthWatcher;
+    private RegionHealthWatcher regionHealthWatcher;
 
     public Launcher() {
         this.msgInProcessQueue = Executors.newFixedThreadPool(4);
@@ -193,9 +193,9 @@ public class Launcher extends CPlugin {
                 this.watchDog.stop();
                 this.watchDog = null;
             }
-            if (this.healthWatcher != null) {
-                this.healthWatcher.timer.cancel();
-                this.healthWatcher = null;
+            if (this.regionHealthWatcher != null) {
+                this.regionHealthWatcher.timer.cancel();
+                this.regionHealthWatcher = null;
             }
             if (this.globalControllerManagerThread!= null) {
                 logger.trace("Region Consumer shutting down");
@@ -267,8 +267,12 @@ public class Launcher extends CPlugin {
     }
 
     public void sendAPMessage(MsgEvent msg) {
-        if (this.ap == null) {
-            logger.debug("AP is null");
+        if ((this.ap == null) && (!region.equals("init"))) {
+            logger.error("AP is null");
+            return;
+        }
+        else if(this.ap == null) {
+            logger.trace("AP is null");
             return;
         }
         this.ap.sendMessage(msg);
@@ -468,13 +472,6 @@ public class Launcher extends CPlugin {
                 }
 
                 discoveryList.clear();
-                //do global discovery here
-                this.globalControllerManagerThread = new Thread(new GlobalControllerMonitor(this, dcv4, dcv6));
-                this.globalControllerManagerThread.start();
-                while (!this.GlobalControllerManagerActive) {
-                    Thread.sleep(1000);
-                    logger.trace("Wait loop for Global Controller");
-                }
 
             }
             else {
@@ -556,98 +553,19 @@ public class Launcher extends CPlugin {
             //startWatchDog();
             updateWatchDog();
             logger.info("WatchDog configuration updated");
-            this.healthWatcher = new HealthWatcher(this);
-            logger.info("HealthWatcher started");
+            this.regionHealthWatcher = new RegionHealthWatcher(this);
+            logger.info("RegionHealthWatcher started");
 
-            /*
-
-            //NetworkConnector nc = broker.AddNetworkConnectorURI("static:tcp://10.163.6.244:61616?maximumConnections=1000&wireFormat.maxFrameSize=104857600","admin","admin");
-            if(this.broker == null) {
-                logger.error("BROKER NULL");
-            }
-            else {
-                logger.info("Broker IsHealthy: " + this.broker.isHealthy());
-            }
-
-            NetworkConnector nc = this.broker.AddNetworkConnectorURI("static:tcp://10.163.6.244:61616","admin","admin");
-            nc.start();
-
-            while(!nc.isStarted()) {
-                logger.info("WAIT!! Starting BROKER");
-            }
-            while(nc.isStarted()) {
-                for (NetworkBridge b : nc.activeBridges()) {
-                    logger.info("Check Broker Name: " + b.getRemoteBrokerName());
-
-                }
-                Thread.sleep(1000);
-            }
-            */
-            /*
-            if(isRegionalController) {
-                //post global controller config
-                //global init
-
-                if (this.config.getStringParam("globalcontroller_host") != null) {
-                    logger.info("Global Controller : Config Found Starting...");
-                    try {
-
-                        DiscoveryStatic ds = new DiscoveryStatic(this);
-                        discoveryList.addAll(ds.discover(DiscoveryType.GLOBAL, getConfig().getIntegerParam("discovery_static_agent_timeout",10000), getConfig().getStringParam("globalcontroller_host")));
-
-                        if(!discoveryList.isEmpty()) {
-                            MsgEvent gc = discoveryList.get(0);
-                            this.incomingCanidateBrokers.offer(gc);
-                            logger.debug("Global Found: " + gc.getParams());
-
-                            String gregion = gc.getParam("src_region");
-                            String gagent = gc.getParam("src_agent");
-                            String gplugin = gc.getParam("src_plugin");
-
-                            String targetAgent = gregion + "_" + gagent;
-
-                            int globalcontroller_try_count = 20;
-                            while(globalcontroller_try_count > 0) {
-
-                                Thread.sleep(1000);
-                                if(this.isReachableAgent(targetAgent)) {
-
-                                    logger.error("Totally Reachable : " + targetAgent);
-                                    MsgEvent ce = new MsgEvent(MsgEvent.Type.CONFIG, this.region, this.agent, null, "global register");
-                                    ce.setParam("src_region", this.region);
-                                    ce.setParam("src_agent", this.agent);
-                                    ce.setParam("src_plugin", this.pluginID);
-                                    ce.setParam("dst_region", gregion);
-                                    ce.setParam("dst_agent", gagent);
-                                    ce.setParam("dst_plugin", gplugin);
-                                    ce.setParam("is_global_client", Boolean.TRUE.toString());
-                                    ce.setParam("is_active", Boolean.TRUE.toString());
-                                    this.sendMsgEvent(ce);
-                                    logger.trace("SENT GLOBAL MESSAGE : " + targetAgent);
-
-                                    globalcontroller_try_count = 0;
-                                } else {
-                                    logger.trace("Waiting on Global Controller");
-
-                                    globalcontroller_try_count--;
-                                    if(globalcontroller_try_count == 0) {
-                                        logger.error("Global Controller Reach Timeout: " + targetAgent);
-                                    }
-                                }
-                            }
-                            logger.error("Post Reach : " + targetAgent);
-
-
-                        }
-
-
-
-                    } catch (Exception e) {
-                        logger.error(e.getMessage());
-                    }
+            //Do GlobalDiscovery Last
+            if(isRegionalController()) {
+                //do global discovery here
+                this.globalControllerManagerThread = new Thread(new GlobalHealthWatcher(this, dcv4, dcv6));
+                this.globalControllerManagerThread.start();
+                while (!this.GlobalControllerManagerActive) {
+                    Thread.sleep(1000);
+                    logger.trace("Wait loop for Global Controller");
                 }
             }
-            */
 
         } catch (Exception e) {
             e.printStackTrace();

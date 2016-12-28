@@ -1,27 +1,34 @@
 package com.researchworx.cresco.controller.regionalcontroller;
 
 import com.researchworx.cresco.controller.core.Launcher;
+import com.researchworx.cresco.controller.graphdb.NodeStatusType;
+import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class HealthWatcher {
+public class RegionHealthWatcher {
     public Timer timer;
     private Launcher plugin;
     private CLogger logger;
     private long startTS;
     private int wdTimer;
+    private Timer regionalUpdateTimer;
+
     //private static final Logger logger = LoggerFactory.getLogger(HealthWatcher.class);
 
-    public HealthWatcher(Launcher plugin) {
-        this.logger = new CLogger(HealthWatcher.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
+    public RegionHealthWatcher(Launcher plugin) {
+        this.logger = new CLogger(RegionHealthWatcher.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
         logger.debug("Initializing");
         this.plugin = plugin;
         wdTimer = 1000;
         startTS = System.currentTimeMillis();
         timer = new Timer();
-        timer.scheduleAtFixedRate(new HealthWatcherTask(), 500, wdTimer);
+        timer.scheduleAtFixedRate(new CommunicationHealthWatcherTask(), 500, wdTimer);
+        regionalUpdateTimer = new Timer();
+        regionalUpdateTimer.scheduleAtFixedRate(new RegionHealthWatcher.RegionalNodeStatusWatchDog(plugin, logger), 500, 15000);//remote
     }
 
     public void shutdown() {
@@ -29,7 +36,7 @@ public class HealthWatcher {
         logger.debug("Shutdown");
     }
 
-    class HealthWatcherTask extends TimerTask {
+    class CommunicationHealthWatcherTask extends TimerTask {
         public void run() {
             boolean isHealthy = true;
             try {
@@ -57,7 +64,6 @@ public class HealthWatcher {
                         logger.info("Broker shutdown detected");
                     }
 
-
                 }
                 if (!isHealthy) {
                     plugin.removeGDBNode(plugin.getRegion(), plugin.getAgent(), null); //remove self from DB
@@ -71,6 +77,30 @@ public class HealthWatcher {
             }
         }
     }
+
+
+    class RegionalNodeStatusWatchDog extends TimerTask {
+        private CLogger logger;
+        private Launcher plugin;
+        public RegionalNodeStatusWatchDog(Launcher plugin, CLogger logger) {
+            this.plugin = plugin;
+            this.logger = logger;
+
+        }
+        public void run() {
+            if(plugin.isRegionalController()) { //only run if node is regional controller
+                logger.debug("RegionalNodeStatusWatchDog");
+                Map<String, NodeStatusType> nodeStatus = plugin.getGDB().getNodeStatus(plugin.getRegion(), null, null);
+                for (Map.Entry<String, NodeStatusType> entry : nodeStatus.entrySet()) {
+                    logger.debug("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());
+                    if(entry.getValue() == NodeStatusType.STALE) { //will include more items once nodes update correctly
+                        logger.error("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());
+                    }
+                }
+            }
+        }
+    }
+
 
 
 }

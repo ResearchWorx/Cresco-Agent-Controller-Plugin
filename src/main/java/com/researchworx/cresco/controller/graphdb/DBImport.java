@@ -64,7 +64,7 @@ public class DBImport {
 
     public DBImport(Launcher plugin, final InputStream iStream, ODatabaseDocumentTx db, GraphDBEngine rgdb) throws IOException {
         this.plugin = plugin;
-        this.logger = new CLogger(DBImport.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
+        this.logger = new CLogger(DBImport.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
         this.db = db;
         jsonReader = new OJSONReader(new InputStreamReader(iStream));
         this.rgdb = rgdb;
@@ -76,7 +76,6 @@ public class DBImport {
         try {
 
             long time = System.currentTimeMillis();
-
             jsonReader.readNext(OJSONReader.BEGIN_OBJECT);
 
             String tag;
@@ -110,12 +109,20 @@ public class DBImport {
         //ODatabaseRecordThreadLocal.INSTANCE.set((ODatabaseRecord) this.connection.getUnderlying().getUnderlying());
 
         while (jsonReader.lastChar() != ']') {
+
+
             ORecord rids = importRecord();
+            rids.detach();
+
+            logger.debug("Import Record : " + totalRecords);
 
             if (record instanceof ODocument) {
 
                 ODocument document = (ODocument) record;
                 document.detach();
+
+                logger.debug("Cast to Document : " + totalRecords);
+
 
                 //START
 
@@ -124,12 +131,15 @@ public class DBImport {
                 Map<String,String> params = new HashMap<String,String>();
 
                 for(String fieldName : document.fieldNames()) {
-                    //logger.error(fieldName + " : " + document.field(fieldName));
+                    //logger.debug("Record Field : " + fieldName + " : " + document.field(fieldName));
                     if(!((fieldName.startsWith("in_") || (fieldName.startsWith("out_"))))) {
                         params.put(fieldName, document.field(fieldName).toString());
                     }
                 }
 
+                logger.debug("Generated " + params.size() + " params for :" + totalRecords);
+
+                boolean isNodeType = false;
                 String region = null;
                 String agent = null;
                 String plugin = null;
@@ -137,6 +147,7 @@ public class DBImport {
                 {
                     //rNode
                     region = document.field("region");
+                    isNodeType = true;
 
                 }
                 else if((document.containsField("region")) && (document.containsField("agent")) && (!document.containsField("plugin")))
@@ -144,35 +155,50 @@ public class DBImport {
                     //aNode
                     region = document.field("region");
                     agent = document.field("agent");
+                    isNodeType = true;
 
                 }
-                else if((document.containsField("region")) && (!document.containsField("agent")) && (document.containsField("plugin")))
+                else if((document.containsField("region")) && (document.containsField("agent")) && (document.containsField("plugin")))
                 {
                     //pNode
                     region = document.field("region");
                     agent = document.field("agent");
                     plugin = document.field("plugin");
+                    isNodeType = true;
                 }
 
-                String nodeId = rgdb.getNodeId(region,agent,plugin);
+                if(isNodeType) {
+                    logger.debug("Region :" + region + " Agent :" + agent + " plugin :" + plugin);
 
-                if(nodeId == null) {
-                    //create node
-                    rgdb.addNode(region,agent,plugin);
+                    String nodeId = rgdb.getNodeId(region, agent, plugin);
+
+
+                    if (nodeId == null) {
+                        //create node
+                        nodeId = rgdb.addNode(region, agent, plugin);
+                        logger.debug("Added nodeId : " + nodeId);
+                    } else {
+                        logger.debug("nodeId : " + nodeId + " exist.");
+                    }
+
+                    //update node params
+                    rgdb.setNodeParams(region, agent, plugin, params);
+                    logger.debug("set parmas for : " + nodeId);
+                    //END
+
+                    totalRecords++;
+                }
+                else {
+                    logger.debug("Load failed on nonNode type Class : " + document.getClassName());
                 }
 
-                //update node params
-                rgdb.setNodeParams(region,agent,plugin,params);
-
-                //END
-
-                totalRecords++;
             }
             record = null;
+            logger.debug("Finished with Record :" + totalRecords);
         }
 
 
-        logger.debug(String.format("\n\nDone. Imported %,d records in %,.2f secs\n", totalRecords,
+        logger.debug(String.format("Done. Imported %,d records in %,.2f secs\n", totalRecords,
                 ((float) (System.currentTimeMillis() - begin)) / 1000));
 
         jsonReader.readNext(OJSONReader.COMMA_SEPARATOR);

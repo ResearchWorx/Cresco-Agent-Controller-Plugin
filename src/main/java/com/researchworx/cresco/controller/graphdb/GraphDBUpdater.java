@@ -9,9 +9,7 @@ import com.researchworx.cresco.library.utilities.CLogger;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 public class GraphDBUpdater {
 
@@ -19,7 +17,6 @@ public class GraphDBUpdater {
     private Launcher plugin;
     private CLogger logger;
     private GraphDBEngine rgdb;
-    private Timer regionalUpdateTimer;
 
 
     public GraphDBUpdater(Launcher plugin) {
@@ -27,8 +24,7 @@ public class GraphDBUpdater {
 
         this.plugin = plugin;
         rgdb = new GraphDBEngine(plugin);
-        regionalUpdateTimer = new Timer();
-        regionalUpdateTimer.scheduleAtFixedRate(new GraphDBUpdater.RegionalWatchDog(plugin, logger), 500, 15000);//remote
+
     }
 
     public boolean setRDBImport(String exportData) {
@@ -43,6 +39,47 @@ public class GraphDBUpdater {
         return rgdb.getDBExport2();
     }
 
+    public Map<String,NodeStatusType> getNodeStatus(String region, String agent, String plugin) {
+
+        Map<String,NodeStatusType> nodeStatusMap = null;
+        try {
+            nodeStatusMap = new HashMap<>();
+            List<String> queryList = rgdb.getNodeIds(region,agent,plugin,false);
+            if((region != null) && (agent == null)) {
+                //region queries should include plugins
+                for(String agentNodeId : queryList) {
+                    agent = rgdb.getNodeParam(agentNodeId,"agent");
+                    nodeStatusMap.putAll(getNodeStatus(region,agent,null));
+                }
+            }
+
+            for(String nodeId : queryList) {
+                Map<String,String> params = rgdb.getNodeParams(nodeId);
+                if((params.containsKey("watchdogtimer") && (params.containsKey("watchdog_ts")))) {
+                    long watchdog_ts = Long.parseLong(params.get("watchdog_ts"));
+                    long watchdog_rate = Long.parseLong(params.get("watchdogtimer"));
+                    long watchdog_diff = System.currentTimeMillis() - watchdog_ts;
+                    if(watchdog_diff > (watchdog_rate * 3)) {
+                        //node is stale
+                        logger.error(nodeId + " is stale");
+                        nodeStatusMap.put(nodeId,NodeStatusType.STALE);
+                    }
+                    else {
+                        nodeStatusMap.put(nodeId,NodeStatusType.ACTIVE);
+                    }
+                }
+                else {
+                    //Plugins will trigger this problem, need to fix Cresco Library
+                    //logger.error(nodeId + " could not find watchdog_ts or watchdog_rate");
+                    nodeStatusMap.put(nodeId,NodeStatusType.ERROR);
+                }
+            }
+        }
+        catch(Exception ex) {
+            logger.error(ex.getMessage());
+        }
+        return nodeStatusMap;
+    }
 
     /*
     public Boolean isNode(String region, String agent, String plugin) {
@@ -124,14 +161,37 @@ public class GraphDBUpdater {
             String plugin = de.getParam("src_plugin");
 
             String nodeId = rgdb.getNodeId(region,agent,plugin);
+
             if(nodeId != null) {
                 logger.debug("Updating WatchDog Node: " + de.getParams().toString());
+                //update watchdog_ts for local db
                 rgdb.setNodeParam(region,agent,plugin, "watchdog_ts", String.valueOf(System.currentTimeMillis()));
+                String interval = de.getParam("watchdogtimer");
+                if(interval == null) {
+                    interval = "5000";
+                }
+                rgdb.setNodeParam(region, agent, plugin, "watchdogtimer", interval);
+
                 wasUpdated = true;
             }
             else {
+
                 //This must be fixed
                 //logger.error("watchDogUpdate : Can't update missing node : " + de.getParams().toString());
+                //Needs to be fixed in Cresco Library for watchdog discovery message modes (start,run,stop)
+                if(rgdb.getNodeId(region,agent,null) != null) {
+                    //this is a plugin for which there is currently no discovery, add it for now
+                    addNode(de);
+                    nodeId = rgdb.getNodeId(region,agent,plugin);
+                    rgdb.setNodeParam(region,agent,plugin, "watchdog_ts", String.valueOf(System.currentTimeMillis()));
+                    String interval = de.getParam("watchdogtimer");
+                    if(interval == null) {
+                        interval = "5000";
+                    }
+                    rgdb.setNodeParam(region, agent, plugin, "watchdogtimer", interval);
+
+                    wasUpdated = true;
+                }
             }
 
         } catch (Exception ex) {
@@ -200,7 +260,6 @@ public class GraphDBUpdater {
         }
     }
 
-
     public void setNodeParam(String region, String agent, String plugin, String key, String value) {
         try {
             if ((region != null) && (agent != null) && (plugin == null)) //agent node
@@ -260,58 +319,5 @@ public class GraphDBUpdater {
         }
         return wasRemoved;
     }
-
-    class RegionalWatchDog extends TimerTask {
-        private CLogger logger;
-        private Launcher plugin;
-        public RegionalWatchDog(Launcher plugin, CLogger logger) {
-            this.plugin = plugin;
-            this.logger = logger;
-        }
-        public void run() {
-            for(String node_id : rgdb.getNodeIds("region",null,null)) {
-                Map<String,String> nodeParams = rgdb.getNodeParams(node_id);
-
-                long watchdog_ts = Long.parseLong(nodeParams.get("watchdog_ts"));
-                long watchdog_rate = Long.parseLong(nodeParams.get("watchdog_rate"));
-                long watchdog_diff = System.currentTimeMillis() - watchdog_ts;
-
-                logger.debug("node_id: " + node_id + " [" + rgdb.getNodeParams(node_id).toString() + "]");
-                logger.debug("WatchDog Diff = " + String.valueOf(watchdog_diff) + " watchdog_rate: " + watchdog_rate);
-
-            }
-
-            //debugging export function
-            if(!this.plugin.isGlobalController()) {
-                if(this.plugin.getGlobalControllerPath() != null) {
-
-                    //logger.info("EXPORT" + getRGBDExport() + "EXPORT");
-
-                    //we have somewhere to send information
-                    String[] tmpStr = this.plugin.getGlobalControllerPath().split("_");
-
-                    MsgEvent me = new MsgEvent(MsgEvent.Type.CONFIG, this.plugin.getRegion(), this.plugin.getAgent(), this.plugin.getPluginID(), "global_");
-                    me.setParam("configtype", "regionalimport");
-                    me.setParam("src_region", this.plugin.getRegion());
-                    me.setParam("src_agent", this.plugin.getAgent());
-                    me.setParam("src_plugin", "plugin/0");
-                    me.setParam("dst_region", tmpStr[0]);
-                    me.setParam("dst_agent", tmpStr[1]);
-                    me.setParam("dst_plugin", "plugin/0");
-                    me.setParam("exportdata",getRGBDExport());
-
-                    //this.plugin.msgIn(me);
-                }
-
-            }
-            else {
-                //logger.info("EXPORT2" + getRGBDExport2() + "EXPORT2");
-
-            }
-
-
-        }
-    }
-
 
 }
