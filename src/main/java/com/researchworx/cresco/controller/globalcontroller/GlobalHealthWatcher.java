@@ -80,6 +80,7 @@ public class GlobalHealthWatcher implements Runnable {
                     tick.setParam("watchdog_ts", String.valueOf(System.currentTimeMillis()));
                     tick.setParam("watchdogtimer", String.valueOf(gCheckInterval));
                     plugin.msgIn(tick);
+
                 }
             }
             else if(plugin.isGlobalController()) {
@@ -229,30 +230,18 @@ public class GlobalHealthWatcher implements Runnable {
     private void sendGlobalWatchDogRegister() {
 
 	    try {
-            logger.error("Starting GR *" + plugin.getGlobalControllerPath() + "* isGlobal :" + plugin.isGlobalController());
             String globalPath = plugin.getGlobalControllerPath();
             if((globalPath != null) && (!plugin.isGlobalController())) {
-                logger.error("GR 1");
                 //is the global controller reachable
                 if(plugin.isReachableAgent(plugin.getGlobalControllerPath())) {
-                    logger.error("GR 2");
                     String[] gPath = globalPath.split("_");
                     MsgEvent le = new MsgEvent(MsgEvent.Type.CONFIG, plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), "enabled");
                     le.setParam("src_region", plugin.getRegion());
                     le.setParam("dst_region", gPath[0]);
                     le.setParam("is_active", Boolean.TRUE.toString());
                     le.setParam("watchdogtimer", String.valueOf(plugin.getConfig().getLongParam("watchdogtimer", 5000L)));
-                    //MsgEvent re = new RPCCall().call(le);
-                    logger.error("GR 3");
-
-                    //MsgEvent re = plugin.getRPC().call(le);
+                    //this should be RPC, but routing needs to be fixed route 16 -> 32 -> regionsend -> 16 -> 32 -> regionsend (goes to region, not rpc)
                     plugin.msgIn(le);
-                    logger.error("GR 4");
-
-                    //logger.info("RPC ENABLE: " + re.getMsgBody() + " [" + re.getParams().toString() + "]");
-                    //now send export
-                    //re = plugin.getRPC().call(regionalDBexport());
-                    //logger.info("RPC DB Export: " + re.getMsgBody() + " [" + re.getParams().toString() + "]");
 
                 }}
         }
@@ -273,7 +262,7 @@ public class GlobalHealthWatcher implements Runnable {
 
             if (!discoveryList.isEmpty()) {
                 for (MsgEvent ime : discoveryList) {
-                    logger.info("Global Controller Found: " + ime.getParams());
+                    logger.debug("Global Controller Found: " + ime.getParams());
                 }
             }
         }
@@ -319,14 +308,14 @@ public class GlobalHealthWatcher implements Runnable {
                     me = new MsgEvent(MsgEvent.Type.CONFIG, this.plugin.getRegion(), this.plugin.getAgent(), this.plugin.getPluginID(), "global_");
                     me.setParam("configtype", "regionalimport");
                     me.setParam("src_region", this.plugin.getRegion());
-                    me.setParam("src_agent", this.plugin.getAgent());
-                    me.setParam("src_plugin", "plugin/0");
+                    //me.setParam("src_agent", this.plugin.getAgent());
+                    //me.setParam("src_plugin", "plugin/0");
                     me.setParam("dst_region", tmpStr[0]);
                     me.setParam("dst_agent", tmpStr[1]);
                     me.setParam("dst_plugin", plugin.getPluginID());
-                    me.setParam("dst_plugin", "plugin/0");
+                    //me.setParam("dst_plugin", "plugin/0");
                     me.setParam("exportdata",dbexport);
-                    //this.plugin.msgIn(me);
+                    this.plugin.msgIn(me);
                 }
 
             }
@@ -358,6 +347,11 @@ public class GlobalHealthWatcher implements Runnable {
                         logger.error("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());
                     }
                 }
+            }
+            else {
+                //send full export of region to global controller
+                //Need to develop a better inconsistency method
+                regionalDBexport();
             }
         }
     }

@@ -37,14 +37,15 @@ class Executor extends CExecutor {
                 return msg;
             //there has to be a better way to do this
             case "regionalimport":
-                logger.info("regionalimport message type found");
-                logger.info(msg.getParam("exportdata"));
+                logger.debug("regionalimport message type found");
+                logger.debug(msg.getParam("exportdata"));
                 if(mainPlugin.getGDB().setRDBImport(msg.getParam("exportdata"))) {
-                    logger.info("Database Imported.");
+                    logger.debug("Database Imported.");
                 }
                 else {
-                    logger.error("Database Import Failed!");
+                    logger.debug("Database Import Failed!");
                 }
+                //return msg;
 
             default:
                 logger.debug("Unknown configtype found: {}", msg.getParam("configtype"));

@@ -182,6 +182,7 @@ public class DBImport {
                     }
 
                     //update node params
+                    
                     rgdb.setNodeParams(region, agent, plugin, params);
                     logger.debug("set parmas for : " + nodeId);
                     //END

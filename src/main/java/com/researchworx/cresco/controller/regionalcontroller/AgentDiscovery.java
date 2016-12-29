@@ -34,11 +34,17 @@ public class AgentDiscovery {
                         plugin.getGDB().removeNode(le);
                         le.setMsgBody("ack");
                         le.setReturn();
-                        plugin.sendMsgEvent(le);
+                        //plugin.sendMsgEvent(le);
+                        plugin.msgIn(le);
                     } else if (le.getMsgBody().equals("enabled")) {
-                        logger.info("CONFIG : AGENTDISCOVER ADD: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
-                        logger.info("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
+                        logger.debug("CONFIG : AGENTDISCOVER ADD: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
+                        logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
                         plugin.getGDB().addNode(le);
+                        //need to regional rpc return, currently this does not work
+                        //le.setMsgBody("ack");
+                        //le.setReturn();
+                        //plugin.sendMsgEvent(le); //don't use this, only sends message to agent
+                        //plugin.msgIn(le);
                     }
 
                 } else if (le.getMsgType() == MsgEvent.Type.WATCHDOG) {

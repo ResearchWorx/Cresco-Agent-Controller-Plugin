@@ -21,9 +21,11 @@ public class MsgRoute implements Runnable {
             }
 
             int routePath = getRoutePath();
-
-            //logger.info("msgType: [" + rm.getMsgType().toString() + "] routepath: " + routePath + "[" + rm.getParams().toString() + "]");
-
+/*
+            if(rm.getMsgType() == MsgEvent.Type.CONFIG) {
+                logger.info("msgType: [" + rm.getMsgType().toString() + "] routepath: " + routePath + "[" + rm.getParams().toString() + "]");
+            }
+*/
             MsgEvent re = null;
             switch (routePath) {
                 case 0:  //System.out.println("CONTROLLER ROUTE CASE 0");
@@ -55,11 +57,14 @@ public class MsgRoute implements Runnable {
                         externalSend();
                     }
                     break;
-                case 32:  //System.out.println("CONTROLLER ROUTE TO REGIONAL TO REGION : 32 " + rm.getParams()); //also where regional messages go
-                    if ((/*PluginEngine.isRegionalController*/ plugin.isRegionalController()) && (rm.getParam("dst_agent") == null)) { //if this is the regional controller consume the message
-                        logger.debug("CONTROLLER SENDING INTER-REGIONAL MESSAGE TO ANOTHER CONTROLLER 32");
+                case 32:  //System.out.println("INTER-REGIONAL MESSAGE REGION-to-REGION INCOMING 32 " + rm.getParams()); //also where regional messages go
+                    if ((plugin.isRegionalController()) && (rm.getParam("dst_agent") == null)) { //if this is the regional controller consume the message
+                        logger.debug("INTER-REGIONAL MESSAGE REGION-to-REGION INCOMING 32");
                         logger.trace(rm.getParams().toString());
                         regionalSend();
+                    }
+                    else {
+                    logger.error("ROUTE 32 : WHY ?" + rm.getParams().toString());
                     }
                     break;
                 case 40:  ////INTER-REGIONAL MESSAGE INCOMING 40
@@ -179,11 +184,11 @@ public class MsgRoute implements Runnable {
                 //regional message
                 targetAgent = rm.getParam("dst_region");
             }
-            logger.info("Send Target : " + targetAgent);
+            logger.trace("Send Target : " + targetAgent);
             if (/*PluginEngine.isReachableAgent(targetAgent)*/plugin.isReachableAgent(targetAgent)) {
                 //PluginEngine.ap.sendMessage(rm);
                 plugin.sendAPMessage(rm);
-                logger.info("Send Target : " + targetAgent + " params : " + rm.getParams().toString());
+                logger.trace("Send Target : " + targetAgent + " params : " + rm.getParams().toString());
                 //System.out.println("SENT NOT CONTROLLER MESSAGE / REMOTE=: " + targetAgent + " " + " region=" + ce.getParam("dst_region") + " agent=" + ce.getParam("dst_agent") + " "  + ce.getParams());
             } else {
                 logger.error("Unreachable External Agent : " + targetAgent);
