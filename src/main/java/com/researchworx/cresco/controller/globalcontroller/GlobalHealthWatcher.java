@@ -1,6 +1,8 @@
 package com.researchworx.cresco.controller.globalcontroller;
 
 import com.researchworx.cresco.controller.core.Launcher;
+import com.researchworx.cresco.controller.globalhttp.HTTPServerEngine;
+import com.researchworx.cresco.controller.globalscheduler.SchedulerEngine;
 import com.researchworx.cresco.controller.graphdb.NodeStatusType;
 import com.researchworx.cresco.controller.netdiscovery.DiscoveryClientIPv4;
 import com.researchworx.cresco.controller.netdiscovery.DiscoveryClientIPv6;
@@ -10,6 +12,7 @@ import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class GlobalHealthWatcher implements Runnable {
 	private Launcher plugin;
@@ -19,6 +22,9 @@ public class GlobalHealthWatcher implements Runnable {
 	private Map<String,String> global_host_map;
     private Timer regionalUpdateTimer;
     private Long gCheckInterval;
+    public ConcurrentLinkedQueue<MsgEvent> resourceScheduleQueue;
+    public Boolean SchedulerActive;
+    public GlobalCommandExec gexec;
 
 	public GlobalHealthWatcher(Launcher plugin, DiscoveryClientIPv4 dcv4, DiscoveryClientIPv6 dcv6) {
 		this.logger = new CLogger(GlobalHealthWatcher.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
@@ -29,7 +35,9 @@ public class GlobalHealthWatcher implements Runnable {
         regionalUpdateTimer = new Timer();
         regionalUpdateTimer.scheduleAtFixedRate(new GlobalHealthWatcher.GlobalNodeStatusWatchDog(plugin, logger), 500, 15000);//remote
         gCheckInterval = plugin.getConfig().getLongParam("watchdogtimer",5000L);
-	}
+        resourceScheduleQueue = new ConcurrentLinkedQueue<MsgEvent>();
+        SchedulerActive = false;
+    }
 
 	public void shutdown() {
 
@@ -159,6 +167,15 @@ public class GlobalHealthWatcher implements Runnable {
                         //No global controller found, starting global services
                         logger.info("No Global Controller Found: Starting Global Services");
                         //start global stuff
+                        //create globalscheduler queue
+                        plugin.setResourceScheduleQueue(new ConcurrentLinkedQueue<MsgEvent>());
+                        //create global exec object
+                        gexec = new GlobalCommandExec(plugin);
+                        //start http interface
+                        startHTTP();
+                        //start global scheduler
+                        startGlobalScheduler();
+                        //end global start
                         this.plugin.setGlobalController(true);
                     }
                 }
@@ -169,6 +186,37 @@ public class GlobalHealthWatcher implements Runnable {
 	        logger.error(ex.getMessage());
         }
 	}
+
+    private Boolean startGlobalScheduler() {
+        boolean isStarted = false;
+        try {
+            //Start Global Controller Services
+            logger.info("Starting Global Scheduler Service");
+            SchedulerEngine se = new SchedulerEngine(plugin,this);
+            Thread schedulerEngineThread = new Thread(se);
+            schedulerEngineThread.start();
+            isStarted = true;
+        }
+        catch (Exception ex) {
+            logger.error(ex.getMessage());
+        }
+        return isStarted;
+    }
+	private Boolean startHTTP() {
+        boolean isStarted = false;
+	    try {
+            //Start Global Controller Services
+            logger.info("Starting Global HTTPInternal Service");
+            HTTPServerEngine httpEngineInternal = new HTTPServerEngine(plugin,gexec);
+            Thread httpServerThreadExternal = new Thread(httpEngineInternal);
+            httpServerThreadExternal.start();
+            isStarted = true;
+        }
+        catch (Exception ex) {
+            logger.error(ex.getMessage());
+        }
+        return isStarted;
+    }
 
     private String connectToGlobal(List<MsgEvent> discoveryList) {
         String globalPath = null;
@@ -325,8 +373,6 @@ public class GlobalHealthWatcher implements Runnable {
         }
         return me;
     }
-
-
 
     class GlobalNodeStatusWatchDog extends TimerTask {
         private CLogger logger;

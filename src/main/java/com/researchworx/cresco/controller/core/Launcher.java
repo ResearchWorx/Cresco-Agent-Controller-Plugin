@@ -3,6 +3,7 @@ package com.researchworx.cresco.controller.core;
 import com.google.auto.service.AutoService;
 import com.researchworx.cresco.controller.communication.*;
 import com.researchworx.cresco.controller.globalcontroller.*;
+import com.researchworx.cresco.controller.globalhttp.HTTPServerEngine;
 import com.researchworx.cresco.controller.graphdb.GraphDBUpdater;
 import com.researchworx.cresco.controller.netdiscovery.*;
 import com.researchworx.cresco.controller.regionalcontroller.*;
@@ -138,6 +139,8 @@ public class Launcher extends CPlugin {
 
     private ConcurrentLinkedQueue<MsgEvent> incomingCanidateBrokers;
     private ConcurrentLinkedQueue<MsgEvent> outgoingMessages;
+    private ConcurrentLinkedQueue<MsgEvent> resourceScheduleQueue;
+
 
     private DiscoveryClientIPv4 dcv4;
     private DiscoveryClientIPv6 dcv6;
@@ -565,6 +568,7 @@ public class Launcher extends CPlugin {
                     Thread.sleep(1000);
                     logger.trace("Wait loop for Global Controller");
                 }
+
             }
 
         } catch (Exception e) {
@@ -721,6 +725,13 @@ public class Launcher extends CPlugin {
     }
     public void setConsumerThreadActive(boolean consumerThreadActive) {
         ConsumerThreadActive = consumerThreadActive;
+    }
+
+    public ConcurrentLinkedQueue<MsgEvent> getResourceScheduleQueue() {
+        return incomingCanidateBrokers;
+    }
+    public void setResourceScheduleQueue(ConcurrentLinkedQueue<MsgEvent> resourceScheduleQueue) {
+        this.resourceScheduleQueue = resourceScheduleQueue;
     }
 
     public ConcurrentLinkedQueue<MsgEvent> getIncomingCanidateBrokers() {
