@@ -49,33 +49,44 @@ public class GraphDBUpdater {
         return params;
     }
 
-    public String getResourceTotal()
+    public Map<String,String> getResourceTotal()
     {
-        int cpu_count = 0;
+        Map<String,String> resourceTotal = null;
+        long cpu_count = 0;
         long memoryAvailable = 0;
         long diskAvailable = 0;
 
+        long region_count = 0;
+        long agent_count = 0;
+        long plugin_count = 0;
+
         try
         {
+            resourceTotal = new HashMap<>();
             List<String> regionList = rgdb.getNodeList(null,null,null);
             //Map<String,Map<String,String>> ahm = new HashMap<String,Map<String,String>>();
-            System.out.println("Region Count: " + regionList.size());
+            region_count++;
             Map<String,String> rMap = new HashMap<String,String>();
             for(String region : regionList)
             {
+                logger.trace("Region : " +region);
                 List<String> agentList = rgdb.getNodeList(region,null,null);
-                System.out.println("Agent Count: " + agentList.size());
 
                 for(String agent: agentList)
                 {
+                    agent_count++;
+                    logger.trace("Agent : " + agent);
+
                     List<String> pluginList = rgdb.getNodeList(region,agent,null);
                     if(pluginList != null) {
-                        System.out.println("Plugin Count: " + pluginList.size());
 
                         boolean isRecorded = false;
                         for (String plugin : pluginList) {
+                            logger.trace("Plugin : " + plugin);
+                            plugin_count++;
                             if (!isRecorded) {
                                 String pluginConfigparams = rgdb.getNodeParam(region, agent, plugin, "configparams");
+                                logger.trace("configParams : " + pluginConfigparams);
                                 if (pluginConfigparams != null) {
                                     Map<String, String> pMap = paramStringToMap(pluginConfigparams);
                                     if (pMap.get("pluginname").equals("cresco-agent-sysinfo-plugin")) {
@@ -98,9 +109,19 @@ public class GraphDBUpdater {
                     }
                 }
             }
-            System.out.println("Total CPU core count : " + cpu_count);
-            System.out.println("Total Memory count : " + memoryAvailable);
-            System.out.println("Total Disk space : " + diskAvailable);
+
+            logger.trace("Regions :" + region_count);
+            logger.trace("Agents :" + agent_count);
+            logger.trace("Plugins : " + plugin_count);
+            logger.trace("Total CPU core count : " + cpu_count);
+            logger.trace("Total Memory count : " + memoryAvailable);
+            logger.trace("Total Disk space : " + diskAvailable);
+            resourceTotal.put("regions",String.valueOf(region_count));
+            resourceTotal.put("agents",String.valueOf(agent_count));
+            resourceTotal.put("plugins",String.valueOf(plugin_count));
+            resourceTotal.put("cpu",String.valueOf(cpu_count));
+            resourceTotal.put("mem",String.valueOf(memoryAvailable));
+            resourceTotal.put("disk",String.valueOf(diskAvailable));
 
         }
         catch(Exception ex)
@@ -112,7 +133,7 @@ public class GraphDBUpdater {
             logger.error(sw.toString()); //
         }
 
-        return "woot";
+        return resourceTotal;
     }
 
 

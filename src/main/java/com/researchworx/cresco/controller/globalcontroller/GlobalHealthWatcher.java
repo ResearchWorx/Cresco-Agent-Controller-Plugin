@@ -353,7 +353,7 @@ public class GlobalHealthWatcher implements Runnable {
                     //we have somewhere to send information
                     String[] tmpStr = this.plugin.getGlobalControllerPath().split("_");
 
-                    me = new MsgEvent(MsgEvent.Type.CONFIG, this.plugin.getRegion(), this.plugin.getAgent(), this.plugin.getPluginID(), "global_");
+                    me = new MsgEvent(MsgEvent.Type.CONFIG, this.plugin.getRegion(), this.plugin.getAgent(), this.plugin.getPluginID(), "regionalimport");
                     me.setParam("configtype", "regionalimport");
                     me.setParam("src_region", this.plugin.getRegion());
                     //me.setParam("src_agent", this.plugin.getAgent());
@@ -397,6 +397,7 @@ public class GlobalHealthWatcher implements Runnable {
             else {
                 //send full export of region to global controller
                 //Need to develop a better inconsistency method
+                //logger.info("Regional Export");
                 regionalDBexport();
             }
         }

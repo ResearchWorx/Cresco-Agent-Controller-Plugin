@@ -37,8 +37,8 @@ public class AgentDiscovery {
                         //plugin.sendMsgEvent(le);
                         plugin.msgIn(le);
                     } else if (le.getMsgBody().equals("enabled")) {
-                        logger.info("CONFIG : AGENTDISCOVER ADD: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
-                        logger.info("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
+                        logger.debug("CONFIG : AGENTDISCOVER ADD: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
+                        logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
                         plugin.getGDB().addNode(le);
                         //need to regional rpc return, currently this does not work
                         //le.setMsgBody("ack");

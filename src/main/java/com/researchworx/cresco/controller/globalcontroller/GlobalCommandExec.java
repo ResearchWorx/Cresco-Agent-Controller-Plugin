@@ -211,12 +211,13 @@ public class GlobalCommandExec {
 					{
 						try
 						{
-						    System.out.println("PRE GET RESOURCE");
-							String rt = plugin.getGDB().getResourceTotal();
-                            System.out.println("POST GET RESOURCE");
-                            if(rt != null)
+						    Map<String,String> resourceTotal = plugin.getGDB().getResourceTotal();
+
+
+                            if(resourceTotal != null)
 							{
-								ce.setParam("resourceinventory", rt);
+							    logger.trace(resourceTotal.toString());
+								ce.setParam("resourceinventory", resourceTotal.toString());
 								ce.setMsgBody("Inventory found.");
 							}
 							else
