@@ -571,6 +571,7 @@ public class Launcher extends CPlugin {
 
             }
 
+
         } catch (Exception e) {
             e.printStackTrace();
             logger.trace("commInit " + e.getMessage());
@@ -818,6 +819,20 @@ public class Launcher extends CPlugin {
     public void setGlobalController(boolean globalController) {
         isGlobalController = globalController;
     }
+
+    public boolean hasActiveProducter() {
+        boolean hasAP = false;
+        try {
+            if(ap != null) {
+                hasAP = true;
+            }
+        }
+        catch(Exception ex) {
+            logger.error(ex.getMessage());
+        }
+        return hasAP;
+    }
+
 
     public boolean hasGlobalController() {
         if(this.globalControllerPath != null)

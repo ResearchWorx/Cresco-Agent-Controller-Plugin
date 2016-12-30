@@ -175,7 +175,11 @@ public class GraphDBUpdater {
     }
 
     public List<String> getNodeList(String region, String agent, String plugin) {
-        return getNodeList(region,agent,plugin);
+        return rgdb.getNodeList(region,agent,plugin);
+    }
+
+    public List<String> getNodeIds(String region, String agent, String plugin, boolean getAll) {
+        return rgdb.getNodeIds(region,agent,plugin,getAll);
     }
 
     public boolean setNodeParam(String nodeId, String paramKey, String paramValue) {

@@ -110,7 +110,20 @@ public class RegionHealthWatcher {
                         plugin.getGDB().removeNode(region,agent,pluginId);
                     }
                     else if(entry.getValue() == NodeStatusType.ERROR) { //will include more items once nodes update correctly
+                        Map<String,String> nodeParams = plugin.getGDB().getNodeParams(entry.getKey());
+                        for (Map.Entry<String, String> entry2 : nodeParams.entrySet()) {
+                            System.out.println("Key = " + entry2.getKey() + ", Value = " + entry2.getValue());
+                        }
+                        String region = nodeParams.get("region");
+                        String agent = nodeParams.get("agent");
+                        String pluginId = nodeParams.get("plugin");
+                        logger.error("Problem with " + region + " " + agent + " " + pluginId);
                         logger.error("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());
+
+                        //String region = nodeParams.get("region");
+                        //String agent = nodeParams.get("agent");
+                        //String pluginId = nodeParams.get("plugin");
+                        //logger.error("Error " + region + " " + agent + " " + pluginId);
 
                     }
 

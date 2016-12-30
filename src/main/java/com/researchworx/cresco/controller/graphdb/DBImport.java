@@ -56,6 +56,9 @@ public class DBImport {
     private ORecord record;
     private Map<String, String>        convertedClassNames             = new HashMap<String, String>();
 
+    private String importRegion;
+    private List<String> importedList;
+
     private Launcher plugin;
     private CLogger logger;
 
@@ -68,6 +71,8 @@ public class DBImport {
         this.db = db;
         jsonReader = new OJSONReader(new InputStreamReader(iStream));
         this.rgdb = rgdb;
+        importedList = new ArrayList<>();
+
         ODatabaseRecordThreadLocal.INSTANCE.set(db);
     }
 
@@ -85,12 +90,50 @@ public class DBImport {
 
                 if (tag.equals("records"))
                     importRecords();
+
             }
+            cleanRecords();
 
         } catch (Exception e) {
             logger.error(e.getMessage());
         }
         return true;
+    }
+
+    private void cleanRecords() {
+        try {
+            logger.debug("Cleaning Region :" + importRegion);
+
+            List<String> regionList = plugin.getGDB().getNodeIds(importRegion,null,null,false);
+            logger.debug("Region " + importRegion + " has " + regionList.size() + " nodes ");
+            for(String lostNode : regionList) {
+                logger.debug("known nodes : " + lostNode);
+            }
+
+                for(String importedNode : importedList) {
+                logger.debug("imported node " + importedNode);
+                if(regionList.contains(importedNode)) {
+                    regionList.remove(importedNode);
+                }
+            }
+            for(String lostNode : regionList) {
+                logger.debug("Removing node :" + lostNode);
+                Map<String,String> nodeParams = plugin.getGDB().getNodeParams(lostNode);
+                String region = nodeParams.get("region");
+                String agent = nodeParams.get("agent");
+                String pluginId = nodeParams.get("plugin");
+                logger.debug("Removing " + region + " " + agent + " " + pluginId);
+                plugin.getGDB().removeNode(region,agent,pluginId);
+            }
+            regionList.clear();
+            importedList.clear();
+
+        }
+        catch(Exception ex) {
+            logger.error(ex.toString());
+
+        }
+
     }
 
     private long importRecords() throws Exception {
@@ -147,6 +190,7 @@ public class DBImport {
                 {
                     //rNode
                     region = document.field("region");
+                    importRegion = region;
                     isNodeType = true;
 
                 }
@@ -168,7 +212,7 @@ public class DBImport {
                 }
 
                 if(isNodeType) {
-                    logger.debug("Region :" + region + " Agent :" + agent + " plugin :" + plugin);
+                    logger.debug("Importing Node : Region :" + region + " Agent :" + agent + " plugin :" + plugin);
 
                     String nodeId = rgdb.getNodeId(region, agent, plugin);
 
@@ -180,6 +224,9 @@ public class DBImport {
                     } else {
                         logger.debug("nodeId : " + nodeId + " exist.");
                     }
+
+                    //record node_id for cleaning
+                    importedList.add(nodeId);
 
                     //update node params
                     

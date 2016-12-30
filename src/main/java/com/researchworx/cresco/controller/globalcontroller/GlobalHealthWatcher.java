@@ -57,8 +57,15 @@ public class GlobalHealthWatcher implements Runnable {
 
 	public void run() {
 		try {
+
+            while(!plugin.hasActiveProducter()) {
+                logger.trace("GlobalHealthWatcher waiting on Active Producer.");
+                Thread.sleep(2500);
+            }
+
             logger.trace("Initial gCheck");
-		    gCheck(); //do initial check
+
+            gCheck(); //do initial check
             this.plugin.setGlobalControllerManagerActive(true);
             logger.trace("GlobalControllerManager is Active");
 
@@ -144,6 +151,7 @@ public class GlobalHealthWatcher implements Runnable {
                 logger.trace("Starting Dynamic Global Controller Check");
                 //Check if the global controller path exist
                 if(plugin.isReachableAgent(this.plugin.getGlobalControllerPath())) {
+                    logger.debug("Global Path : " +  this.plugin.getGlobalControllerPath() + " reachable :" + plugin.isReachableAgent(this.plugin.getGlobalControllerPath()));
                    return;
                 }
                 else {
@@ -389,7 +397,7 @@ public class GlobalHealthWatcher implements Runnable {
                 Map<String, NodeStatusType> nodeListStatus = plugin.getGDB().getNodeStatus(null, null, null);
                 for (Map.Entry<String, NodeStatusType> entry : nodeListStatus.entrySet()) {
 
-                    logger.info("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());
+                    logger.debug("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());
 
                     if(entry.getValue() == NodeStatusType.STALE) { //will include more items once nodes update correctly
                         logger.error("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());
