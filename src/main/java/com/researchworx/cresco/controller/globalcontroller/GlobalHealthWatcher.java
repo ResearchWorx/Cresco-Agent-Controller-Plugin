@@ -382,16 +382,35 @@ public class GlobalHealthWatcher implements Runnable {
             this.logger = logger;
 
         }
+
         public void run() {
             if(plugin.isGlobalController()) { //only run if node is a global controller
                 logger.debug("GlobalNodeStatusWatchDog");
-                Map<String, NodeStatusType> nodeStatus = plugin.getGDB().getNodeStatus(null, null, null);
-                for (Map.Entry<String, NodeStatusType> entry : nodeStatus.entrySet()) {
+                Map<String, NodeStatusType> nodeListStatus = plugin.getGDB().getNodeStatus(null, null, null);
+                for (Map.Entry<String, NodeStatusType> entry : nodeListStatus.entrySet()) {
+
                     logger.info("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());
 
                     if(entry.getValue() == NodeStatusType.STALE) { //will include more items once nodes update correctly
                         logger.error("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());
+                        //mark node disabled
+                        plugin.getGDB().setNodeParam(entry.getKey(),"is_active",Boolean.FALSE.toString());
                     }
+                    else if(entry.getValue() == NodeStatusType.LOST) { //will include more items once nodes update correctly
+                        logger.error("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());
+                        //remove nodes
+                        Map<String,String> nodeParams = plugin.getGDB().getNodeParams(entry.getKey());
+                        String region = nodeParams.get("region");
+                        String agent = nodeParams.get("agent");
+                        String pluginId = nodeParams.get("plugin");
+                        logger.error("Removing " + region + " " + agent + " " + pluginId);
+                        plugin.getGDB().removeNode(region,agent,pluginId);
+                    }
+                    else if(entry.getValue() == NodeStatusType.ERROR) { //will include more items once nodes update correctly
+                        logger.error("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());
+
+                    }
+
                 }
             }
             else {

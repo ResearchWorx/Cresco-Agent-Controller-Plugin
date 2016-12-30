@@ -67,7 +67,7 @@ public class HTTPServerEngine implements Runnable{
 	public static Launcher plugin; //super dirty, but jersey injection is complicated!  FIXME
     public static CLogger logger; //super dirty, but jersey injection is complicated! FIXME
     public static GlobalCommandExec gce; //super dirty, but jersey injection is complicated! FIXME
-    //public static Cache<String, String> cookieCache;
+    public static Cache<String, String> cookieCache;
 
 	public HTTPServerEngine(Launcher plugin, GlobalCommandExec gce) throws IOException, InterruptedException
 	{
@@ -77,14 +77,14 @@ public class HTTPServerEngine implements Runnable{
         //gexec = gexec;
         this.gce = gce;
 
-        /*
+
         cookieCache = CacheBuilder.newBuilder()
                 .concurrencyLevel(4)
                 .softValues()
                 .maximumSize(10000)
                 .expireAfterWrite(15, TimeUnit.MINUTES)
                 .build();
-        */
+
 	}
 	public void run()
 	{

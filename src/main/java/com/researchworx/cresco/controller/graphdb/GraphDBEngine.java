@@ -2173,6 +2173,80 @@ public class GraphDBEngine {
         return isUpdated;
     }
 
+    public boolean setNodeParam(String nodeId, String paramKey, String paramValue)
+    {
+        boolean isUpdated = false;
+        int count = 0;
+        try
+        {
+
+            while((!isUpdated) && (count != retryCount))
+            {
+                if(count > 0)
+                {
+                    //logger.debug("iNODEUPDATE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
+                    Thread.sleep((long)(Math.random() * 1000)); //random wait to prevent sync error
+                }
+                isUpdated = IsetNodeParam(nodeId, paramKey, paramValue);
+                count++;
+
+            }
+
+            if((!isUpdated) && (count == retryCount))
+            {
+                logger.debug("GraphDBEngine : setINodeParam : Failed to add node in " + count + " retrys");
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.debug("GraphDBEngine : setINodeParam : Error " + ex.toString());
+        }
+
+        return isUpdated;
+    }
+
+    public boolean IsetNodeParam(String nodeId, String paramKey, String paramValue)
+    {
+        boolean isUpdated = false;
+        OrientGraph graph = null;
+        String node_id;
+        try
+        {
+            node_id = nodeId;
+            if(node_id != null)
+            {
+                graph = factory.getTx();
+                Vertex iNode = graph.getVertex(node_id);
+
+                iNode.setProperty( paramKey, paramValue);
+                graph.commit();
+                isUpdated = true;
+            }
+        }
+        catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException exc)
+        {
+            //eat exception.. this is not normal and should log somewhere
+        }
+        catch(com.orientechnologies.orient.core.exception.OConcurrentModificationException exc)
+        {
+            //eat exception.. this is normal
+        }
+        catch(Exception ex)
+        {
+            long threadId = Thread.currentThread().getId();
+            logger.debug("setINodeParams: thread_id: " + threadId + " Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return isUpdated;
+    }
+
+
     public boolean setNodeParam(String region, String agent, String plugin, String paramKey, String paramValue)
     {
         boolean isUpdated = false;
