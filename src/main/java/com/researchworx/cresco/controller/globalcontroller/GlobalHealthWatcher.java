@@ -3,7 +3,7 @@ package com.researchworx.cresco.controller.globalcontroller;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.controller.globalhttp.HTTPServerEngine;
 import com.researchworx.cresco.controller.globalscheduler.SchedulerEngine;
-import com.researchworx.cresco.controller.graphdb.NodeStatusType;
+import com.researchworx.cresco.controller.db.NodeStatusType;
 import com.researchworx.cresco.controller.netdiscovery.DiscoveryClientIPv4;
 import com.researchworx.cresco.controller.netdiscovery.DiscoveryClientIPv6;
 import com.researchworx.cresco.controller.netdiscovery.DiscoveryStatic;
@@ -352,7 +352,7 @@ public class GlobalHealthWatcher implements Runnable {
             if(!this.plugin.isGlobalController()) {
                 if(this.plugin.getGlobalControllerPath() != null) {
 
-                    String dbexport = plugin.getGDB().getRGBDExport();
+                    String dbexport = plugin.getGDB().gdb.getDBExport();
                     logger.trace("EXPORT" + dbexport + "EXPORT");
 
                     //we have somewhere to send information
@@ -399,12 +399,12 @@ public class GlobalHealthWatcher implements Runnable {
                     if(entry.getValue() == NodeStatusType.STALE) { //will include more items once nodes update correctly
                         logger.error("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());
                         //mark node disabled
-                        plugin.getGDB().setNodeParam(entry.getKey(),"is_active",Boolean.FALSE.toString());
+                        plugin.getGDB().gdb.setNodeParam(entry.getKey(),"is_active",Boolean.FALSE.toString());
                     }
                     else if(entry.getValue() == NodeStatusType.LOST) { //will include more items once nodes update correctly
                         logger.error("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());
                         //remove nodes
-                        Map<String,String> nodeParams = plugin.getGDB().getNodeParams(entry.getKey());
+                        Map<String,String> nodeParams = plugin.getGDB().gdb.getNodeParams(entry.getKey());
                         String region = nodeParams.get("region");
                         String agent = nodeParams.get("agent");
                         String pluginId = nodeParams.get("plugin");

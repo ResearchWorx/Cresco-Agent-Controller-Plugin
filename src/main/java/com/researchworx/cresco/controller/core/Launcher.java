@@ -3,8 +3,7 @@ package com.researchworx.cresco.controller.core;
 import com.google.auto.service.AutoService;
 import com.researchworx.cresco.controller.communication.*;
 import com.researchworx.cresco.controller.globalcontroller.*;
-import com.researchworx.cresco.controller.globalhttp.HTTPServerEngine;
-import com.researchworx.cresco.controller.graphdb.GraphDBUpdater;
+import com.researchworx.cresco.controller.db.DBInterface;
 import com.researchworx.cresco.controller.netdiscovery.*;
 import com.researchworx.cresco.controller.regionalcontroller.*;
 import com.researchworx.cresco.controller.shell.AppShellFactory;
@@ -42,7 +41,7 @@ public class Launcher extends CPlugin {
     private ExecutorService msgInProcessQueue;
 
     //regional
-    private GraphDBUpdater gdb;
+    private DBInterface gdb;
 
     private boolean clientDiscoveryActiveIPv4 = false;
     private boolean clientDiscoveryActiveIPv6 = false;
@@ -446,7 +445,7 @@ public class Launcher extends CPlugin {
                 }
                 //logger.debug("Region ConsumerThread Started..");
 
-                this.gdb = new GraphDBUpdater(this); //start graphdb service
+                this.gdb = new DBInterface(this); //start db service
                 logger.debug("RegionalControllerDB Service Started");
                 this.discoveryMap = new ConcurrentHashMap<>(); //discovery map
 
@@ -848,10 +847,10 @@ public class Launcher extends CPlugin {
         this.discoveryMap = discoveryMap;
     }
 
-    public GraphDBUpdater getGDB() {
+    public DBInterface getGDB() {
         return gdb;
     }
-    public void setGDB(GraphDBUpdater gdb) {
+    public void setGDB(DBInterface gdb) {
         this.gdb = gdb;
     }
     public void removeGDBNode(String region, String agent, String pluginID) {

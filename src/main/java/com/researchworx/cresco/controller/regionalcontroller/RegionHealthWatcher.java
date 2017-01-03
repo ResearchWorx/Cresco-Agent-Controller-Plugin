@@ -1,8 +1,7 @@
 package com.researchworx.cresco.controller.regionalcontroller;
 
 import com.researchworx.cresco.controller.core.Launcher;
-import com.researchworx.cresco.controller.graphdb.NodeStatusType;
-import com.researchworx.cresco.library.messaging.MsgEvent;
+import com.researchworx.cresco.controller.db.NodeStatusType;
 import com.researchworx.cresco.library.utilities.CLogger;
 
 import java.util.Map;
@@ -97,12 +96,12 @@ public class RegionHealthWatcher {
                     if(entry.getValue() == NodeStatusType.STALE) { //will include more items once nodes update correctly
                         logger.error("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());
                         //mark node disabled
-                        plugin.getGDB().setNodeParam(entry.getKey(),"is_active",Boolean.FALSE.toString());
+                        plugin.getGDB().gdb.setNodeParam(entry.getKey(),"is_active",Boolean.FALSE.toString());
                     }
                     else if(entry.getValue() == NodeStatusType.LOST) { //will include more items once nodes update correctly
                         logger.error("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());
                         //remove nodes
-                        Map<String,String> nodeParams = plugin.getGDB().getNodeParams(entry.getKey());
+                        Map<String,String> nodeParams = plugin.getGDB().gdb.getNodeParams(entry.getKey());
                         String region = nodeParams.get("region");
                         String agent = nodeParams.get("agent");
                         String pluginId = nodeParams.get("plugin");
@@ -110,7 +109,7 @@ public class RegionHealthWatcher {
                         plugin.getGDB().removeNode(region,agent,pluginId);
                     }
                     else if(entry.getValue() == NodeStatusType.ERROR) { //will include more items once nodes update correctly
-                        Map<String,String> nodeParams = plugin.getGDB().getNodeParams(entry.getKey());
+                        Map<String,String> nodeParams = plugin.getGDB().gdb.getNodeParams(entry.getKey());
                         for (Map.Entry<String, String> entry2 : nodeParams.entrySet()) {
                             System.out.println("Key = " + entry2.getKey() + ", Value = " + entry2.getValue());
                         }

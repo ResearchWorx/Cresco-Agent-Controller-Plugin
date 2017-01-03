@@ -2,7 +2,6 @@ package com.researchworx.cresco.controller.globalscheduler;
 
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.controller.globalcontroller.GlobalHealthWatcher;
-import com.researchworx.cresco.controller.graphdb.GraphDBEngine;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 
@@ -49,8 +48,8 @@ public class SchedulerEngine implements Runnable {
 							String pluginJar = verifyPlugin(ce);
 							if(pluginJar == null)
 							{
-								if((plugin.getGDB().setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_code","1")) &&
-										(plugin.getGDB().setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_desc","iNode Failed Activation : Plugin not found!")))
+								if((plugin.getGDB().gdb.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_code","1")) &&
+										(plugin.getGDB().gdb.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_desc","iNode Failed Activation : Plugin not found!")))
 								{
 									System.out.println("Provisioning Failed: No matching controller plugins found!");
 								}
@@ -182,16 +181,16 @@ public class SchedulerEngine implements Runnable {
 		String agent_path = null;
 		try
 		{
-			List<String> regionList = plugin.getGDB().getNodeList(null,null,null);
+			List<String> regionList = plugin.getGDB().gdb.getNodeList(null,null,null);
 			//System.out.println("Region Count: " + regionList.size());
 			for(String region : regionList)
 			{
-				List<String> agentList = plugin.getGDB().getNodeList(region,null,null);
+				List<String> agentList = plugin.getGDB().gdb.getNodeList(region,null,null);
 				//System.out.println("Agent Count: " + agentList.size());
 				
 				for(String agent: agentList)
 				{
-					List<String> pluginList = plugin.getGDB().getNodeList(region,agent,null);
+					List<String> pluginList = plugin.getGDB().gdb.getNodeList(region,agent,null);
 					int pluginCount = 0;
 					if(pluginList != null)
 					{

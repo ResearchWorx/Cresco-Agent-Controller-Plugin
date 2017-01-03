@@ -1,4 +1,4 @@
-package com.researchworx.cresco.controller.graphdb;
+package com.researchworx.cresco.controller.db;
 
 import com.orientechnologies.orient.client.remote.OServerAdmin;
 import com.orientechnologies.orient.core.command.OCommandOutputListener;

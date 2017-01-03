@@ -27,13 +27,13 @@ public class PollAddPlugin implements Runnable {
 	        	String edge_id = null;
 	        	while((edge_id == null) && (count < 30))
 	        	{
-	        		edge_id = plugin.getGDB().getResourceEdgeId(resource_id, inode_id, region, agent);
+	        		edge_id = plugin.getGDB().gdb.getResourceEdgeId(resource_id, inode_id, region, agent);
 	        		Thread.sleep(1000);
 	        	}
 	        	if(edge_id != null)
 	        	{
-	        		if((plugin.getGDB().setINodeParam(resource_id,inode_id,"status_code","10")) &&
-							(plugin.getGDB().setINodeParam(resource_id,inode_id,"status_desc","iNode Active.")))
+	        		if((plugin.getGDB().gdb.setINodeParam(resource_id,inode_id,"status_code","10")) &&
+							(plugin.getGDB().gdb.setINodeParam(resource_id,inode_id,"status_desc","iNode Active.")))
 					{
 							//recorded plugin activations
 	        				System.out.println("SchedulerEngine : pollAddPlugin : Activated inode_id=" + inode_id);

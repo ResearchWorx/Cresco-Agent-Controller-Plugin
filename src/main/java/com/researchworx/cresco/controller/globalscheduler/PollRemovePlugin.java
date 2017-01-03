@@ -29,19 +29,19 @@ public class PollRemovePlugin implements Runnable {
         try 
         {
 
-        	String edge_id = plugin.getGDB().getResourceEdgeId(resource_id, inode_id);
+        	String edge_id = plugin.getGDB().gdb.getResourceEdgeId(resource_id, inode_id);
     		if(edge_id != null)
     		{
-    			String pnode_node_id = plugin.getGDB().getIsAssignedParam(edge_id, "out");
+    			String pnode_node_id = plugin.getGDB().gdb.getIsAssignedParam(edge_id, "out");
     			if(pnode_node_id != null)
 				{
     				pnode_node_id = pnode_node_id.substring(pnode_node_id.indexOf("[") + 1, pnode_node_id.indexOf("]"));
     				
-    				String region = plugin.getGDB().getIsAssignedParam(edge_id, "region");
-    				String agent = plugin.getGDB().getIsAssignedParam(edge_id, "agent");
-    				String pluginId = plugin.getGDB().getIsAssignedParam(edge_id, "plugin");
+    				String region = plugin.getGDB().gdb.getIsAssignedParam(edge_id, "region");
+    				String agent = plugin.getGDB().gdb.getIsAssignedParam(edge_id, "agent");
+    				String pluginId = plugin.getGDB().gdb.getIsAssignedParam(edge_id, "plugin");
     				
-    				String pnode_node_id_match = plugin.getGDB().getNodeId(region, agent, pluginId);
+    				String pnode_node_id_match = plugin.getGDB().gdb.getNodeId(region, agent, pluginId);
 
 					if(pnode_node_id.equals(pnode_node_id_match))
     				{
@@ -55,7 +55,7 @@ public class PollRemovePlugin implements Runnable {
 	        			boolean isRemoved = false;
 	        			while((!isRemoved) && (count < 30))
 	        			{
-	        				if(plugin.getGDB().getNodeId(region, agent, pluginId) == null)
+	        				if(plugin.getGDB().gdb.getNodeId(region, agent, pluginId) == null)
 	        				{
 	        					isRemoved = true;
 	        				}
@@ -85,13 +85,13 @@ public class PollRemovePlugin implements Runnable {
     			System.out.println("Edge_id=null");
     		}
     		System.out.println("Removing iNode: " + inode_id);
-			plugin.getGDB().removeINode(resource_id,inode_id);
+			plugin.getGDB().gdb.removeINode(resource_id,inode_id);
 			
 			//remove resource_id if this is the last resource
-			List<String> inodes = plugin.getGDB().getresourceNodeList(resource_id,null);
+			List<String> inodes = plugin.getGDB().gdb.getresourceNodeList(resource_id,null);
 			if(inodes == null)
 			{
-				plugin.getGDB().removeResourceNode(resource_id);
+				plugin.getGDB().gdb.removeResourceNode(resource_id);
 			}
 			
         	/*

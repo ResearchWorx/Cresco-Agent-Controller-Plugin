@@ -1,32 +1,27 @@
-package com.researchworx.cresco.controller.graphdb;
+package com.researchworx.cresco.controller.db;
 
-import com.researchworx.cresco.controller.communication.ActiveBrokerManager;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.controller.regionalcontroller.AgentNode;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-public class GraphDBUpdater {
+public class DBInterface {
 
     private Map<String, AgentNode> agentMap;
     private Launcher plugin;
     private CLogger logger;
-    private GraphDBEngine rgdb;
+    public GraphDBEngine gdb;
 
 
-    public GraphDBUpdater(Launcher plugin) {
-        this.logger = new CLogger(GraphDBUpdater.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+    public DBInterface(Launcher plugin) {
+        this.logger = new CLogger(DBInterface.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
 
         this.plugin = plugin;
-        rgdb = new GraphDBEngine(plugin);
+        gdb = new GraphDBEngine(plugin);
 
     }
 
@@ -64,20 +59,20 @@ public class GraphDBUpdater {
         try
         {
             resourceTotal = new HashMap<>();
-            List<String> regionList = rgdb.getNodeList(null,null,null);
+            List<String> regionList = gdb.getNodeList(null,null,null);
             //Map<String,Map<String,String>> ahm = new HashMap<String,Map<String,String>>();
             //Map<String,String> rMap = new HashMap<String,String>();
             if(regionList != null) {
                 for (String region : regionList) {
                     region_count++;
                     logger.trace("Region : " + region);
-                    List<String> agentList = rgdb.getNodeList(region, null, null);
+                    List<String> agentList = gdb.getNodeList(region, null, null);
                     if (agentList != null) {
                         for (String agent : agentList) {
                             agent_count++;
                             logger.trace("Agent : " + agent);
 
-                            List<String> pluginList = rgdb.getNodeList(region, agent, null);
+                            List<String> pluginList = gdb.getNodeList(region, agent, null);
                             if (pluginList != null) {
 
                                 boolean isRecorded = false;
@@ -85,14 +80,14 @@ public class GraphDBUpdater {
                                     logger.trace("Plugin : " + plugin);
                                     plugin_count++;
                                     if (!isRecorded) {
-                                        String pluginConfigparams = rgdb.getNodeParam(region, agent, plugin, "configparams");
+                                        String pluginConfigparams = gdb.getNodeParam(region, agent, plugin, "configparams");
                                         logger.trace("configParams : " + pluginConfigparams);
                                         if (pluginConfigparams != null) {
                                             Map<String, String> pMap = paramStringToMap(pluginConfigparams);
                                             if (pMap.get("pluginname").equals("cresco-agent-sysinfo-plugin")) {
                                                 System.out.println("region=" + region + " agent=" + agent);
                                                 String agent_path = region + "_" + agent;
-                                                String agentConfigparams = rgdb.getNodeParam(region, agent, null, "configparams");
+                                                String agentConfigparams = gdb.getNodeParam(region, agent, null, "configparams");
                                                 Map<String, String> aMap = paramStringToMap(agentConfigparams);
                                                 String resourceKey = aMap.get("platform") + "_" + aMap.get("environment") + "_" + aMap.get("location");
 
@@ -137,98 +132,105 @@ public class GraphDBUpdater {
         return resourceTotal;
     }
 
-
+    /*
     public String getResourceEdgeId(String resource_id, String inode_id, String region, String agent) {
-        return rgdb.getResourceEdgeId(resource_id,inode_id,region,agent);
+        return gdb.getResourceEdgeId(resource_id,inode_id,region,agent);
     }
 
     public String getResourceEdgeId(String resource_id, String inode_id) {
-        return rgdb.getResourceEdgeId(resource_id,inode_id);
+        return gdb.getResourceEdgeId(resource_id,inode_id);
     }
 
     public String getINodeId(String resource_id, String inode_id) {
-        return rgdb.getINodeId(resource_id,inode_id);
+        return gdb.getINodeId(resource_id,inode_id);
     }
 
     public boolean setINodeParam(String resource_id, String inode_id, String paramKey, String paramValue) {
-        return rgdb.setINodeParam(resource_id,inode_id,paramKey,paramValue);
+        return gdb.setINodeParam(resource_id,inode_id,paramKey,paramValue);
     }
 
     public String getIsAssignedParam(String edge_id,String param_name) {
-        return rgdb.getIsAssignedParam(edge_id,param_name);
+        return gdb.getIsAssignedParam(edge_id,param_name);
     }
 
     public String getNodeId(String region, String agent, String plugin) {
-        return rgdb.getNodeId(region,agent,plugin);
+        return gdb.getNodeId(region,agent,plugin);
     }
 
     public boolean removeINode(String resource_id, String inode_id) {
-        return rgdb.removeINode(resource_id,inode_id);
+        return gdb.removeINode(resource_id,inode_id);
     }
 
     public List<String> getresourceNodeList(String resource_id, String inode_id) {
-        return rgdb.getresourceNodeList(resource_id,inode_id);
+        return gdb.getresourceNodeList(resource_id,inode_id);
     }
 
     public boolean removeResourceNode(String resource_id) {
-        return rgdb.removeResourceNode(resource_id);
+        return gdb.removeResourceNode(resource_id);
     }
 
     public List<String> getNodeList(String region, String agent, String plugin) {
-        return rgdb.getNodeList(region,agent,plugin);
+        return gdb.getNodeList(region,agent,plugin);
     }
 
     public List<String> getNodeIds(String region, String agent, String plugin, boolean getAll) {
-        return rgdb.getNodeIds(region,agent,plugin,getAll);
+        return gdb.getNodeIds(region,agent,plugin,getAll);
+    }
+
+    public Map<String,String> getNodeParams(String node_id) {
+        return gdb.getNodeParams(node_id);
     }
 
     public boolean setNodeParam(String nodeId, String paramKey, String paramValue) {
-        return rgdb.setNodeParam(nodeId,paramKey,paramValue);
+        return gdb.setNodeParam(nodeId,paramKey,paramValue);
     }
 
     public String addINode(String resource_id, String inode_id) {
-        return rgdb.addINode(resource_id,inode_id);
+        return gdb.addINode(resource_id,inode_id);
     }
 
     public boolean updatePerf(String region, String agent, String plugin, String resource_id, String inode_id, Map<String,String> params) {
-        return rgdb.updatePerf(region,agent,plugin,resource_id,inode_id,params);
+        return gdb.updatePerf(region,agent,plugin,resource_id,inode_id,params);
     }
 
     public List<String> getANodeFromIndex(String indexName, String indexValue) {
-        return rgdb.getANodeFromIndex(indexName,indexValue);
+        return gdb.getANodeFromIndex(indexName,indexValue);
     }
 
     public String getINodeParam(String resource_id,String inode_id, String param) {
-        return rgdb.getINodeParam(resource_id,inode_id,param);
+        return gdb.getINodeParam(resource_id,inode_id,param);
     }
     public boolean setRDBImport(String exportData) {
-        return rgdb.setDBImport(exportData);
+        return gdb.setDBImport(exportData);
     }
 
     public String getRGBDExport() {
-        return rgdb.getDBExport();
+        return gdb.getDBExport();
     }
 
     public String getRGBDExport2() {
-        return rgdb.getDBExport2();
+        return gdb.getDBExport2();
     }
+
+    */
+
 
     public Map<String,NodeStatusType> getNodeStatus(String region, String agent, String plugin) {
 
         Map<String,NodeStatusType> nodeStatusMap = null;
         try {
             nodeStatusMap = new HashMap<>();
-            List<String> queryList = rgdb.getNodeIds(region,agent,plugin,false);
+            List<String> queryList = gdb.getNodeIds(region,agent,plugin,false);
             if((region != null) && (agent == null)) {
                 //region queries should include plugins
                 for(String agentNodeId : queryList) {
-                    agent = rgdb.getNodeParam(agentNodeId,"agent");
+                    agent = gdb.getNodeParam(agentNodeId,"agent");
                     nodeStatusMap.putAll(getNodeStatus(region,agent,null));
                 }
             }
 
             for(String nodeId : queryList) {
-                Map<String,String> params = rgdb.getNodeParams(nodeId);
+                Map<String,String> params = gdb.getNodeParams(nodeId);
                 if((params.containsKey("watchdogtimer") && (params.containsKey("watchdog_ts"))  && (params.containsKey("is_active")))) {
                     long watchdog_ts = Long.parseLong(params.get("watchdog_ts"));
                     long watchdog_rate = Long.parseLong(params.get("watchdogtimer"));
@@ -261,9 +263,6 @@ public class GraphDBUpdater {
         return nodeStatusMap;
     }
 
-    public Map<String,String> getNodeParams(String node_id) {
-        return rgdb.getNodeParams(node_id);
-    }
 
     public MsgEvent controllerMsgEvent(String region, String agent, String plugin, String controllercmd) {
         MsgEvent ce = new MsgEvent(MsgEvent.Type.CONFIG, null, null, null, "Generated by ControllerDB");
@@ -289,21 +288,21 @@ public class GraphDBUpdater {
             String agent = de.getParam("src_agent");
             String plugin = de.getParam("src_plugin");
 
-            String nodeId = rgdb.getNodeId(region,agent,plugin);
+            String nodeId = gdb.getNodeId(region,agent,plugin);
             if(nodeId != null) {
                 logger.trace("region: " + region + " agent:" + agent + " plugin:" + plugin + " id:" + nodeId);
-                logger.trace("params: " + rgdb.getNodeParams(nodeId).toString());
+                logger.trace("params: " + gdb.getNodeParams(nodeId).toString());
                 if(plugin != null) {
-                    String nodeAgentId = rgdb.getNodeId(region,agent,null);
+                    String nodeAgentId = gdb.getNodeId(region,agent,null);
                     logger.trace("region: " + region + " agent:" + agent + " plugin:" + " null id:" + nodeAgentId);
-                    logger.trace("params: " + rgdb.getNodeParams(nodeAgentId).toString());
+                    logger.trace("params: " + gdb.getNodeParams(nodeAgentId).toString());
                 }
             }
             else {
                 logger.debug("Adding Node: " + de.getParams().toString());
-                rgdb.addNode(region, agent,plugin);
-                rgdb.setNodeParams(region,agent,plugin, de.getParams());
-                rgdb.setNodeParam(region,agent,plugin, "watchdog_ts", String.valueOf(System.currentTimeMillis()));
+                gdb.addNode(region, agent,plugin);
+                gdb.setNodeParams(region,agent,plugin, de.getParams());
+                gdb.setNodeParam(region,agent,plugin, "watchdog_ts", String.valueOf(System.currentTimeMillis()));
                 wasAdded = true;
             }
 
@@ -322,19 +321,19 @@ public class GraphDBUpdater {
             String agent = de.getParam("src_agent");
             String pluginId = de.getParam("src_plugin");
 
-            String nodeId = rgdb.getNodeId(region,agent,pluginId);
+            String nodeId = gdb.getNodeId(region,agent,pluginId);
 
             if(nodeId != null) {
                 logger.debug("Updating WatchDog Node: " + de.getParams().toString());
                 //update watchdog_ts for local db
-                rgdb.setNodeParam(region,agent,pluginId, "watchdog_ts", String.valueOf(System.currentTimeMillis()));
-                rgdb.setNodeParam(region,agent,pluginId, "is_active", Boolean.TRUE.toString());
+                gdb.setNodeParam(region,agent,pluginId, "watchdog_ts", String.valueOf(System.currentTimeMillis()));
+                gdb.setNodeParam(region,agent,pluginId, "is_active", Boolean.TRUE.toString());
 
                 String interval = de.getParam("watchdogtimer");
                 if(interval == null) {
                     interval = "5000";
                 }
-                rgdb.setNodeParam(region, agent, pluginId, "watchdogtimer", interval);
+                gdb.setNodeParam(region, agent, pluginId, "watchdogtimer", interval);
 
                 wasUpdated = true;
             }
@@ -343,7 +342,7 @@ public class GraphDBUpdater {
                 //This must be fixed
                 //logger.error("watchDogUpdate : Can't update missing node : " + de.getParams().toString());
                 //Needs to be fixed in Cresco Library for watchdog discovery message modes (start,run,stop)
-                if(rgdb.getNodeId(region,agent,null) != null) {
+                if(gdb.getNodeId(region,agent,null) != null) {
                     //this is a plugin for which there is currently no discovery, add it for now
                     //send a note to the agent to send information on this plugin to the region controller
 
@@ -359,13 +358,13 @@ public class GraphDBUpdater {
                     this.plugin.msgIn(le);
                     /*
                     addNode(de);
-                    nodeId = rgdb.getNodeId(region,agent,plugin);
-                    rgdb.setNodeParam(region,agent,plugin, "watchdog_ts", String.valueOf(System.currentTimeMillis()));
+                    nodeId = gdb.getNodeId(region,agent,plugin);
+                    gdb.setNodeParam(region,agent,plugin, "watchdog_ts", String.valueOf(System.currentTimeMillis()));
                     String interval = de.getParam("watchdogtimer");
                     if(interval == null) {
                         interval = "5000";
                     }
-                    rgdb.setNodeParam(region, agent, plugin, "watchdogtimer", interval);
+                    gdb.setNodeParam(region, agent, plugin, "watchdogtimer", interval);
                     wasUpdated = true;
                     */
                 }
@@ -448,10 +447,10 @@ public class GraphDBUpdater {
             String agent = de.getParam("src_agent");
             String plugin = de.getParam("src_plugin");
 
-            String nodeId = rgdb.getNodeId(region,agent,plugin);
+            String nodeId = gdb.getNodeId(region,agent,plugin);
             if(nodeId != null) {
                 logger.debug("Removing Node: " + de.getParams().toString());
-                rgdb.removeNode(region, agent,plugin);
+                gdb.removeNode(region, agent,plugin);
                 wasRemoved = true;
             }
             else {
@@ -469,10 +468,10 @@ public class GraphDBUpdater {
 
         try {
 
-            String nodeId = rgdb.getNodeId(region,agent,plugin);
+            String nodeId = gdb.getNodeId(region,agent,plugin);
             if(nodeId != null) {
                 logger.debug("Removing Node: " + "region: " + region + " agent:" + agent + " plugin:" + plugin);
-                rgdb.removeNode(region, agent,plugin);
+                gdb.removeNode(region, agent,plugin);
                 wasRemoved = true;
             }
             else {
