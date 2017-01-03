@@ -2,6 +2,7 @@ package com.researchworx.cresco.controller.globalscheduler;
 
 
 import com.researchworx.cresco.controller.core.Launcher;
+import com.researchworx.cresco.controller.globalcontroller.GlobalCommandExec;
 import com.researchworx.cresco.controller.globalcontroller.GlobalHealthWatcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 
@@ -13,13 +14,14 @@ public class PollRemovePlugin implements Runnable {
 	private String inode_id = null;
 	private Launcher plugin;
 	private GlobalHealthWatcher ghw;
+	private GlobalCommandExec gexec;
 
-	public PollRemovePlugin(Launcher plugin, GlobalHealthWatcher ghw, String resource_id, String inode_id)
+	public PollRemovePlugin(Launcher plugin, String resource_id, String inode_id)
 	{
 		this.plugin = plugin;
-		this.ghw = ghw;
 		this.resource_id = resource_id;
 		this.inode_id = inode_id;
+		this.gexec = new GlobalCommandExec(plugin);
 		
 	}
 
@@ -45,7 +47,7 @@ public class PollRemovePlugin implements Runnable {
     				{
     					//fire off remove command
         				MsgEvent me = removePlugin(region,agent,pluginId);
-        				ghw.gexec.cmdExec(me);
+        				gexec.cmdExec(me);
         				//ControllerEngine.commandExec.cmdExec(me);
         				//loop until remove is completed
         				

@@ -4,6 +4,7 @@ package com.researchworx.cresco.controller.globalhttp;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.researchworx.cresco.controller.core.Launcher;
+import com.researchworx.cresco.controller.globalcontroller.GlobalCommandExec;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -21,10 +22,6 @@ import java.util.Map;
 @Path("/API")
 public class webREST {
 
-    private @Context ResourceConfig rc;
-
-
-
 	//http://192.168.1.116:9999/API?type=exec&region=test&agent=controller2&plugin=plugin/0&paramkey=cmd&paramvalue=show_version
 	
 	//add plugin
@@ -37,16 +34,25 @@ public class webREST {
 	//shutdown agent
 	//http://192.168.1.116:9999/API?type=config&region=test&agent=controller2&paramkey=configtype&paramvalue=componentstate&paramkey=msg&paramvalue=disable
 
-    private Launcher mainPlugin;
-    private CLogger logger;
+    private static Launcher mainPlugin;
+    private static CLogger logger;
 
+    private static GlobalCommandExec gce;
 
-    public webREST() {
+	public static void connectPlugin(Launcher plugin) {
+		mainPlugin = plugin;
+		logger = new CLogger(webREST.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+		gce = new GlobalCommandExec(plugin);
+	}
+
+/*
+	public webREST() {
 
         this.mainPlugin = HTTPServerEngine.plugin;
         this.logger = HTTPServerEngine.logger;
 
     }
+*/
 
     @GET
 	public Response getRoot(
@@ -105,7 +111,7 @@ public class webREST {
 	    		//MsgEvent ce = ControllerEngine.commandExec.cmdExec(me);
 
 
-				MsgEvent ce = HTTPServerEngine.gce.cmdExec(me);
+				MsgEvent ce = gce.cmdExec(me);
 
 				String returnString = null;
 	    		if(ce != null)

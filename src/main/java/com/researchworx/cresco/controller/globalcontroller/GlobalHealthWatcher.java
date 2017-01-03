@@ -24,7 +24,6 @@ public class GlobalHealthWatcher implements Runnable {
     private Long gCheckInterval;
     public ConcurrentLinkedQueue<MsgEvent> resourceScheduleQueue;
     public Boolean SchedulerActive;
-    public GlobalCommandExec gexec;
 
 	public GlobalHealthWatcher(Launcher plugin, DiscoveryClientIPv4 dcv4, DiscoveryClientIPv6 dcv6) {
 		this.logger = new CLogger(GlobalHealthWatcher.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
@@ -177,8 +176,6 @@ public class GlobalHealthWatcher implements Runnable {
                         //start global stuff
                         //create globalscheduler queue
                         plugin.setResourceScheduleQueue(new ConcurrentLinkedQueue<MsgEvent>());
-                        //create global exec object
-                        gexec = new GlobalCommandExec(plugin);
                         //start http interface
                         startHTTP();
                         //start global scheduler
@@ -215,7 +212,7 @@ public class GlobalHealthWatcher implements Runnable {
 	    try {
             //Start Global Controller Services
             logger.info("Starting Global HTTPInternal Service");
-            HTTPServerEngine httpEngineInternal = new HTTPServerEngine(plugin,gexec);
+            HTTPServerEngine httpEngineInternal = new HTTPServerEngine(plugin);
             Thread httpServerThreadExternal = new Thread(httpEngineInternal);
             httpServerThreadExternal.start();
             isStarted = true;

@@ -106,7 +106,7 @@ public class SchedulerEngine implements Runnable {
 						}
 						else if(ce.getParam("globalcmd").equals("removeplugin"))
 						{
-							new Thread(new PollRemovePlugin(plugin, ghw,ce.getParam("resource_id"),ce.getParam("inode_id"))).start();
+							new Thread(new PollRemovePlugin(plugin,  ce.getParam("resource_id"),ce.getParam("inode_id"))).start();
 						}
 					}
 					else
