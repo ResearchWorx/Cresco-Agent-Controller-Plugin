@@ -367,7 +367,7 @@ public class GlobalCommandExec {
 				*/
 				Map<String,String> params = ce.getParams();
 				
-				plugin.getGDB().gdb.updatePerf(region, agent, pluginid, resource_id, inode_id, params);
+				plugin.getGDB().gdb.updateKPI(region, agent, pluginid, resource_id, inode_id, params);
 				
 				ce.setMsgBody("updatedperf");
                 ce.setParam("source","watchdog");

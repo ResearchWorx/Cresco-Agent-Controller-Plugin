@@ -811,6 +811,7 @@ public class GraphDBEngine {
                 graph = factory.getTx();
                 Edge e = graph.getEdge(edge_id);
                 param = e.getProperty(param_name).toString();
+
             }
 
         }
@@ -826,6 +827,40 @@ public class GraphDBEngine {
             }
         }
         return param;
+    }
+
+    public Map<String,String> getIsAssignedParams(String edge_id)
+    {
+        Map<String,String> params = null;
+        OrientGraph graph = null;
+
+        try
+        {
+            if(edge_id != null)
+            {
+                params = new HashMap<>();
+                graph = factory.getTx();
+                Edge e = graph.getEdge(edge_id);
+
+                for (String s : e.getPropertyKeys()) {
+                    params.put(s,e.getProperty(s).toString());
+                }
+
+            }
+
+        }
+        catch(Exception ex)
+        {
+            logger.debug("GraphDBEngine : getIsAssignedParams : Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return params;
     }
 
     public List<String> getNodeList(String region, String agent, String plugin)
@@ -969,7 +1004,7 @@ public class GraphDBEngine {
         }
         catch(Exception ex)
         {
-            logger.debug("GrapgDBEngine : getNodeList : Error " + ex.toString());
+            logger.debug("GraphDBEngine : getNodeList : Error " + ex.toString());
         }
         finally
         {
@@ -2700,7 +2735,7 @@ public class GraphDBEngine {
 
     }
 
-    public boolean updatePerf(String region, String agent, String plugin, String resource_id, String inode_id, Map<String,String> params)
+    public boolean updateKPI(String region, String agent, String plugin, String resource_id, String inode_id, Map<String,String> params)
     {
         boolean isUpdated = false;
         String edge_id = null;

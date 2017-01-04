@@ -48,16 +48,42 @@ public class DBInterface {
     public Map<String,String> getResourceTotal()
     {
         Map<String,String> resourceTotal = null;
-        long cpu_count = 0;
+        long cpu_core_count = 0;
         long memoryAvailable = 0;
+        long memoryTotal = 0;
         long diskAvailable = 0;
-
+        long diskTotal = 0;
         long region_count = 0;
         long agent_count = 0;
         long plugin_count = 0;
 
         try
         {
+            /*
+            logger.info("CODY START");
+            List<String> sysInfoEdgeList = gdb.getIsAssignedEdgeIds("sysinfo_resource", "sysinfo_inode");
+            for(String edgeID : sysInfoEdgeList) {
+                logger.info("ID = " + edgeID);
+                //logger.info(gdb.getIsAssignedParam(String edge_id,String param_name)
+                String region = gdb.getIsAssignedParam(edgeID,"region");
+                String agent = gdb.getIsAssignedParam(edgeID,"agent");
+                String pluginID = gdb.getIsAssignedParam(edgeID,"plugin");
+
+                Map<String,String> edgeParams = gdb.getIsAssignedParams(edgeID);
+                for (Map.Entry<String, String> entry : edgeParams.entrySet()) {
+                    String key = entry.getKey();
+                    String value = entry.getValue();
+                    logger.info("key=" + key + " value=" + value);
+                }
+
+                logger.info(region + " " + agent + " " + pluginID);
+            }
+
+            logger.info("CODY END");
+            */
+
+            //public List<String> getIsAssignedEdgeIds(String resource_id, String inode_id)
+
             resourceTotal = new HashMap<>();
             List<String> regionList = gdb.getNodeList(null,null,null);
             //Map<String,Map<String,String>> ahm = new HashMap<String,Map<String,String>>();
@@ -84,12 +110,24 @@ public class DBInterface {
                                         logger.trace("configParams : " + pluginConfigparams);
                                         if (pluginConfigparams != null) {
                                             Map<String, String> pMap = paramStringToMap(pluginConfigparams);
-                                            if (pMap.get("pluginname").equals("cresco-agent-sysinfo-plugin")) {
+                                            if (pMap.get("pluginname").equals("cresco-sysinfo-plugin")) {
+
+                                                String isAssignedEdgeId = gdb.getResourceEdgeId("sysinfo_resource", "sysinfo_inode",region,agent);
+                                                Map<String,String> edgeParams = gdb.getIsAssignedParams(isAssignedEdgeId);
+                                                cpu_core_count += Long.parseLong(edgeParams.get("cpu-core-count"));
+                                                memoryAvailable += Long.parseLong(edgeParams.get("memory-available"));
+                                                memoryTotal += Long.parseLong(edgeParams.get("memory-total"));
+                                                for(String fspair : edgeParams.get("fs-map").split(",")) {
+                                                    String[] fskey = fspair.split(":");
+                                                    diskAvailable += Long.parseLong(edgeParams.get("fs-" + fskey[0] + "-available"));
+                                                    diskTotal += Long.parseLong(edgeParams.get("fs-" + fskey[0] + "-total"));
+                                                }
+                                                /*
                                                 System.out.println("region=" + region + " agent=" + agent);
                                                 String agent_path = region + "_" + agent;
                                                 String agentConfigparams = gdb.getNodeParam(region, agent, null, "configparams");
                                                 Map<String, String> aMap = paramStringToMap(agentConfigparams);
-                                                String resourceKey = aMap.get("platform") + "_" + aMap.get("environment") + "_" + aMap.get("location");
+                                                //String resourceKey = aMap.get("platform") + "_" + aMap.get("environment") + "_" + aMap.get("location");
 
                                                 for (Map.Entry<String, String> entry : pMap.entrySet()) {
                                                     String key = entry.getKey();
@@ -97,6 +135,7 @@ public class DBInterface {
                                                     System.out.println("\t" + key + ":" + value);
                                                 }
                                                 isRecorded = true;
+                                                */
                                             }
                                         }
                                     }
@@ -109,15 +148,19 @@ public class DBInterface {
             logger.trace("Regions :" + region_count);
             logger.trace("Agents :" + agent_count);
             logger.trace("Plugins : " + plugin_count);
-            logger.trace("Total CPU core count : " + cpu_count);
-            logger.trace("Total Memory count : " + memoryAvailable);
-            logger.trace("Total Disk space : " + diskAvailable);
+            logger.trace("Total CPU core count : " + cpu_core_count);
+            logger.trace("Total Memory Available : " + memoryAvailable);
+            logger.trace("Total Memory Total : " + memoryTotal);
+            logger.trace("Total Disk Available : " + diskAvailable);
+            logger.trace("Total Disk Total : " + diskTotal);
             resourceTotal.put("regions",String.valueOf(region_count));
             resourceTotal.put("agents",String.valueOf(agent_count));
             resourceTotal.put("plugins",String.valueOf(plugin_count));
-            resourceTotal.put("cpu",String.valueOf(cpu_count));
-            resourceTotal.put("mem",String.valueOf(memoryAvailable));
-            resourceTotal.put("disk",String.valueOf(diskAvailable));
+            resourceTotal.put("cpu_core_count",String.valueOf(cpu_core_count));
+            resourceTotal.put("mem_available",String.valueOf(memoryAvailable));
+            resourceTotal.put("mem_total",String.valueOf(memoryTotal));
+            resourceTotal.put("disk_available",String.valueOf(diskAvailable));
+            resourceTotal.put("disk_total",String.valueOf(diskTotal));
 
         }
         catch(Exception ex)
@@ -131,89 +174,6 @@ public class DBInterface {
 
         return resourceTotal;
     }
-
-    /*
-    public String getResourceEdgeId(String resource_id, String inode_id, String region, String agent) {
-        return gdb.getResourceEdgeId(resource_id,inode_id,region,agent);
-    }
-
-    public String getResourceEdgeId(String resource_id, String inode_id) {
-        return gdb.getResourceEdgeId(resource_id,inode_id);
-    }
-
-    public String getINodeId(String resource_id, String inode_id) {
-        return gdb.getINodeId(resource_id,inode_id);
-    }
-
-    public boolean setINodeParam(String resource_id, String inode_id, String paramKey, String paramValue) {
-        return gdb.setINodeParam(resource_id,inode_id,paramKey,paramValue);
-    }
-
-    public String getIsAssignedParam(String edge_id,String param_name) {
-        return gdb.getIsAssignedParam(edge_id,param_name);
-    }
-
-    public String getNodeId(String region, String agent, String plugin) {
-        return gdb.getNodeId(region,agent,plugin);
-    }
-
-    public boolean removeINode(String resource_id, String inode_id) {
-        return gdb.removeINode(resource_id,inode_id);
-    }
-
-    public List<String> getresourceNodeList(String resource_id, String inode_id) {
-        return gdb.getresourceNodeList(resource_id,inode_id);
-    }
-
-    public boolean removeResourceNode(String resource_id) {
-        return gdb.removeResourceNode(resource_id);
-    }
-
-    public List<String> getNodeList(String region, String agent, String plugin) {
-        return gdb.getNodeList(region,agent,plugin);
-    }
-
-    public List<String> getNodeIds(String region, String agent, String plugin, boolean getAll) {
-        return gdb.getNodeIds(region,agent,plugin,getAll);
-    }
-
-    public Map<String,String> getNodeParams(String node_id) {
-        return gdb.getNodeParams(node_id);
-    }
-
-    public boolean setNodeParam(String nodeId, String paramKey, String paramValue) {
-        return gdb.setNodeParam(nodeId,paramKey,paramValue);
-    }
-
-    public String addINode(String resource_id, String inode_id) {
-        return gdb.addINode(resource_id,inode_id);
-    }
-
-    public boolean updatePerf(String region, String agent, String plugin, String resource_id, String inode_id, Map<String,String> params) {
-        return gdb.updatePerf(region,agent,plugin,resource_id,inode_id,params);
-    }
-
-    public List<String> getANodeFromIndex(String indexName, String indexValue) {
-        return gdb.getANodeFromIndex(indexName,indexValue);
-    }
-
-    public String getINodeParam(String resource_id,String inode_id, String param) {
-        return gdb.getINodeParam(resource_id,inode_id,param);
-    }
-    public boolean setRDBImport(String exportData) {
-        return gdb.setDBImport(exportData);
-    }
-
-    public String getRGBDExport() {
-        return gdb.getDBExport();
-    }
-
-    public String getRGBDExport2() {
-        return gdb.getDBExport2();
-    }
-
-    */
-
 
     public Map<String,NodeStatusType> getNodeStatus(String region, String agent, String plugin) {
 
@@ -374,6 +334,43 @@ public class DBInterface {
             logger.error("GraphDBUpdater : watchDogUpdate ERROR : " + ex.toString());
         }
         return wasUpdated;
+    }
+
+    public Boolean updateKPI(MsgEvent ce) {
+        boolean updatedKPI = false;
+        try {
+            String region = null;
+            String agent = null;
+            String plugin = null;
+            String resource_id = null;
+            String inode_id = null;
+
+            region = ce.getParam("src_region");
+            agent = ce.getParam("src_agent");
+            plugin = ce.getParam("src_plugin");
+            resource_id = ce.getParam("resource_id");
+            inode_id = ce.getParam("inode_id");
+
+            //clean params for edge
+				/*
+				ce.removeParam("loop");
+				ce.removeParam("isGlobal");
+				ce.removeParam("src_agent");
+				ce.removeParam("src_region");
+				ce.removeParam("src_plugin");
+				ce.removeParam("dst_agent");
+				ce.removeParam("dst_region");
+				ce.removeParam("dst_plugin");
+				*/
+            Map<String, String> params = ce.getParams();
+
+            updatedKPI = gdb.updateKPI(region, agent, plugin, resource_id, inode_id, params);
+
+        }
+        catch( Exception ex) {
+            logger.error("updateKPI :" + ex.getMessage());
+        }
+        return updatedKPI;
     }
 
     public void setNodeParams(String region, String agent, String plugin, Map<String, String> paramMap) {

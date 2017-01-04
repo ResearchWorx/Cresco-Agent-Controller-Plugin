@@ -16,6 +16,23 @@ public class AgentDiscovery {
         //rpc = new RPC(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), null);
     }
 
+    //function to send to global controller
+    private void globalSend(MsgEvent ge) {
+        try {
+            if(!this.plugin.isGlobalController()) {
+                if(this.plugin.getGlobalControllerPath() != null) {
+                    String[] tmpStr = this.plugin.getGlobalControllerPath().split("_");
+                    ge.setParam("dst_region", tmpStr[0]);
+                    ge.setParam("dst_plugin", plugin.getPluginID());
+                    plugin.msgIn(ge);
+                }
+            }
+        }
+        catch (Exception ex) {
+            logger.error("globalSend : " + ex.getMessage());
+        }
+    }
+
     public void discover(MsgEvent le) {
         try {
 
@@ -55,8 +72,17 @@ public class AgentDiscovery {
                 } else if (le.getMsgType() == MsgEvent.Type.KPI) {
                     logger.debug("KPI: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
                     //logger.info("MsgType=" + le.getMsgType() + " Params=" + le.getParams());
-                    if (plugin.getGlobalControllerChannel() != null)
-                        plugin.getGlobalControllerChannel().updatePerf(le);
+                    if(plugin.isGlobalController()) {
+                        logger.debug("MsgType=" + le.getMsgType() + " Params=" + le.getParams());
+                        plugin.getGDB().updateKPI(le);
+                    }
+                    else {
+                        globalSend(le);
+                    }
+                    //send to controller
+                    //if (plugin.getGlobalControllerChannel() != null)
+                    //    plugin.getGlobalControllerChannel().updatePerf(le);
+
                 }
                 else if (le.getMsgType() == MsgEvent.Type.INFO) {
                     logger.debug("INFO: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
