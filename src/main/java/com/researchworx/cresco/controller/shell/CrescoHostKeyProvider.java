@@ -15,6 +15,7 @@ import org.apache.sshd.common.util.io.IoUtils;
 /**
  * Created by vcbumg2 on 5/26/16.
  */
+//setAlgorithm(KeyUtils.RSA_ALGORITHM);
 
 public abstract class CrescoHostKeyProvider extends AbstractGeneratorHostKeyProvider {
 
