@@ -1,6 +1,8 @@
 package com.researchworx.cresco.controller.globalhttp;
 
 import com.researchworx.cresco.controller.core.Launcher;
+import com.researchworx.cresco.controller.globalcontroller.GlobalCommandExec;
+import com.researchworx.cresco.library.utilities.CLogger;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -16,7 +18,18 @@ import java.io.InputStream;
 
 @Path("/PLUGINS")
 public class webDownload {
-	
+
+
+	private static Launcher mainPlugin;
+	private static CLogger logger;
+
+	private static GlobalCommandExec gce;
+
+	public static void connectPlugin(Launcher plugin) {
+		mainPlugin = plugin;
+		logger = new CLogger(webDownload.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+		gce = new GlobalCommandExec(plugin);
+	}
 	
 	@GET
 	@Path("{subResources:.*}")
@@ -31,8 +44,8 @@ public class webDownload {
             //File jarLocation = new File(Launcher.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
             //String parentDirName = jarLocation.getParent(); // to get the parent dir name
             String pluginDirectory = null;
-            if(HTTPServerEngine.plugin.getConfig().getStringParam("localpluginrepo") != null) {
-                pluginDirectory = HTTPServerEngine.plugin.getConfig().getStringParam("localpluginrepo");
+            if(mainPlugin.getConfig().getStringParam("localpluginrepo") != null) {
+                pluginDirectory = mainPlugin.getConfig().getStringParam("localpluginrepo");
             }
             else {
                 //if not listed use the controller directory

@@ -18,11 +18,14 @@ public class InAppPasswordAuthenticator implements PasswordAuthenticator {
 
         if((sshd_username != null) && (sshd_password != null)) {
             if((username.equals(sshd_username)) && (password.equals(sshd_password))) {
+                //System.out.println("0 Username : " + username + " password: " + password + " auth=" + isAuth);
                 isAuth = true;
             }
         }
         else {
+
             isAuth = username != null && username.equals(password);
+            //System.out.println("1 Username : " + username + " password: " + password + " auth=" + isAuth);
         }
         return isAuth;
 

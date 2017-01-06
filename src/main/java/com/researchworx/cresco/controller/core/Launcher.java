@@ -3,8 +3,7 @@ package com.researchworx.cresco.controller.core;
 import com.google.auto.service.AutoService;
 import com.researchworx.cresco.controller.communication.*;
 import com.researchworx.cresco.controller.globalcontroller.*;
-import com.researchworx.cresco.controller.globalhttp.HTTPServerEngine;
-import com.researchworx.cresco.controller.graphdb.GraphDBUpdater;
+import com.researchworx.cresco.controller.db.DBInterface;
 import com.researchworx.cresco.controller.netdiscovery.*;
 import com.researchworx.cresco.controller.regionalcontroller.*;
 import com.researchworx.cresco.controller.shell.AppShellFactory;
@@ -13,7 +12,9 @@ import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.plugin.core.CPlugin;
 import com.researchworx.cresco.library.utilities.CLogger;
 import org.apache.activemq.command.ActiveMQDestination;
+import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.server.SshServer;
+import org.apache.sshd.server.keyprovider.AbstractGeneratorHostKeyProvider;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 
 import javax.jms.JMSException;
@@ -42,7 +43,7 @@ public class Launcher extends CPlugin {
     private ExecutorService msgInProcessQueue;
 
     //regional
-    private GraphDBUpdater gdb;
+    private DBInterface gdb;
 
     private boolean clientDiscoveryActiveIPv4 = false;
     private boolean clientDiscoveryActiveIPv6 = false;
@@ -288,12 +289,19 @@ public class Launcher extends CPlugin {
 
             if(getConfig().getBooleanParam("enable_sshd",false)) {
                 SshServer sshd = SshServer.setUpDefaultServer();
+
                 sshd.setPasswordAuthenticator(new InAppPasswordAuthenticator(this));
                 sshd.setPort(config.getIntegerParam("sshd_port",5222));
                 String keypairPath = config.getStringParam("sshd_rsa_key_path");
                 if(keypairPath != null) {
                     try {
-                        sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider(new File(keypairPath)));
+                        AbstractGeneratorHostKeyProvider hostKeyProvider =
+                                new SimpleGeneratorHostKeyProvider(new File(keypairPath));
+                        hostKeyProvider.setAlgorithm(KeyUtils.RSA_ALGORITHM);
+                        sshd.setKeyPairProvider(hostKeyProvider);
+
+                        //sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider(new File(keypairPath)));
+
                     }
                     catch (Exception ex) {
                         logger.error("Invalid RSA Key File = " +  keypairPath + " Message=" + ex.getMessage());
@@ -301,10 +309,12 @@ public class Launcher extends CPlugin {
                     }
                 }
                 else {
-                    sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider());
+                    AbstractGeneratorHostKeyProvider hostKeyProvider =
+                            new SimpleGeneratorHostKeyProvider();
+                    hostKeyProvider.setAlgorithm(KeyUtils.RSA_ALGORITHM);
+                    sshd.setKeyPairProvider(hostKeyProvider);
+                    //sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider());
                 }
-
-
 
                 AppShellFactory ssh_shell = new AppShellFactory(this);
                 sshd.setShellFactory(ssh_shell);
@@ -446,7 +456,7 @@ public class Launcher extends CPlugin {
                 }
                 //logger.debug("Region ConsumerThread Started..");
 
-                this.gdb = new GraphDBUpdater(this); //start graphdb service
+                this.gdb = new DBInterface(this); //start db service
                 logger.debug("RegionalControllerDB Service Started");
                 this.discoveryMap = new ConcurrentHashMap<>(); //discovery map
 
@@ -848,10 +858,10 @@ public class Launcher extends CPlugin {
         this.discoveryMap = discoveryMap;
     }
 
-    public GraphDBUpdater getGDB() {
+    public DBInterface getGDB() {
         return gdb;
     }
-    public void setGDB(GraphDBUpdater gdb) {
+    public void setGDB(DBInterface gdb) {
         this.gdb = gdb;
     }
     public void removeGDBNode(String region, String agent, String pluginID) {

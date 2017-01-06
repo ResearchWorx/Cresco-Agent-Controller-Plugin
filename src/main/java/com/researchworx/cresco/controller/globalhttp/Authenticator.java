@@ -119,13 +119,14 @@ public final class Authenticator {
     {
     	if(cookie != null)
     	{
+    	    /*
     		String storedCookie = HTTPServerEngine.cookieCache.getIfPresent(cookie);
     		if(storedCookie != null)
     		{
     			System.out.println("cached cookie: " + storedCookie);
     			return true;
     		}
-    		/*
+
     		else if(HTTPServerEngine.graphDB.isSession(cookie))
     		{
     			System.out.println("stored cookie: " + cookie);

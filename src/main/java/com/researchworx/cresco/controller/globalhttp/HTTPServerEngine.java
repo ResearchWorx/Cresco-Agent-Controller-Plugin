@@ -44,9 +44,6 @@ package com.researchworx.cresco.controller.globalhttp;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.researchworx.cresco.controller.core.Launcher;
-import com.researchworx.cresco.controller.globalcontroller.GlobalCommandExec;
-import com.researchworx.cresco.controller.globalcontroller.GlobalHealthWatcher;
-import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
@@ -57,25 +54,20 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.util.Enumeration;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
 
 public class HTTPServerEngine implements Runnable{
 
 	
-	public static Launcher plugin; //super dirty, but jersey injection is complicated!  FIXME
-    public static CLogger logger; //super dirty, but jersey injection is complicated! FIXME
-    public static GlobalCommandExec gce; //super dirty, but jersey injection is complicated! FIXME
-    public static Cache<String, String> cookieCache;
+	private Launcher plugin;
+    private CLogger logger;
+    private Cache<String, String> cookieCache;
 
-	public HTTPServerEngine(Launcher plugin, GlobalCommandExec gce) throws IOException, InterruptedException
+	public HTTPServerEngine(Launcher plugin) throws IOException, InterruptedException
 	{
         this.logger = new CLogger(HTTPServerEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
         this.plugin = plugin;
-        //this.gce = new GlobalCommandExec(plugin);
-        //gexec = gexec;
-        this.gce = gce;
 
 
         cookieCache = CacheBuilder.newBuilder()
@@ -181,6 +173,10 @@ public class HTTPServerEngine implements Runnable{
         config.register(RESTRequestFilter.class);
         config.register(RESTResponseFilter.class);
         config.register(webDownload.class);
+
+        //set static vars
+        webDownload.connectPlugin(plugin);
+        webREST.connectPlugin(plugin);
 
         //ResourceConfig config = new ResourceConfig(wr);
         //CLogger webRESTLogger = new CLogger(webREST.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);

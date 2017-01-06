@@ -38,13 +38,13 @@ public class GlobalCommandExec {
 						if((ce.getParam("inode_id") != null) && (ce.getParam("resource_id") != null) && (ce.getParam("configparams") != null))
 						{
 							
-							if(plugin.getGDB().getINodeId(ce.getParam("resource_id"),ce.getParam("inode_id")) == null)
+							if(plugin.getGDB().gdb.getINodeId(ce.getParam("resource_id"),ce.getParam("inode_id")) == null)
 							{
-								if(plugin.getGDB().addINode(ce.getParam("resource_id"),ce.getParam("inode_id")) != null)
+								if(plugin.getGDB().gdb.addINode(ce.getParam("resource_id"),ce.getParam("inode_id")) != null)
 								{
-									if((plugin.getGDB().setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_code","0")) &&
-										(plugin.getGDB().setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_desc","iNode Scheduled.")) &&
-										(plugin.getGDB().setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"configparams",ce.getParam("configparams"))))
+									if((plugin.getGDB().gdb.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_code","0")) &&
+										(plugin.getGDB().gdb.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_desc","iNode Scheduled.")) &&
+										(plugin.getGDB().gdb.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"configparams",ce.getParam("configparams"))))
 									{
 										ce.setParam("status_code","0");
 										ce.setParam("status_desc","iNode Scheduled");
@@ -80,10 +80,10 @@ public class GlobalCommandExec {
 					{
 						if((ce.getParam("inode_id") != null) && (ce.getParam("resource_id") != null))
 						{
-							if(plugin.getGDB().getINodeId(ce.getParam("resource_id"),ce.getParam("inode_id")) != null)
+							if(plugin.getGDB().gdb.getINodeId(ce.getParam("resource_id"),ce.getParam("inode_id")) != null)
 							{
-								if((plugin.getGDB().setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_code","10")) &&
-								(plugin.getGDB().setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_desc","iNode scheduled for removal.")))
+								if((plugin.getGDB().gdb.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_code","10")) &&
+								(plugin.getGDB().gdb.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_desc","iNode scheduled for removal.")))
 								{
 									ce.setParam("status_code","10");
 									ce.setParam("status_desc","iNode scheduled for removal.");
@@ -159,7 +159,7 @@ public class GlobalCommandExec {
 								String indexName = ce.getParam("environment_id");
 								String indexValue = ce.getParam("environment_value");
 								
-								List<String> envNodeList = plugin.getGDB().getANodeFromIndex(indexName, indexValue);
+								List<String> envNodeList = plugin.getGDB().gdb.getANodeFromIndex(indexName, indexValue);
 								ce.setParam("count",String.valueOf(envNodeList.size()));
 							}
 							else
@@ -180,8 +180,8 @@ public class GlobalCommandExec {
 						{
 							if((ce.getParam("inode_id") != null) && (ce.getParam("resource_id") != null))
 							{
-								String status_code = plugin.getGDB().getINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_code");
-								String status_desc = plugin.getGDB().getINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_desc");
+								String status_code = plugin.getGDB().gdb.getINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_code");
+								String status_desc = plugin.getGDB().gdb.getINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_desc");
 								if((status_code != null) && (status_desc != null))
 								{
 									ce.setParam("status_code",status_code);
@@ -367,7 +367,7 @@ public class GlobalCommandExec {
 				*/
 				Map<String,String> params = ce.getParams();
 				
-				plugin.getGDB().updatePerf(region, agent, pluginid, resource_id, inode_id, params);
+				plugin.getGDB().gdb.updateKPI(region, agent, pluginid, resource_id, inode_id, params);
 				
 				ce.setMsgBody("updatedperf");
                 ce.setParam("source","watchdog");

@@ -16,13 +16,30 @@ public class AgentDiscovery {
         //rpc = new RPC(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), null);
     }
 
+    //function to send to global controller
+    private void globalSend(MsgEvent ge) {
+        try {
+            if(!this.plugin.isGlobalController()) {
+                if(this.plugin.getGlobalControllerPath() != null) {
+                    String[] tmpStr = this.plugin.getGlobalControllerPath().split("_");
+                    ge.setParam("dst_region", tmpStr[0]);
+                    ge.setParam("dst_plugin", plugin.getPluginID());
+                    plugin.msgIn(ge);
+                }
+            }
+        }
+        catch (Exception ex) {
+            logger.error("globalSend : " + ex.getMessage());
+        }
+    }
+
     public void discover(MsgEvent le) {
         try {
 
             String discoverString = le.getParam("src_region") + "-" + le.getParam("src_agent") + "-" + le.getParam("src_plugin");
             logger.trace("MsgType: [" + le.getMsgType() + "] Params: [" + le.getParams() + "]");
             if (plugin.getDiscoveryMap().containsKey(discoverString)) {
-                logger.info("Discovery underway for : discoverString=" + discoverString);
+                logger.debug("Discovery underway for : discoverString=" + discoverString);
             } else {
 
                 plugin.getDiscoveryMap().put(discoverString, System.currentTimeMillis());
@@ -36,6 +53,10 @@ public class AgentDiscovery {
                         le.setReturn();
                         //plugin.sendMsgEvent(le);
                         plugin.msgIn(le);
+                        if(!plugin.isGlobalController()) {
+                            logger.debug("MsgType=" + le.getMsgType() + " Params=" + le.getParams());
+                            globalSend(le);
+                        }
                     } else if (le.getMsgBody().equals("enabled")) {
                         logger.debug("CONFIG : AGENTDISCOVER ADD: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
                         logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
@@ -45,6 +66,10 @@ public class AgentDiscovery {
                         //le.setReturn();
                         //plugin.sendMsgEvent(le); //don't use this, only sends message to agent
                         //plugin.msgIn(le);
+                        if(!plugin.isGlobalController()) {
+                            logger.debug("MsgType=" + le.getMsgType() + " Params=" + le.getParams());
+                            globalSend(le);
+                        }
                     }
 
                 } else if (le.getMsgType() == MsgEvent.Type.WATCHDOG) {
@@ -55,8 +80,17 @@ public class AgentDiscovery {
                 } else if (le.getMsgType() == MsgEvent.Type.KPI) {
                     logger.debug("KPI: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
                     //logger.info("MsgType=" + le.getMsgType() + " Params=" + le.getParams());
-                    if (plugin.getGlobalControllerChannel() != null)
-                        plugin.getGlobalControllerChannel().updatePerf(le);
+                    if(plugin.isGlobalController()) {
+                        logger.debug("MsgType=" + le.getMsgType() + " Params=" + le.getParams());
+                        plugin.getGDB().updateKPI(le);
+                    }
+                    else {
+                        globalSend(le);
+                    }
+                    //send to controller
+                    //if (plugin.getGlobalControllerChannel() != null)
+                    //    plugin.getGlobalControllerChannel().updatePerf(le);
+
                 }
                 else if (le.getMsgType() == MsgEvent.Type.INFO) {
                     logger.debug("INFO: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));

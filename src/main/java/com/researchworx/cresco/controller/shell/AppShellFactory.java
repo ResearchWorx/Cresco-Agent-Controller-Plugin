@@ -69,7 +69,7 @@ public class AppShellFactory implements Factory {
 		*/
         completors.add(
                 new AggregateCompleter(
-                        new ArgumentCompleter(new StringsCompleter(InAppShell.SHELL_CMD_QUIT,InAppShell.SHELL_CMD_EXIT, InAppShell.SHELL_CMD_VERSION, InAppShell.SHELL_CMD_HELP))));
+                        new ArgumentCompleter(new StringsCompleter(InAppShell.SHELL_CMD_QUESTION,InAppShell.SHELL_CMD_DATABASE,InAppShell.SHELL_CMD_RESOURCES,InAppShell.SHELL_CMD_QUIT,InAppShell.SHELL_CMD_EXIT, InAppShell.SHELL_CMD_VERSION, InAppShell.SHELL_CMD_HELP))));
     }
 
     private class InAppShell implements Command, Runnable {
@@ -88,6 +88,11 @@ public class AppShellFactory implements Factory {
         private static final String SHELL_CMD_EXIT = "exit";
         private static final String SHELL_CMD_VERSION = "version";
         private static final String SHELL_CMD_HELP = "help";
+        private static final String SHELL_CMD_QUESTION = "?";
+
+
+        private static final String SHELL_CMD_RESOURCES = "resources";
+        private static final String SHELL_CMD_DATABASE = "db";
 
         private InputStream in;
         private OutputStream out;
@@ -235,6 +240,71 @@ public class AppShellFactory implements Factory {
         }
 
         private void handleUserInput(String line) throws Exception {
+
+            String response;
+
+            switch (line.toLowerCase()) {
+                case SHELL_CMD_QUIT:
+                    throw new InterruptedIOException();
+                case SHELL_CMD_EXIT:
+                    throw new InterruptedIOException();
+                case SHELL_CMD_VERSION:
+                    response = System.getProperty("os.name").toString() + " " + plugin.getVersion();
+                    break;
+                case SHELL_CMD_HELP:
+                    response = getHelpString();
+                    break;
+                case SHELL_CMD_QUESTION:
+                    response = getHelpString();
+                    break;
+                case SHELL_CMD_RESOURCES:
+                    response = getResourceString();
+                    break;
+                default:
+                    response = getHelpString();
+            }
+
+            writer.println(response);
+            writer.flush();
+
+
+        }
+
+        private String getResourceString() {
+            String response;
+            Map<String,String> resourceTotal = plugin.getGDB().getResourceTotal();
+
+            if(resourceTotal != null)
+            {
+                response = "Global Resources: \n";
+                response = "------------- \n";
+                for (Map.Entry<String, String> entry : resourceTotal.entrySet()) {
+                    response += entry.getKey() + "\t\t:\t\t" + entry.getValue() + "\n";
+                }
+            }
+            else
+            {
+                response = "Resource Query Failed !";
+            }
+            return response;
+        }
+
+        private String getHelpString() {
+
+            String response = "Command Menu: \n";
+            response += "------------- \n";
+
+            response += "version\t\t:\t\tShow Version \n";
+            response += "help\t\t:\t\tDisplay this menu \n";
+            response += "?\t\t:\t\tDisplay this menu\n";
+            response += "resources\t:\tPrint all resources \n";
+            response += "quit\t\t:\t\tExit Shell \n";
+            response += "exit\t\t:\t\tExit Shell \n";
+
+            return response;
+        }
+
+        private void handleUserInput2(String line) throws Exception {
             line = line.replaceAll("\\s+", " ").trim().toLowerCase();
             String cmdString = line.replace(" ", "_");
 
@@ -249,8 +319,39 @@ public class AppShellFactory implements Factory {
             //System.out.println("OS Name: " + System.getProperty("os.name"));
 
 
-            else if (line.equalsIgnoreCase(SHELL_CMD_HELP))
-                response = "Help is not implemented yet...";
+            else if (line.equalsIgnoreCase(SHELL_CMD_HELP)) {
+
+                //response = "Help is not implemented yet...";
+                response = "Command Menu: \n";
+                response = "------------- \n";
+
+                response += "quit : Exit \n";
+                response += "exit : Exit \n";
+                response += "version : Show Version \n";
+                response += "help : Display this menu \n";
+                response += "? : Display this menu\n";
+                response += "resources : Print all resources \n";
+            }
+
+
+            else if(line.equalsIgnoreCase(SHELL_CMD_RESOURCES)) {
+                Map<String,String> resourceTotal = plugin.getGDB().getResourceTotal();
+
+                if(resourceTotal != null)
+                {
+                    response = "Global Resources: \n";
+                    response = "------------- \n";
+                    for (Map.Entry<String, String> entry : resourceTotal.entrySet()) {
+                        response += entry.getKey() + " = " + entry.getValue() + "\n";
+                    }
+                }
+                else
+                {
+                    response = "Resource Query Failed !";
+                }
+            }
+
+
 
             else {
                 response = cmdExec(cmdString);

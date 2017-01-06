@@ -1,4 +1,4 @@
-package com.researchworx.cresco.controller.graphdb;
+package com.researchworx.cresco.controller.db;
 
 /*
  *
@@ -104,7 +104,7 @@ public class DBImport {
         try {
             logger.debug("Cleaning Region :" + importRegion);
 
-            List<String> regionList = plugin.getGDB().getNodeIds(importRegion,null,null,false);
+            List<String> regionList = plugin.getGDB().gdb.getNodeIds(importRegion,null,null,false);
             logger.debug("Region " + importRegion + " has " + regionList.size() + " nodes ");
             for(String lostNode : regionList) {
                 logger.debug("known nodes : " + lostNode);
@@ -118,7 +118,7 @@ public class DBImport {
             }
             for(String lostNode : regionList) {
                 logger.debug("Removing node :" + lostNode);
-                Map<String,String> nodeParams = plugin.getGDB().getNodeParams(lostNode);
+                Map<String,String> nodeParams = plugin.getGDB().gdb.getNodeParams(lostNode);
                 String region = nodeParams.get("region");
                 String agent = nodeParams.get("agent");
                 String pluginId = nodeParams.get("plugin");

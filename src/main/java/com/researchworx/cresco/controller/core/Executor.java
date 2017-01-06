@@ -1,13 +1,8 @@
 package com.researchworx.cresco.controller.core;
 
-import com.researchworx.cresco.controller.graphdb.DBImport;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.plugin.core.CExecutor;
 import com.researchworx.cresco.library.utilities.CLogger;
-
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 
 class Executor extends CExecutor {
     private Launcher mainPlugin;
@@ -39,7 +34,7 @@ class Executor extends CExecutor {
             case "regionalimport":
                 logger.debug("regionalimport message type found");
                 logger.debug(msg.getParam("exportdata"));
-                if(mainPlugin.getGDB().setRDBImport(msg.getParam("exportdata"))) {
+                if(mainPlugin.getGDB().gdb.setDBImport(msg.getParam("exportdata"))) {
                     logger.debug("Database Imported.");
                 }
                 else {
