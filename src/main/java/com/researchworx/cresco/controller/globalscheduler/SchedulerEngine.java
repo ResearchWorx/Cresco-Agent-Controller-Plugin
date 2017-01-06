@@ -218,7 +218,7 @@ public class SchedulerEngine implements Runnable {
 		}
 		catch(Exception ex)
 		{
-			System.out.println("GraphDBEngine : getLowAgent : Error " + ex.toString());
+			System.out.println("DBEngine : getLowAgent : Error " + ex.toString());
 		}
 		
 		return agent_path;

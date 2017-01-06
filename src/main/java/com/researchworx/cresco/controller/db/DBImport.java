@@ -59,18 +59,17 @@ public class DBImport {
     private String importRegion;
     private List<String> importedList;
 
-    private Launcher plugin;
+    //private Launcher plugin;
     private CLogger logger;
 
     private ODatabaseDocumentTx db;
-    private GraphDBEngine rgdb;
+    private DBBaseFunctions gdb;
 
-    public DBImport(Launcher plugin, final InputStream iStream, ODatabaseDocumentTx db, GraphDBEngine rgdb) throws IOException {
-        this.plugin = plugin;
+    public DBImport(Launcher plugin, final InputStream iStream, DBBaseFunctions gdb, ODatabaseDocumentTx db) throws IOException {
         this.logger = new CLogger(DBImport.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
         this.db = db;
         jsonReader = new OJSONReader(new InputStreamReader(iStream));
-        this.rgdb = rgdb;
+        this.gdb = gdb;
         importedList = new ArrayList<>();
 
         ODatabaseRecordThreadLocal.INSTANCE.set(db);
@@ -104,7 +103,7 @@ public class DBImport {
         try {
             logger.debug("Cleaning Region :" + importRegion);
 
-            List<String> regionList = plugin.getGDB().gdb.getNodeIds(importRegion,null,null,false);
+            List<String> regionList = gdb.getNodeIds(importRegion,null,null,false);
             logger.debug("Region " + importRegion + " has " + regionList.size() + " nodes ");
             for(String lostNode : regionList) {
                 logger.debug("known nodes : " + lostNode);
@@ -118,12 +117,12 @@ public class DBImport {
             }
             for(String lostNode : regionList) {
                 logger.debug("Removing node :" + lostNode);
-                Map<String,String> nodeParams = plugin.getGDB().gdb.getNodeParams(lostNode);
+                Map<String,String> nodeParams = gdb.getNodeParams(lostNode);
                 String region = nodeParams.get("region");
                 String agent = nodeParams.get("agent");
                 String pluginId = nodeParams.get("plugin");
                 logger.debug("Removing " + region + " " + agent + " " + pluginId);
-                plugin.getGDB().removeNode(region,agent,pluginId);
+                gdb.removeNode(region,agent,pluginId);
             }
             regionList.clear();
             importedList.clear();
@@ -214,12 +213,12 @@ public class DBImport {
                 if(isNodeType) {
                     logger.debug("Importing Node : Region :" + region + " Agent :" + agent + " plugin :" + plugin);
 
-                    String nodeId = rgdb.getNodeId(region, agent, plugin);
+                    String nodeId = gdb.getNodeId(region, agent, plugin);
 
 
                     if (nodeId == null) {
                         //create node
-                        nodeId = rgdb.addNode(region, agent, plugin);
+                        nodeId = gdb.addNode(region, agent, plugin);
                         logger.debug("Added nodeId : " + nodeId);
                     } else {
                         logger.debug("nodeId : " + nodeId + " exist.");
@@ -230,7 +229,7 @@ public class DBImport {
 
                     //update node params
                     
-                    rgdb.setNodeParams(region, agent, plugin, params);
+                    gdb.setNodeParams(region, agent, plugin, params);
                     logger.debug("set parmas for : " + nodeId);
                     //END
 

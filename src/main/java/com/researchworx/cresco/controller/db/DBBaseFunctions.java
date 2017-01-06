@@ -1,6 +1,5 @@
 package com.researchworx.cresco.controller.db;
 
-import com.orientechnologies.orient.client.remote.OServerAdmin;
 import com.orientechnologies.orient.core.command.OCommandOutputListener;
 import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
@@ -22,354 +21,31 @@ import javax.xml.bind.DatatypeConverter;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-public class GraphDBEngine {
-	
-	public OrientGraphFactory factory;
-	private ODatabaseDocumentTx db;
-	private OrientGraph odb;
+
+public class DBBaseFunctions {
+
     private Launcher plugin;
     private CLogger logger;
-    private boolean isMemory = true;
+    private OrientGraphFactory factory;
+    private ODatabaseDocumentTx db;
+    private int retryCount;
+    private DBEngine dbe;
 
     public String[] aNodeIndexParams = {"platform","environment","location"};
-	
-	public int retryCount = 50;
 
 
-    public boolean setDBImport(String exportData) {
-        boolean isImported = false;
-        try {
-
-            //logger.info("Import Raw : " + exportData);
-
-            //decode base64
-            byte[] exportDataRawCompressed = DatatypeConverter.parseBase64Binary(exportData);
-            InputStream iss = new ByteArrayInputStream(exportDataRawCompressed);
-            //uncompress
-            InputStream is = new GZIPInputStream(iss);
-
-            //Scanner s = new Scanner(is).useDelimiter("\\A");
-            //String result = s.hasNext() ? s.next() : "";
-            //logger.info("Uncompressed Import :" + result);
-
-            //InputStream is = new ByteArrayInputStream(exportData.getBytes(StandardCharsets.UTF_8));
-            DBImport dbImport = new DBImport(plugin, is, db, this);
-            isImported = dbImport.importDump();
-
-        }
-        catch(Exception ex) {
-            logger.error(ex.getMessage());
-            logger.error(ex.toString());
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            ex.printStackTrace(pw);
-            logger.error(sw.toString()); //
-        }
-        //export.exportDatabase();
-        //export.close();
-        //database.close();
-        return isImported;
-    }
-
-
-    public boolean setDBImportNative(String exportData) {
-        boolean isImported = false;
-        try {
-
-            OCommandOutputListener listener = new OCommandOutputListener() {
-                @Override
-                public void onMessage(String iText) {
-                    // System.out.print(iText);
-                    logger.info(iText);
-                }
-            };
-            //Not sure what this does, but is needed to dump database.
-            ODatabaseRecordThreadLocal.INSTANCE.set(db);
-            //create location for output stream
-
-            InputStream is = new ByteArrayInputStream(exportData.getBytes(StandardCharsets.UTF_8));
-
-            ODatabaseImport dbImport = new ODatabaseImport(db, is, listener);
-            //operation
-            dbImport.setMerge(true);
-            dbImport.setDeleteRIDMapping(true);
-            dbImport.setMigrateLinks(true);
-            //dbImport.setRebuildIndexes(true);
-
-            //filter export
-            dbImport.setIncludeInfo(false);
-            dbImport.setIncludeClusterDefinitions(false);
-            dbImport.setIncludeSchema(false);
-            dbImport.setIncludeIndexDefinitions(false);
-            dbImport.setIncludeManualIndexes(false);
-            dbImport.setIncludeSecurity(true);
-
-            dbImport.importDatabase();
-            dbImport.close();
-            isImported = true;
-
-
-
-        }
-        catch(Exception ex) {
-            logger.error(ex.getMessage());
-            logger.error(ex.toString());
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            ex.printStackTrace(pw);
-            logger.error(sw.toString()); //
-        }
-        //export.exportDatabase();
-        //export.close();
-        //database.close();
-        return isImported;
-    }
-
-	public String getDBExport() {
-	    String exportString = null;
-	    try {
-
-            Set<String> crescoDbClasses = new HashSet<String>();
-            crescoDbClasses.add("rnode".toUpperCase());
-            crescoDbClasses.add("anode".toUpperCase());
-            crescoDbClasses.add("pnode".toUpperCase());
-            //crescoDbClasses.add("resourcenode".toUpperCase());
-            //crescoDbClasses.add("inode".toUpperCase());
-            crescoDbClasses.add("isagent".toUpperCase());
-            crescoDbClasses.add("isplugin".toUpperCase());
-            //crescoDbClasses.add("isconnected".toUpperCase());
-            //crescoDbClasses.add("isresource".toUpperCase());
-            //crescoDbClasses.add("isreachable".toUpperCase());
-            //crescoDbClasses.add("isassigned".toUpperCase());
-            //System.out.println(crescoDbClasses);
-
-
-            OCommandOutputListener listener = new OCommandOutputListener() {
-                @Override
-                public void onMessage(String iText) {
-                    // System.out.print(iText);
-                }
-            };
-            //Not sure what this does, but is needed to dump database.
-            ODatabaseRecordThreadLocal.INSTANCE.set(db);
-            //create location for output stream
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-
-            ODatabaseExport export = new ODatabaseExport(db, os, listener);
-
-            //filter export
-
-
-            export.setIncludeInfo(false);
-            export.setIncludeClusterDefinitions(false);
-            export.setIncludeSchema(false);
-
-            export.setIncludeIndexDefinitions(false);
-            export.setIncludeManualIndexes(false);
-
-            export.setIncludeSecurity(false);
-            //include classes
-            export.setIncludeClasses(crescoDbClasses);
-
-
-            export.exportDatabase();
-
-            String exportStringRaw = new String(os.toByteArray(),"UTF-8");
-
-            export.close();
-
-            //Now Compress and Encode
-            exportString = DatatypeConverter.printBase64Binary(stringCompress(exportStringRaw));
-            //byte[] message = "hello world".getBytes("UTF-8");
-            //String encoded = DatatypeConverter.printBase64Binary(message);
-            //byte[] decoded = DatatypeConverter.parseBase64Binary(encoded);
-
-
-        }
-        catch(Exception ex) {
-	        logger.error(ex.getMessage());
-        }
-        //export.exportDatabase();
-        //export.close();
-        //database.close();
-        return exportString;
-    }
-
-    private byte[] stringCompress(String str) {
-        byte[] dataToCompress = str.getBytes(StandardCharsets.UTF_8);
-        byte[] compressedData = null;
-        try
-        {
-            ByteArrayOutputStream byteStream =
-                    new ByteArrayOutputStream(dataToCompress.length);
-            try
-            {
-                GZIPOutputStream zipStream =
-                        new GZIPOutputStream(byteStream);
-                try
-                {
-                    zipStream.write(dataToCompress);
-                }
-                finally
-                {
-                    zipStream.close();
-                }
-            }
-            finally
-            {
-                byteStream.close();
-            }
-
-            compressedData = byteStream.toByteArray();
-
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-        }
-        return compressedData;
-    }
-
-    public String getDBExport2() {
-        String exportString = null;
-        try {
-
-            OCommandOutputListener listener = new OCommandOutputListener() {
-                @Override
-                public void onMessage(String iText) {
-                    // System.out.print(iText);
-                }
-            };
-            //Not sure what this does, but is needed to dump database.
-            ODatabaseRecordThreadLocal.INSTANCE.set(db);
-            //create location for output stream
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-
-            ODatabaseExport export = new ODatabaseExport(db, os, listener);
-
-            export.exportDatabase();
-
-            exportString = new String(os.toByteArray(),"UTF-8");
-
-            export.close();
-
-        }
-        catch(Exception ex) {
-            logger.error(ex.getMessage());
-        }
-
-        return exportString;
-    }
-
-	public GraphDBEngine(Launcher plugin) {
-        //For logging, does not seem to work.
-        //System.setProperty("log.console.level", "FINE");
-        //System.setProperty("orientdb.installCustomFormatter", "false");
-
+    public DBBaseFunctions(Launcher plugin, DBEngine dbe) {
+        this.logger = new CLogger(DBBaseFunctions.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
         this.plugin = plugin;
-        logger = new CLogger(GraphDBEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+        this.factory = dbe.factory;
+        this.db = dbe.db;
+        this.retryCount = plugin.getConfig().getIntegerParam("db_retry_count",50);
 
-
-		/*
-		nodePathCache = CacheBuilder.newBuilder()
-			    .concurrencyLevel(4)
-			    .softValues()
-			    .maximumSize(100000)
-			    .expireAfterWrite(15, TimeUnit.MINUTES)
-			    .build();
-		
-		appPathCache = CacheBuilder.newBuilder()
-			    .concurrencyLevel(4)
-			    .softValues()
-			    .maximumSize(100000)
-			    .expireAfterWrite(15, TimeUnit.MINUTES)
-			    .build();
-		*/
-
-        String host = plugin.getConfig().getStringParam("gdb_host");
-        String username = plugin.getConfig().getStringParam("gdb_username");
-        String password = plugin.getConfig().getStringParam("gdb_password");
-        String dbname = plugin.getConfig().getStringParam("gdb_dbname");
-        if((host != null) && (username != null) && (password != null) && (dbname != null))
-        {
-            isMemory = false;
-        }
-
-        if(isMemory) {
-            db = new ODatabaseDocumentTx("memory:internalDb").create();
-
-            factory = new OrientGraphFactory("memory:internalDb");
-        }
-        else {
-
-            //String connection_string = "plocal:/opt/cresco/db";
-            String connection_string = "plocal:/Users/vcbumg2/Downloads/orientdb-community-2.2.14/databases/cresco";
-            db = new  ODatabaseDocumentTx(connection_string).open(username, password);
-            factory = new OrientGraphFactory(connection_string, username, password).setupPool(10, 100);
-
-            //db = new ODatabaseDocumentTx(connection_string).create();
-
-            /*
-            //Orient.instance(). .instance(). .reg .registerEngine(new OEngineRemote());
-            String connection_string = "remote:" + host + "/" + dbname;
-
-
-            if (dropDBIfExists(connection_string, username, password)) {
-                logger.debug("Dropped existing database!");
-                //System.exit(0);
-            }
-
-            if (!dbCheck(connection_string, username, password)) {
-                logger.debug("DBCheck failed");
-                System.exit(0);
-            }
-            db = new  ODatabaseDocumentTx(connection_string).open(username, password);
-            factory = new OrientGraphFactory(connection_string, username, password).setupPool(10, 100);
-            */
-        }
+        //create basic cresco constructs
         initCrescoDB();
-        logger.debug("Post Init!");
-
-    }
-
-    public boolean dbCheck(String connection_string, String username, String password) {
-
-        Boolean isValid = false;
-        try {
-            OServerAdmin server = new OServerAdmin(connection_string).connect(username, password);
-            if (!server.existsDatabase("plocal")) {
-                server.createDatabase("graph", "plocal");
-                isValid = true;
-            }
-            else {
-                isValid = true;
-            }
-            server.close();
-        }
-        catch(Exception ex) {
-            ex.printStackTrace();
-        }
-        return isValid;
-    }
-
-    public boolean dropDBIfExists(String connection_string, String username, String password) {
-        Boolean isValid = false;
-        try {
-            OServerAdmin server = new OServerAdmin(connection_string).connect(username, password);
-            if (server.existsDatabase("plocal")) {
-                server.dropDatabase("plocal");
-                isValid = true;
-            }
-            server.close();
-        }
-        catch(Exception ex) {
-            ex.printStackTrace();
-        }
-        return isValid;
     }
 
     //new database functions
@@ -397,7 +73,7 @@ public class GraphDBEngine {
         }
         catch(Exception ex)
         {
-            logger.debug("GraphDBEngine : getINodeID : Error " + ex.toString());
+            logger.debug("DBEngine : getINodeID : Error " + ex.toString());
         }
         finally
         {
@@ -436,7 +112,7 @@ public class GraphDBEngine {
         }
         catch(Exception ex)
         {
-            logger.debug("GraphDBEngine : getANodeFromIndex : Error " + ex.toString());
+            logger.debug("DBEngine : getANodeFromIndex : Error " + ex.toString());
             nodeList = null;
         }
         finally
@@ -472,7 +148,7 @@ public class GraphDBEngine {
         }
         catch(Exception ex)
         {
-            logger.debug("GraphDBEngine : getResourceNodeID : Error " + ex.toString());
+            logger.debug("DBEngine : getResourceNodeID : Error " + ex.toString());
         }
         finally
         {
@@ -555,7 +231,7 @@ public class GraphDBEngine {
         }
         catch(Exception ex)
         {
-            logger.debug("GraphDBEngine : getNodeID : Error " + ex.toString());
+            logger.debug("DBEngine : getNodeID : Error " + ex.toString());
         }
         finally
         {
@@ -566,7 +242,6 @@ public class GraphDBEngine {
         }
         return node_id;
     }
-
 
     public List<String> getNodeIds(String region, String agent, String plugin, boolean getAll)
     {
@@ -581,7 +256,7 @@ public class GraphDBEngine {
                 //OrientGraphNoTx graph = factory.getNoTx();
                 graph = factory.getTx();
                 Iterable<Vertex> resultIterator = null;
-                    resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:rNode.nodePath")).execute();
+                resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:rNode.nodePath")).execute();
                 Iterator<Vertex> iter = resultIterator.iterator();
                 while(iter.hasNext())
                 {
@@ -655,7 +330,7 @@ public class GraphDBEngine {
         }
         catch(Exception ex)
         {
-            logger.debug("GraphDBEngine : getNodeID : Error " + ex.toString());
+            logger.debug("DBEngine : getNodeID : Error " + ex.toString());
         }
         finally
         {
@@ -698,7 +373,7 @@ public class GraphDBEngine {
         }
         catch(Exception ex)
         {
-            logger.debug("GraphDBEngine : getResourceEdgeId : Error " + ex.toString());
+            logger.debug("DBEngine : getResourceEdgeId : Error " + ex.toString());
         }
         finally
         {
@@ -741,7 +416,7 @@ public class GraphDBEngine {
         }
         catch(Exception ex)
         {
-            logger.debug("GraphDBEngine : getIsAssignedEdgeId : Error " + ex.toString());
+            logger.debug("DBEngine : getIsAssignedEdgeId : Error " + ex.toString());
         }
         finally
         {
@@ -787,7 +462,7 @@ public class GraphDBEngine {
         }
         catch(Exception ex)
         {
-            logger.debug("GraphDBEngine : getIsAssignedEdgeId : Error " + ex.toString());
+            logger.debug("DBEngine : getIsAssignedEdgeId : Error " + ex.toString());
         }
         finally
         {
@@ -817,7 +492,7 @@ public class GraphDBEngine {
         }
         catch(Exception ex)
         {
-            logger.debug("GraphDBEngine : getIsAssignedParam : Error " + ex.toString());
+            logger.debug("DBEngine : getIsAssignedParam : Error " + ex.toString());
         }
         finally
         {
@@ -851,7 +526,7 @@ public class GraphDBEngine {
         }
         catch(Exception ex)
         {
-            logger.debug("GraphDBEngine : getIsAssignedParams : Error " + ex.toString());
+            logger.debug("DBEngine : getIsAssignedParams : Error " + ex.toString());
         }
         finally
         {
@@ -1004,7 +679,7 @@ public class GraphDBEngine {
         }
         catch(Exception ex)
         {
-            logger.debug("GraphDBEngine : getNodeList : Error " + ex.toString());
+            logger.debug("DBEngine : getNodeList : Error " + ex.toString());
         }
         finally
         {
@@ -1068,12 +743,12 @@ public class GraphDBEngine {
 
             if((paramVal == null) && (count == retryCount))
             {
-                logger.debug("GraphDBEngine : getNodeParam : Failed to add node in " + count + " retrys");
+                logger.debug("DBEngine : getNodeParam : Failed to add node in " + count + " retrys");
             }
         }
         catch(Exception ex)
         {
-            logger.debug("GraphDBEngine : getNodeParam : Error " + ex.toString());
+            logger.debug("DBEngine : getNodeParam : Error " + ex.toString());
         }
 
         return paramVal;
@@ -1101,12 +776,12 @@ public class GraphDBEngine {
 
             if((paramVal == null) && (count == retryCount))
             {
-                logger.debug("GraphDBEngine : getNodeParam : Failed to add node in " + count + " retrys");
+                logger.debug("DBEngine : getNodeParam : Failed to add node in " + count + " retrys");
             }
         }
         catch(Exception ex)
         {
-            logger.debug("GraphDBEngine : getNodeParam : Error " + ex.toString());
+            logger.debug("DBEngine : getNodeParam : Error " + ex.toString());
         }
 
         return paramVal;
@@ -1186,19 +861,18 @@ public class GraphDBEngine {
 
             if((paramsVal == null) && (count == retryCount))
             {
-                logger.debug("GraphDBEngine : getNodeParams : Failed to add node in " + count + " retrys");
+                logger.debug("DBEngine : getNodeParams : Failed to add node in " + count + " retrys");
             }
         }
         catch(Exception ex)
         {
-            logger.debug("GraphDBEngine : getNodeParams : Error " + ex.toString());
+            logger.debug("DBEngine : getNodeParams : Error " + ex.toString());
         }
 
         return paramsVal;
     }
 
     //WRITES
-
     public String addIsAttachedEdge(String resource_id, String inode_id, String region, String agent, String plugin)
     {
         String edge_id = null;
@@ -1220,12 +894,12 @@ public class GraphDBEngine {
 
             if((edge_id == null) && (count == retryCount))
             {
-                logger.debug("GraphDBEngine : addIsAttachedEdge : Failed to add edge in " + count + " retrys");
+                logger.debug("DBEngine : addIsAttachedEdge : Failed to add edge in " + count + " retrys");
             }
         }
         catch(Exception ex)
         {
-            logger.debug("GraphDBEngine : addIsAttachedEdge : Error " + ex.toString());
+            logger.debug("DBEngine : addIsAttachedEdge : Error " + ex.toString());
         }
 
         return edge_id;
@@ -1335,12 +1009,12 @@ public class GraphDBEngine {
 
             if((node_id == null) && (count == retryCount))
             {
-                logger.debug("GraphDBEngine : addINode : Failed to add node in " + count + " retrys");
+                logger.debug("DBEngine : addINode : Failed to add node in " + count + " retrys");
             }
         }
         catch(Exception ex)
         {
-            logger.debug("GraphDBEngine : addINode : Error " + ex.toString());
+            logger.debug("DBEngine : addINode : Error " + ex.toString());
         }
 
         return node_id;
@@ -1487,12 +1161,12 @@ public class GraphDBEngine {
 
             if((node_id == null) && (count == retryCount))
             {
-                logger.debug("GraphDBEngine : addNode : Failed to add node in " + count + " retrys");
+                logger.debug("DBEngine : addNode : Failed to add node in " + count + " retrys");
             }
         }
         catch(Exception ex)
         {
-            logger.debug("GraphDBEngine : addNode : Error " + ex.toString());
+            logger.debug("DBEngine : addNode : Error " + ex.toString());
         }
 
         return node_id;
@@ -1585,12 +1259,12 @@ public class GraphDBEngine {
 
             if((node_id == null) && (count == retryCount))
             {
-                logger.debug("GraphDBEngine : addINode : Failed to add node in " + count + " retrys");
+                logger.debug("DBEngine : addINode : Failed to add node in " + count + " retrys");
             }
         }
         catch(Exception ex)
         {
-            logger.debug("GraphDBEngine : addINode : Error " + ex.toString());
+            logger.debug("DBEngine : addINode : Error " + ex.toString());
         }
 
         return node_id;
@@ -1658,12 +1332,12 @@ public class GraphDBEngine {
 
             if((edge_id == null) && (count == retryCount))
             {
-                logger.debug("GraphDBEngine : addEdge : Failed to add node in " + count + " retrys");
+                logger.debug("DBEngine : addEdge : Failed to add node in " + count + " retrys");
             }
         }
         catch(Exception ex)
         {
-            logger.debug("GraphDBEngine : addEdge : Error " + ex.toString());
+            logger.debug("DBEngine : addEdge : Error " + ex.toString());
         }
 
         return edge_id;
@@ -1720,12 +1394,12 @@ public class GraphDBEngine {
 
             if((!nodeRemoved) && (count == retryCount))
             {
-                logger.debug("GraphDBEngine : removeNode : Failed to add node in " + count + " retrys");
+                logger.debug("DBEngine : removeNode : Failed to add node in " + count + " retrys");
             }
         }
         catch(Exception ex)
         {
-            logger.debug("GraphDBEngine : removeNode : Error " + ex.toString());
+            logger.debug("DBEngine : removeNode : Error " + ex.toString());
         }
 
         return nodeRemoved;
@@ -1840,12 +1514,12 @@ public class GraphDBEngine {
 
             if((!nodeRemoved) && (count == retryCount))
             {
-                logger.debug("GraphDBEngine : removeINode : Failed to add node in " + count + " retrys");
+                logger.debug("DBEngine : removeINode : Failed to add node in " + count + " retrys");
             }
         }
         catch(Exception ex)
         {
-            logger.debug("GraphDBEngine : removeINode : Error " + ex.toString());
+            logger.debug("DBEngine : removeINode : Error " + ex.toString());
         }
 
         return nodeRemoved;
@@ -1914,12 +1588,12 @@ public class GraphDBEngine {
 
             if((!nodeRemoved) && (count == retryCount))
             {
-                logger.debug("GraphDBEngine : removeResourceNode : Failed to add node in " + count + " retrys");
+                logger.debug("DBEngine : removeResourceNode : Failed to add node in " + count + " retrys");
             }
         }
         catch(Exception ex)
         {
-            logger.debug("GraphDBEngine : removeResourceNode : Error " + ex.toString());
+            logger.debug("DBEngine : removeResourceNode : Error " + ex.toString());
         }
 
         return nodeRemoved;
@@ -1968,7 +1642,7 @@ public class GraphDBEngine {
         catch(Exception ex)
         {
             long threadId = Thread.currentThread().getId();
-            logger.debug("GraphDBEngine : IremoveResourceNode :  thread_id: " + threadId + " Error " + ex.toString());
+            logger.debug("DBEngine : IremoveResourceNode :  thread_id: " + threadId + " Error " + ex.toString());
         }
         finally
         {
@@ -1996,7 +1670,7 @@ public class GraphDBEngine {
                 Iterator it = paramMap.entrySet().iterator();
                 while (it.hasNext())
                 {
-                    Entry pairs = (Entry)it.next();
+                    Map.Entry pairs = (Map.Entry)it.next();
                     iNode.setProperty( pairs.getKey().toString(), pairs.getValue().toString());
                 }
                 graph.commit();
@@ -2047,12 +1721,12 @@ public class GraphDBEngine {
 
             if((!isUpdated) && (count == retryCount))
             {
-                logger.debug("GraphDBEngine : setINodeParams : Failed to add node in " + count + " retrys");
+                logger.debug("DBEngine : setINodeParams : Failed to add node in " + count + " retrys");
             }
         }
         catch(Exception ex)
         {
-            logger.debug("GraphDBEngine : setINodeParams : Error " + ex.toString());
+            logger.debug("DBEngine : setINodeParams : Error " + ex.toString());
         }
 
         return isUpdated;
@@ -2079,12 +1753,12 @@ public class GraphDBEngine {
 
             if((!isUpdated) && (count == retryCount))
             {
-                logger.debug("GraphDBEngine : setINodeParams : Failed to add node in " + count + " retrys");
+                logger.debug("DBEngine : setINodeParams : Failed to add node in " + count + " retrys");
             }
         }
         catch(Exception ex)
         {
-            logger.debug("GraphDBEngine : setINodeParams : Error " + ex.toString());
+            logger.debug("DBEngine : setINodeParams : Error " + ex.toString());
         }
 
         return isUpdated;
@@ -2106,7 +1780,7 @@ public class GraphDBEngine {
                 Iterator it = paramMap.entrySet().iterator();
                 while (it.hasNext())
                 {
-                    Entry pairs = (Entry)it.next();
+                    Map.Entry pairs = (Map.Entry)it.next();
                     iNode.setProperty( pairs.getKey().toString(), pairs.getValue().toString());
                 }
                 graph.commit();
@@ -2157,12 +1831,12 @@ public class GraphDBEngine {
 
             if((!isUpdated) && (count == retryCount))
             {
-                logger.debug("GraphDBEngine : setINodeParam : Failed to add node in " + count + " retrys");
+                logger.debug("DBEngine : setINodeParam : Failed to add node in " + count + " retrys");
             }
         }
         catch(Exception ex)
         {
-            logger.debug("GraphDBEngine : setINodeParam : Error " + ex.toString());
+            logger.debug("DBEngine : setINodeParam : Error " + ex.toString());
         }
 
         return isUpdated;
@@ -2229,12 +1903,12 @@ public class GraphDBEngine {
 
             if((!isUpdated) && (count == retryCount))
             {
-                logger.debug("GraphDBEngine : setINodeParam : Failed to add node in " + count + " retrys");
+                logger.debug("DBEngine : setINodeParam : Failed to add node in " + count + " retrys");
             }
         }
         catch(Exception ex)
         {
-            logger.debug("GraphDBEngine : setINodeParam : Error " + ex.toString());
+            logger.debug("DBEngine : setINodeParam : Error " + ex.toString());
         }
 
         return isUpdated;
@@ -2281,7 +1955,6 @@ public class GraphDBEngine {
         return isUpdated;
     }
 
-
     public boolean setNodeParam(String region, String agent, String plugin, String paramKey, String paramValue)
     {
         boolean isUpdated = false;
@@ -2303,12 +1976,12 @@ public class GraphDBEngine {
 
             if((!isUpdated) && (count == retryCount))
             {
-                logger.debug("GraphDBEngine : setINodeParam : Failed to add node in " + count + " retrys");
+                logger.debug("DBEngine : setINodeParam : Failed to add node in " + count + " retrys");
             }
         }
         catch(Exception ex)
         {
-            logger.debug("GraphDBEngine : setINodeParam : Error " + ex.toString());
+            logger.debug("DBEngine : setINodeParam : Error " + ex.toString());
         }
 
         return isUpdated;
@@ -2370,7 +2043,113 @@ public class GraphDBEngine {
         return isUpdated;
     }
 
-    //INIT Functions
+    //Updateing KPI
+    public boolean updateKPI(String region, String agent, String plugin, String resource_id, String inode_id, Map<String,String> params)
+    {
+        boolean isUpdated = false;
+        String edge_id = null;
+        try
+        {
+            //make sure nodes exist
+            String resource_node_id = getResourceNodeId(resource_id);
+            String inode_node_id = getINodeId(resource_id,inode_id);
+            String plugin_node_id = getNodeId(region,agent,plugin);
+
+            //create node if not seen.. this needs to be changed.
+            if(plugin_node_id == null) {
+                plugin_node_id = addNode(region,agent,plugin);
+                logger.debug("Added Node" + region + " " + agent + " " + plugin + " = " + plugin_node_id);
+            }
+
+            if((resource_node_id != null) && (inode_node_id != null) && (plugin_node_id != null))
+            {
+                //check if edge is found, if not create it
+                edge_id = getResourceEdgeId(resource_id, inode_id, region, agent);
+                if(edge_id == null)
+                {
+                    edge_id = addIsAttachedEdge(resource_id, inode_id, region, agent, plugin);
+                }
+                //check again if edge is found
+                if(edge_id != null)
+                {
+                    //if(updateEdge(edge_id, params))
+                    if(updateEdgeNoTx(edge_id, params))
+                    {
+                        isUpdated = true;
+                    }
+                    else
+                    {
+                        logger.debug("Controller : DBEngine : Failed to updatePerf : Failed to update Edge params!");
+                    }
+                }
+                else
+                {
+                    logger.debug("Controller : DBEngine : Failed to updatePerf : edge_id not found!");
+                }
+            }
+            else
+            {
+                logger.debug("Can't update missing nodes : " + resource_id + "," + inode_id + "," + plugin);
+                logger.debug("Can't update missing nodes : " + resource_node_id + "," + inode_node_id + "," + plugin_node_id);
+            }
+
+        }
+        catch(Exception ex)
+        {
+            logger.debug("Controller : DBEngine : Failed to updatePerf");
+
+        }
+        return isUpdated;
+    }
+
+    private boolean updateEdgeNoTx(String edge_id, Map<String,String> params)
+    {
+        boolean isUpdated = false;
+        OrientGraphNoTx graph = null;
+        try
+        {
+            graph = factory.getNoTx();
+            Edge edge = graph.getEdge(edge_id);
+            if(edge != null)
+            {
+                for (Map.Entry<String, String> entry : params.entrySet())
+                {
+                    edge.setProperty(entry.getKey(), entry.getValue());
+                }
+                graph.commit();
+                isUpdated = true;
+            }
+            else
+            {
+                logger.debug("IupdateEdge: no edge found for edge_id=" + edge_id);
+            }
+
+        }
+        catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException exc)
+        {
+            //eat exception.. this is not normal and should log somewhere
+        }
+        catch(com.orientechnologies.orient.core.exception.OConcurrentModificationException exc)
+        {
+            //eat exception.. this is normal
+        }
+        catch(Exception ex)
+        {
+            long threadId = Thread.currentThread().getId();
+            logger.debug("IupdateEdge: thread_id: " + threadId + " Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return isUpdated;
+
+    }
+
+    //Base INIT Functions
     public void initCrescoDB()
     {
         try
@@ -2465,6 +2244,7 @@ public class GraphDBEngine {
         }
     }
 
+    //Class Create Functions
     boolean createVertexIndex(String className, String indexName, boolean isUnique)
     {
         boolean wasCreated = false;
@@ -2491,12 +2271,13 @@ public class GraphDBEngine {
 
                 wasCreated = true;
             }
+
             txGraph.commit();
             txGraph.shutdown();
         }
         catch(Exception ex)
         {
-            logger.debug("GraphDBEngine : createVertexIndex : Error " + ex.toString());
+            logger.debug("DBEngine : createVertexIndex : Error " + ex.toString());
         }
 
         return wasCreated;
@@ -2546,10 +2327,11 @@ public class GraphDBEngine {
             for(String prop : props)
                 vt.createProperty(prop, OType.STRING);
             vt.createIndex(className + ".nodePath", OClass.INDEX_TYPE.UNIQUE, props);
-
-            wasCreated = true;
+            txGraph.commit();
+            if (schema.existsClass(className)) {
+                wasCreated = true;
+            }
         }
-        txGraph.commit();
         txGraph.shutdown();
         return wasCreated;
     }
@@ -2577,219 +2359,230 @@ public class GraphDBEngine {
         return wasCreated;
     }
 
-    //CLIENT FUNCTIONS
+    //DB IO Functions
+    //dbIO functions
+    public boolean setDBImport(String exportData) {
+        boolean isImported = false;
+        try {
 
-    //client DB
+            //logger.info("Import Raw : " + exportData);
 
+            //decode base64
+            byte[] exportDataRawCompressed = DatatypeConverter.parseBase64Binary(exportData);
+            InputStream iss = new ByteArrayInputStream(exportDataRawCompressed);
+            //uncompress
+            InputStream is = new GZIPInputStream(iss);
 
-    public String getNodeClass(String region, String agent, String plugin)
-    {
-        try
-        {
-            if((region != null) && (agent == null) && (plugin == null))
-            {
-                return "rNode";
-            }
-            else if((region != null) && (agent != null) && (plugin == null))
-            {
-                return "aNode";
-            }
-            else if((region != null) && (agent != null) && (plugin != null))
-            {
-                return "pNode";
-            }
+            //Scanner s = new Scanner(is).useDelimiter("\\A");
+            //String result = s.hasNext() ? s.next() : "";
+            //logger.info("Uncompressed Import :" + result);
+
+            //InputStream is = new ByteArrayInputStream(exportData.getBytes(StandardCharsets.UTF_8));
+            DBImport dbImport = new DBImport(plugin, is, this,db);
+            isImported = dbImport.importDump();
+
         }
-        catch(Exception ex)
-        {
-            logger.debug("getNodeClass: Error " + ex.toString());
+        catch(Exception ex) {
+            logger.error(ex.getMessage());
+            logger.error(ex.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString()); //
         }
-        return null;
-
+        //export.exportDatabase();
+        //export.close();
+        //database.close();
+        return isImported;
     }
 
-    public boolean updateEdge(String edge_id, Map<String,String> params)
-    {
-        boolean isUpdated = false;
-        int count = 0;
-        try
-        {
+    public boolean setDBImportNative(String exportData) {
+        boolean isImported = false;
+        try {
 
-            while((!isUpdated) && (count != retryCount))
-            {
-                if(count > 0)
-                {
-                    //logger.debug("ADDNODE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
-                    Thread.sleep((long)(Math.random() * 1000)); //random wait to prevent sync error
+            OCommandOutputListener listener = new OCommandOutputListener() {
+                @Override
+                public void onMessage(String iText) {
+                    // System.out.print(iText);
+                    logger.info(iText);
                 }
-                isUpdated = IupdateEdge(edge_id, params);
-                count++;
+            };
+            //Not sure what this does, but is needed to dump database.
+            ODatabaseRecordThreadLocal.INSTANCE.set(db);
+            //create location for output stream
 
-            }
+            InputStream is = new ByteArrayInputStream(exportData.getBytes(StandardCharsets.UTF_8));
 
-            if((!isUpdated) && (count == retryCount))
-            {
-                logger.debug("GraphDBEngine : updateEdge : Failed to update edge in " + count + " retrys");
-            }
+            ODatabaseImport dbImport = new ODatabaseImport(db, is, listener);
+            //operation
+            dbImport.setMerge(true);
+            dbImport.setDeleteRIDMapping(true);
+            dbImport.setMigrateLinks(true);
+            //dbImport.setRebuildIndexes(true);
+
+            //filter export
+            dbImport.setIncludeInfo(false);
+            dbImport.setIncludeClusterDefinitions(false);
+            dbImport.setIncludeSchema(false);
+            dbImport.setIncludeIndexDefinitions(false);
+            dbImport.setIncludeManualIndexes(false);
+            dbImport.setIncludeSecurity(true);
+
+            dbImport.importDatabase();
+            dbImport.close();
+            isImported = true;
+
+
+
         }
-        catch(Exception ex)
-        {
-            logger.debug("GraphDBEngine : updateEdge : Error " + ex.toString());
+        catch(Exception ex) {
+            logger.error(ex.getMessage());
+            logger.error(ex.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString()); //
         }
-
-        return isUpdated;
+        //export.exportDatabase();
+        //export.close();
+        //database.close();
+        return isImported;
     }
 
-    private boolean IupdateEdge(String edge_id, Map<String,String> params)
-    {
-        boolean isUpdated = false;
-        OrientGraph graph = null;
-        try
-        {
-            graph = factory.getTx();
-            Edge edge = graph.getEdge(edge_id);
-            if(edge != null)
-            {
-                for (Entry<String, String> entry : params.entrySet())
-                {
-                    edge.setProperty(entry.getKey(), entry.getValue());
+    public String getDBExport() {
+        String exportString = null;
+        try {
+
+            Set<String> crescoDbClasses = new HashSet<String>();
+            crescoDbClasses.add("rnode".toUpperCase());
+            crescoDbClasses.add("anode".toUpperCase());
+            crescoDbClasses.add("pnode".toUpperCase());
+            //crescoDbClasses.add("resourcenode".toUpperCase());
+            //crescoDbClasses.add("inode".toUpperCase());
+            crescoDbClasses.add("isagent".toUpperCase());
+            crescoDbClasses.add("isplugin".toUpperCase());
+            //crescoDbClasses.add("isconnected".toUpperCase());
+            //crescoDbClasses.add("isresource".toUpperCase());
+            //crescoDbClasses.add("isreachable".toUpperCase());
+            //crescoDbClasses.add("isassigned".toUpperCase());
+            //System.out.println(crescoDbClasses);
+
+
+            OCommandOutputListener listener = new OCommandOutputListener() {
+                @Override
+                public void onMessage(String iText) {
+                    // System.out.print(iText);
                 }
-                graph.commit();
-                isUpdated = true;
-            }
-            else
-            {
-                logger.debug("IupdateEdge: no edge found for edge_id=" + edge_id);
-            }
+            };
+            //Not sure what this does, but is needed to dump database.
+            ODatabaseRecordThreadLocal.INSTANCE.set(db);
+            //create location for output stream
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+            ODatabaseExport export = new ODatabaseExport(db, os, listener);
+
+            //filter export
+
+
+            export.setIncludeInfo(false);
+            export.setIncludeClusterDefinitions(false);
+            export.setIncludeSchema(false);
+
+            export.setIncludeIndexDefinitions(false);
+            export.setIncludeManualIndexes(false);
+
+            export.setIncludeSecurity(false);
+            //include classes
+            export.setIncludeClasses(crescoDbClasses);
+
+
+            export.exportDatabase();
+
+            String exportStringRaw = new String(os.toByteArray(),"UTF-8");
+
+            export.close();
+
+            //Now Compress and Encode
+            exportString = DatatypeConverter.printBase64Binary(stringCompress(exportStringRaw));
+            //byte[] message = "hello world".getBytes("UTF-8");
+            //String encoded = DatatypeConverter.printBase64Binary(message);
+            //byte[] decoded = DatatypeConverter.parseBase64Binary(encoded);
+
 
         }
-        catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException exc)
-        {
-            //eat exception.. this is not normal and should log somewhere
+        catch(Exception ex) {
+            logger.error(ex.getMessage());
         }
-        catch(com.orientechnologies.orient.core.exception.OConcurrentModificationException exc)
-        {
-            //eat exception.. this is normal
-        }
-        catch(Exception ex)
-        {
-            long threadId = Thread.currentThread().getId();
-            logger.debug("IupdateEdge: thread_id: " + threadId + " Error " + ex.toString());
-        }
-        finally
-        {
-            if(graph != null)
-            {
-                graph.shutdown();
-            }
-        }
-        return isUpdated;
-
+        //export.exportDatabase();
+        //export.close();
+        //database.close();
+        return exportString;
     }
 
-    private boolean updateEdgeNoTx(String edge_id, Map<String,String> params)
-    {
-        boolean isUpdated = false;
-        OrientGraphNoTx graph = null;
+    private byte[] stringCompress(String str) {
+        byte[] dataToCompress = str.getBytes(StandardCharsets.UTF_8);
+        byte[] compressedData = null;
         try
         {
-            graph = factory.getNoTx();
-            Edge edge = graph.getEdge(edge_id);
-            if(edge != null)
+            ByteArrayOutputStream byteStream =
+                    new ByteArrayOutputStream(dataToCompress.length);
+            try
             {
-                for (Entry<String, String> entry : params.entrySet())
+                GZIPOutputStream zipStream =
+                        new GZIPOutputStream(byteStream);
+                try
                 {
-                    edge.setProperty(entry.getKey(), entry.getValue());
+                    zipStream.write(dataToCompress);
                 }
-                graph.commit();
-                isUpdated = true;
+                finally
+                {
+                    zipStream.close();
+                }
             }
-            else
+            finally
             {
-                logger.debug("IupdateEdge: no edge found for edge_id=" + edge_id);
+                byteStream.close();
             }
 
-        }
-        catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException exc)
-        {
-            //eat exception.. this is not normal and should log somewhere
-        }
-        catch(com.orientechnologies.orient.core.exception.OConcurrentModificationException exc)
-        {
-            //eat exception.. this is normal
-        }
-        catch(Exception ex)
-        {
-            long threadId = Thread.currentThread().getId();
-            logger.debug("IupdateEdge: thread_id: " + threadId + " Error " + ex.toString());
-        }
-        finally
-        {
-            if(graph != null)
-            {
-                graph.shutdown();
-            }
-        }
-        return isUpdated;
+            compressedData = byteStream.toByteArray();
 
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+        return compressedData;
     }
 
-    public boolean updateKPI(String region, String agent, String plugin, String resource_id, String inode_id, Map<String,String> params)
-    {
-        boolean isUpdated = false;
-        String edge_id = null;
-        try
-        {
-            //make sure nodes exist
-            String resource_node_id = getResourceNodeId(resource_id);
-            String inode_node_id = getINodeId(resource_id,inode_id);
-            String plugin_node_id = getNodeId(region,agent,plugin);
+    public String getDBExport2() {
+        String exportString = null;
+        try {
 
-            //create node if not seen.. this needs to be changed.
-            if(plugin_node_id == null) {
-                plugin_node_id = addNode(region,agent,plugin);
-                logger.debug("Added Node" + region + " " + agent + " " + plugin + " = " + plugin_node_id);
-            }
+            OCommandOutputListener listener = new OCommandOutputListener() {
+                @Override
+                public void onMessage(String iText) {
+                    // System.out.print(iText);
+                }
+            };
+            //Not sure what this does, but is needed to dump database.
+            ODatabaseRecordThreadLocal.INSTANCE.set(db);
+            //create location for output stream
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
 
-            if((resource_node_id != null) && (inode_node_id != null) && (plugin_node_id != null))
-            {
-                //check if edge is found, if not create it
-                edge_id = getResourceEdgeId(resource_id, inode_id, region, agent);
-                if(edge_id == null)
-                {
-                    edge_id = addIsAttachedEdge(resource_id, inode_id, region, agent, plugin);
-                }
-                //check again if edge is found
-                if(edge_id != null)
-                {
-                    //if(updateEdge(edge_id, params))
-                    if(updateEdgeNoTx(edge_id, params))
-                    {
-                        isUpdated = true;
-                    }
-                    else
-                    {
-                        logger.debug("Controller : GraphDBEngine : Failed to updatePerf : Failed to update Edge params!");
-                    }
-                }
-                else
-                {
-                    logger.debug("Controller : GraphDBEngine : Failed to updatePerf : edge_id not found!");
-                }
-            }
-            else
-            {
-                logger.debug("Can't update missing nodes : " + resource_id + "," + inode_id + "," + plugin);
-                logger.debug("Can't update missing nodes : " + resource_node_id + "," + inode_node_id + "," + plugin_node_id);
-            }
+            ODatabaseExport export = new ODatabaseExport(db, os, listener);
+
+            export.exportDatabase();
+
+            exportString = new String(os.toByteArray(),"UTF-8");
+
+            export.close();
 
         }
-        catch(Exception ex)
-        {
-            logger.debug("Controller : GraphDBEngine : Failed to updatePerf");
-
+        catch(Exception ex) {
+            logger.error(ex.getMessage());
         }
-        return isUpdated;
+
+        return exportString;
     }
-
 
 }
