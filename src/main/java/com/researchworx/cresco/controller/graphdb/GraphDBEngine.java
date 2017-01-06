@@ -2342,8 +2342,6 @@ public class GraphDBEngine {
         {
             //index properties
 
-
-
             logger.debug("Create Region Vertex Class");
             String[] rProps = {"region"}; //Property names
             createVertexClass("rNode", rProps);
