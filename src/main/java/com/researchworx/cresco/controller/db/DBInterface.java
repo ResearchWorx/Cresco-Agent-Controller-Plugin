@@ -16,14 +16,14 @@ public class DBInterface {
     private CLogger logger;
     private DBEngine gde;
     public DBBaseFunctions gdb;
-
+    public DBApplicationFunctions dba;
 
     public DBInterface(Launcher plugin) {
         this.logger = new CLogger(DBInterface.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
         this.plugin = plugin;
-        gde = new DBEngine(plugin);
-        gdb = new DBBaseFunctions(plugin,gde);
-        //DBAdvancedFunctions dba = new DBAdvancedFunctions(plugin,gde);
+        this.gde = new DBEngine(plugin);
+        this.gdb = new DBBaseFunctions(plugin,gde);
+        this.dba = new DBApplicationFunctions(plugin,gde);
 
     }
 
