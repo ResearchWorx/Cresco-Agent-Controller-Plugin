@@ -1,6 +1,7 @@
 package com.researchworx.cresco.controller.globalcontroller;
 
 
+import app.gFunctions;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
@@ -19,12 +20,13 @@ public class GlobalCommandExec {
 
 	private Launcher plugin;
 	private CLogger logger;
+	private gFunctions gfunc;
 
 	public GlobalCommandExec(Launcher plugin)
 	{
 		this.logger = new CLogger(GlobalCommandExec.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
 		this.plugin = plugin;
-
+        this.gfunc = new gFunctions(plugin);
 	}
 	
 	public MsgEvent cmdExec(MsgEvent ce)
@@ -269,6 +271,27 @@ public class GlobalCommandExec {
 						}
 						return ce;   
 					}
+                    else if(ce.getParam("globalcmd").equals("gpipelinesubmit"))
+                    {
+                        try
+                        {
+                            if(ce.getParam("gpipeline") != null) {
+                                String pipelineJSON = ce.getParam("gpipeline");
+                                logger.info("*" + pipelineJSON + "*");
+                                if(gfunc.gPipelineSubmit(pipelineJSON)) {
+                                    logger.info("Pipeline Submitted");
+                                }
+                                else {
+                                    logger.error("Pipeline submission failed.");
+                                }
+                            }
+                        }
+                        catch(Exception ex)
+                        {
+                            logger.error("gpipelinesubmit " + ex.getMessage());
+                        }
+                        return ce;
+                    }
 					else if(ce.getParam("globalcmd").equals("plugindownload"))
 					{
 						try
@@ -610,5 +633,5 @@ public class GlobalCommandExec {
 
 	}
 
-	
+
 }

@@ -565,7 +565,50 @@ public class DBApplicationFunctions {
         return gpay;
     }
 
-    public gPayload createPipelineRecord(String cookie, String gPayload, gPayload gpay)
+    public gPayload createPipelineRecord(String gPayload, gPayload gpay)
+    {
+        logger.error("createPipelineRecord : Launcher.gPayloadQueue.offer(gpay) COMMENTED OUT");
+
+        try
+        {
+            //String username = cookieCache.getIfPresent(cookie);
+            String username = "-nouserlisted-";
+            System.out.println("Creating vPipeline");
+
+            Vertex vPipeline = odb.addVertex("class:Pipeline");
+            vPipeline.setProperty("pipelineid", gpay.pipeline_id);
+            vPipeline.setProperty("name", gpay.pipeline_name);
+            //vPipeline.setProperty("username", username);
+            vPipeline.setProperty("submission", gPayload);
+            vPipeline.setProperty("status_code", "3");
+            vPipeline.setProperty("status_desc", "Record added to DB.");
+
+            odb.commit();
+            System.out.println("Post vPipeline commit");
+
+            Vertex vUser = odb.getVertexByKey("User.username", username);
+            System.out.println("Select vUser");
+
+            Edge eLives = odb.addEdge(null, vPipeline, vUser, "ispipeline");
+            System.out.println("Add Edge");
+            odb.commit();
+
+            System.out.println("Offer Pipeline to Scheduler Queue");
+            //Launcher.gPayloadQueue.offer(gpay);
+            return gpay;
+        }
+        catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException se)
+        {
+            System.out.println("DUPE " + se.toString());
+        }
+        catch(Exception ex)
+        {
+            System.out.println(ex.toString());
+        }
+        return null;
+    }
+
+    public gPayload createPipelineRecord2(String cookie, String gPayload, gPayload gpay)
     {
         logger.error("createPipelineRecord : Launcher.gPayloadQueue.offer(gpay) COMMENTED OUT");
 
