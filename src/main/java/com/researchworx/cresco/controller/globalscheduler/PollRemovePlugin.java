@@ -71,7 +71,7 @@ public class PollRemovePlugin implements Runnable {
 	        			}
 	        			else
 	        			{
-	        				System.out.println("SchedulerEngine : pollRemovePlugin : unable to verify iNode deactivation!");
+	        				System.out.println("ResourceSchedulerEngine : pollRemovePlugin : unable to verify iNode deactivation!");
 	        			}
 	        			
     				}
@@ -101,12 +101,12 @@ public class PollRemovePlugin implements Runnable {
 						(ControllerEngine.gdb.setINodeParam(resource_id,inode_id,"status_desc","iNode Active.")))
 				{
 						//recorded plugin activations
-        				System.out.println("SchedulerEngine : pollAddPlugin : Activated inode_id=" + inode_id);
+        				System.out.println("ResourceSchedulerEngine : pollAddPlugin : Activated inode_id=" + inode_id);
 				}
         	}
         	else
         	{
-        		System.out.println("SchedulerEngine : pollAddPlugin : unable to verify iNode activation!");
+        		System.out.println("ResourceSchedulerEngine : pollAddPlugin : unable to verify iNode activation!");
         	}
         	*/
         }

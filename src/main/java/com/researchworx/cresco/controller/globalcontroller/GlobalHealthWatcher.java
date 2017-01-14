@@ -1,8 +1,10 @@
 package com.researchworx.cresco.controller.globalcontroller;
 
+import app.gPayload;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.controller.globalhttp.HTTPServerEngine;
-import com.researchworx.cresco.controller.globalscheduler.SchedulerEngine;
+import com.researchworx.cresco.controller.globalscheduler.AppSchedulerEngine;
+import com.researchworx.cresco.controller.globalscheduler.ResourceSchedulerEngine;
 import com.researchworx.cresco.controller.db.NodeStatusType;
 import com.researchworx.cresco.controller.netdiscovery.DiscoveryClientIPv4;
 import com.researchworx.cresco.controller.netdiscovery.DiscoveryClientIPv6;
@@ -24,8 +26,10 @@ public class GlobalHealthWatcher implements Runnable {
     private Long gCheckInterval;
     public ConcurrentLinkedQueue<MsgEvent> resourceScheduleQueue;
     public Boolean SchedulerActive;
+    public Boolean AppSchedulerActive;
 
-	public GlobalHealthWatcher(Launcher plugin, DiscoveryClientIPv4 dcv4, DiscoveryClientIPv6 dcv6) {
+
+    public GlobalHealthWatcher(Launcher plugin, DiscoveryClientIPv4 dcv4, DiscoveryClientIPv6 dcv6) {
 		this.logger = new CLogger(GlobalHealthWatcher.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
 		this.plugin = plugin;
         this.dcv4 = dcv4;
@@ -36,6 +40,7 @@ public class GlobalHealthWatcher implements Runnable {
         gCheckInterval = plugin.getConfig().getLongParam("watchdogtimer",5000L);
         resourceScheduleQueue = new ConcurrentLinkedQueue<MsgEvent>();
         SchedulerActive = false;
+        AppSchedulerActive = false;
     }
 
 	public void shutdown() {
@@ -176,10 +181,11 @@ public class GlobalHealthWatcher implements Runnable {
                         //start global stuff
                         //create globalscheduler queue
                         plugin.setResourceScheduleQueue(new ConcurrentLinkedQueue<MsgEvent>());
+                        plugin.setAppScheduleQueue(new ConcurrentLinkedQueue<gPayload>());
                         //start http interface
                         startHTTP();
                         //start global scheduler
-                        startGlobalScheduler();
+                        startGlobalSchedulers();
                         //end global start
                         this.plugin.setGlobalController(true);
                     }
@@ -192,14 +198,19 @@ public class GlobalHealthWatcher implements Runnable {
         }
 	}
 
-    private Boolean startGlobalScheduler() {
+    private Boolean startGlobalSchedulers() {
         boolean isStarted = false;
         try {
             //Start Global Controller Services
             logger.info("Starting Global Scheduler Service");
-            SchedulerEngine se = new SchedulerEngine(plugin,this);
+            ResourceSchedulerEngine se = new ResourceSchedulerEngine(plugin,this);
             Thread schedulerEngineThread = new Thread(se);
             schedulerEngineThread.start();
+
+            AppSchedulerEngine ae = new AppSchedulerEngine(plugin,this);
+            Thread appSchedulerEngineThread = new Thread(ae);
+            appSchedulerEngineThread.start();
+
             isStarted = true;
         }
         catch (Exception ex) {

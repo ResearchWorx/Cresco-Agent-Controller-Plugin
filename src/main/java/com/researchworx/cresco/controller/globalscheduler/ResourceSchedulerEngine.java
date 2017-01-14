@@ -14,16 +14,16 @@ import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
 
-public class SchedulerEngine implements Runnable {
+public class ResourceSchedulerEngine implements Runnable {
 
 	private Launcher plugin;
 	private GlobalHealthWatcher ghw;
 	private CLogger logger;
 
-	public SchedulerEngine(Launcher plugin, GlobalHealthWatcher ghw) {
+	public ResourceSchedulerEngine(Launcher plugin, GlobalHealthWatcher ghw) {
 		this.plugin = plugin;
 		this.ghw = ghw;
-        logger = new CLogger(SchedulerEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+        logger = new CLogger(ResourceSchedulerEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
     }
 		
 	public void run() 
@@ -63,7 +63,7 @@ public class SchedulerEngine implements Runnable {
 								String agentPath = getLowAgent();
 								if(agentPath == null)
 								{
-									System.out.println("SchedulerEngine : Unable to find agent for plugin scheduling");
+									System.out.println("ResourceSchedulerEngine : Unable to find agent for plugin scheduling");
 								}
 								else
 								{
@@ -115,13 +115,13 @@ public class SchedulerEngine implements Runnable {
 				}
 				catch(Exception ex)
 				{
-					System.out.println("SchedulerEngine Error: " + ex.toString());
+					System.out.println("ResourceSchedulerEngine Error: " + ex.toString());
 				}
 			}
 		}
 		catch(Exception ex)
 		{
-			System.out.println("SchedulerEngine Error: " + ex.toString());
+			System.out.println("ResourceSchedulerEngine Error: " + ex.toString());
 		}
 	}
 	
@@ -168,11 +168,10 @@ public class SchedulerEngine implements Runnable {
 		}
 		catch(Exception ex)
 		{
-			System.out.println("SchedulerEngine : Error " + ex.toString());
+			System.out.println("ResourceSchedulerEngine : Error " + ex.toString());
 		}
 		return params;
 	}
-	
 
 	public String getLowAgent()
 	{

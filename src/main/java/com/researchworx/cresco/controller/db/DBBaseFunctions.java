@@ -2184,6 +2184,8 @@ public class DBBaseFunctions {
             String[] iProps = {"resource_id", "inode_id"}; //Property names
             createVertexClass("iNode", iProps);
 
+            logger.debug("Create iNode Index");
+            createVertexIndex("iNode", "inode_id", true);
 
             logger.debug("Create isAgent Edge Class");
             String[] isAgentProps = {"edge_id"}; //Property names
@@ -2258,7 +2260,11 @@ public class DBBaseFunctions {
             {
                 OClass vt = txGraph.getVertexType(className);
                 //OClass vt = txGraph.createVertexType(className);
-                vt.createProperty(indexName, OType.STRING);
+                //vt.createProperty(indexName, OType.STRING);
+
+                if(vt.getProperty(indexName) == null) {
+                    vt.createProperty(indexName, OType.STRING);
+                }
 
                 if(isUnique)
                 {

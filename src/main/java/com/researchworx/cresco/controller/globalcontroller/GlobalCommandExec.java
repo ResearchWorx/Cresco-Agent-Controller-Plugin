@@ -1,7 +1,7 @@
 package com.researchworx.cresco.controller.globalcontroller;
 
 
-import app.gFunctions;
+import app.gPayload;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
@@ -20,14 +20,12 @@ public class GlobalCommandExec {
 
 	private Launcher plugin;
 	private CLogger logger;
-	private gFunctions gfunc;
 
 	public GlobalCommandExec(Launcher plugin)
 	{
 		this.logger = new CLogger(GlobalCommandExec.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
 		this.plugin = plugin;
-        this.gfunc = new gFunctions(plugin);
-	}
+    }
 	
 	public MsgEvent cmdExec(MsgEvent ce)
 	{
@@ -279,13 +277,30 @@ public class GlobalCommandExec {
                                 String pipelineJSON = ce.getParam("gpipeline");
                                 String tenantID = ce.getParam("tenant_id");
                                 logger.info("*" + pipelineJSON + "*");
-                                String returnGpipeline = gfunc.gPipelineSubmit(tenantID, pipelineJSON);
+                                gPayload gpay = plugin.getGDB().dba.createPipelineRecord(tenantID, pipelineJSON);
+                                String returnGpipeline = plugin.getGDB().dba.JsonFromgPayLoad(gpay);
                                 ce.setParam("gpipeline",returnGpipeline);
                             }
                         }
                         catch(Exception ex)
                         {
                             logger.error("gpipelinesubmit " + ex.getMessage());
+                        }
+                        return ce;
+                    }
+                    else if(ce.getParam("globalcmd").equals("getgpipeline"))
+                    {
+                        try
+                        {
+                            if(ce.getParam("pipeline_id") != null) {
+                                String pipelineId = ce.getParam("pipeline_id");
+                                String returnGetGpipeline = plugin.getGDB().dba.getPipeline(pipelineId);
+                                ce.setParam("gpipeline",returnGetGpipeline);
+                            }
+                        }
+                        catch(Exception ex)
+                        {
+                            logger.error("getgpipeline " + ex.getMessage());
                         }
                         return ce;
                     }

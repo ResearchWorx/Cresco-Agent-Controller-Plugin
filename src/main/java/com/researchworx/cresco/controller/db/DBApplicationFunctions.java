@@ -3,10 +3,9 @@ package com.researchworx.cresco.controller.db;
 import app.gEdge;
 import app.gNode;
 import app.gPayload;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.orientechnologies.common.util.OCallable;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.metadata.schema.OSchema;
@@ -16,8 +15,8 @@ import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.utilities.CLogger;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.Parameter;
 import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.impls.orient.OrientBaseGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
@@ -27,7 +26,6 @@ import java.io.StringWriter;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 
 public class DBApplicationFunctions {
@@ -39,236 +37,331 @@ public class DBApplicationFunctions {
     private int retryCount;
     private DBEngine dbe;
     private OrientGraph odb;
-    private Cache<String, String> cookieCache;
 
     public DBApplicationFunctions(Launcher plugin, DBEngine dbe) {
-        this.logger = new CLogger(DBApplicationFunctions.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+        this.logger = new CLogger(DBApplicationFunctions.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Debug);
         this.plugin = plugin;
         this.factory = dbe.factory;
         this.db = dbe.db;
         this.retryCount = plugin.getConfig().getIntegerParam("db_retry_count",50);
         odb = factory.getTx();
-        //create basic cresco constructs
-        //initCrescoDB();
 
-        cookieCache = CacheBuilder.newBuilder()
-                .concurrencyLevel(4)
-                .softValues()
-                .maximumSize(10000)
-                .expireAfterWrite(15, TimeUnit.MINUTES)
-                .build();
+        //create basic application constructs
+        initCrescoDB();
     }
 
+    public String getTenantNodeId(String tenantId) {
+        String node_id = null;
+        OrientGraph graph = null;
 
-    public void populateDB()
-    {
         try
         {
 
-            //adding custom classes and constraints
-            logger.debug("Create Tenant Class");
-            if(createClass("Tenant"))
+            //OrientGraphNoTx graph = factory.getNoTx();
+            graph = factory.getTx();
+
+            Iterable<Vertex> resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:Tenant.tenant_id WHERE key = '" + tenantId + "'")).execute();
+
+            Iterator<Vertex> iter = resultIterator.iterator();
+            if(iter.hasNext())
             {
-                createKeyIndex("Tenant","tenant_id");
+                Vertex v = iter.next();
+                node_id = v.getProperty("rid").toString();
             }
-
-            logger.debug("Create Pipeline Class");
-            if(createClass("Pipeline"))
+            if(node_id != null)
             {
-                createKeyIndex("Pipeline","pipelineid");
+                node_id = node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
             }
-            //implementation node
-            logger.debug("Create iNode Class");
-
-            if(createClass("iNode"))
-            {
-                createKeyIndex("iNode","node_id");
-            }
-            //virtual node
-            logger.debug("Create vNode Class");
-
-            if(createClass("vNode"))
-            {
-                createKeyIndex("vNode","node_id");
-            }
-            //edge node (in,out)
-            logger.debug("Create eNode Class");
-
-            if(createClass("eNode"))
-            {
-                createKeyIndex("eNode","node_id");
-                //createKeyIndex("eNode","iNode_id");
-
-            }
-            //template node
-            logger.debug("Create tNode Class");
-
-            if(createClass("tNode"))
-            {
-                createKeyIndex("tNode","node_id");
-                //createKeyIndex("eNode","iNode_id");
-
-            }
-            //make sure one user exist
-            logger.debug("Create default user");
-
-            createTenant("default", "0");
-
-            //add templates
-            System.out.println("Create Default Templates");
-
-            Map<String, String> params = new HashMap<String,String>();
-            params.put("query_string", "");
-            params.put("query_class", "netFlow");
-            gNode node = new gNode("query", "ESPER Query", "9a11036f-35ba-419b-b03a-05abe35b1ab9", params);
-            createTNode(node);
-            params.clear();
-
-            node = new gNode("membuffer", "Memory Output Buffer", "43c98b9f-cab2-47ad-a989-0c8dbb350cb6", params);
-            params.put("data_url", "http://www.wuzzlemix.com/API?Woot");
-            createTNode(node);
-            params.clear();
-
-            node = new gNode("amqp", "AMQP Exchange", "43c98b9f-cab2-47ad-a989-0c8dbb350cb7", params);
-            params.put("outExchange", "");
-            params.put("amqp_server", "");
-            params.put("amqp_password", "");
-            params.put("amqp_login", "");
-
-            createTNode(node);
-            params.clear();
 
         }
         catch(Exception ex)
         {
-            System.out.println("populateDB Error: " + ex.toString());
+            logger.error("getTenantNodeID : Error " + ex.toString());
         }
-
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return node_id;
     }
-    public boolean isAuthenicated(String username, String password)
-    {
-        //odb.getVertex(arg0)
-		/*
-		 OrientVertexType type = graph.createVertexType("Government");
-		type.createProperty("itemid", OType.INTEGER);
-		graph.createKeyIndex("itemid", Vertex.class, new Parameter<>("class", "Government"));
-		 */
+
+    public String getPipelineNodeId(String pipelineId) {
+        String node_id = null;
+        OrientGraph graph = null;
+
         try
         {
-            Vertex exists = odb.getVertexByKey("User.username", username);
-            String storedPass = exists.getProperty("password");
-            if(storedPass.equals(password))
+
+            //OrientGraphNoTx graph = factory.getNoTx();
+            graph = factory.getTx();
+
+            Iterable<Vertex> resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:Pipeline.pipeline_id WHERE key = '" + pipelineId + "'")).execute();
+
+            Iterator<Vertex> iter = resultIterator.iterator();
+            if(iter.hasNext())
             {
-                return true;
+                Vertex v = iter.next();
+                node_id = v.getProperty("rid").toString();
             }
+            if(node_id != null)
+            {
+                node_id = node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
+            }
+
         }
         catch(Exception ex)
         {
-            System.out.println("isAuthenicated Error: " + ex.toString());
+            logger.error("getPipelineNodeID : Error " + ex.toString());
         }
-        return false;
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return node_id;
     }
-    public boolean isSession(String cookie)
-    {
+
+    public String getVNodeNodeId(String vNodeId) {
+        String node_id = null;
+        OrientGraph graph = null;
+
         try
         {
-            Vertex exists = odb.getVertexByKey("Cookie.cookie", cookie);
-            if(exists != null)
+
+            //OrientGraphNoTx graph = factory.getNoTx();
+            graph = factory.getTx();
+
+            Iterable<Vertex> resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:vNode.vnode_id WHERE key = '" + vNodeId + "'")).execute();
+
+            Iterator<Vertex> iter = resultIterator.iterator();
+            if(iter.hasNext())
             {
-                String username = exists.getProperty("username");
-                System.out.println("cookie exist:" + username);
-                //update cache
-                cookieCache.put(cookie, username);
-                return true;
+                Vertex v = iter.next();
+                node_id = v.getProperty("rid").toString();
             }
+            if(node_id != null)
+            {
+                node_id = node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
+            }
+
         }
         catch(Exception ex)
         {
-            System.out.println("isSession Error: " + ex.toString());
+            logger.error("getVNodeID : Error " + ex.toString());
         }
-        return false;
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return node_id;
     }
-    public boolean createCookie(String cookie, String username)
-    {
+
+    public String getINodeNodeId(String iNodeId) {
+        String node_id = null;
+        OrientGraph graph = null;
+
         try
         {
-            Vertex vCookie = odb.addVertex("class:Cookie");
-            vCookie.setProperty("cookie", cookie);
-            vCookie.setProperty("username", username);
-            odb.commit();
 
-            Vertex vUser = odb.getVertexByKey("User.username", username);
-            Edge eLives = odb.addEdge(null, vCookie, vUser, "session");
+            //OrientGraphNoTx graph = factory.getNoTx();
+            graph = factory.getTx();
 
+            Iterable<Vertex> resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:iNode.inode_id WHERE key = '" + iNodeId + "'")).execute();
+
+            Iterator<Vertex> iter = resultIterator.iterator();
+            if(iter.hasNext())
+            {
+                Vertex v = iter.next();
+                node_id = v.getProperty("rid").toString();
+            }
+            if(node_id != null)
+            {
+                node_id = node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
+            }
+
+        }
+        catch(Exception ex)
+        {
+            logger.error("getINodeID : Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return node_id;
+    }
+
+    public String getENodeNodeId(String eNodeId) {
+        String node_id = null;
+        OrientGraph graph = null;
+
+        try
+        {
+
+            //OrientGraphNoTx graph = factory.getNoTx();
+            graph = factory.getTx();
+
+            Iterable<Vertex> resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:eNode.enode_id WHERE key = '" + eNodeId + "'")).execute();
+
+            Iterator<Vertex> iter = resultIterator.iterator();
+            if(iter.hasNext())
+            {
+                Vertex v = iter.next();
+                node_id = v.getProperty("rid").toString();
+            }
+            if(node_id != null)
+            {
+                node_id = node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
+            }
+
+        }
+        catch(Exception ex)
+        {
+            logger.error("getENodeID : Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return node_id;
+    }
+
+    public String getPipeline(String pipelineId) {
+        String json = null;
+
+        String pipelineNodeId = getPipelineNodeId(pipelineId);
+        if(pipelineNodeId != null) {
+            //if(getPipelineNodeId(pipelineId != null)
+            Vertex vPipeline = odb.getVertex(getPipelineNodeId(pipelineId));
+            if (vPipeline != null) {
+                json = vPipeline.getProperty("submission");
+            }
+        }
+        return json;
+    }
+
+    Boolean createIEdge(String node_from, String node_to) {
+        try
+        {
+            logger.debug("createIedge from_node: " + node_from + " node_to: " + node_to);
+            logger.debug("-I0 ");
+            //Vertex iNode_from = odb.getVertexByKey("iNode.node_id", node_from);
+            Vertex iNode_from = odb.getVertex(getINodeNodeId(node_from));
+            logger.debug("-I1 ");
+
+            //Vertex iNode_to = odb.getVertexByKey("iNode.node_id", node_to);
+            Vertex iNode_to = odb.getVertex(getINodeNodeId(node_to));
+
+            logger.debug("-I2 ");
+
+            if((iNode_from != null) && (iNode_to != null))
+            {
+                logger.debug("iEdge: node_from:" + node_from + " node_to:" + node_to);
+            }
+            logger.debug("-I3 ");
+
+            Iterable<Edge> fromEdges = iNode_from.getEdges(Direction.OUT, "Out");
+            Edge eEdge_from = fromEdges.iterator().next();
+            Vertex eNode_from = eEdge_from.getVertex(Direction.IN);
+            if(eNode_from != null)
+            {
+                logger.debug("From eNode_id:" +  eNode_from.getProperty("node_id") + " iNode_id:" + eNode_from.getProperty("inode_id"));
+            }
+            logger.debug("-I4 ");
+
+            Iterable<Edge> toEdges = iNode_to.getEdges(Direction.IN, "in");
+            Edge eEdge_to = toEdges.iterator().next();
+            Vertex eNode_to = eEdge_to.getVertex(Direction.OUT);
+            logger.debug("-I5 ");
+
+            if(eNode_to != null)
+            {
+                logger.debug("To eNode_id:" +  eNode_to.getProperty("node_id") + " iNode_id:" + eNode_to.getProperty("inode_id"));
+            }
+            logger.debug("-I6 ");
+
+            Edge iEdge = odb.addEdge(null, eNode_from, eNode_to, "isEConnected");
+			/*
+			 public Iterable<Edge> getEdges(OrientVertex iDestination,
+                               Direction iDirection,
+                               String... iLabels)
+			 */
+            logger.debug("-I7 ");
+
+            //Edge vEdge = odb.addEdge(null, eNode_from, eNode_to, "isIConnected");
+            //Edge vEdge = eNode_from.getEdges(arg0, arg1)
             odb.commit();
             return true;
         }
         catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException se)
         {
-            System.out.println("DUPE " + se.toString());
+            logger.debug("createIEdge DUPE " + se.toString());
         }
         catch(Exception ex)
         {
-            System.out.println(ex.toString());
+            logger.debug("createIEdge: " + ex.toString());
         }
         return false;
     }
 
-    public String getPipeline(String pipeline_id)
-    {
-        String json = null;
-        Vertex vPipeline = odb.getVertexByKey("Pipeline.pipelineid", pipeline_id);
-        if(vPipeline != null)
-        {
-            json = vPipeline.getProperty("submission");
-        }
-        return json;
-
-    }
-    public gPayload getPipelineObj(String pipeline_id)
-    {
-
-        gPayload gpay = null;
-        Vertex vPipeline = odb.getVertexByKey("Pipeline.pipelineid", pipeline_id);
-        if(vPipeline != null)
-        {
-            String json = vPipeline.getProperty("submission");
-            gpay = gPayLoadFromJson(json);
-        }
-        return gpay;
-
-    }
-
-    public boolean setPipelineStatus(String pipeline_id, String status_code, String status_desc)
-    {
+    String createVEdge(String node_from, String node_to) {
+        String edge_id = null;
         try
         {
-            Vertex vPipeline = odb.getVertexByKey("Pipeline.pipelineid", pipeline_id);
-            if(vPipeline != null)
-            {
-                vPipeline.setProperty("status_code", status_code);
-                vPipeline.setProperty("status_desc", status_desc);
-                odb.commit();
-                return true;
-            }
+
+            logger.debug("node_from: " + node_from + " node_to:" + node_to);
+
+            logger.debug("-0");
+            //Vertex vNode_from = odb.getVertexByKey("vNode.node_id", node_from);
+            Vertex vNode_from = odb.getVertex(getVNodeNodeId(node_from));
+            logger.debug("-1");
+            //Vertex vNode_to = odb.getVertexByKey("vNode.node_id", node_to);
+            Vertex vNode_to = odb.getVertex(getVNodeNodeId(node_to));
+            logger.debug("-2");
+            Edge vEdge = odb.addEdge(null, vNode_from, vNode_to, "isVConnected");
+            logger.debug("-3");
+            edge_id = UUID.randomUUID().toString();
+            logger.debug("-4");
+            vEdge.setProperty("edge_id", edge_id);
+            logger.debug("-5");
+            odb.commit();
+            logger.debug("-6");
+        }
+        catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException se)
+        {
+            logger.debug("createVEdge DUPE " + se.toString());
         }
         catch(Exception ex)
         {
-            System.out.println("setPipelineStatus Error: " + ex.toString());
+            logger.debug("createVedge: " + ex.toString());
         }
-        return false;
-
+        return edge_id;
     }
 
-    public boolean setPipelineStatus(gPayload gpay)
-    {
+    public boolean setPipelineStatus(gPayload gpay) {
         try
         {
-            String pipeline_id = gpay.pipeline_id;
+            String pipelineId = gpay.pipeline_id;
             String status_code = gpay.status_code;
             String status_desc = gpay.status_desc;
             String submission = JsonFromgPayLoad(gpay);
-            Vertex vPipeline = odb.getVertexByKey("Pipeline.pipelineid", pipeline_id);
+            //Vertex vPipeline = odb.getVertexByKey("Pipeline.pipelineid", pipeline_id);
+            Vertex vPipeline = odb.getVertex(getPipelineNodeId(pipelineId));
+            
             if(vPipeline != null)
             {
                 vPipeline.setProperty("status_code", status_code);
@@ -281,19 +374,103 @@ public class DBApplicationFunctions {
         }
         catch(Exception ex)
         {
-            System.out.println("setPipelineStatus Error: " + ex.toString());
+            logger.debug("setPipelineStatus Error: " + ex.toString());
         }
         return false;
 
     }
 
-    public List<gPayload> getPipelineList()
-    {
+    public boolean setPipelineStatus(String pipelineId, String status_code, String status_desc) {
+        try
+        {
+            //Vertex vPipeline = odb.getVertexByKey("Pipeline.pipelineid", pipeline_id);
+            Vertex vPipeline = odb.getVertex(getPipelineNodeId(pipelineId));
+
+            if(vPipeline != null)
+            {
+                vPipeline.setProperty("status_code", status_code);
+                vPipeline.setProperty("status_desc", status_desc);
+                odb.commit();
+                return true;
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.debug("setPipelineStatus Error: " + ex.toString());
+        }
+        return false;
+
+    }
+
+    public gPayload getPipelineObj(String pipelineId) {
+
+        gPayload gpay = null;
+        //Vertex vPipeline = odb.getVertexByKey("Pipeline.pipelineid", pipeline_id);
+        Vertex vPipeline = odb.getVertex(getPipelineNodeId(pipelineId));
+        if(vPipeline != null)
+        {
+            String json = vPipeline.getProperty("submission");
+            gpay = gPayLoadFromJson(json);
+        }
+        return gpay;
+
+    }
+
+    public String getINodefromVNode(String vNode_id) {
+        String iNode_id = null;
+        try
+        {
+            //Vertex vNode = odb.getVertexByKey("vNode.node_id", vNode_id);
+            Vertex vNode = odb.getVertex(getVNodeNodeId(vNode_id));
+            if(vNode != null)
+            {
+                //json = vPipeline.getProperty("submission");
+                Iterable<Edge> vNodeEdges = vNode.getEdges(Direction.OUT, "isINode");
+                Iterator<Edge> iter = vNodeEdges.iterator();
+
+                Edge isINode = iter.next();
+                Vertex iNode = isINode.getVertex(Direction.IN);
+                return iNode.getProperty("node_id");
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.error("getINodefromVNode: Exception ex:" + ex.toString());
+        }
+        return iNode_id;
+    }
+
+    public boolean setINodeStatus(String iNode_id, String status_code, String status_desc) {
+        try
+        {
+            //Vertex iNode = odb.getVertexByKey("iNode.node_id", iNode_id);
+            Vertex iNode = odb.getVertex(getINodeNodeId(iNode_id));
+            if(iNode == null)
+            {
+                logger.debug("setINodeStatus Error: Node not found!");
+                return false;
+            }
+            else
+            {
+                iNode.setProperty("status_code", status_code);
+                iNode.setProperty("status_desc", status_desc);
+                odb.commit();
+                logger.debug("setINodeStatus iNode_id:" + iNode_id + " status_code:" + status_code + " status_desc:" + status_desc);
+                return true;
+            }
+
+        }
+        catch(Exception ex)
+        {
+            logger.error("setINodeStatus: Exception ex:" + ex.toString());
+        }
+        return false;
+    }
+
+    public List<gPayload> getPipelineList() {
         List<gPayload> pipelineList = new ArrayList<gPayload>();
         try
         {
-            //String username = cookieCache.getIfPresent(cookie);
-            //odb.getv
             Iterable<Vertex> pipelines = odb.getVerticesOfClass("Pipeline");
             Iterator<Vertex> iter = pipelines.iterator();
             while (iter.hasNext())
@@ -302,106 +479,53 @@ public class DBApplicationFunctions {
                 String submission = vPipeline.getProperty("submission");
                 gPayload gpay = gPayLoadFromJson(submission);
                 pipelineList.add(gpay);
-                //gPayLoadFromJson(String json)
 
-				/*
-				System.out.println("Found pipeline");
-				//canidate node for match
-
-				String pipelineid = vPipeline.getProperty("pipelineid");
-				System.out.println("Found pipeline id: " + pipelineid);
-
-				String pipeline_name = vPipeline.getProperty("name");
-				String pipeline_status_code = vPipeline.getProperty("status_code");
-				String pipeline_status_desc = vPipeline.getProperty("status_desc");
-
-				gPayload gpay = new gPayload();
-				gpay.pipeline_id = pipelineid;
-				gpay.pipeline_name = pipeline_name;
-				gpay.status_code = pipeline_status_code;
-				gpay.status_desc = pipeline_status_desc;
-				System.out.println("Pipeline list pre: " + pipelineList.size());
-
-				pipelineList.add(gpay);
-				System.out.println("Pipeline list post: " + pipelineList.size());
-				*/
             }
         }
         catch(Exception ex)
         {
-            System.out.println("getPipelineList Error: " + ex.toString());
+            logger.debug("getPipelineList Error: " + ex.toString());
         }
-        System.out.println("Pipeline list return: " + pipelineList.size());
+        logger.debug("Pipeline list return: " + pipelineList.size());
 
         return pipelineList;
     }
 
-    public List<gPayload> getPipelineList(String cookie)
-    {
-        List<gPayload> pipelineList = new ArrayList<gPayload>();
+    public boolean iNodeIsActive(String iNode_id) {
         try
         {
-            String username = cookieCache.getIfPresent(cookie);
+            //Vertex iNode = odb.getVertexByKey("iNode.node_id", iNode_id);
+            Vertex iNode = odb.getVertex(getINodeNodeId(iNode_id));
 
-            Vertex vUser = odb.getVertexByKey("User.username", username);
-            Iterable<Edge> pipelineEdges = vUser.getEdges(Direction.IN, "ispipeline");
-            Iterator<Edge> iter = pipelineEdges.iterator();
-            while (iter.hasNext())
+            if(iNode != null)
             {
-                Edge isPipeLineEdge = iter.next();
-                Vertex vPipeline = isPipeLineEdge.getVertex(Direction.OUT);
-
-                System.out.println("Found pipeline");
-                //canidate node for match
-
-                String pipelineid = vPipeline.getProperty("pipelineid");
-                System.out.println("Found pipeline id: " + pipelineid);
-
-                String pipeline_name = vPipeline.getProperty("name");
-                String pipeline_status_code = vPipeline.getProperty("status_code");
-                String pipeline_status_desc = vPipeline.getProperty("status_desc");
-
-                gPayload gpay = new gPayload();
-                gpay.pipeline_id = pipelineid;
-                gpay.pipeline_name = pipeline_name;
-                gpay.status_code = pipeline_status_code;
-                gpay.status_desc = pipeline_status_desc;
-                System.out.println("Pipeline list pre: " + pipelineList.size());
-
-                pipelineList.add(gpay);
-                System.out.println("Pipeline list post: " + pipelineList.size());
+                if(iNode.getProperty("node_id").toString().equals("4"))
+                {
+                    return true;
+                }
             }
         }
         catch(Exception ex)
         {
-            System.out.println("getPipelineList Error: " + ex.toString());
+            logger.debug("iNodeIsActive: Exception ex:" + ex.toString());
         }
-        System.out.println("Pipeline list return: " + pipelineList.size());
-
-        return pipelineList;
+        return false;
     }
 
-    public Map<String,String> getMapFromString(String param, boolean isRestricted)
-    {
+    public Map<String,String> getMapFromString(String param, boolean isRestricted) {
         Map<String,String> paramMap = null;
 
-        System.out.println("PARAM: " + param);
-        //URLEncoder.encode(q, "UTF-8");
+        logger.debug("PARAM: " + param);
 
         try{
             String[] sparam = param.split(",");
-            System.out.println("PARAM LENGTH: " + sparam.length);
+            logger.debug("PARAM LENGTH: " + sparam.length);
 
             paramMap = new HashMap<String,String>();
 
             for(String str : sparam)
             {
-                //URLEncoder.encode(str, "UTF-8");
                 String[] sstr = str.split(":");
-
-                //URLDecoder.decode(str, "UTF-8");
-                //sstr.length
-
 
                 if(isRestricted)
                 {
@@ -422,426 +546,59 @@ public class DBApplicationFunctions {
         }
         catch(Exception ex)
         {
-            System.out.println("getMapFromString Error: " + ex.toString());
+            logger.error("getMapFromString Error: " + ex.toString());
         }
 
         return paramMap;
     }
 
-    public List<gNode> getNodeTypes(String cookie)
-    {
-        List<gNode> nodeTypeList = new ArrayList<gNode>();
+    public String getUpstreamNode(String iNode_id) {
+        String uINode = null;
         try
         {
-            //String username = cookieCache.getIfPresent(cookie);
-            Iterable<Vertex> gnodes = odb.getVertices("vNode.isSource", "true");
-
-            Iterator<Vertex> iter = gnodes.iterator();
-            while (iter.hasNext())
-            {
-                System.out.println("WOOT NODE isSource");
-                //canidate node for match
-                Vertex vNode = iter.next();
-                Map<String,String> params = getMapFromString(vNode.getProperty("params").toString(), true);
-                //Map<String,String> params = new HashMap<String,String>();
-                String node_name = vNode.getProperty("node_name");
-                String node_type = vNode.getProperty("node_type");
-                String node_id = vNode.getProperty("node_id");
-                Boolean isSource = Boolean.parseBoolean(vNode.getProperty("isSource").toString());
-                gNode node = new gNode(node_type, node_name, node_id, params);
-                node.isSource = isSource;
-                nodeTypeList.add(node);
-                //public gNode(String type, String node_name, String node_id, String top, String left, HashMap<String, String> params)
-
-            }
-            gnodes = odb.getVerticesOfClass("tNode");
-            iter = gnodes.iterator();
-            while (iter.hasNext())
-            {
-                System.out.println("WOOT NODE tNode");
-
-                //canidate node for match
-                Vertex tNode = iter.next();
-                System.out.println("CODY0");
-
-                Map<String,String> params = getMapFromString(tNode.getProperty("params").toString(), false);
-                System.out.println("CODY1");
-
-                String node_name = tNode.getProperty("node_name");
-                String node_type = tNode.getProperty("node_type");
-                String node_id = tNode.getProperty("node_id");
-                gNode node = new gNode(node_type, node_name, node_id, params);
-                nodeTypeList.add(node);
-                //public gNode(String type, String node_name, String node_id, String top, String left, HashMap<String, String> params)
-            }
-
-        }
-        catch(Exception ex)
-        {
-            System.out.println("getNodeType Error: " + ex.toString());
-        }
-        return nodeTypeList;
-    }
-
-    public gPayload createPipelineNodes(gPayload gpay)
-    {
-
-        try
-        {
-            //create nodes and links for pipeline records
-            //List<gNode> nodes = gpay.nodes;
-            //<node_name>,<node_id>
-            HashMap<String,String> iNodeHm = new HashMap<String,String>();
-            //<node_name>,<node_id>
-            HashMap<String,String> vNodeHm = new HashMap<String,String>();
-
-            List<gEdge> edges = gpay.edges;
-            for(gNode node : gpay.nodes)
-            {
-                try
-                {
-                    String vNode_id = createVNode(gpay.pipeline_id, node,true);
-                    vNodeHm.put(node.node_id, vNode_id);
-
-                    System.out.println("Submitted Node:" + node.node_id);
-                    System.out.println("vNode:" + vNode_id);
-
-                    String iNode_id = createINode(vNode_id, node);
-                    //node.node_id = iNode_id;
-                    iNodeHm.put(node.node_id, iNode_id);
-
-                    System.out.println("iNode:" + node.node_id);
-
-                    //keep the vnodeID
-                    node.node_id = vNode_id;
-
-                    //test finding nodes
-                    //getNode(node);
-                }
-                catch(Exception ex)
-                {
-                    System.out.println("createPipelineNodes Node: " + ex.toString());
-                }
-            }
-
-            for(gEdge edge : gpay.edges)
-            {
-                try
-                {
-                    System.out.println(edge.edge_id + " " + edge.node_from + " " + edge.node_to);
-                    //createGEdge(edge);
-                    //vEdge
-                    String edge_id = createVEdge(vNodeHm.get(edge.node_from),vNodeHm.get(edge.node_to));
-                    edge.edge_id = edge_id;
-
-                    createIEdge(iNodeHm.get(edge.node_from),iNodeHm.get(edge.node_to));
-                    //assign vEdge ID
-                    edge.node_from = vNodeHm.get(edge.node_from);
-                    edge.node_to = vNodeHm.get(edge.node_to);
-
-                    //iEdge
-                }
-                catch(Exception ex)
-                {
-                    System.out.println("createPipelineNodes Edge: " + ex.toString());
-                }
-            }
-            //return gpay;
-            gpay.status_code = "3";
-            gpay.status_desc = "Pipeline Nodes Created.";
-            setPipelineStatus(gpay);
-
-            return gpay;
-        }
-        catch(Exception ex)
-        {
-            System.out.println("createPipelineNodes: " + ex.toString());
-        }
-        gpay.status_code = "1";
-        gpay.status_desc = "Failed to create Pipeline.";
-        setPipelineStatus(gpay);
-        return gpay;
-    }
-
-    public String getTenantNodeId(String tenantId)
-    {
-        String node_id = null;
-        OrientGraph graph = null;
-
-        try
-        {
-
-                //OrientGraphNoTx graph = factory.getNoTx();
-                graph = factory.getTx();
-
-                Iterable<Vertex> resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:Tenant.tenant_id WHERE key = '" + tenantId + "'")).execute();
-
-                Iterator<Vertex> iter = resultIterator.iterator();
-                if(iter.hasNext())
-                {
-                    Vertex v = iter.next();
-                    node_id = v.getProperty("rid").toString();
-                }
-                if(node_id != null)
-                {
-                    node_id = node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
-                }
-
-        }
-        catch(Exception ex)
-        {
-            logger.error("getTenantNodeID : Error " + ex.toString());
-        }
-        finally
-        {
-            if(graph != null)
-            {
-                graph.shutdown();
-            }
-        }
-        return node_id;
-    }
-
-
-    public gPayload createPipelineRecord(String tenant_id, String gPayload, gPayload gpay)
-    {
-        logger.info("createPipelineRecord : Launcher.gPayloadQueue.offer(gpay) COMMENTED OUT");
-
-        try
-        {
-            //String username = cookieCache.getIfPresent(cookie);
-            //String username = "-nouserlisted-";
-            System.out.println("Creating vPipeline");
-
-            Vertex vPipeline = odb.addVertex("class:Pipeline");
-            vPipeline.setProperty("pipelineid", gpay.pipeline_id);
-            vPipeline.setProperty("name", gpay.pipeline_name);
-            //vPipeline.setProperty("username", username);
-            vPipeline.setProperty("submission", gPayload);
-            vPipeline.setProperty("status_code", "3");
-            vPipeline.setProperty("status_desc", "Record added to DB.");
-            vPipeline.setProperty("tenant_id",tenant_id);
-
-            odb.commit();
-            System.out.println("Post vPipeline commit");
-
-            Vertex vTenant = odb.getVertex(getTenantNodeId(tenant_id));
-            Edge eLives = odb.addEdge(null, vPipeline, vTenant, "ispipeline");
-            odb.commit();
-
-            logger.info("Offer Pipeline to Scheduler Queue");
-            return gpay;
-        }
-        catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException se)
-        {
-            logger.error("createPipelineRecord DUPE " + se.toString());
-        }
-        catch(Exception ex)
-        {
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            ex.printStackTrace(pw);
-
-            logger.error("createPipelineRecord " + ex.toString());
-            logger.error(sw.toString());
-        }
-        return null;
-    }
-
-    public gPayload createPipelineRecord2(String cookie, String gPayload, gPayload gpay)
-    {
-        logger.error("createPipelineRecord : Launcher.gPayloadQueue.offer(gpay) COMMENTED OUT");
-
-        try
-        {
-            String username = cookieCache.getIfPresent(cookie);
-            System.out.println("Creating vPipeline");
-
-            Vertex vPipeline = odb.addVertex("class:Pipeline");
-            vPipeline.setProperty("pipelineid", gpay.pipeline_id);
-            vPipeline.setProperty("name", gpay.pipeline_name);
-            //vPipeline.setProperty("username", username);
-            vPipeline.setProperty("submission", gPayload);
-            vPipeline.setProperty("status_code", "3");
-            vPipeline.setProperty("status_desc", "Record added to DB.");
-
-            odb.commit();
-            System.out.println("Post vPipeline commit");
-
-            Vertex vUser = odb.getVertexByKey("User.username", username);
-            System.out.println("Select vUser");
-
-            Edge eLives = odb.addEdge(null, vPipeline, vUser, "ispipeline");
-            System.out.println("Add Edge");
-            odb.commit();
-
-            System.out.println("Offer Pipeline to Scheduler Queue");
-            //Launcher.gPayloadQueue.offer(gpay);
-            return gpay;
-        }
-        catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException se)
-        {
-            System.out.println("DUPE " + se.toString());
-        }
-        catch(Exception ex)
-        {
-            System.out.println(ex.toString());
-        }
-        return null;
-    }
-
-    boolean createTenant(String tenantName, String tenantId)
-    {
-        try
-        {
-            Vertex vTenant = odb.addVertex("class:Tenant");
-            if(tenantId == null){
-                vTenant.setProperty("tenant_id", UUID.randomUUID().toString());
-            }
-            else {
-                vTenant.setProperty("tenant_id", tenantId);
-            }
-
-            odb.commit();
-            return true;
-        }
-        catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException se)
-        {
-            System.out.println("DUPE " + se.toString());
-        }
-        catch(Exception ex)
-        {
-            System.out.println(ex.toString());
-        }
-        return false;
-    }
-
-    public String getINodefromVNode(String vNode_id)
-    {
-        String iNode_id = null;
-        try
-        {
-            Vertex vNode = odb.getVertexByKey("vNode.node_id", vNode_id);
-            if(vNode != null)
-            {
-                //json = vPipeline.getProperty("submission");
-                Iterable<Edge> vNodeEdges = vNode.getEdges(Direction.OUT, "isINode");
-                Iterator<Edge> iter = vNodeEdges.iterator();
-
-                Edge isINode = iter.next();
-                Vertex iNode = isINode.getVertex(Direction.IN);
-                return iNode.getProperty("node_id");
-            }
-        }
-        catch(Exception ex)
-        {
-            System.out.println("getINodefromVNode: Exception ex:" + ex.toString());
-        }
-        return iNode_id;
-    }
-
-    public boolean iNodeIsActive(String iNode_id)
-    {
-        try
-        {
-            Vertex iNode = odb.getVertexByKey("iNode.node_id", iNode_id);
+            //Vertex iNode = odb.getVertexByKey("iNode.node_id", iNode_id);
+            Vertex iNode = odb.getVertex(getINodeNodeId(iNode_id));
             if(iNode != null)
             {
-                if(iNode.getProperty("node_id").toString().equals("4"))
-                {
-                    return true;
-                }
-            }
-        }
-        catch(Exception ex)
-        {
-            System.out.println("iNodeIsActive: Exception ex:" + ex.toString());
-        }
-        return false;
-    }
-    public boolean setINodeStatus(String iNode_id, String status_code, String status_desc)
-    {
-        try
-        {
-            Vertex iNode = odb.getVertexByKey("iNode.node_id", iNode_id);
-            if(iNode == null)
-            {
-                System.out.println("setINodeStatus Error: Node not found!");
-                return false;
+                //Get Enode for this iNode
+                Iterable<Edge> iNodeEdges = iNode.getEdges(Direction.IN, "in");
+                Iterator<Edge> iterE = iNodeEdges.iterator();
+                Edge isIn = iterE.next();
+                Vertex eNode = isIn.getVertex(Direction.OUT);
+                logger.debug("ENode: " + eNode.getId().toString());
+
+                //Get Enode for the upstream iNode
+                Iterable<Edge> eNodeEdges = eNode.getEdges(Direction.IN, "isEConnected");
+                Iterator<Edge> iterE2 = eNodeEdges.iterator();
+                Edge isEConnected = iterE2.next();
+                Vertex eNode2 = isEConnected.getVertex(Direction.OUT);
+                logger.debug("ENode2: " + eNode2.getId().toString());
+
+                //Get Upstream iNode
+                Iterable<Edge> iNodeEdges2 = eNode2.getEdges(Direction.IN, "out");
+                Iterator<Edge> iter2 = iNodeEdges2.iterator();
+                Edge isOut = iter2.next();
+                Vertex iNode2 = isOut.getVertex(Direction.OUT);
+                uINode = iNode2.getProperty("node_id");
             }
             else
             {
-                iNode.setProperty("status_code", status_code);
-                iNode.setProperty("status_desc", status_desc);
-                odb.commit();
-                System.out.println("setINodeStatus iNode_id:" + iNode_id + " status_code:" + status_code + " status_desc:" + status_desc);
-                return true;
+                logger.error("getUpstreamNode: Error: Incoming iNode: " + iNode_id + " is null");
             }
-
         }
         catch(Exception ex)
         {
-            System.out.println("setINodeStatus: Exception ex:" + ex.toString());
+            logger.error("getUpstreamNode: Exception ex:" + ex.toString());
         }
-        return false;
+        return uINode;
     }
 
-    public boolean addINodeParams(String iNode_id, Map<String,String> newparams)
-    {
-        try
-        {
-            Vertex iNode = odb.getVertexByKey("iNode.node_id", iNode_id);
-            Map<String,String> params = getMapFromString(iNode.getProperty("params").toString(), false);
-
-            params.putAll(newparams);
-
-            iNode.setProperty("params", encodeParams(params));
-            odb.commit();
-            return true;
-        }
-        catch(Exception ex)
-        {
-            System.out.println("addINodeParams: Exception ex:" + ex.toString());
-        }
-        return false;
-    }
-    public String encodeParams(Map<String,String> params)
-    {
-        String params_string = null;
-        try{
-            StringBuilder sb = new StringBuilder();
-
-            for (Map.Entry<String, String> entry : params.entrySet())
-            {
-                String sKey = URLEncoder.encode(entry.getKey(), "UTF-8");
-                String sValue = null;
-                if(entry.getValue() != null)
-                {
-                    sValue = URLEncoder.encode(entry.getValue(), "UTF-8");
-                }
-
-
-                //String sKey = entry.getKey() + ":" + entry.getValue();
-                //str = URLEncoder.encode(str, "UTF-8");
-
-                //System.out.println(entry.getKey() + "/" + entry.getValue());
-                sb.append(sKey + ":" + sValue + ",");
-            }
-            params_string = sb.substring(0, sb.length() -1);
-
-        }
-        catch(Exception ex)
-        {
-            System.out.println("encodeParams: Exception ex:" + ex.toString());
-        }
-        return params_string;
-    }
-    public Map<String,String> getNodeManifest(String iNode_id)
-    {
+    public Map<String,String> getNodeManifest(String iNode_id) {
         Map<String,String> manifest = null;
         try
         {
-            Vertex iNode = odb.getVertexByKey("iNode.node_id", iNode_id);
+            //Vertex iNode = odb.getVertexByKey("iNode.node_id", iNode_id);
+            Vertex iNode = odb.getVertex(getINodeNodeId(iNode_id));
             if(iNode != null)
             {
                 manifest = getMapFromString(iNode.getProperty("params").toString(), false);
@@ -861,15 +618,16 @@ public class DBApplicationFunctions {
                     String upstreamINode_id = getUpstreamNode(iNode_id);
                     if(upstreamINode_id == null)
                     {
-                        System.out.println("getNodeManifest: Error: null nextNodeID before AMQP Node");
+                        logger.error("getNodeManifest: Error: null nextNodeID before AMQP Node");
                         return null;
                     }
                     else
                     {
-                        Vertex uINode = odb.getVertexByKey("iNode.node_id", upstreamINode_id);
+                        //Vertex uINode = odb.getVertexByKey("iNode.node_id", upstreamINode_id);
+                        Vertex uINode = odb.getVertex(getINodeNodeId(upstreamINode_id));
                         if(uINode == null)
                         {
-                            System.out.println("getNodeManifest: Error: null uINode Node");
+                            logger.error("getNodeManifest: Error: null uINode Node");
                             return null;
                         }
                         else
@@ -878,7 +636,7 @@ public class DBApplicationFunctions {
                             {
                                 if(uINode.getProperty("status_code").toString().equals("4"))
                                 {
-                                    System.out.println("Found Active Upstream iNode:" + upstreamINode_id);
+                                    logger.debug("Found Active Upstream iNode:" + upstreamINode_id);
                                     Map<String,String> params = getMapFromString(uINode.getProperty("params").toString(), false);
                                     manifest.put("outExchange", params.get("outExchange"));
                                     manifest.put("amqp_server", params.get("amqp_server"));
@@ -889,7 +647,7 @@ public class DBApplicationFunctions {
                             }
                             else
                             {
-                                System.out.println("Upstream iNode is InActive: " + upstreamINode_id);
+                                logger.debug("Upstream iNode is InActive: " + upstreamINode_id);
                                 return null;
                             }
 
@@ -901,122 +659,93 @@ public class DBApplicationFunctions {
         }
         catch(Exception ex)
         {
-            System.out.println("getNodeManifest: Exception ex:" + ex.toString());
+            logger.debug("getNodeManifest: Exception ex:" + ex.toString());
         }
         return manifest;
     }
 
+    public gPayload createPipelineNodes(gPayload gpay) {
 
-    public String getUpstreamNode(String iNode_id)
-    {
-        String uINode = null;
         try
         {
-            Vertex iNode = odb.getVertexByKey("iNode.node_id", iNode_id);
-            if(iNode != null)
-            {
-                //Get Enode for this iNode
-                Iterable<Edge> iNodeEdges = iNode.getEdges(Direction.IN, "in");
-                Iterator<Edge> iterE = iNodeEdges.iterator();
-                Edge isIn = iterE.next();
-                Vertex eNode = isIn.getVertex(Direction.OUT);
-                System.out.println("ENode: " + eNode.getId().toString());
+            //create nodes and links for pipeline records
+            HashMap<String,String> iNodeHm = new HashMap<>();
+            HashMap<String,String> vNodeHm = new HashMap<>();
 
-                //Get Enode for the upstream iNode
-                Iterable<Edge> eNodeEdges = eNode.getEdges(Direction.IN, "isEConnected");
-                Iterator<Edge> iterE2 = eNodeEdges.iterator();
-                Edge isEConnected = iterE2.next();
-                Vertex eNode2 = isEConnected.getVertex(Direction.OUT);
-                System.out.println("ENode2: " + eNode2.getId().toString());
-
-                //Get Upstream iNode
-                Iterable<Edge> iNodeEdges2 = eNode2.getEdges(Direction.IN, "out");
-                Iterator<Edge> iter2 = iNodeEdges2.iterator();
-                Edge isOut = iter2.next();
-                Vertex iNode2 = isOut.getVertex(Direction.OUT);
-                uINode = iNode2.getProperty("node_id");
-            }
-            else
+            List<gEdge> edges = gpay.edges;
+            for(gNode node : gpay.nodes)
             {
-                System.out.println("getUpstreamNode: Error: Incoming iNode: " + iNode_id + " is null");
+                try
+                {
+                    String vNode_id = createVNode(gpay.pipeline_id, node,true);
+                    vNodeHm.put(node.node_id, vNode_id);
+
+                    logger.debug("Submitted Node:" + node.node_id);
+                    logger.debug("vNode:" + vNode_id);
+
+
+                    String iNode_id = createINode(vNode_id, node);
+                    //node.node_id = iNode_id;
+                    iNodeHm.put(node.node_id, iNode_id);
+
+                    logger.debug("iNode:" + node.node_id);
+
+                    //keep the vnodeID
+                    node.node_id = vNode_id;
+
+                    //test finding nodes
+                    //getNode(node);
+                }
+                catch(Exception ex)
+                {
+                    logger.debug("createPipelineNodes Node: " + ex.toString());
+                }
             }
+
+            for(gEdge edge : gpay.edges)
+            {
+                try
+                {
+                    logger.debug(edge.edge_id + " " + edge.node_from + " " + edge.node_to);
+                    //createGEdge(edge);
+                    //vEdge
+                    String edge_id = createVEdge(vNodeHm.get(edge.node_from),vNodeHm.get(edge.node_to));
+                    edge.edge_id = edge_id;
+
+                    createIEdge(iNodeHm.get(edge.node_from),iNodeHm.get(edge.node_to));
+                    //assign vEdge ID
+                    edge.node_from = vNodeHm.get(edge.node_from);
+                    edge.node_to = vNodeHm.get(edge.node_to);
+
+                    //iEdge
+                }
+                catch(Exception ex)
+                {
+                    logger.debug("createPipelineNodes Edge: " + ex.toString());
+                }
+            }
+            //return gpay;
+            gpay.status_code = "3";
+            gpay.status_desc = "Pipeline Nodes Created.";
+            setPipelineStatus(gpay);
+
+            return gpay;
         }
         catch(Exception ex)
         {
-            System.out.println("getUpstreamNode: Exception ex:" + ex.toString());
+            logger.debug("createPipelineNodes: " + ex.toString());
         }
-        return uINode;
+        gpay.status_code = "1";
+        gpay.status_desc = "Failed to create Pipeline.";
+        setPipelineStatus(gpay);
+        return gpay;
     }
 
-    boolean getNode(gNode node)
-    {
-        try
-        {
-            //Vertex node = odb.getVertex(arg0)
-            //Iterable resultset = getVertices("Person",new String[] {"name","surname"},new Object[] { "Sherlock" ,"Holmes"});
-            Iterable<Vertex> resultset = odb.getVertices("iNode",node.getIdentKey(),node.getIdentValue());
-            Iterator<Vertex> iter = resultset.iterator();
-            //Iterable<Vertex> resultset = odb.getVertices("node_name", node.node_name);
-            while (iter.hasNext())
-            {
-                //canidate node for match
-                Vertex iNode_to = iter.next();
-                //get the In edge to check and see if anything is connected
-                Iterable<Edge> toEdges = iNode_to.getEdges(Direction.IN, "In");
-                Edge eEdge_to = toEdges.iterator().next();
-                //here is the eNode for the incoming connections
-                Vertex eNode_to = eEdge_to.getVertex(Direction.OUT);
-                Iterable<Edge> incomingEdges = iNode_to.getEdges(Direction.IN, "In");
-
-                //System.out.println("results:" + iNode.getProperty("node_name"));
-            }
-        }
-        catch(Exception ex)
-        {
-            System.out.println("CODY: getNode Exception ex:" + node.node_name + " " + ex.toString());
-        }
-        return true;
-    }
-    Boolean createTNode(gNode node)
-    {
-        try
-        {
-
-            String params = encodeParams(node.params);
-
-
-
-            Vertex tNode = odb.addVertex("class:tNode");
-            tNode.setProperty("node_name", node.node_name);
-            tNode.setProperty("node_type", node.type);
-            tNode.setProperty("node_id", node.node_id);
-
-            tNode.setProperty("params", params);
-
-            odb.commit();
-
-            return true;
-        }
-        catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException se)
-        {
-            System.out.println("DUPE " + se.toString());
-        }
-        catch(Exception ex)
-        {
-            System.out.println("createTNode Error: " + ex.toString());
-        }
-        return false;
-    }
-
-    String createVNode(String pipelineid, gNode node, boolean isNew)
-    {
+    String createVNode(String pipelineId, gNode node, boolean isNew) {
         try
         {
 
             String node_id = null;
-
-            String params = encodeParams(node.params);
-
 
             Vertex vNode = odb.addVertex("class:vNode");
             vNode.setProperty("node_name", node.node_name);
@@ -1029,15 +758,18 @@ public class DBApplicationFunctions {
             {
                 node_id = node.node_id;
             }
-            vNode.setProperty("node_id", node_id);
+            vNode.setProperty("vnode_id", node_id);
 
-            vNode.setProperty("top", node.top);
-            vNode.setProperty("left", node.left);
-            vNode.setProperty("params", params);
+            if(node.params.size() > 0) {
+                vNode.setProperty("params",encodeParams(node.params));
+            }
+
             vNode.setProperty("isSource", String.valueOf(node.isSource));
             odb.commit();
 
-            Vertex vPipeline = odb.getVertexByKey("Pipeline.pipelineid", pipelineid);
+            logger.debug("Created vNode " + node_id + " Node ID " + vNode.getId().toString() + " getvNode = " + getVNodeNodeId(node_id));
+
+            Vertex vPipeline = odb.getVertex(getPipelineNodeId(pipelineId));
             Edge ePipeline = odb.addEdge(null, vPipeline, vNode, "isVNode");
             odb.commit();
 
@@ -1045,76 +777,95 @@ public class DBApplicationFunctions {
         }
         catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException se)
         {
-            System.out.println("DUPE " + se.toString());
+            logger.error("DUPE " + se.toString());
         }
         catch(Exception ex)
         {
-            System.out.println("createVNode Error: " + ex.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString());
+
+            logger.error("createVNode Error: " + ex.toString());
         }
         return null;
     }
-    String createINode(String vNode_id, gNode node)
-    {
+
+    String createINode(String vNode_id, gNode node) {
         try
         {
 
             String node_id = UUID.randomUUID().toString();
 
-            String params = encodeParams(node.params);
-
             Vertex iNode = odb.addVertex("class:iNode");
             iNode.setProperty("node_name", node.node_name);
             iNode.setProperty("node_type", node.type);
-            iNode.setProperty("node_id", node_id);
-            iNode.setProperty("params", params);
-            System.out.println("iNode Params: " + params);
+            iNode.setProperty("inode_id", node_id);
+            if(node.params.size() > 0) {
+                iNode.setProperty("params",encodeParams(node.params));
+                logger.debug("iNode Params: " + encodeParams(node.params));
+            }
+
             iNode.setProperty("status_code", "0");
             iNode.setProperty("status_desc", "Added to DB");
 
 
             odb.commit();
+
+            logger.debug("Created iNode " + node_id + " Node ID " + iNode.getId().toString() + " getiNode = " + getINodeNodeId(node_id));
+
             //Link to vNode
-            Vertex vNode = odb.getVertexByKey("vNode.node_id", vNode_id);
+            logger.debug("Connecting to vNode = " + vNode_id + " node ID " + getVNodeNodeId(vNode_id));
+            Vertex vNode = odb.getVertex(getVNodeNodeId(vNode_id));
 
             Edge eNodeEdge = odb.addEdge(null, vNode, iNode, "isINode");
 
             //Create iNode I/O Nodes
             String eNode_id = createENode(node_id, true);
 
-            System.out.println("Added new eNode in: " + eNode_id);
+            logger.debug("Added new eNode in: " + eNode_id);
             eNode_id = createENode(node_id, false);
-            System.out.println("Added new eNode out: " + eNode_id);
+            logger.debug("Added new eNode out: " + eNode_id);
 
             odb.commit();
             return node_id;
         }
         catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException se)
         {
-            System.out.println("createINode DUPE " + se.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            se.printStackTrace(pw);
+            logger.error(sw.toString());
+
+            logger.error("createINode DUPE " + se.toString());
         }
         catch(Exception ex)
         {
-            System.out.println("createINode: " + ex.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString());
+
+            logger.error("createINode: " + ex.toString());
         }
         return null;
     }
-    String createENode(String iNode_id, boolean isIn)
-    {
+
+    String createENode(String iNode_id, boolean isIn) {
         try
         {
-
-
             String node_id = UUID.randomUUID().toString();
 
             Vertex eNode = odb.addVertex("class:eNode");
-            eNode.setProperty("node_id", node_id);
-            eNode.setProperty("iNode_id", iNode_id);
+            eNode.setProperty("enode_id", node_id);
+            eNode.setProperty("inode_id", iNode_id);
             odb.commit();
 
-            Vertex iNode = odb.getVertexByKey("iNode.node_id", iNode_id);
+            Vertex iNode = odb.getVertex(getINodeNodeId(iNode_id));
+
             if(isIn)
             {
-                Edge ePipeline = odb.addEdge(null, eNode, iNode, "In");
+                Edge ePipeline = odb.addEdge(null, eNode, iNode, "in");
             }
             else
             {
@@ -1122,170 +873,186 @@ public class DBApplicationFunctions {
             }
             odb.commit();
 
+            logger.debug("Created eNode " + node_id + " Node ID " + eNode.getId().toString() + " geteNode = " + getENodeNodeId(node_id));
+
+
             return node_id;
         }
         catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException se)
         {
-            System.out.println("createENode DUPE " + se.toString());
+            logger.error("createENode DUPE " + se.toString());
         }
         catch(Exception ex)
         {
-            System.out.println("createENode: " + ex.toString());
+            logger.error("createENode: " + ex.toString());
         }
         return null;
     }
-    Boolean createIEdge(String node_from, String node_to)
-    {
+
+    public String encodeParams(Map<String,String> params) {
+        String params_string = null;
+        try{
+            StringBuilder sb = new StringBuilder();
+
+            for (Map.Entry<String, String> entry : params.entrySet())
+            {
+                String sKey = URLEncoder.encode(entry.getKey(), "UTF-8");
+                String sValue = null;
+                if(entry.getValue() != null)
+                {
+                    sValue = URLEncoder.encode(entry.getValue(), "UTF-8");
+                }
+
+                sb.append(sKey + ":" + sValue + ",");
+            }
+            params_string = sb.substring(0, sb.length() -1);
+
+        }
+        catch(Exception ex)
+        {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString());
+            logger.error("encodeParams: Exception ex:" + ex.toString());
+        }
+        return params_string;
+    }
+
+    public gPayload createPipelineRecord(String tenant_id, String gPayload) {
+        logger.info("createPipelineRecord...");
+
         try
         {
-            System.out.println("createIedge from_node: " + node_from + " node_to: " + node_to);
-            System.out.println("-I0 ");
-            Vertex iNode_from = odb.getVertexByKey("iNode.node_id", node_from);
-            System.out.println("-I1 ");
+            gPayload gpay = gPayLoadFromJson(gPayload);
+            gpay.pipeline_id = UUID.randomUUID().toString();
+            //inject real pipelineID
+            gPayload = JsonFromgPayLoad(gpay);
 
-            Vertex iNode_to = odb.getVertexByKey("iNode.node_id", node_to);
-            System.out.println("-I2 ");
 
-            if((iNode_from != null) && (iNode_to != null))
-            {
-                System.out.println("iEdge: node_from:" + node_from + " node_to:" + node_to);
+            if(getPipelineNodeId(gpay.pipeline_id) == null) {
+                logger.debug("Creating vPipeline");
+
+                Vertex vPipeline = odb.addVertex("class:Pipeline");
+                vPipeline.setProperty("pipeline_id", gpay.pipeline_id);
+                vPipeline.setProperty("pipeline_name", gpay.pipeline_name);
+                vPipeline.setProperty("submission", gPayload);
+                vPipeline.setProperty("status_code", "3");
+                vPipeline.setProperty("status_desc", "Record added to DB.");
+                vPipeline.setProperty("tenant_id", tenant_id);
+
+                odb.commit();
+
+                if(getPipelineNodeId(gpay.pipeline_id) == null) {
+                    logger.error("Pipeline record was not saved to database!");
+                }
+                else {
+                    logger.debug("Post vPipeline commit of node " + getPipelineNodeId(gpay.pipeline_id));
+                }
+
+                Vertex vTenant = odb.getVertex(getTenantNodeId(tenant_id));
+                Edge eLives = odb.addEdge(null, vPipeline, vTenant, "isPipeline");
+                odb.commit();
+
+                logger.info("Offer Pipeline to Scheduler Queue");
+                plugin.getAppScheduleQueue().offer(gpay);
+                return gpay;
             }
-            System.out.println("-I3 ");
-
-            Iterable<Edge> fromEdges = iNode_from.getEdges(Direction.OUT, "Out");
-            Edge eEdge_from = fromEdges.iterator().next();
-            Vertex eNode_from = eEdge_from.getVertex(Direction.IN);
-            if(eNode_from != null)
-            {
-                System.out.println("From eNode_id:" +  eNode_from.getProperty("node_id") + " iNode_id:" + eNode_from.getProperty("iNode_id"));
+            else {
+                logger.error("createPipelineRecord : Duplicate pipeline_id!" );
             }
-            System.out.println("-I4 ");
+        }
+        catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException se)
+        {
+            logger.error("createPipelineRecord DUPE " + se.toString());
+        }
+        catch(Exception ex)
+        {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString());
 
-            Iterable<Edge> toEdges = iNode_to.getEdges(Direction.IN, "In");
-            Edge eEdge_to = toEdges.iterator().next();
-            Vertex eNode_to = eEdge_to.getVertex(Direction.OUT);
-            System.out.println("-I5 ");
+            logger.error("createPipelineRecord " + ex.toString());
 
-            if(eNode_to != null)
-            {
-                System.out.println("To eNode_id:" +  eNode_to.getProperty("node_id") + " iNode_id:" + eNode_to.getProperty("iNode_id"));
+        }
+        return null;
+    }
+
+    boolean createTenant(String tenantName, String tenantId) {
+        try
+        {
+            Vertex vTenant = odb.addVertex("class:Tenant");
+            if(tenantId == null){
+                vTenant.setProperty("tenant_id", UUID.randomUUID().toString());
             }
-            System.out.println("-I6 ");
-
-            Edge iEdge = odb.addEdge(null, eNode_from, eNode_to, "isEConnected");
-			/*
-			 public Iterable<Edge> getEdges(OrientVertex iDestination,
-                               Direction iDirection,
-                               String... iLabels)
-			 */
-            System.out.println("-I7 ");
-
-            //Edge vEdge = odb.addEdge(null, eNode_from, eNode_to, "isIConnected");
-            //Edge vEdge = eNode_from.getEdges(arg0, arg1)
+            else {
+                vTenant.setProperty("tenant_id", tenantId);
+            }
             odb.commit();
             return true;
         }
         catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException se)
         {
-            System.out.println("createIEdge DUPE " + se.toString());
+            logger.error("DUPE " + se.toString());
         }
         catch(Exception ex)
         {
-            System.out.println("createIEdge: " + ex.toString());
+            logger.error(ex.toString());
         }
         return false;
     }
-    String createVEdge(String node_from, String node_to)
-    {
-        String edge_id = null;
+
+    public void initCrescoDB() {
         try
         {
 
-            System.out.println("node_from: " + node_from + " node_to:" + node_to);
+            odb.executeOutsideTx(new OCallable<Object, OrientBaseGraph>() {
+                @Override
+                public Object call(OrientBaseGraph iArgument) {
 
-            System.out.println("-0");
-            Vertex vNode_from = odb.getVertexByKey("vNode.node_id", node_from);
-            System.out.println("-1");
-            Vertex vNode_to = odb.getVertexByKey("vNode.node_id", node_to);
-            System.out.println("-2");
-            Edge vEdge = odb.addEdge(null, vNode_from, vNode_to, "isVConnected");
-            System.out.println("-3");
-            edge_id = UUID.randomUUID().toString();
-            System.out.println("-4");
-            vEdge.setProperty("edge_id", edge_id);
-            System.out.println("-5");
-            odb.commit();
-            System.out.println("-6");
-        }
-        catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException se)
-        {
-            System.out.println("createVEdge DUPE " + se.toString());
-        }
-        catch(Exception ex)
-        {
-            System.out.println("createVedge: " + ex.toString());
-        }
-        return edge_id;
-    }
-    boolean createClass(String className)
-    {
-        boolean wasCreated = false;
-        OrientGraphNoTx txGraph = factory.getNoTx();
-        //OSchema schema = ((OrientGraph)odb).getRawGraph().getMetadata().getSchema();
-        OSchema schema = ((OrientGraphNoTx)txGraph).getRawGraph().getMetadata().getSchema();
+                    logger.debug("Create Tenant Vertex Class");
+                    createVertexClass("Tenant");
+                    createVertexIndex("Tenant", "tenant_id", true);
 
-        if (!schema.existsClass(className))
-        {
-            txGraph.createVertexType(className);
-            //txGraph.createKeyIndex(key, Vertex.class, new Parameter("type", "UNIQUE"), new Parameter("class", className));
-            wasCreated = true;
-        }
-        txGraph.commit();
-        txGraph.shutdown();
-        return wasCreated;
-    }
-    void createKeyIndex(String className, String key)
-    {
-        OrientGraphNoTx txGraph = factory.getNoTx();
-        //OSchema schema = ((OrientGraph)odb).getRawGraph().getMetadata().getSchema();
-        OSchema schema = ((OrientGraphNoTx)txGraph).getRawGraph().getMetadata().getSchema();
+                    logger.debug("Create Pipeline Vertex Class");
+                    createVertexClass("Pipeline");
+                    createVertexIndex("Pipeline", "pipeline_id", true);
 
-        if (schema.existsClass(className))
-        {
-            txGraph.createKeyIndex(key, Vertex.class, new Parameter("type", "UNIQUE"), new Parameter("class", className));
-        }
-        txGraph.commit();
-        txGraph.shutdown();
-    }
-    //firstName
-    private String JsonFromgPayLoad(gPayload gpay)
-    {
-        Gson gson = new GsonBuilder().create();
-        //gPayload me = gson.fromJson(json, gPayload.class);
-        //System.out.println(p);
-        return gson.toJson(gpay);
+                    logger.debug("Create eNode Vertex Class");
+                    createVertexClass("eNode");
+                    createVertexIndex("eNode", "enode_id", true);
 
-    }
-    private gPayload gPayLoadFromJson(String json)
-    {
-        Gson gson = new GsonBuilder().create();
-        gPayload me = gson.fromJson(json, gPayload.class);
-        //System.out.println(p);
-        return me;
-    }
+                    logger.debug("Create vNode Vertex Class");
+                    createVertexClass("vNode");
+                    createVertexIndex("vNode", "vnode_id", true);
 
+                    logger.debug("Create isVNode Edge Class");
+                    createEdgeClass("isVNode",null);
 
-    //Base INIT Functions
-    public void initCrescoDB()
-    {
-        try
-        {
-            //index properties
+                    logger.debug("Create isINode Edge Class");
+                    createEdgeClass("isINode",null);
 
-            logger.debug("Create Region Vertex Class");
-            String[] rProps = {"zregion"}; //Property names
-            createVertexClass("zNode", rProps);
+                    logger.debug("Create isVConnected Edge Class");
+                    createEdgeClass("isVConnected",null);
 
+                    logger.debug("Create isPipeline Edge Class");
+                    createEdgeClass("isPipeline",null);
+
+                    logger.debug("Create isEConnected Edge Class");
+                    createEdgeClass("isEConnected",null);
+
+                    logger.debug("Create in Edge Class");
+                    createEdgeClass("in",null);
+
+                    logger.debug("Create out Edge Class");
+                    createEdgeClass("out",null);
+
+                    return null;
+                }
+            });
+
+            createTenant("default", "0");
 
         }
         catch(Exception ex)
@@ -1294,100 +1061,7 @@ public class DBApplicationFunctions {
         }
     }
 
-    //Class Create Functions
-    boolean createVertexIndex(String className, String indexName, boolean isUnique)
-    {
-        boolean wasCreated = false;
-        try
-        {
-            OrientGraphNoTx txGraph = factory.getNoTx();
-            //OSchema schema = ((OrientGraph)odb).getRawGraph().getMetadata().getSchema();
-            OSchema schema = ((OrientGraphNoTx)txGraph).getRawGraph().getMetadata().getSchema();
-
-            if (schema.existsClass(className))
-            {
-                OClass vt = txGraph.getVertexType(className);
-                //OClass vt = txGraph.createVertexType(className);
-                vt.createProperty(indexName, OType.STRING);
-
-                if(isUnique)
-                {
-                    vt.createIndex(className + "." + indexName, OClass.INDEX_TYPE.UNIQUE, indexName);
-                }
-                else
-                {
-                    vt.createIndex(className + "." + indexName, OClass.INDEX_TYPE.NOTUNIQUE, indexName);
-                }
-
-                wasCreated = true;
-            }
-
-            txGraph.commit();
-            txGraph.shutdown();
-        }
-        catch(Exception ex)
-        {
-            logger.debug("DBEngine : createVertexIndex : Error " + ex.toString());
-        }
-
-        return wasCreated;
-    }
-
-    boolean createVertexIndex(String className, String[] props, String indexName, boolean isUnique)
-    {
-        boolean wasCreated = false;
-        OrientGraphNoTx txGraph = factory.getNoTx();
-        //OSchema schema = ((OrientGraph)odb).getRawGraph().getMetadata().getSchema();
-        OSchema schema = ((OrientGraphNoTx)txGraph).getRawGraph().getMetadata().getSchema();
-
-        if (schema.existsClass(className))
-        {
-            OClass vt = txGraph.getVertexType(className);
-            //OClass vt = txGraph.createVertexType(className);
-            for(String prop : props)
-            {
-                vt.createProperty(prop, OType.STRING);
-            }
-            if(isUnique)
-            {
-                vt.createIndex(className + "." + indexName, OClass.INDEX_TYPE.UNIQUE, props);
-            }
-            else
-            {
-                vt.createIndex(className + "." + indexName, OClass.INDEX_TYPE.NOTUNIQUE, props);
-            }
-
-            wasCreated = true;
-        }
-        txGraph.commit();
-        txGraph.shutdown();
-        return wasCreated;
-    }
-
-    boolean createVertexClass(String className, String[] props)
-    {
-        boolean wasCreated = false;
-        OrientGraphNoTx txGraph = factory.getNoTx();
-        //OSchema schema = ((OrientGraph)odb).getRawGraph().getMetadata().getSchema();
-        OSchema schema = ((OrientGraphNoTx)txGraph).getRawGraph().getMetadata().getSchema();
-
-        if (!schema.existsClass(className))
-        {
-            OClass vt = txGraph.createVertexType(className);
-            for(String prop : props)
-                vt.createProperty(prop, OType.STRING);
-            vt.createIndex(className + ".nodePath", OClass.INDEX_TYPE.UNIQUE, props);
-            txGraph.commit();
-            if (schema.existsClass(className)) {
-                wasCreated = true;
-            }
-        }
-        txGraph.shutdown();
-        return wasCreated;
-    }
-
-    boolean createEdgeClass(String className, String[] props)
-    {
+    boolean createEdgeClass(String className, String[] props) {
         boolean wasCreated = false;
         OrientGraphNoTx txGraph = factory.getNoTx();
         //OSchema schema = ((OrientGraph)odb).getRawGraph().getMetadata().getSchema();
@@ -1409,6 +1083,71 @@ public class DBApplicationFunctions {
         return wasCreated;
     }
 
+    boolean createVertexClass(String className) {
+        boolean wasCreated = false;
+        OrientGraphNoTx txGraph = factory.getNoTx();
+        OSchema schema = ((OrientGraphNoTx)txGraph).getRawGraph().getMetadata().getSchema();
 
+        if (!schema.existsClass(className))
+        {
+            OClass vt = txGraph.createVertexType(className);
+            txGraph.commit();
+            if (schema.existsClass(className)) {
+                wasCreated = true;
+            }
+        }
+        txGraph.shutdown();
+        return wasCreated;
+    }
 
+    boolean createVertexIndex(String className, String indexName, boolean isUnique) {
+        boolean wasCreated = false;
+        try
+        {
+            OrientGraphNoTx txGraph = factory.getNoTx();
+            OSchema schema = ((OrientGraphNoTx)txGraph).getRawGraph().getMetadata().getSchema();
+
+            if (schema.existsClass(className))
+            {
+                OClass vt = txGraph.getVertexType(className);
+                if(vt.getProperty(indexName) == null) {
+                    vt.createProperty(indexName, OType.STRING);
+                }
+                if(isUnique)
+                {
+                    vt.createIndex(className + "." + indexName, OClass.INDEX_TYPE.UNIQUE, indexName);
+                }
+                else
+                {
+                    vt.createIndex(className + "." + indexName, OClass.INDEX_TYPE.NOTUNIQUE, indexName);
+                }
+
+                wasCreated = true;
+            }
+
+            txGraph.commit();
+            txGraph.shutdown();
+        }
+        catch(Exception ex)
+        {
+            logger.error("createVertexIndex : Error " + ex.toString());
+        }
+
+        return wasCreated;
+    }
+
+    public String JsonFromgPayLoad(gPayload gpay) {
+        Gson gson = new GsonBuilder().create();
+        //gPayload me = gson.fromJson(json, gPayload.class);
+        //logger.debug(p);
+        return gson.toJson(gpay);
+
+    }
+
+    public gPayload gPayLoadFromJson(String json) {
+        Gson gson = new GsonBuilder().create();
+        gPayload me = gson.fromJson(json, gPayload.class);
+        //logger.debug(p);
+        return me;
+    }
 }

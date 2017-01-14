@@ -1,5 +1,6 @@
 package com.researchworx.cresco.controller.core;
 
+import app.gPayload;
 import com.google.auto.service.AutoService;
 import com.researchworx.cresco.controller.communication.*;
 import com.researchworx.cresco.controller.globalcontroller.*;
@@ -141,6 +142,8 @@ public class Launcher extends CPlugin {
     private ConcurrentLinkedQueue<MsgEvent> incomingCanidateBrokers;
     private ConcurrentLinkedQueue<MsgEvent> outgoingMessages;
     private ConcurrentLinkedQueue<MsgEvent> resourceScheduleQueue;
+    private ConcurrentLinkedQueue<gPayload> appScheduleQueue;
+
 
 
     private DiscoveryClientIPv4 dcv4;
@@ -739,10 +742,17 @@ public class Launcher extends CPlugin {
     }
 
     public ConcurrentLinkedQueue<MsgEvent> getResourceScheduleQueue() {
-        return incomingCanidateBrokers;
+        return resourceScheduleQueue;
     }
-    public void setResourceScheduleQueue(ConcurrentLinkedQueue<MsgEvent> resourceScheduleQueue) {
-        this.resourceScheduleQueue = resourceScheduleQueue;
+    public void setResourceScheduleQueue(ConcurrentLinkedQueue<MsgEvent> appScheduleQueue) {
+        this.resourceScheduleQueue = appScheduleQueue;
+    }
+
+    public ConcurrentLinkedQueue<gPayload> getAppScheduleQueue() {
+        return appScheduleQueue;
+    }
+    public void setAppScheduleQueue(ConcurrentLinkedQueue<gPayload> appScheduleQueue) {
+        this.appScheduleQueue = appScheduleQueue;
     }
 
     public ConcurrentLinkedQueue<MsgEvent> getIncomingCanidateBrokers() {
