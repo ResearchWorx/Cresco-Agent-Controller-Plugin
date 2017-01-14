@@ -48,7 +48,6 @@ public class DBBaseFunctions {
         initCrescoDB();
     }
 
-    //uplo
     //new database functions
     //READS
     public String getINodeId(String resource_id, String inode_id)

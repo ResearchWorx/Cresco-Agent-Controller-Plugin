@@ -566,7 +566,7 @@ public class DBApplicationFunctions {
     }
 
 
-    //upload
+
     public gPayload createPipelineRecord(String gPayload, gPayload gpay)
     {
         logger.error("createPipelineRecord : Launcher.gPayloadQueue.offer(gpay) COMMENTED OUT");
