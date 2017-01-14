@@ -11,6 +11,7 @@ import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.metadata.schema.OSchema;
 import com.orientechnologies.orient.core.metadata.schema.OType;
+import com.orientechnologies.orient.core.sql.OCommandSQL;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.utilities.CLogger;
 import com.tinkerpop.blueprints.Direction;
@@ -21,6 +22,8 @@ import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.*;
@@ -61,40 +64,35 @@ public class DBApplicationFunctions {
     {
         try
         {
+
             //adding custom classes and constraints
-            System.out.println("Create User Class");
-            if(createClass("User"))
+            logger.debug("Create Tenant Class");
+            if(createClass("Tenant"))
             {
-                createKeyIndex("User","username");
+                createKeyIndex("Tenant","tenant_id");
             }
-            System.out.println("Create Cookie Class");
 
-            if(createClass("Cookie"))
-            {
-                createKeyIndex("Cookie","cookie");
-            }
-            System.out.println("Create Pipeline Class");
-
+            logger.debug("Create Pipeline Class");
             if(createClass("Pipeline"))
             {
                 createKeyIndex("Pipeline","pipelineid");
             }
             //implementation node
-            System.out.println("Create iNode Class");
+            logger.debug("Create iNode Class");
 
             if(createClass("iNode"))
             {
                 createKeyIndex("iNode","node_id");
             }
             //virtual node
-            System.out.println("Create vNode Class");
+            logger.debug("Create vNode Class");
 
             if(createClass("vNode"))
             {
                 createKeyIndex("vNode","node_id");
             }
             //edge node (in,out)
-            System.out.println("Create eNode Class");
+            logger.debug("Create eNode Class");
 
             if(createClass("eNode"))
             {
@@ -103,7 +101,7 @@ public class DBApplicationFunctions {
 
             }
             //template node
-            System.out.println("Create tNode Class");
+            logger.debug("Create tNode Class");
 
             if(createClass("tNode"))
             {
@@ -112,9 +110,9 @@ public class DBApplicationFunctions {
 
             }
             //make sure one user exist
-            System.out.println("Create default user");
+            logger.debug("Create default user");
 
-            createUser("cody@uky.edu","cody01");
+            createTenant("default", "0");
 
             //add templates
             System.out.println("Create Default Templates");
@@ -565,16 +563,54 @@ public class DBApplicationFunctions {
         return gpay;
     }
 
-
-
-    public gPayload createPipelineRecord(String gPayload, gPayload gpay)
+    public String getTenantNodeId(String tenantId)
     {
-        logger.error("createPipelineRecord : Launcher.gPayloadQueue.offer(gpay) COMMENTED OUT");
+        String node_id = null;
+        OrientGraph graph = null;
+
+        try
+        {
+
+                //OrientGraphNoTx graph = factory.getNoTx();
+                graph = factory.getTx();
+
+                Iterable<Vertex> resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:Tenant.tenant_id WHERE key = '" + tenantId + "'")).execute();
+
+                Iterator<Vertex> iter = resultIterator.iterator();
+                if(iter.hasNext())
+                {
+                    Vertex v = iter.next();
+                    node_id = v.getProperty("rid").toString();
+                }
+                if(node_id != null)
+                {
+                    node_id = node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
+                }
+
+        }
+        catch(Exception ex)
+        {
+            logger.error("getTenantNodeID : Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return node_id;
+    }
+
+
+    public gPayload createPipelineRecord(String tenant_id, String gPayload, gPayload gpay)
+    {
+        logger.info("createPipelineRecord : Launcher.gPayloadQueue.offer(gpay) COMMENTED OUT");
 
         try
         {
             //String username = cookieCache.getIfPresent(cookie);
-            String username = "-nouserlisted-";
+            //String username = "-nouserlisted-";
             System.out.println("Creating vPipeline");
 
             Vertex vPipeline = odb.addVertex("class:Pipeline");
@@ -584,28 +620,30 @@ public class DBApplicationFunctions {
             vPipeline.setProperty("submission", gPayload);
             vPipeline.setProperty("status_code", "3");
             vPipeline.setProperty("status_desc", "Record added to DB.");
+            vPipeline.setProperty("tenant_id",tenant_id);
 
             odb.commit();
             System.out.println("Post vPipeline commit");
 
-            Vertex vUser = odb.getVertexByKey("User.username", username);
-            System.out.println("Select vUser");
-
-            Edge eLives = odb.addEdge(null, vPipeline, vUser, "ispipeline");
-            System.out.println("Add Edge");
+            Vertex vTenant = odb.getVertex(getTenantNodeId(tenant_id));
+            Edge eLives = odb.addEdge(null, vPipeline, vTenant, "ispipeline");
             odb.commit();
 
-            System.out.println("Offer Pipeline to Scheduler Queue");
-            //Launcher.gPayloadQueue.offer(gpay);
+            logger.info("Offer Pipeline to Scheduler Queue");
             return gpay;
         }
         catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException se)
         {
-            System.out.println("DUPE " + se.toString());
+            logger.error("createPipelineRecord DUPE " + se.toString());
         }
         catch(Exception ex)
         {
-            System.out.println(ex.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+
+            logger.error("createPipelineRecord " + ex.toString());
+            logger.error(sw.toString());
         }
         return null;
     }
@@ -652,13 +690,18 @@ public class DBApplicationFunctions {
         return null;
     }
 
-    boolean createUser(String username, String password)
+    boolean createTenant(String tenantName, String tenantId)
     {
         try
         {
-            Vertex vUser = odb.addVertex("class:User");
-            vUser.setProperty("username", username);
-            vUser.setProperty("password", password);
+            Vertex vTenant = odb.addVertex("class:Tenant");
+            if(tenantId == null){
+                vTenant.setProperty("tenant_id", UUID.randomUUID().toString());
+            }
+            else {
+                vTenant.setProperty("tenant_id", tenantId);
+            }
+
             odb.commit();
             return true;
         }

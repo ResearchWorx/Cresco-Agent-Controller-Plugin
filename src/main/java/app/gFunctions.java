@@ -21,7 +21,7 @@ public class gFunctions {
 
 	}
 
-	public String gPipelineSubmit(String pipelineJSON)
+	public String gPipelineSubmit(String tenantId, String pipelineJSON)
 	{
 		//boolean isSubmitted = false;
         String returnGpipeline = null;
@@ -31,11 +31,9 @@ public class gFunctions {
 			gPayload gpay = gPayLoadFromJson(pipelineJSON);
 			gpay.pipeline_id = UUID.randomUUID().toString();
 			pipelineJSON = JsonFromgPayLoad(gpay);
-			gpay = plugin.getGDB().dba.createPipelineRecord(pipelineJSON, gpay);
-			//add pipeline submission record
-			//gpay = Launcher.graphDB.createPipelineRecord(cookie, message, gpay);
-			//add nodes and edges
-            //isSubmitted = true;
+			gpay = plugin.getGDB().dba.createPipelineRecord(tenantId, pipelineJSON, gpay);
+			returnGpipeline = JsonFromgPayLoad(gpay);
+			logger.info("gPipelineSubmit : returnGpipeline " + returnGpipeline);
 
 		}
 		catch(Exception ex) {

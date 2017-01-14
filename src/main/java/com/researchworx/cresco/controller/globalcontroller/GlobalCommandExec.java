@@ -275,10 +275,11 @@ public class GlobalCommandExec {
                     {
                         try
                         {
-                            if(ce.getParam("gpipeline") != null) {
+                            if((ce.getParam("gpipeline") != null) && (ce.getParam("tenant_id") != null)) {
                                 String pipelineJSON = ce.getParam("gpipeline");
+                                String tenantID = ce.getParam("tenant_id");
                                 logger.info("*" + pipelineJSON + "*");
-                                String returnGpipeline = gfunc.gPipelineSubmit(pipelineJSON);
+                                String returnGpipeline = gfunc.gPipelineSubmit(tenantID, pipelineJSON);
                                 ce.setParam("gpipeline",returnGpipeline);
                             }
                         }
