@@ -278,12 +278,8 @@ public class GlobalCommandExec {
                             if(ce.getParam("gpipeline") != null) {
                                 String pipelineJSON = ce.getParam("gpipeline");
                                 logger.info("*" + pipelineJSON + "*");
-                                if(gfunc.gPipelineSubmit(pipelineJSON)) {
-                                    logger.info("Pipeline Submitted");
-                                }
-                                else {
-                                    logger.error("Pipeline submission failed.");
-                                }
+                                String returnGpipeline = gfunc.gPipelineSubmit(pipelineJSON);
+                                ce.setParam("gpipeline",returnGpipeline);
                             }
                         }
                         catch(Exception ex)
