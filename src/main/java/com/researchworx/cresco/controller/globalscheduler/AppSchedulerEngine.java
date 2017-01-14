@@ -79,7 +79,7 @@ public class AppSchedulerEngine implements Runnable {
     public boolean checkPipeline(String pipeline_id) {
 
         gPayload gpay = plugin.getGDB().dba.getPipelineObj(pipeline_id);
-        logger.debug("Disable started for Pipeline_id:" + gpay.pipeline_id + " Pipeline_name:" + gpay.pipeline_name);
+        logger.debug("checkPipeline started for Pipeline_id:" + gpay.pipeline_id + " Pipeline_name:" + gpay.pipeline_name);
 
         List<String> badINodes = new ArrayList<String>();
         logger.debug("Checking Pipeline_id:" + gpay.pipeline_id + " Pipeline_name:" + gpay.pipeline_name);

@@ -279,7 +279,7 @@ public class DBApplicationFunctions {
             Vertex eNode_from = eEdge_from.getVertex(Direction.IN);
             if(eNode_from != null)
             {
-                logger.debug("From eNode_id:" +  eNode_from.getProperty("node_id") + " iNode_id:" + eNode_from.getProperty("inode_id"));
+                logger.debug("From eNode_id:" +  eNode_from.getProperty("enode_id") + " iNode_id:" + eNode_from.getProperty("inode_id"));
             }
             logger.debug("-I4 ");
 
@@ -290,7 +290,7 @@ public class DBApplicationFunctions {
 
             if(eNode_to != null)
             {
-                logger.debug("To eNode_id:" +  eNode_to.getProperty("node_id") + " iNode_id:" + eNode_to.getProperty("inode_id"));
+                logger.debug("To eNode_id:" +  eNode_to.getProperty("enode_id") + " iNode_id:" + eNode_to.getProperty("inode_id"));
             }
             logger.debug("-I6 ");
 
@@ -430,7 +430,7 @@ public class DBApplicationFunctions {
 
                 Edge isINode = iter.next();
                 Vertex iNode = isINode.getVertex(Direction.IN);
-                return iNode.getProperty("node_id");
+                return iNode.getProperty("inode_id");
             }
         }
         catch(Exception ex)
@@ -499,7 +499,7 @@ public class DBApplicationFunctions {
 
             if(iNode != null)
             {
-                if(iNode.getProperty("node_id").toString().equals("4"))
+                if(iNode.getProperty("inode_id").toString().equals("4"))
                 {
                     return true;
                 }
@@ -579,7 +579,7 @@ public class DBApplicationFunctions {
                 Iterator<Edge> iter2 = iNodeEdges2.iterator();
                 Edge isOut = iter2.next();
                 Vertex iNode2 = isOut.getVertex(Direction.OUT);
-                uINode = iNode2.getProperty("node_id");
+                uINode = iNode2.getProperty("inode_id");
             }
             else
             {
@@ -603,7 +603,7 @@ public class DBApplicationFunctions {
             {
                 manifest = getMapFromString(iNode.getProperty("params").toString(), false);
                 //set type in manifest
-                manifest.put("node_id", iNode.getProperty("node_id").toString());
+                manifest.put("inode_id", iNode.getProperty("inode_id").toString());
                 manifest.put("node_name", iNode.getProperty("node_name").toString());
                 manifest.put("node_type", iNode.getProperty("node_type").toString());
                 manifest.put("status_code", iNode.getProperty("status_code").toString());
@@ -612,8 +612,6 @@ public class DBApplicationFunctions {
                 //add type-specific information This should be done a better way
                 if((manifest.get("node_type").equals("membuffer")) || (manifest.get("node_type").equals("query")))
                 {
-                    //String nextNodeId = getUpstreamNode(iNode.getProperty("node_id").toString());
-
                     //WALK BACK AND FIND AMQP
                     String upstreamINode_id = getUpstreamNode(iNode_id);
                     if(upstreamINode_id == null)
