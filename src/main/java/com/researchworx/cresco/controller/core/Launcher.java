@@ -22,6 +22,7 @@ import javax.jms.JMSException;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.management.ManagementFactory;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
@@ -141,7 +142,7 @@ public class Launcher extends CPlugin {
 
     private ConcurrentLinkedQueue<MsgEvent> incomingCanidateBrokers;
     private ConcurrentLinkedQueue<MsgEvent> outgoingMessages;
-    private ConcurrentLinkedQueue<MsgEvent> resourceScheduleQueue;
+    //private ConcurrentLinkedQueue<MsgEvent> resourceScheduleQueue;
     private ConcurrentLinkedQueue<gPayload> appScheduleQueue;
 
 
@@ -741,13 +742,14 @@ public class Launcher extends CPlugin {
         ConsumerThreadActive = consumerThreadActive;
     }
 
+    /*
     public ConcurrentLinkedQueue<MsgEvent> getResourceScheduleQueue() {
         return resourceScheduleQueue;
     }
     public void setResourceScheduleQueue(ConcurrentLinkedQueue<MsgEvent> appScheduleQueue) {
         this.resourceScheduleQueue = appScheduleQueue;
     }
-
+*/
     public ConcurrentLinkedQueue<gPayload> getAppScheduleQueue() {
         return appScheduleQueue;
     }

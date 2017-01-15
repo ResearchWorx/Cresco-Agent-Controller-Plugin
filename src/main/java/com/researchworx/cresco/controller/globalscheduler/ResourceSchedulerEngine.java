@@ -1,12 +1,18 @@
 package com.researchworx.cresco.controller.globalscheduler;
 
 import com.researchworx.cresco.controller.core.Launcher;
+import com.researchworx.cresco.controller.db.DBApplicationFunctions;
+import com.researchworx.cresco.controller.db.DBBaseFunctions;
 import com.researchworx.cresco.controller.globalcontroller.GlobalHealthWatcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
+import com.sun.media.jfxmedia.logging.Logger;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.net.URLDecoder;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.jar.Attributes;
@@ -23,7 +29,7 @@ public class ResourceSchedulerEngine implements Runnable {
 	public ResourceSchedulerEngine(Launcher plugin, GlobalHealthWatcher ghw) {
 		this.plugin = plugin;
 		this.ghw = ghw;
-        logger = new CLogger(ResourceSchedulerEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+        logger = new CLogger(ResourceSchedulerEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Debug);
     }
 		
 	public void run() 
@@ -39,35 +45,37 @@ public class ResourceSchedulerEngine implements Runnable {
 					if(ce != null)
 					{
 
-						System.out.println("me offered");
+						logger.debug("me offered");
 						//check the pipeline node
 						if(ce.getParam("globalcmd").equals("addplugin"))
 						{
 							//do something to activate a plugin
-							System.out.println("starting precheck...");
-							String pluginJar = verifyPlugin(ce);
-							if(pluginJar == null)
+							logger.debug("starting precheck...");
+							//String pluginJar = verifyPlugin(ce);
+							if(!verifyPlugin(ce))
 							{
 								if((plugin.getGDB().gdb.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_code","1")) &&
 										(plugin.getGDB().gdb.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_desc","iNode Failed Activation : Plugin not found!")))
 								{
-									System.out.println("Provisioning Failed: No matching controller plugins found!");
+									logger.debug("Provisioning Failed: No matching controller plugins found!");
 								}
 							}
 							else
 							{
 								//adding in jar name information
-								ce.setParam("configparams",ce.getParam("configparams") + ",jarfile=" + pluginJar);
-								
-								System.out.println("plugin precheck = OK");
+								//ce.setParam("configparams",ce.getParam("configparams") + ",jarfile=" + pluginJar);
+
+								//Here is where scheduling is taking place
+								logger.debug("plugin precheck = OK");
 								String agentPath = getLowAgent();
+
 								if(agentPath == null)
 								{
-									System.out.println("ResourceSchedulerEngine : Unable to find agent for plugin scheduling");
+									logger.debug("ResourceSchedulerEngine : Unable to find agent for plugin scheduling");
 								}
 								else
 								{
-									System.out.println("agent precheck = OK");
+									logger.debug("agent precheck = OK");
 									
 									String[] agentPath_s = agentPath.split(",");
 									String region = agentPath_s[0];
@@ -76,16 +84,17 @@ public class ResourceSchedulerEngine implements Runnable {
 									String inode_id = ce.getParam("inode_id");
 									//have agent download plugin
 									String pluginurl = "http://127.0.0.1:32003/";
-									downloadPlugin(region,agent,pluginJar,pluginurl, false);
-									System.out.println("Downloading plugin on region=" + region + " agent=" + agent);
+									//downloadPlugin(region,agent,pluginJar,pluginurl, false);
+									logger.debug("Downloading plugin on region=" + region + " agent=" + agent);
 									
 									
 									//schedule plugin
-									System.out.println("Scheduling plugin on region=" + region + " agent=" + agent);
+									logger.debug("Scheduling plugin on region=" + region + " agent=" + agent);
 									MsgEvent me = addPlugin(region,agent,ce.getParam("configparams"));
-									System.out.println("pluginadd message: " + me.getParams().toString());
+									logger.debug("pluginadd message: " + me.getParams().toString());
 									
 									//ControllerEngine.commandExec.cmdExec(me);
+                                    plugin.msgIn(me);
 
 									new Thread(new PollAddPlugin(plugin,resource_id, inode_id,region,agent)).start();
 								}
@@ -99,9 +108,6 @@ public class ResourceSchedulerEngine implements Runnable {
 								}
 								*/
 							}
-							
-							
-							
 						}
 						else if(ce.getParam("globalcmd").equals("removeplugin"))
 						{
@@ -115,32 +121,57 @@ public class ResourceSchedulerEngine implements Runnable {
 				}
 				catch(Exception ex)
 				{
-					System.out.println("ResourceSchedulerEngine Error: " + ex.toString());
+                    StringWriter sw = new StringWriter();
+                    PrintWriter pw = new PrintWriter(sw);
+                    ex.printStackTrace(pw);
+                    logger.error(sw.toString());
+
+                    logger.error("ResourceSchedulerEngine Error: " + ex.toString());
 				}
 			}
 		}
 		catch(Exception ex)
 		{
-			System.out.println("ResourceSchedulerEngine Error: " + ex.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString());
+
+            logger.error("ResourceSchedulerEngine Error: " + ex.toString());
 		}
 	}
 	
-	private String verifyPlugin(MsgEvent ce)
-	{
+	private Boolean verifyPlugin(MsgEvent ce) {
+	    boolean isVerified = false;
 		//pre-schedule check
 		String configparams = ce.getParam("configparams");
-		String[] cparams = configparams.split(",");
+		logger.debug("verifyPlugin params " + configparams);
+
+        Map<String,String> params = getMapFromString(configparams, false);
+
+        String requestedPlugin = params.get("pluginname");
+
+        List<String> pluginMap = getPluginInventory();
+        for(String pluginfile : pluginMap) {
+            logger.debug("plugin = " + pluginfile);
+            logger.debug("plugin name = " + getPluginName(pluginfile));
+            if(requestedPlugin.equals(getPluginName(pluginfile))) {
+                isVerified = true;
+            }
+        }
+
+        /*
+        String[] cparams = configparams.split(",");
 		Map<String,String> cm = new HashMap<String,String>();
 		for(String param : cparams)
 		{
 			String[] paramkv = param.split("=");
 			cm.put(paramkv[0], paramkv[1]);
 		}
-		
-		//check if we have the plugin
-		List<String> pluginMap = getPluginInventory();
+
 		String requestedPlugin = cm.get("pluginname") + "=" + cm.get("pluginversion");
-		System.out.println("Requested Plugin=" + requestedPlugin);
+        String requestedPlugin = params.get("pluginname");
+		logger.debug("Requested Plugin=" + requestedPlugin);
 		if(pluginMap.contains(requestedPlugin))
 		{
 			return getPluginFileMap().get(requestedPlugin);
@@ -150,7 +181,8 @@ public class ResourceSchedulerEngine implements Runnable {
 			ce.setMsgBody("Matching plugin could not be found!");
 			ce.setParam("pluginstatus","failed");
 		}
-		return null;
+		*/
+		return isVerified;
 	}
 	
 	public Map<String,String> paramStringToMap(String param)
@@ -168,7 +200,7 @@ public class ResourceSchedulerEngine implements Runnable {
 		}
 		catch(Exception ex)
 		{
-			System.out.println("ResourceSchedulerEngine : Error " + ex.toString());
+			logger.error("ResourceSchedulerEngine : Error " + ex.toString());
 		}
 		return params;
 	}
@@ -181,11 +213,11 @@ public class ResourceSchedulerEngine implements Runnable {
 		try
 		{
 			List<String> regionList = plugin.getGDB().gdb.getNodeList(null,null,null);
-			//System.out.println("Region Count: " + regionList.size());
+			//logger.debug("Region Count: " + regionList.size());
 			for(String region : regionList)
 			{
 				List<String> agentList = plugin.getGDB().gdb.getNodeList(region,null,null);
-				//System.out.println("Agent Count: " + agentList.size());
+				//logger.debug("Agent Count: " + agentList.size());
 				
 				for(String agent: agentList)
 				{
@@ -209,7 +241,7 @@ public class ResourceSchedulerEngine implements Runnable {
 				/*
 				for (Entry<String, Integer> entry : sortedMapAsc.entrySet())
 				{
-					System.out.println("Key : " + entry.getKey() + " Value : "+ entry.getValue());
+					logger.debug("Key : " + entry.getKey() + " Value : "+ entry.getValue());
 				}
 				*/
 			}
@@ -217,7 +249,7 @@ public class ResourceSchedulerEngine implements Runnable {
 		}
 		catch(Exception ex)
 		{
-			System.out.println("DBEngine : getLowAgent : Error " + ex.toString());
+			logger.error("DBEngine : getLowAgent : Error " + ex.toString());
 		}
 		
 		return agent_path;
@@ -258,12 +290,15 @@ public class ResourceSchedulerEngine implements Runnable {
 	
 	public MsgEvent addPlugin(String region, String agent, String configParams)
 	{
+
+	    //else if (ce.getParam("configtype").equals("pluginadd"))
+
 		MsgEvent me = new MsgEvent(MsgEvent.Type.CONFIG,region,null,null,"add plugin");
-		me.setParam("src_region", region);
-		me.setParam("src_agent", "external");
-		me.setParam("dst_region", region);
+		me.setParam("src_region", plugin.getRegion());
+		me.setParam("src_agent", plugin.getAgent());
+        me.setParam("src_plugin", plugin.getPluginID());
+        me.setParam("dst_region", region);
 		me.setParam("dst_agent", agent);
-		me.setParam("controllercmd", "regioncmd");
 		me.setParam("configtype", "pluginadd");
 		me.setParam("configparams",configParams);
 		return me;
@@ -314,7 +349,7 @@ public class ResourceSchedulerEngine implements Runnable {
                     if (listOfFiles[i].isFile())
                     {
                         pluginFiles.add(listOfFiles[i].getAbsolutePath());
-                        System.out.println(listOfFiles[i].toPath());
+                        logger.debug(listOfFiles[i].getAbsolutePath().toString());
                     }
 
                 }
@@ -330,7 +365,7 @@ public class ResourceSchedulerEngine implements Runnable {
         }
         catch(Exception ex)
         {
-            System.out.println(ex.toString());
+            logger.debug(ex.toString());
             pluginFiles = null;
         }
         return pluginFiles;
@@ -341,7 +376,7 @@ public class ResourceSchedulerEngine implements Runnable {
         String version;
         try{
             //String jarFile = AgentEngine.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-            //System.out.println("JARFILE:" + jarFile);
+            //logger.debug("JARFILE:" + jarFile);
             //File file = new File(jarFile.substring(5, (jarFile.length() )));
             File file = new File(jarFile);
             FileInputStream fis = new FileInputStream(file);
@@ -366,7 +401,7 @@ public class ResourceSchedulerEngine implements Runnable {
         String version;
         try{
             //String jarFile = AgentEngine.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-            //System.out.println("JARFILE:" + jarFile);
+            //logger.debug("JARFILE:" + jarFile);
             //File file = new File(jarFile.substring(5, (jarFile.length() )));
             File file = new File(jarFile);
             FileInputStream fis = new FileInputStream(file);
@@ -386,7 +421,7 @@ public class ResourceSchedulerEngine implements Runnable {
         return version;
     }
 
-	public static Map<String,String> getPluginFileMap()
+	public Map<String,String> getPluginFileMap()
 	{
 		Map<String,String> pluginList = new HashMap<String,String>();
 		
@@ -404,7 +439,7 @@ public class ResourceSchedulerEngine implements Runnable {
 		    {
 		      if (listOfFiles[i].isFile()) 
 		      {
-		        //System.out.println("Found Plugin: " + listOfFiles[i].getName());
+		        //logger.debug("Found Plugin: " + listOfFiles[i].getName());
 		        //<pluginName>=<pluginVersion>,
 		        String pluginPath = listOfFiles[i].getAbsolutePath();
 		        //pluginList.add(ControllerEngine.commandExec.getPluginName(pluginPath) + "=" + ControllerEngine.commandExec.getPluginVersion(pluginPath));
@@ -426,12 +461,54 @@ public class ResourceSchedulerEngine implements Runnable {
 		}
 		catch(Exception ex)
 		{
-			System.out.println(ex.toString());
+			logger.debug(ex.toString());
 		}
 		return null; 
 		
 	}
-		
+
+
+    public Map<String,String> getMapFromString(String param, boolean isRestricted) {
+        Map<String,String> paramMap = null;
+
+        logger.debug("PARAM: " + param);
+
+        try{
+            String[] sparam = param.split(",");
+            logger.debug("PARAM LENGTH: " + sparam.length);
+
+            paramMap = new HashMap<String,String>();
+
+            for(String str : sparam)
+            {
+                String[] sstr = str.split(":");
+
+                if(isRestricted)
+                {
+                    paramMap.put(URLDecoder.decode(sstr[0], "UTF-8"), "");
+                }
+                else
+                {
+                    if(sstr.length > 1)
+                    {
+                        paramMap.put(URLDecoder.decode(sstr[0], "UTF-8"), URLDecoder.decode(sstr[1], "UTF-8"));
+                    }
+                    else
+                    {
+                        paramMap.put(URLDecoder.decode(sstr[0], "UTF-8"), "");
+                    }
+                }
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.error("getMapFromString Error: " + ex.toString());
+        }
+
+        return paramMap;
+    }
+
+
 }
 
 

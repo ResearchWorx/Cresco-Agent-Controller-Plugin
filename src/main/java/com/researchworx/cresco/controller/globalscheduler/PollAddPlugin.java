@@ -2,6 +2,7 @@ package com.researchworx.cresco.controller.globalscheduler;
 
 
 import com.researchworx.cresco.controller.core.Launcher;
+import com.researchworx.cresco.library.utilities.CLogger;
 
 public class PollAddPlugin implements Runnable {
 
@@ -10,9 +11,11 @@ public class PollAddPlugin implements Runnable {
 	private String region = null;
 	private String agent = null;
 	private Launcher plugin;
-	
+	private CLogger logger;
+
 	public PollAddPlugin(Launcher plugin, String resource_id, String inode_id, String region, String agent)
 	{
+		this.logger = new CLogger(PollAddPlugin.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Debug);
 		this.plugin = plugin;
 		this.resource_id = resource_id;
 		this.inode_id = inode_id;
@@ -29,6 +32,7 @@ public class PollAddPlugin implements Runnable {
 	        	{
 	        		edge_id = plugin.getGDB().gdb.getResourceEdgeId(resource_id, inode_id, region, agent);
 	        		Thread.sleep(1000);
+	        		count++;
 	        	}
 	        	if(edge_id != null)
 	        	{
@@ -36,17 +40,17 @@ public class PollAddPlugin implements Runnable {
 							(plugin.getGDB().gdb.setINodeParam(resource_id,inode_id,"status_desc","iNode Active.")))
 					{
 							//recorded plugin activations
-	        				System.out.println("ResourceSchedulerEngine : pollAddPlugin : Activated inode_id=" + inode_id);
+	        				logger.debug("ResourceSchedulerEngine : pollAddPlugin : Activated inode_id=" + inode_id);
 					}
 	        	}
 	        	else
 	        	{
-	        		System.out.println("ResourceSchedulerEngine : pollAddPlugin : unable to verify iNode activation!");
+	        		logger.debug("ResourceSchedulerEngine : pollAddPlugin : unable to verify iNode activation!");
 	        	}
 	        }
 		   catch(Exception v) 
 		   {
-	            System.out.println(v);
+	            logger.error(v.getMessage());
 	       }
 	    }  
 }

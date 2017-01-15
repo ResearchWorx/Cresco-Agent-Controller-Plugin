@@ -39,7 +39,7 @@ public class DBApplicationFunctions {
     private OrientGraph odb;
 
     public DBApplicationFunctions(Launcher plugin, DBEngine dbe) {
-        this.logger = new CLogger(DBApplicationFunctions.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Debug);
+        this.logger = new CLogger(DBApplicationFunctions.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
         this.plugin = plugin;
         this.factory = dbe.factory;
         this.db = dbe.db;
@@ -400,6 +400,32 @@ public class DBApplicationFunctions {
         }
         return false;
 
+    }
+
+    public String getINodeParams(String iNode_id) {
+        String params = null;
+        OrientGraph graph = null;
+
+        try {
+            graph = factory.getTx();
+
+            String node_id = getINodeNodeId(iNode_id);
+            if(node_id != null) {
+                Vertex iNode = graph.getVertex(node_id);
+                params = iNode.getProperty("params");
+            }
+        }
+        catch(Exception ex) {
+            logger.error("getINodeConfigParams " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return params;
     }
 
     public gPayload getPipelineObj(String pipelineId) {
@@ -826,6 +852,7 @@ public class DBApplicationFunctions {
             logger.debug("Added new eNode out: " + eNode_id);
 
             odb.commit();
+
             return node_id;
         }
         catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException se)

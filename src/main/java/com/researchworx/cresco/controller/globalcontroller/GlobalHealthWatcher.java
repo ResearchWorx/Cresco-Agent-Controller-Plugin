@@ -25,6 +25,7 @@ public class GlobalHealthWatcher implements Runnable {
     private Timer regionalUpdateTimer;
     private Long gCheckInterval;
     public ConcurrentLinkedQueue<MsgEvent> resourceScheduleQueue;
+
     public Boolean SchedulerActive;
     public Boolean AppSchedulerActive;
 
@@ -38,7 +39,7 @@ public class GlobalHealthWatcher implements Runnable {
         regionalUpdateTimer = new Timer();
         regionalUpdateTimer.scheduleAtFixedRate(new GlobalHealthWatcher.GlobalNodeStatusWatchDog(plugin, logger), 500, 15000);//remote
         gCheckInterval = plugin.getConfig().getLongParam("watchdogtimer",5000L);
-        resourceScheduleQueue = new ConcurrentLinkedQueue<MsgEvent>();
+        resourceScheduleQueue = new ConcurrentLinkedQueue<>();
         SchedulerActive = false;
         AppSchedulerActive = false;
     }
@@ -180,7 +181,7 @@ public class GlobalHealthWatcher implements Runnable {
                         logger.info("No Global Controller Found: Starting Global Services");
                         //start global stuff
                         //create globalscheduler queue
-                        plugin.setResourceScheduleQueue(new ConcurrentLinkedQueue<MsgEvent>());
+                        //plugin.setResourceScheduleQueue(new ConcurrentLinkedQueue<MsgEvent>());
                         plugin.setAppScheduleQueue(new ConcurrentLinkedQueue<gPayload>());
                         //start http interface
                         startHTTP();

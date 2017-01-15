@@ -4,6 +4,7 @@ import app.gNode;
 import app.gPayload;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.controller.globalcontroller.GlobalHealthWatcher;
+import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 
 import java.util.*;
@@ -88,6 +89,24 @@ public class AppSchedulerEngine implements Runnable {
             String vNode_id = node.node_id;
             String iNode_id = plugin.getGDB().dba.getINodefromVNode(vNode_id);
             logger.debug("Checking vNode_id:" + vNode_id + " iNode_id:" + iNode_id);
+
+            //plugin.getGDB().dba.setINodeStatus(iNode_id, "0", "Status Reset on Startup");
+            plugin.getGDB().gdb.addINodeResource(gpay.pipeline_id,iNode_id);
+            //addINodeResource
+
+            MsgEvent me = new MsgEvent(MsgEvent.Type.CONFIG, null, null, null, "add application node");
+            //me.setParam("src_region", "external");
+            //me.setParam("src_agent", "external");
+            //me.setParam("dst_region", "external");
+            //me.setParam("dst_agent", "external");
+            me.setParam("globalcmd", "addplugin");
+            me.setParam("inode_id", iNode_id);
+            me.setParam("resource_id", gpay.pipeline_id);
+            me.setParam("configparams", plugin.getGDB().dba.getINodeParams(iNode_id));
+
+            //schedule resource
+            ghw.resourceScheduleQueue.offer(me);
+
             /*
             //check if node is active
             if(Launcher.resource_list.containsKey(iNode_id))

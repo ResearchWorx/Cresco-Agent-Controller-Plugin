@@ -988,6 +988,39 @@ public class DBBaseFunctions {
 
     }
 
+    public String addINodeResource(String resource_id, String inode_id)
+    {
+        String node_id = null;
+
+        int count = 0;
+        try
+        {
+
+            while((node_id == null) && (count != retryCount))
+            {
+                if(count > 0)
+                {
+                    Thread.sleep((long)(Math.random() * 1000)); //random wait to prevent sync error
+                }
+                node_id = IaddINodeResource(resource_id, inode_id);
+                count++;
+
+            }
+
+            if((node_id == null) && (count == retryCount))
+            {
+                logger.debug("DBEngine : addINodeResource : Failed to add node in " + count + " retrys");
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.debug("DBEngine : addINodeResource : Error " + ex.toString());
+        }
+
+        return node_id;
+    }
+
+
     public String addINode(String resource_id, String inode_id)
     {
         String node_id = null;
@@ -1172,6 +1205,68 @@ public class DBBaseFunctions {
         return node_id;
     }
 
+    private String IaddINodeResource(String resource_id, String inode_id)
+    {
+        String node_id = null;
+        String resource_node_id = null;
+
+        OrientGraph graph = null;
+        try
+        {
+
+            node_id = plugin.getGDB().dba.getINodeNodeId(inode_id);
+            if(node_id != null)
+            {
+                resource_node_id = getResourceNodeId(resource_id);
+                if(resource_node_id == null)
+                {
+                    resource_node_id = addResourceNode(resource_id);
+                }
+
+                if(resource_node_id != null)
+                {
+                    graph = factory.getTx();
+
+                    Vertex fromV = graph.getVertex(node_id);
+                    fromV.setProperty("resource_id", resource_id);
+
+                    //ADD EDGE TO RESOURCE
+                    Vertex toV = graph.getVertex(resource_node_id);
+                    graph.addEdge("class:isResource", fromV, toV, "isResource");
+                    graph.commit();
+                    node_id = fromV.getId().toString();
+                }
+            }
+            else {
+                logger.error("IaddINodeResource inode " + inode_id + " missing!");
+            }
+        }
+        catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException exc)
+        {
+            //eat exception.. this is not normal and should log somewhere
+            logger.debug("Error 0 " + exc.getMessage());
+        }
+        catch(com.orientechnologies.orient.core.exception.OConcurrentModificationException exc)
+        {
+            //eat exception.. this is normal
+            logger.debug("Error 1 " + exc.getMessage());
+        }
+        catch(Exception ex)
+        {
+            long threadId = Thread.currentThread().getId();
+            logger.debug("IaddINode: thread_id: " + threadId + " Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return node_id;
+
+    }
+
     private String IaddINode(String resource_id, String inode_id)
     {
         String node_id = null;
@@ -1236,6 +1331,7 @@ public class DBBaseFunctions {
         return node_id;
 
     }
+
 
     public String addResourceNode(String resource_id)
     {
@@ -2183,9 +2279,7 @@ public class DBBaseFunctions {
             logger.debug("Create iNode Vertex Class");
             String[] iProps = {"resource_id", "inode_id"}; //Property names
             createVertexClass("iNode", iProps);
-
-            logger.debug("Create iNode Index");
-            createVertexIndex("iNode", "inode_id", true);
+            createVertexIndex("iNode","inode_id",true);
 
             logger.debug("Create isAgent Edge Class");
             String[] isAgentProps = {"edge_id"}; //Property names
