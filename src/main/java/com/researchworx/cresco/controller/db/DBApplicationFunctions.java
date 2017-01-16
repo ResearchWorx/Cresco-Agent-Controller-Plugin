@@ -701,11 +701,16 @@ public class DBApplicationFunctions {
             {
                 try
                 {
+                    //add resource_id to configs
+                    node.params.put("resource_id",gpay.pipeline_id);
+                    //
+
                     String vNode_id = createVNode(gpay.pipeline_id, node,true);
                     vNodeHm.put(node.node_id, vNode_id);
 
                     logger.debug("Submitted Node:" + node.node_id);
                     logger.debug("vNode:" + vNode_id);
+
 
 
                     String iNode_id = createINode(vNode_id, node);
@@ -815,7 +820,7 @@ public class DBApplicationFunctions {
         return null;
     }
 
-    String createINode(String vNode_id, gNode node) {
+    String createINode(String iNode_id, gNode node) {
         try
         {
 
@@ -825,10 +830,11 @@ public class DBApplicationFunctions {
             iNode.setProperty("node_name", node.node_name);
             iNode.setProperty("node_type", node.type);
             iNode.setProperty("inode_id", node_id);
-            if(node.params.size() > 0) {
+            node.params.put("inode_id",node_id);
+            //if(node.params.size() > 0) {
                 iNode.setProperty("params",encodeParams(node.params));
                 logger.debug("iNode Params: " + encodeParams(node.params));
-            }
+            //}
 
             iNode.setProperty("status_code", "0");
             iNode.setProperty("status_desc", "Added to DB");
@@ -839,8 +845,8 @@ public class DBApplicationFunctions {
             logger.debug("Created iNode " + node_id + " Node ID " + iNode.getId().toString() + " getiNode = " + getINodeNodeId(node_id));
 
             //Link to vNode
-            logger.debug("Connecting to vNode = " + vNode_id + " node ID " + getVNodeNodeId(vNode_id));
-            Vertex vNode = odb.getVertex(getVNodeNodeId(vNode_id));
+            logger.debug("Connecting to vNode = " + iNode_id + " node ID " + getVNodeNodeId(iNode_id));
+            Vertex vNode = odb.getVertex(getVNodeNodeId(iNode_id));
 
             Edge eNodeEdge = odb.addEdge(null, vNode, iNode, "isINode");
 

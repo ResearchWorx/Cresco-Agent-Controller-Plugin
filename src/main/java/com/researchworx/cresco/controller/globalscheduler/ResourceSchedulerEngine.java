@@ -94,6 +94,10 @@ public class ResourceSchedulerEngine implements Runnable {
 									logger.debug("pluginadd message: " + me.getParams().toString());
 									
 									//ControllerEngine.commandExec.cmdExec(me);
+                                    //logger.error("before send");
+                                    //MsgEvent re = plugin.getRPC().call(me);
+                                    //logger.error("after send");
+
                                     plugin.msgIn(me);
 
 									new Thread(new PollAddPlugin(plugin,resource_id, inode_id,region,agent)).start();
@@ -304,16 +308,16 @@ public class ResourceSchedulerEngine implements Runnable {
 		return me;
 	}
 	
-	public MsgEvent downloadPlugin(String region, String agent, String plugin, String pluginurl, boolean forceDownload)
+	public MsgEvent downloadPlugin(String region, String agent, String pluginId, String pluginurl, boolean forceDownload)
 	{
 		MsgEvent me = new MsgEvent(MsgEvent.Type.CONFIG,region,null,null,"download plugin");
-		me.setParam("src_region", region);
-		me.setParam("src_agent", "external");
-		me.setParam("dst_region", region);
-		me.setParam("dst_agent", agent);
-		me.setParam("controllercmd", "regioncmd");
-		me.setParam("configtype", "plugindownload");
-		me.setParam("plugin", plugin);
+        me.setParam("src_region", plugin.getRegion());
+        me.setParam("src_agent", plugin.getAgent());
+        me.setParam("src_plugin", plugin.getPluginID());
+        me.setParam("dst_region", region);
+        me.setParam("dst_agent", agent);
+        me.setParam("configtype", "plugindownload");
+		me.setParam("plugin", pluginId);
 		me.setParam("pluginurl", pluginurl);
 		//me.setParam("configparams", "perflevel="+ perflevel + ",pluginname=DummyPlugin,jarfile=..//Cresco-Agent-Dummy-Plugin/target/cresco-agent-dummy-plugin-0.5.0-SNAPSHOT-jar-with-dependencies.jar,region=test2,watchdogtimer=5000");
 		if(forceDownload)
