@@ -122,7 +122,10 @@ public class GlobalHealthWatcher implements Runnable {
 	private void gCheck() {
 	    try{
             //Static Remote Global Controller
-	        String static_global_controller_host = plugin.getConfig().getStringParam("global_controller_host");
+	        String static_global_controller_host = plugin.getConfig().getStringParam("gc_host");
+	        if(static_global_controller_host == null) {
+                String globalControllerHost = System.getenv("CRESCO_GC_HOST");
+            }
 	        if(static_global_controller_host != null) {
                 this.plugin.setGlobalController(false);
                 logger.trace("Starting Static Global Controller Check");
@@ -219,7 +222,8 @@ public class GlobalHealthWatcher implements Runnable {
         }
         return isStarted;
     }
-	private Boolean startHTTP() {
+
+    private Boolean startHTTP() {
         boolean isStarted = false;
 	    try {
             //Start Global Controller Services
