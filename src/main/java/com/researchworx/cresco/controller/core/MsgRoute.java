@@ -107,7 +107,7 @@ public class MsgRoute implements Runnable {
                     break;
                 case 56:  //System.out.println("CONTROLLER ROUTE TO LOCAL AGENT : 56 "  + rm.getParams());
                     //PluginEngine.msgInQueue.offer(rm);
-                    logger.debug("CONTROLLER SENDING REGIONAL MESSAGE 56");
+                    logger.debug("CONTROLLER SENDING REGIONAL MESSAGE TO ITS AGENT 56");
                     logger.trace(rm.getParams().toString());
                     plugin.sendMsgEvent(rm);
                     break;
@@ -115,6 +115,12 @@ public class MsgRoute implements Runnable {
                     logger.debug("CONTROLLER SENDING REGIONAL MESSAGE 58");
                     logger.trace(rm.getParams().toString());
                     re = getCommandExec();
+                    break;
+                case 61:
+                    logger.debug("CONTROLLER SENDING MESSAGE TO ITS OWN AGENT");
+                    logger.trace(rm.getParams().toString());
+                    plugin.sendMsgEvent(rm);
+                    //re = getCommandExec();
                     break;
                 case 62:  //System.out.println("CONTROLLER ROUTE TO COMMANDEXEC : 62 "  + rm.getParams());
                     logger.debug("CONTROLLER SENDING REGIONAL MESSAGE 62");
