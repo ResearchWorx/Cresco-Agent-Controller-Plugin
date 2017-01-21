@@ -177,7 +177,6 @@ class DiscoveryClientWorkerIPv4 {
         return discoveredList;
     }
 
-
     private String ValidatedAuthenication(MsgEvent rme) {
         String decryptedString = null;
         try {

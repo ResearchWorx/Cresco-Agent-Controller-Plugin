@@ -7,22 +7,14 @@ import com.researchworx.cresco.controller.globalcontroller.*;
 import com.researchworx.cresco.controller.db.DBInterface;
 import com.researchworx.cresco.controller.netdiscovery.*;
 import com.researchworx.cresco.controller.regionalcontroller.*;
-import com.researchworx.cresco.controller.shell.AppShellFactory;
-import com.researchworx.cresco.controller.shell.InAppPasswordAuthenticator;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.plugin.core.CPlugin;
 import com.researchworx.cresco.library.utilities.CLogger;
 import org.apache.activemq.command.ActiveMQDestination;
-import org.apache.sshd.common.config.keys.KeyUtils;
-import org.apache.sshd.server.SshServer;
-import org.apache.sshd.server.keyprovider.AbstractGeneratorHostKeyProvider;
-import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 
 import javax.jms.JMSException;
-import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.lang.management.ManagementFactory;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
@@ -289,8 +281,9 @@ public class Launcher extends CPlugin {
     public void commInit() {
         logger.info("Initializing services");
         setActive(true);
-        try {
 
+        try {
+            /*
             if(getConfig().getBooleanParam("enable_sshd",false)) {
                 SshServer sshd = SshServer.setUpDefaultServer();
 
@@ -320,12 +313,14 @@ public class Launcher extends CPlugin {
                     //sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider());
                 }
 
+
                 AppShellFactory ssh_shell = new AppShellFactory(this);
                 sshd.setShellFactory(ssh_shell);
                 sshd.start();
                 logger.info("Enabled SSH Shell");
-            }
 
+            }
+            */
             this.brokeredAgents = new ConcurrentHashMap<>();
             this.incomingCanidateBrokers = new ConcurrentLinkedQueue<>();
             this.outgoingMessages = new ConcurrentLinkedQueue<>();

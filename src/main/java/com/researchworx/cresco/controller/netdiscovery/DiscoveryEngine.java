@@ -125,6 +125,9 @@ public class DiscoveryEngine implements Runnable {
                     }
                     logger.trace("Discovery Engine Worker [" + networkInterface.getDisplayName() + "] has shutdown");
                 }
+                else {
+                    logger.debug("Not listening on " + networkInterface.getDisplayName());
+                }
             } catch (Exception ex) {
                 logger.error("Run : Interface = {} : Error = {}", networkInterface.getDisplayName(), ex.getMessage());
                 ex.printStackTrace();
@@ -296,6 +299,7 @@ public class DiscoveryEngine implements Runnable {
             MsgEvent me = null;
             try {
 
+                logger.trace("getAgentMsg : " + rme.getParams().toString());
                 //determine if we should respond to request
                 //String validateMsgEvent(rme)
                  //       validatedAuthenication
