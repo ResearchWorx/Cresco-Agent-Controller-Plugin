@@ -35,7 +35,8 @@ class DiscoveryClientWorkerIPv4 {
     private class StopListenerTask extends TimerTask {
         public void run() {
             try {
-                logger.trace("Closing Listener...");
+                logger.trace("Closing Listener... Timeout: " + discoveryTimeout + " SysTime: " + System.currentTimeMillis());
+
                 //user timer to close socket
                 c.close();
                 timer.cancel();
@@ -139,7 +140,7 @@ class DiscoveryClientWorkerIPv4 {
                                 logger.trace("Sent sendPacket via {}", inAddr.toString());
                             }
                             while (!c.isClosed()) {
-                                logger.trace("Listening", inAddr.toString());
+                                logger.trace("Listening " +  inAddr.toString() + " Timeout: " + discoveryTimeout + " SysTime: " + System.currentTimeMillis());
                                 try {
                                     byte[] recvBuf = new byte[15000];
                                     DatagramPacket receivePacket = new DatagramPacket(recvBuf, recvBuf.length);

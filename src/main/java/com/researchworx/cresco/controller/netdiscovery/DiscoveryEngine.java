@@ -115,7 +115,7 @@ public class DiscoveryEngine implements Runnable {
                                     plugin.responds.incrementAndGet();
                                 }
                                 else {
-                                    logger.trace("Discovery Return Packet = Null");
+                                    logger.trace("Can't generate sendPacket for " + recPacket.getAddress());
                                 }
 
                             }
@@ -305,6 +305,7 @@ public class DiscoveryEngine implements Runnable {
                  //       validatedAuthenication
                 if (plugin.reachableAgents().size() < 25)  {
 
+
                     String validatedAuthenication = validateMsgEvent(rme); //create auth string
 
 
@@ -323,6 +324,14 @@ public class DiscoveryEngine implements Runnable {
                             me.setParam("validated_authenication",validatedAuthenication);
                             logger.debug("getAgentMsg = " + me.getParams().toString());
                         //}
+                    }
+                    else {
+                        if(rme.getParam("src_region") == null) {
+                            logger.trace("getAgentMsg : Invalid src_region");
+                        }
+                        if(validatedAuthenication == null) {
+                            logger.trace("getAgentMsg : validatedAuthenication == null");
+                        }
                     }
                     /*
                     else {
