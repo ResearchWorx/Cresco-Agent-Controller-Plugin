@@ -1,6 +1,6 @@
 package com.researchworx.cresco.controller.core;
 
-import app.gPayload;
+import com.researchworx.cresco.controller.app.gPayload;
 import com.google.auto.service.AutoService;
 import com.researchworx.cresco.controller.communication.*;
 import com.researchworx.cresco.controller.globalcontroller.*;

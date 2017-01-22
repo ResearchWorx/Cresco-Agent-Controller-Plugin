@@ -1,8 +1,8 @@
 package com.researchworx.cresco.controller.db;
 
-import app.gEdge;
-import app.gNode;
-import app.gPayload;
+import com.researchworx.cresco.controller.app.gEdge;
+import com.researchworx.cresco.controller.app.gNode;
+import com.researchworx.cresco.controller.app.gPayload;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.orientechnologies.common.util.OCallable;

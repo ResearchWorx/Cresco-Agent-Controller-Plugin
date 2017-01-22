@@ -100,7 +100,7 @@ public class HTTPServerEngine implements Runnable{
 			e.printStackTrace();
 		}
         /*
-        System.out.println(String.format("Jersey app started with WADL available at "
+        System.out.println(String.format("Jersey com.researchworx.cresco.controller.app started with WADL available at "
                 + "%sapplication.wadl\nTry out %shelloworld\nHit enter to stop it...",
                 BASE_URI, BASE_URI));
         */
