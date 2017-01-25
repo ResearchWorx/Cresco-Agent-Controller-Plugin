@@ -73,6 +73,21 @@
             <version>${orientdb.version}</version>
         </dependency>
 
+		<!-- Sat Solver -->
+
+		<dependency>
+			<groupId>org.choco-solver</groupId>
+			<artifactId>choco-solver</artifactId>
+			<version>4.0.1</version>
+		</dependency>
+
+        <!-- commons-math3 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>3.6.1</version>
+        </dependency>
+
         <!-- Apache SSH -->
 
         <dependency>

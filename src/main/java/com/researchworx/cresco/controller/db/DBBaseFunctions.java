@@ -2312,7 +2312,7 @@ public class DBBaseFunctions {
 
 
             //create plugin anchor resource and inodes
-            String[]  pluginAnchors= {"sysinfo","netdiscovery"}; //Property names
+            String[]  pluginAnchors= {"sysinfo","netdiscovery","container"}; //Property names
             for(String pAnchor : pluginAnchors)
             {
                 String resource_id = pAnchor + "_resource";

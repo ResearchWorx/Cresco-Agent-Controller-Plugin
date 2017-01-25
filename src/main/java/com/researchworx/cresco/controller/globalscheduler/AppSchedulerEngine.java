@@ -15,11 +15,18 @@ public class AppSchedulerEngine implements Runnable {
 	private Launcher plugin;
 	private CLogger logger;
     private GlobalHealthWatcher ghw;
+    public FuturaEngine fe;
+    public GuilderEngine ge;
+    public OptimaEngine oe;
 
-	public AppSchedulerEngine(Launcher plugin, GlobalHealthWatcher ghw) {
+
+    public AppSchedulerEngine(Launcher plugin, GlobalHealthWatcher ghw) {
 		this.logger = new CLogger(AppSchedulerEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Debug);
 		this.plugin = plugin;
 		this.ghw = ghw;
+        oe = new OptimaEngine(this);
+        fe = new FuturaEngine(plugin,this);
+        ge = new GuilderEngine(plugin,this);
 	}
 
     public void run() {
@@ -95,6 +102,10 @@ public class AppSchedulerEngine implements Runnable {
             plugin.getGDB().gdb.addINodeResource(gpay.pipeline_id,iNode_id);
             //addINodeResource
 
+
+            //Check resources
+
+            /*
             MsgEvent me = new MsgEvent(MsgEvent.Type.CONFIG, null, null, null, "add application node");
             //me.setParam("src_region", "external");
             //me.setParam("src_agent", "external");
@@ -107,6 +118,194 @@ public class AppSchedulerEngine implements Runnable {
 
             //schedule resource
             ghw.resourceScheduleQueue.offer(me);
+            */
+
+
+            /*
+            //check if node is active
+            if(Launcher.resource_list.containsKey(iNode_id))
+            {
+                if(!Launcher.resource_list.get(iNode_id))
+                {
+                    badINodes.add(iNode_id);
+                    plugin.getGDB().dba.setINodeStatus(iNode_id, "0", "Status Reset on Startup");
+                }
+            }
+            else
+            {
+                badINodes.add(iNode_id);
+                plugin.getGDB().dba.setINodeStatus(iNode_id, "0", "Status Reset on Startup");
+            }
+            */
+        }
+
+
+        Map<String,List<gNode>> schedulemaps = buildNodeMaps(gpay);
+
+        List<gNode> assignedNodes = schedulemaps.get("assigned");
+        List<gNode> unAssignedNodes = schedulemaps.get("unassigned");
+        List<gNode> badNodes = schedulemaps.get("error");
+
+        System.out.println("Assigned Nodes : " + assignedNodes.size());
+        System.out.println("unAssigned Nodes : " + unAssignedNodes.size());
+        System.out.println("badNodes : " + badNodes.size());
+
+        if (badNodes.size() != 0) {
+            System.out.println("Bad Node assignments... dead dead deadsky!");
+        } else if (unAssignedNodes.size() != 0) {
+            System.out.println("We need to find some resources for these request.");
+
+            Map<String,List<gNode>> scheduleAssignments = oe.scheduleAssignment(unAssignedNodes);
+
+            if(scheduleAssignments.get("unassigned").size() != 0) {
+                //nodify guilder to get resources
+                double workloadResources = 0;
+                for(gNode gnode : scheduleAssignments.get("noresources")) {
+                    workloadResources += gnode.workloadUtil;
+                }
+                ge.addResourceProvider(workloadResources);
+            }
+            else if(scheduleAssignments.get("assigned").size() == unAssignedNodes.size()) {
+                //rebuild payload
+                gpay.nodes.clear();
+                gpay.nodes.addAll(scheduleAssignments.get("assigned"));
+                Map<String,List<gNode>> schedulemapsOpt = buildNodeMaps(gpay);
+
+                List<gNode> assignedNodesOpt = schedulemapsOpt.get("assigned");
+                List<gNode> unAssignedNodesOpt = schedulemapsOpt.get("unassigned");
+                List<gNode> badNodesOpt = schedulemapsOpt.get("error");
+
+                System.out.println("Assigned Nodes : " + assignedNodesOpt.size());
+                System.out.println("unAssigned Nodes : " + unAssignedNodesOpt.size());
+                System.out.println("badNodes : " + badNodesOpt.size());
+
+                if((unAssignedNodesOpt.size() == 0) && (badNodesOpt.size() == 0)) {
+                    System.out.println("WOOT");
+                }
+
+                ////gpay.nodes.addAll(assignedNodes);
+
+            }
+
+
+        } else if ((unAssignedNodes.size() == 0) && (badNodes.size() == 0)) {
+            System.out.println("Woot! Schedule This thing!");
+        } else {
+            System.out.println("WTF are you doing here?");
+        }
+
+        /*
+        //Rebuild nodes
+        for(String iNode_id : badINodes)
+        {
+            logger.debug("iNode_id: " + iNode_id + " must be rescheduled.");
+            if(!createResource(iNode_id))
+            {
+                plugin.getGDB().dba.setPipelineStatus(gpay.pipeline_id,"1","Pipeline check Failed.");
+                return false;
+            }
+
+        }
+        */
+        plugin.getGDB().dba.setPipelineStatus(gpay.pipeline_id,"4","Pipeline was activated.");
+
+        return true;
+    }
+
+    public boolean nodeExist(String region, String agent) {
+        boolean nodeExist = false;
+        try {
+            String nodeId = plugin.getGDB().gdb.getNodeId(region,agent,null);
+            if(nodeId != null) {
+                nodeExist = true;
+            }
+        }
+        catch(Exception ex) {
+            logger.error(ex.getMessage());
+        }
+        return nodeExist;
+    }
+
+    public boolean locationExist(String location) {
+        return true;
+    }
+
+    private Map<String,List<gNode>> buildNodeMaps(gPayload gpay) {
+
+        Map<String,List<gNode>> nodeResults = null;
+        try {
+
+            nodeResults = new HashMap<>();
+
+            List<gNode> assignedNodes = new ArrayList<>();
+            List<gNode> unAssignedNodes = new ArrayList<>(gpay.nodes);
+            List<gNode> errorNodes = new ArrayList<>();
+
+
+            //verify predicates
+            for (gNode node : gpay.nodes) {
+
+                if (node.params.containsKey("location_region") && node.params.containsKey("location_agent")) {
+                    if (nodeExist(node.params.get("location_region"), node.params.get("location_agent"))) {
+                        unAssignedNodes.remove(node);
+                        assignedNodes.add(node);
+                    } else {
+                        errorNodes.add(node);
+                    }
+                } else if (node.params.containsKey("location")) {
+                    if (locationExist(node.params.get("location"))) {
+                        unAssignedNodes.remove(node);
+                        assignedNodes.add(node);
+                    } else {
+                        errorNodes.add(node);
+                    }
+                }
+            }
+            nodeResults.put("assigned",assignedNodes);
+            nodeResults.put("unassigned", unAssignedNodes);
+            nodeResults.put("error",errorNodes);
+        }
+        catch(Exception ex) {
+            ex.printStackTrace();
+        }
+        return nodeResults;
+    }
+
+
+    public boolean checkPipeline2(String pipeline_id) {
+
+        gPayload gpay = plugin.getGDB().dba.getPipelineObj(pipeline_id);
+        logger.debug("checkPipeline started for Pipeline_id:" + gpay.pipeline_id + " Pipeline_name:" + gpay.pipeline_name);
+
+        List<String> badINodes = new ArrayList<String>();
+        logger.debug("Checking Pipeline_id:" + gpay.pipeline_id + " Pipeline_name:" + gpay.pipeline_name);
+        for(gNode node : gpay.nodes)
+        {
+            String vNode_id = node.node_id;
+            String iNode_id = plugin.getGDB().dba.getINodefromVNode(vNode_id);
+            logger.debug("Checking vNode_id:" + vNode_id + " iNode_id:" + iNode_id);
+
+            //plugin.getGDB().dba.setINodeStatus(iNode_id, "0", "Status Reset on Startup");
+            plugin.getGDB().gdb.addINodeResource(gpay.pipeline_id,iNode_id);
+            //addINodeResource
+
+            //Check resources
+
+            /*
+            MsgEvent me = new MsgEvent(MsgEvent.Type.CONFIG, null, null, null, "add application node");
+            //me.setParam("src_region", "external");
+            //me.setParam("src_agent", "external");
+            //me.setParam("dst_region", "external");
+            //me.setParam("dst_agent", "external");
+            me.setParam("globalcmd", "addplugin");
+            me.setParam("inode_id", iNode_id);
+            me.setParam("resource_id", gpay.pipeline_id);
+            me.setParam("configparams", plugin.getGDB().dba.getINodeParams(iNode_id));
+
+            //schedule resource
+            ghw.resourceScheduleQueue.offer(me);
+            */
+
 
             /*
             //check if node is active
