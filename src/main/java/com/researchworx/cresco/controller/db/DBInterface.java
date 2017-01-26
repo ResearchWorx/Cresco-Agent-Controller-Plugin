@@ -116,7 +116,7 @@ public class DBInterface {
 
                                                 String isAssignedEdgeId = gdb.getResourceEdgeId("sysinfo_resource", "sysinfo_inode",region,agent);
                                                 Map<String,String> edgeParams = gdb.getIsAssignedParams(isAssignedEdgeId);
-                                                cpu_core_count += Long.parseLong(edgeParams.get("cpu-core-count"));
+                                                cpu_core_count += Long.parseLong(edgeParams.get("cpu-logical-count"));
                                                 memoryAvailable += Long.parseLong(edgeParams.get("memory-available"));
                                                 memoryTotal += Long.parseLong(edgeParams.get("memory-total"));
                                                 for(String fspair : edgeParams.get("fs-map").split(",")) {
