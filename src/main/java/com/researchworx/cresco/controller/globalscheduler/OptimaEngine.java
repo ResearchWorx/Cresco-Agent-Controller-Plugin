@@ -134,12 +134,12 @@ public class OptimaEngine {
     public String getINodeIdRegion(String INodeId) {
         return "region-" + INodeId;
     }
+
     public String getINodeIdAgent(String INodeId) {
         return "agent-" + INodeId;
     }
 
-    public  int[] convertIntegers(List<Integer> integers)
-    {
+    public  int[] convertIntegers(List<Integer> integers) {
         int[] ret = new int[integers.size()];
         Iterator<Integer> iterator = integers.iterator();
 

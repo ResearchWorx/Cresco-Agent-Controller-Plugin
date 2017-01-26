@@ -50,8 +50,7 @@ public class DBBaseFunctions {
 
     //new database functions
     //READS
-    public String getINodeId(String resource_id, String inode_id)
-    {
+    public String getINodeId(String resource_id, String inode_id) {
         String node_id = null;
         OrientGraph graph = null;
         try
@@ -85,17 +84,20 @@ public class DBBaseFunctions {
         return node_id;
     }
 
-    public List<String> getANodeFromIndex(String indexName, String indexValue)
-    {
+    public List<String> getANodeFromIndex(String indexName, String indexValue) {
         List<String> nodeList = null;
         OrientGraph graph = null;
         try
         {
             nodeList = new ArrayList<String>();
             graph = factory.getTx();
-
-            Iterable<Vertex> resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:aNode." + indexName + " WHERE key = '" + indexValue + "'")).execute();
-
+            Iterable<Vertex> resultIterator = null;
+            if(indexValue == null) {
+                resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:aNode'")).execute();
+            }
+            else {
+                resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:aNode." + indexName + " WHERE key = '" + indexValue + "'")).execute();
+            }
             Iterator<Vertex> iter = resultIterator.iterator();
             while(iter.hasNext())
             //if(iter.hasNext())
@@ -124,6 +126,8 @@ public class DBBaseFunctions {
         }
         return nodeList;
     }
+
+
 
     public String getResourceNodeId(String resource_id)
     {

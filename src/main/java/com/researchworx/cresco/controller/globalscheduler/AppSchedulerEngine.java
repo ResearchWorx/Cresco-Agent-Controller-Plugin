@@ -4,7 +4,6 @@ import com.researchworx.cresco.controller.app.gNode;
 import com.researchworx.cresco.controller.app.gPayload;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.controller.globalcontroller.GlobalHealthWatcher;
-import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 
 import java.util.*;
@@ -227,7 +226,13 @@ public class AppSchedulerEngine implements Runnable {
     }
 
     public boolean locationExist(String location) {
-        return true;
+        boolean isLocation = false;
+        //String getINodeId(String resource_id, String inode_id)
+        List<String> aNodeLocations = plugin.getGDB().gdb.getANodeFromIndex("location",null);
+        if(aNodeLocations.size() > 0) {
+            isLocation = true;
+        }
+        return isLocation;
     }
 
     private Map<String,List<gNode>> buildNodeMaps(gPayload gpay) {
