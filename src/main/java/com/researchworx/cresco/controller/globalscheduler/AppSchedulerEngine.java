@@ -228,7 +228,7 @@ public class AppSchedulerEngine implements Runnable {
     public boolean locationExist(String location) {
         boolean isLocation = false;
         //String getINodeId(String resource_id, String inode_id)
-        List<String> aNodeLocations = plugin.getGDB().gdb.getANodeFromIndex("location",null);
+        List<String> aNodeLocations = plugin.getGDB().gdb.getANodeFromIndex("location",location);
         if(aNodeLocations.size() > 0) {
             isLocation = true;
         }
