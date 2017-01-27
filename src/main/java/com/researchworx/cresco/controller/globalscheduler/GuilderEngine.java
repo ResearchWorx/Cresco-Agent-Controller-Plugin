@@ -25,61 +25,71 @@ public class GuilderEngine {
 
     public double getResourceCost(String region, String agent) {
         double resourceCost = -1;
-        try{
+        try {
             resourceCost = 1;
-        }
-        catch(Exception ex) {
+        } catch (Exception ex) {
 
         }
         return resourceCost;
     }
 
-    public ResourceProvider getResourceProvider(String INodeId) {
-        ResourceProvider rm = null;
-        try{
-            rm = genResourceProvider();
-        }
-        catch(Exception ex) {
-            ex.printStackTrace();
-        }
-        return rm;
-    }
-
-    public List<ResourceProvider> getResourceProviders2() {
-        List<ResourceProvider> resourceProviders = null;
+    public ResourceProvider getResourceProvider(String region, String agent) {
+        ResourceProvider rp = null;
         try {
-            resourceProviders = new ArrayList<>();
-            for(int i = 0; i<3; i++) {
-                resourceProviders.add(genResourceProvider());
+            List<ResourceProvider> resourceProviders = getResourceProviders();
+            for(ResourceProvider crp : resourceProviders) {
+                if((crp.getRegion().equals(region)) && crp.getAgent().equals(agent)) {
+                    rp = crp;
+                }
             }
+        } catch (Exception ex) {
+            logger.error("getResourceProvider " + ex.getMessage());
         }
-        catch(Exception ex) {
-            ex.printStackTrace();
-        }
-        return resourceProviders;
+        return rp;
     }
 
     public List<ResourceProvider> getResourceProviders() {
+        return getResourceProviders(null);
+    }
+    public List<ResourceProvider> getResourceProviders(String location) {
 
         List<ResourceProvider> resourceProviders = null;
+
         try {
             resourceProviders = new ArrayList<>();
-
+            List<String> resourceLocation = null;
+            if(location != null) {
+                resourceLocation = new ArrayList<>();
+                for (String aNodeId : plugin.getGDB().gdb.getANodeFromIndex("location", location)) {
+                    Map<String,String> nodeparams = plugin.getGDB().gdb.getNodeParams(aNodeId);
+                    resourceLocation.add(nodeparams.get("region") + "-" + nodeparams.get("agent"));
+                }
+            }
             List<String> sysInfoEdgeList = plugin.getGDB().gdb.getIsAssignedEdgeIds("sysinfo_resource", "sysinfo_inode");
             for(String edgeID : sysInfoEdgeList) {
 
                 String region = plugin.getGDB().gdb.getIsAssignedParam(edgeID,"region");
                 String agent = plugin.getGDB().gdb.getIsAssignedParam(edgeID,"agent");
 
-                Map<String,String> edgeParams = plugin.getGDB().gdb.getIsAssignedParams(edgeID);
+                boolean addResource = true;
 
-                long sysUptime = Long.parseLong(edgeParams.get("sys-uptime"));
-                double cpuIdle = Double.parseDouble(edgeParams.get("cpu-idle-load"));
-                int cpuLogicalCount = Integer.parseInt(edgeParams.get("cpu-logical-count"));
-                int cpuCompositeBenchmark = Integer.parseInt(edgeParams.get("benchmark_cpu_composite"));
-                long memAvailable = Long.parseLong(edgeParams.get("memory-available"));
-                long memLimit = Long.parseLong(edgeParams.get("memory-total"));
-                resourceProviders.add(new ResourceProvider(region,agent,sysUptime,cpuIdle, cpuLogicalCount, cpuCompositeBenchmark,memAvailable,memLimit));
+                if(location != null) {
+                    String nodePath = region + "-" + agent;
+                    if(!resourceLocation.contains(nodePath)) {
+                        addResource = false;
+                    }
+                }
+
+                if(addResource) {
+                    Map<String, String> edgeParams = plugin.getGDB().gdb.getIsAssignedParams(edgeID);
+                    long sysUptime = Long.parseLong(edgeParams.get("sys-uptime"));
+                    double cpuIdle = Double.parseDouble(edgeParams.get("cpu-idle-load"));
+                    int cpuLogicalCount = Integer.parseInt(edgeParams.get("cpu-logical-count"));
+                    int cpuCompositeBenchmark = Integer.parseInt(edgeParams.get("benchmark_cpu_composite"));
+                    long memAvailable = Long.parseLong(edgeParams.get("memory-available"));
+                    long memLimit = Long.parseLong(edgeParams.get("memory-total"));
+                    resourceProviders.add(new ResourceProvider(region, agent, sysUptime, cpuIdle, cpuLogicalCount, cpuCompositeBenchmark, memAvailable, memLimit));
+                }
             }
 
         }
@@ -112,11 +122,6 @@ public class GuilderEngine {
         }
 
     }
-
-    public void addResourceProvider(double workloadUtil) {
-        System.out.println("Adding Resources");
-    }
-
 
     private ResourceProvider genResourceProvider() {
         Map<String,String> sm = null;

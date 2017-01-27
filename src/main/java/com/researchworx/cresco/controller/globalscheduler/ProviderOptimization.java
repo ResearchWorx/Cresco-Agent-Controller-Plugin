@@ -1,5 +1,7 @@
 package com.researchworx.cresco.controller.globalscheduler;
 
+import com.researchworx.cresco.controller.core.Launcher;
+import com.researchworx.cresco.library.utilities.CLogger;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.strategy.Search;
@@ -21,6 +23,13 @@ import java.util.*;
  * @since 27/05/2016.
  */
 public class ProviderOptimization {
+    private Launcher plugin;
+    private CLogger logger;
+
+    public ProviderOptimization(Launcher plugin) {
+        this.logger = new CLogger(ProviderOptimization.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+        this.plugin = plugin;
+    }
 
     public Map<Integer, List<Integer>> opMap = null;
 
@@ -49,6 +58,7 @@ public class ProviderOptimization {
         for (int i = 0; i < W; i++) {
             // additional variable 'occ' is created on the fly
             // its domain includes the constraint on capacity
+            logger.debug("i=" + i + " K[i] = " + K[i]);
             IntVar occ = model.intVar("occur_" + i, 0, K[i], true);
             // for-loop starts at 0, warehouse index starts at 1
             // => we count occurrences of (i+1) in 'supplier'

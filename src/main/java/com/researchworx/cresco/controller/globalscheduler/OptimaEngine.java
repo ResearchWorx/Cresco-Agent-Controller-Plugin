@@ -2,7 +2,11 @@ package com.researchworx.cresco.controller.globalscheduler;
 
 
 import com.researchworx.cresco.controller.app.gNode;
+import com.researchworx.cresco.controller.core.Launcher;
+import com.researchworx.cresco.library.utilities.CLogger;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.*;
 
 /**
@@ -10,42 +14,55 @@ import java.util.*;
  */
 public class OptimaEngine {
 
-    AppSchedulerEngine appSchedulerEngine;
+    private AppSchedulerEngine appSchedulerEngine;
+    private Launcher plugin;
+    private CLogger logger;
 
-    public OptimaEngine(AppSchedulerEngine appSchedulerEngine) {
-    this.appSchedulerEngine = appSchedulerEngine;
-
+    public OptimaEngine(Launcher plugin, AppSchedulerEngine appSchedulerEngine) {
+        this.logger = new CLogger(OptimaEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Debug);
+        this.plugin = plugin;
+        this.appSchedulerEngine = appSchedulerEngine;
     }
 
     public Map<String,List<gNode>> scheduleAssignment(List<gNode> unAssignedNodes) {
+        return scheduleAssignment(unAssignedNodes, null);
+    }
+
+    public Map<String,List<gNode>> scheduleAssignment(List<gNode> unAssignedNodes, String location) {
         //base optimization on CPU, this must be expanded
         Map<String,List<gNode>> scheduleMap = null;
-        List<gNode> assignedNodes = null;
-        List<gNode> noResourceNodes = null;
+        //List<gNode> assignedNodes = null;
+        //List<gNode> noResourceNodes = null;
         try {
             scheduleMap = new HashMap<>();
-            assignedNodes = new ArrayList<>();
-            noResourceNodes = new ArrayList<>();
-            scheduleMap.put("assigned",assignedNodes);
-            scheduleMap.put("unassigned",noResourceNodes);
+            //assignedNodes = new ArrayList<>();
+            //noResourceNodes = new ArrayList<>();
+            scheduleMap.put("assigned", new ArrayList<gNode>());
+            scheduleMap.put("unassigned", new ArrayList<gNode>());
+            scheduleMap.put("error", new ArrayList<gNode>());
+            scheduleMap.put("noresource",new ArrayList<gNode>());
+
 
             List<gNode> preAssignedNodes = new ArrayList<>();
-            List<ResourceProvider> rps = appSchedulerEngine.ge.getResourceProviders();
+            List<ResourceProvider> rps = null;
+            rps = appSchedulerEngine.ge.getResourceProviders(location);
 
             double minResourceUtil = -1;
 
             for(gNode gnode : unAssignedNodes) {
-                String pluginname = gnode.params.get("pluginname");
+                String containerImage = gnode.params.get("container_image");
 
                 //Get past metric if it exist
-                ResourceMetric rm = appSchedulerEngine.fe.getResourceMetricAve(pluginname);
+                ResourceMetric rm = appSchedulerEngine.fe.getResourceMetricAve(containerImage);
                 //add metric to gnode
-                double resourceUtil = rm.getWorkloadUtil()/10;
-                gnode.workloadUtil = resourceUtil;
+                gnode.workloadUtil = rm.getWorkloadUtil();
 
                 boolean foundResourceProvider = false;
                 for(ResourceProvider rp : rps) {
                     double resourceAvalable = (rp.getCpuCompositeBenchmark() * rp.getCpuLogicalCount()) * (rp.getCpuIdle()/100);
+                    //logger.error("provider resourceAvalable " + resourceAvalable);
+                    //logger.error("provider gnode.workloadUtil " + gnode.workloadUtil);
+
                     if(gnode.workloadUtil <= resourceAvalable) {
                         foundResourceProvider = true;
                         if(minResourceUtil == -1) {
@@ -57,9 +74,10 @@ public class OptimaEngine {
                             }
                         }
                     }
+
                 }
                 if(!foundResourceProvider) {
-                    noResourceNodes.add(gnode);
+                    scheduleMap.get("noresource").add(gnode);
                 }
                 else {
                     preAssignedNodes.add(gnode);
@@ -67,13 +85,19 @@ public class OptimaEngine {
 
             }
 
-            if(noResourceNodes.size() == 0) {
+            if(scheduleMap.get("noresource").size() == 0) {
                 //no single resource too large to schedule, composite might still be
 
                 List<Integer> providerCapacity = new ArrayList<>();
                 for (ResourceProvider rp : rps) {
                     double resourceAvalable = (rp.getCpuCompositeBenchmark() * rp.getCpuLogicalCount()) * (rp.getCpuIdle() / 100);
-                    providerCapacity.add((int) Math.round(resourceAvalable/minResourceUtil));
+                    //logger.error("resourceAvalable " + resourceAvalable);
+                    //logger.error("minResourceUtil " + minResourceUtil);
+
+                    int capCalc = (int) Math.round(resourceAvalable/minResourceUtil);
+                    //logger.error("capCal " + capCalc);
+
+                    providerCapacity.add(capCalc);
                 }
                 // number of warehouses
                 int W = providerCapacity.size();
@@ -103,7 +127,7 @@ public class OptimaEngine {
                     }
                 }
 
-                ProviderOptimization po = new ProviderOptimization();
+                ProviderOptimization po = new ProviderOptimization(plugin);
                 Map<Integer, List<Integer>> opMap =  po.modelAndSolve(W,S,K,P,bCost);
 
                 for (Map.Entry<Integer, List<Integer>> entry : opMap.entrySet())
@@ -117,7 +141,7 @@ public class OptimaEngine {
                         gNode gnode = preAssignedNodes.get(gnodeIndex);
                         gnode.params.put("location_region",rps.get(providerIndex).getRegion());
                         gnode.params.put("location_agent",rps.get(providerIndex).getAgent());
-                        assignedNodes.add(gnode);
+                        scheduleMap.get("assigned").add(gnode);
                     }
                     //System.out.println(entry.getKey() + "/" + entry.getValue());
                 }
@@ -126,7 +150,11 @@ public class OptimaEngine {
             }
         }
         catch(Exception ex) {
-            ex.printStackTrace();
+            logger.error("scheduleAssignment " + ex.getMessage());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString()); // stack trace as a string
         }
         return scheduleMap;
     }

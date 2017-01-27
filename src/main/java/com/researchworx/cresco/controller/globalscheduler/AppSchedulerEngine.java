@@ -5,7 +5,10 @@ import com.researchworx.cresco.controller.app.gPayload;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.controller.globalcontroller.GlobalHealthWatcher;
 import com.researchworx.cresco.library.utilities.CLogger;
+import com.sun.media.jfxmedia.logging.Logger;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.*;
 
 
@@ -23,7 +26,7 @@ public class AppSchedulerEngine implements Runnable {
 		this.logger = new CLogger(AppSchedulerEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Debug);
 		this.plugin = plugin;
 		this.ghw = ghw;
-        oe = new OptimaEngine(this);
+        oe = new OptimaEngine(plugin,this);
         fe = new FuturaEngine(plugin,this);
         ge = new GuilderEngine(plugin,this);
 	}
@@ -62,7 +65,7 @@ public class AppSchedulerEngine implements Runnable {
                         }
                         else
                         {
-                            logger.debug("Pipeline Creation Failed: " + gpay.pipeline_name + " id=" + gpay.pipeline_id);
+                            logger.error("Pipeline Creation Failed: " + gpay.pipeline_name + " id=" + gpay.pipeline_id);
 
                         }
                         //process pipeline stuff
@@ -74,13 +77,21 @@ public class AppSchedulerEngine implements Runnable {
                 }
                 catch(Exception ex)
                 {
-                    logger.debug("ResourceSchedulerEngine gPayloadQueue Error: " + ex.toString());
+                    logger.error("AppSchedulerEngine gPayloadQueue Error: " + ex.toString());
+                    StringWriter sw = new StringWriter();
+                    PrintWriter pw = new PrintWriter(sw);
+                    ex.printStackTrace(pw);
+                    logger.error(sw.toString()); // stack trace as a string
                 }
             }
         }
         catch(Exception ex)
         {
-            logger.debug("ResourceSchedulerEngine Error: " + ex.toString());
+            logger.error("AppSchedulerEngine Error: " + ex.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString()); // stack trace as a string
         }
     }
 
@@ -139,58 +150,97 @@ public class AppSchedulerEngine implements Runnable {
         }
 
 
-        Map<String,List<gNode>> schedulemaps = buildNodeMaps(gpay);
+        Map<String,List<gNode>> schedulemaps = buildNodeMaps(gpay.nodes);
+        printScheduleStats(schedulemaps);
 
-        List<gNode> assignedNodes = schedulemaps.get("assigned");
-        List<gNode> unAssignedNodes = schedulemaps.get("unassigned");
-        List<gNode> badNodes = schedulemaps.get("error");
-
-        System.out.println("Assigned Nodes : " + assignedNodes.size());
-        System.out.println("unAssigned Nodes : " + unAssignedNodes.size());
-        System.out.println("badNodes : " + badNodes.size());
-
-        if (badNodes.size() != 0) {
+        if (schedulemaps.get("error").size() != 0) {
             System.out.println("Bad Node assignments... dead dead deadsky!");
-        } else if (unAssignedNodes.size() != 0) {
+        } else if (schedulemaps.get("unassigned").size() != 0) {
             System.out.println("We need to find some resources for these request.");
 
-            Map<String,List<gNode>> scheduleAssignments = oe.scheduleAssignment(unAssignedNodes);
+            //We need to deal with locations independently
+            //First build list of locations
+            Map<String,List<gNode>> locationNodes = new HashMap<>();
+            List<gNode> unassignedList = new ArrayList<>(schedulemaps.get("unassigned"));
+            for(gNode gnode : unassignedList) {
+                if(gnode.params.containsKey("location")) {
+                    //remove from general unassigned.
+                    schedulemaps.get("unassigned").remove(gnode);
+                    String location = gnode.params.get("location");
+                    if(locationNodes.containsKey(location)) {
+                        locationNodes.get(location).add(gnode);
+                    }
+                    else {
+                        locationNodes.put(location,new ArrayList<gNode>());
+                        locationNodes.get(location).add(gnode);
+                    }
+                }
+            }
+            unassignedList.clear();
 
-            if(scheduleAssignments.get("unassigned").size() != 0) {
+            //Map<String,List<gNode>> scheduleAssignments = new HashMap<>();
+            //scheduleAssignments.put("assigned",new ArrayList<gNode>());
+            //scheduleAssignments.put("error",new ArrayList<gNode>());
+            //scheduleAssignments.put("noresource",new ArrayList<gNode>());
+
+            //if there are any location nodes process them
+            if(locationNodes.size() > 0) {
+                for (Map.Entry<String, List<gNode>> entry : locationNodes.entrySet())
+                {
+                    //System.out.println(entry.getKey() + "/" + entry.getValue());
+                    String location = entry.getValue().get(0).params.get("location");
+                    Map<String,List<gNode>> locationAssignments = oe.scheduleAssignment(entry.getValue(),location);
+
+                    logger.info("Location: " + location);
+                    printScheduleStats(locationAssignments);
+                    schedulemaps.get("assigned").addAll(locationAssignments.get("assigned"));
+                    schedulemaps.get("error").addAll(locationAssignments.get("error"));
+                    schedulemaps.get("noresource").addAll(locationAssignments.get("noresource"));
+                }
+            }
+            //schedule nodes with no locations
+            if(schedulemaps.get("unassigned").size() > 0) {
+                List<gNode> unassigned = schedulemaps.get("unassigned");
+                Map<String, List<gNode>> noLocationAssignments = oe.scheduleAssignment(unassigned);
+                logger.info("Location: unknown");
+                printScheduleStats(noLocationAssignments);
+
+                schedulemaps.get("assigned").addAll(noLocationAssignments.get("assigned"));
+                schedulemaps.get("unassigned").addAll(noLocationAssignments.get("assigned"));
+                schedulemaps.get("error").addAll(noLocationAssignments.get("error"));
+                schedulemaps.get("noresource").addAll(noLocationAssignments.get("noresource"));
+            }
+            if(schedulemaps.get("noresource").size() != 0) {
                 //nodify guilder to get resources
                 double workloadResources = 0;
-                for(gNode gnode : scheduleAssignments.get("noresources")) {
+                for(gNode gnode : schedulemaps.get("noresource")) {
                     workloadResources += gnode.workloadUtil;
                 }
-                ge.addResourceProvider(workloadResources);
+                //code here to add resources
+                //ge.addResourceProvider(workloadResources);
             }
-            else if(scheduleAssignments.get("assigned").size() == unAssignedNodes.size()) {
+
+            else if((schedulemaps.get("assigned").size() != 0) && (schedulemaps.get("unassigned").size() == 0)) {
                 //rebuild payload
-                gpay.nodes.clear();
-                gpay.nodes.addAll(scheduleAssignments.get("assigned"));
-                Map<String,List<gNode>> schedulemapsOpt = buildNodeMaps(gpay);
+                //gpay.nodes.clear();
+                //add existing good assignments
+                //gpay.nodes.addAll(schedulemaps.get("assigned"));
+                //add new assign,ents
+                Map<String,List<gNode>> schedulemapsOpt = buildNodeMaps(schedulemaps.get("assigned"));
+                //logger.info("Final Check");
+                //printScheduleStats(schedulemapsOpt);
 
-                List<gNode> assignedNodesOpt = schedulemapsOpt.get("assigned");
-                List<gNode> unAssignedNodesOpt = schedulemapsOpt.get("unassigned");
-                List<gNode> badNodesOpt = schedulemapsOpt.get("error");
-
-                System.out.println("Assigned Nodes : " + assignedNodesOpt.size());
-                System.out.println("unAssigned Nodes : " + unAssignedNodesOpt.size());
-                System.out.println("badNodes : " + badNodesOpt.size());
-
-                if((unAssignedNodesOpt.size() == 0) && (badNodesOpt.size() == 0)) {
-                    System.out.println("WOOT");
+                if(!((schedulemapsOpt.get("unassigned").size() == 0) && (schedulemapsOpt.get("error").size() == 0))) {
+                    logger.error("SOMETHING IS BAD WRONG WITH RESCHEDULING!");
                 }
-
-                ////gpay.nodes.addAll(assignedNodes);
-
             }
 
+        }
 
-        } else if ((unAssignedNodes.size() == 0) && (badNodes.size() == 0)) {
-            System.out.println("Woot! Schedule This thing!");
+        if((schedulemaps.get("assigned").size() != 0) && (schedulemaps.get("unassigned").size() == 0) && (schedulemaps.get("error").size() == 0) && (schedulemaps.get("noresource").size() == 0)) {
+            logger.info("Scheduling is ready!");
         } else {
-            System.out.println("WTF are you doing here?");
+            logger.error("SOMETHING IS BAD WRONG WITH SCHEDULING!");
         }
 
         /*
@@ -235,7 +285,14 @@ public class AppSchedulerEngine implements Runnable {
         return isLocation;
     }
 
-    private Map<String,List<gNode>> buildNodeMaps(gPayload gpay) {
+    public void printScheduleStats(Map<String,List<gNode>> schedulemaps) {
+        logger.debug("Assigned Nodes : " + schedulemaps.get("assigned").size());
+        logger.debug("Unassigned Nodes : " + schedulemaps.get("unassigned").size());
+        logger.debug("Noresource Nodes : " + schedulemaps.get("noresource").size());
+        logger.debug("Error Nodes : " + schedulemaps.get("error").size());
+    }
+
+    private Map<String,List<gNode>> buildNodeMaps(List<gNode> nodes) {
 
         Map<String,List<gNode>> nodeResults = null;
         try {
@@ -243,12 +300,11 @@ public class AppSchedulerEngine implements Runnable {
             nodeResults = new HashMap<>();
 
             List<gNode> assignedNodes = new ArrayList<>();
-            List<gNode> unAssignedNodes = new ArrayList<>(gpay.nodes);
             List<gNode> errorNodes = new ArrayList<>();
-
+            List<gNode> unAssignedNodes = new ArrayList<>(nodes);
 
             //verify predicates
-            for (gNode node : gpay.nodes) {
+            for (gNode node : nodes) {
 
                 if (node.params.containsKey("location_region") && node.params.containsKey("location_agent")) {
                     if (nodeExist(node.params.get("location_region"), node.params.get("location_agent"))) {
@@ -257,25 +313,20 @@ public class AppSchedulerEngine implements Runnable {
                     } else {
                         errorNodes.add(node);
                     }
-                } else if (node.params.containsKey("location")) {
-                    if (locationExist(node.params.get("location"))) {
-                        unAssignedNodes.remove(node);
-                        assignedNodes.add(node);
-                    } else {
-                        errorNodes.add(node);
-                    }
                 }
+
             }
             nodeResults.put("assigned",assignedNodes);
             nodeResults.put("unassigned", unAssignedNodes);
             nodeResults.put("error",errorNodes);
+            nodeResults.put("noresource", new ArrayList<gNode>());
+
         }
         catch(Exception ex) {
             ex.printStackTrace();
         }
         return nodeResults;
     }
-
 
     public boolean checkPipeline2(String pipeline_id) {
 

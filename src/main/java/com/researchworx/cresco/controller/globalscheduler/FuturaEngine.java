@@ -19,7 +19,7 @@ public class FuturaEngine {
     private CLogger logger;
 
     public FuturaEngine(Launcher plugin, AppSchedulerEngine appSchedulerEngine) {
-        this.logger = new CLogger(FuturaEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Debug);
+        this.logger = new CLogger(FuturaEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
         this.plugin = plugin;
         this.appSchedulerEngine = appSchedulerEngine;
     }
@@ -162,51 +162,66 @@ public class FuturaEngine {
     public ResourceMetric getResourceMetricAve(String containerImage) {
 
         ResourceMetric resourceMetric = null;
+
         try {
 
-            List<String> containerEdgeList = plugin.getGDB().gdb.getIsAssignedEdgeIds("container_resource", "container_inode");
-            for(String edgeID : containerEdgeList) {
+            if(containerImage != null) {
+                List<String> containerEdgeList = plugin.getGDB().gdb.getIsAssignedEdgeIds("container_resource", "container_inode");
+                for (String edgeID : containerEdgeList) {
 
-                String region = plugin.getGDB().gdb.getIsAssignedParam(edgeID,"region");
-                String agent = plugin.getGDB().gdb.getIsAssignedParam(edgeID,"agent");
-                String pluginId = plugin.getGDB().gdb.getIsAssignedParam(edgeID,"plugin");
+                    String region = plugin.getGDB().gdb.getIsAssignedParam(edgeID, "region");
+                    String agent = plugin.getGDB().gdb.getIsAssignedParam(edgeID, "agent");
+                    String pluginId = plugin.getGDB().gdb.getIsAssignedParam(edgeID, "plugin");
 
-                Map<String,String> edgeParams = plugin.getGDB().gdb.getIsAssignedParams(edgeID);
-                for (Map.Entry<String, String> entry : edgeParams.entrySet()) {
-                    String key = entry.getKey();
-                    String value = entry.getValue();
-                    logger.info("key=" + key + " value=" + value);
-                }
+                    logger.debug("LOOKING FOR RESOURCE PROVIDER ON Region: " + region + " Agent: " + agent);
 
-                logger.error("LOOKING FOR CONTAINER IMAGE = " + containerImage);
-                String canidateContainerImage = plugin.getGDB().gdb.getIsAssignedParam(edgeID,"container_image");
+                    ResourceProvider rp = appSchedulerEngine.ge.getResourceProvider(region,agent);
 
-                 if(containerImage.equals(canidateContainerImage)) {
-                    String resourceMetricJSON = plugin.getGDB().gdb.getIsAssignedParam(edgeID,"resource_metric");
-                    Gson gson = new Gson();
-                    ResourceMetric rm = gson.fromJson(resourceMetricJSON,ResourceMetric.class);
-                    if(resourceMetric == null) {
-                        resourceMetric = rm;
+                    //only calculate metrics if record exist for provider
+                    if(rp != null) {
+                        /*
+                        Map<String, String> edgeParams = plugin.getGDB().gdb.getIsAssignedParams(edgeID);
+                        for (Map.Entry<String, String> entry : edgeParams.entrySet()) {
+                            String key = entry.getKey();
+                            String value = entry.getValue();
+                            logger.info("key=" + key + " value=" + value);
+                        }
+                        */
+                        logger.debug("LOOKING FOR CONTAINER IMAGE = " + containerImage);
+                        String canidateContainerImage = plugin.getGDB().gdb.getIsAssignedParam(edgeID, "container_image");
+
+                        if (containerImage.equals(canidateContainerImage)) {
+                            String resourceMetricJSON = plugin.getGDB().gdb.getIsAssignedParam(edgeID, "resource_metric");
+                            Gson gson = new Gson();
+                            ResourceMetric rm = gson.fromJson(resourceMetricJSON, ResourceMetric.class);
+                            if (resourceMetric == null) {
+                                resourceMetric = rm;
+                            } else {
+                                resourceMetric.addCpuAve(rm.getCpuAve());
+                                resourceMetric.addMemory(rm.getMemAve());
+                                resourceMetric.addDiskRead(rm.getDiskRead());
+                                resourceMetric.addDiskWrite(rm.getDiskWrite());
+                                resourceMetric.addNetworkRx(rm.getNetworkRx());
+                                resourceMetric.addNetworkTx(rm.getNetworkTx());
+                            }
+                            logger.debug("pre workload utilization: " + resourceMetric.getWorkloadUtil());
+                            logger.debug("rp.getCpuCompositeBenchmark() : " + rp.getCpuCompositeBenchmark());
+                            logger.debug("rp.getCpuLogicalCount() : " + rp.getCpuLogicalCount());
+                            logger.debug("rm.getCpuAve() : " + rm.getCpuAve());
+                            resourceMetric.addWorkloadCost( (rp.getCpuCompositeBenchmark() * rp.getCpuLogicalCount()) * (rm.getCpuAve()/100));
+                            logger.debug("post workload utilization: " + resourceMetric.getWorkloadUtil());
+                        }
                     }
-                    else {
-                        resourceMetric.addCpuAve(rm.getCpuAve());
-                        resourceMetric.addMemory(rm.getMemAve());
-                        resourceMetric.addDiskRead(rm.getDiskRead());
-                        resourceMetric.addDiskWrite(rm.getDiskWrite());
-                        resourceMetric.addNetworkRx(rm.getNetworkRx());
-                        resourceMetric.addNetworkTx(rm.getNetworkTx());
-                    }
                 }
-
             }
-            if(resourceMetric == null) {
-                resourceMetric = new ResourceMetric(500);
-                logger.error("NO RESOURCE METRIC FOUND USING DEFAULT");
+            if (resourceMetric == null) {
+                resourceMetric = new ResourceMetric(200);
+                logger.debug("NO RESOURCE METRIC FOUND USING DEFAULT");
             }
 
         }
         catch(Exception ex) {
-            ex.printStackTrace();
+            logger.error("getResourceMetricAve " + ex.getMessage());
         }
         return resourceMetric;
 
