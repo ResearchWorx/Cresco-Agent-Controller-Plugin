@@ -73,12 +73,18 @@ public class GuilderEngine {
 
                 boolean addResource = true;
 
+                String nodePath = region + "-" + agent;
+
                 if(location != null) {
-                    String nodePath = region + "-" + agent;
                     if(!resourceLocation.contains(nodePath)) {
                         addResource = false;
                     }
                 }
+                //make sure old resources are not assigned.
+                if(!plugin.isReachableAgent(nodePath)) {
+                    addResource = false;
+                }
+
 
                 if(addResource) {
                     Map<String, String> edgeParams = plugin.getGDB().gdb.getIsAssignedParams(edgeID);

@@ -525,7 +525,7 @@ public class ResourceSchedulerEngine implements Runnable {
                 logger.debug("interface addresses " + inaddr);
                 String hostAddress = inaddr.getAddress().getHostAddress();
                 if(!hostAddress.contains(":")) {
-                    nsb.append("http://" + hostAddress + ":32003/,");
+                    nsb.append("http://" + hostAddress + ":32000/,");
                 }
             }
             if(nsb.length() > 0) {
