@@ -24,7 +24,7 @@ public class AppSchedulerEngine implements Runnable {
 
 
     public AppSchedulerEngine(Launcher plugin, GlobalHealthWatcher ghw) {
-		this.logger = new CLogger(AppSchedulerEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Debug);
+		this.logger = new CLogger(AppSchedulerEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
 		this.plugin = plugin;
 		this.ghw = ghw;
         oe = new OptimaEngine(plugin,this);
