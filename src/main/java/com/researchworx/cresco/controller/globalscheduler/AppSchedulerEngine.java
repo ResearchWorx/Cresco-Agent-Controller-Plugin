@@ -4,6 +4,7 @@ import com.researchworx.cresco.controller.app.gNode;
 import com.researchworx.cresco.controller.app.gPayload;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.controller.globalcontroller.GlobalHealthWatcher;
+import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 import com.sun.media.jfxmedia.logging.Logger;
 
@@ -23,7 +24,7 @@ public class AppSchedulerEngine implements Runnable {
 
 
     public AppSchedulerEngine(Launcher plugin, GlobalHealthWatcher ghw) {
-		this.logger = new CLogger(AppSchedulerEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+		this.logger = new CLogger(AppSchedulerEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Debug);
 		this.plugin = plugin;
 		this.ghw = ghw;
         oe = new OptimaEngine(plugin,this);
@@ -207,6 +208,27 @@ public class AppSchedulerEngine implements Runnable {
 
                 for(gNode gnode : schedulemaps.get("assigned")) {
                     logger.debug("gnode_id : " + gnode.node_id + " params : " + gnode.params);
+                    MsgEvent me = new MsgEvent(MsgEvent.Type.CONFIG, null, null, null, "add application node");
+                    me.setParam("globalcmd", "addplugin");
+                    me.setParam("inode_id", gnode.node_id);
+                    me.setParam("resource_id", gpay.pipeline_id);
+                    me.setParam("location_region",gnode.params.get("location_region"));
+                    me.setParam("location_agent",gnode.params.get("location_agent"));
+                    gnode.params.remove("location_region");
+                    gnode.params.remove("location_agent");
+
+                    StringBuilder configparms = new StringBuilder();
+                    for (Map.Entry<String, String> entry : gnode.params.entrySet())
+                    {
+                        configparms.append(entry.getKey() + "=" + entry.getValue() + ",");
+                        //System.out.println(entry.getKey() + "/" + entry.getValue());
+                    }
+                    if(configparms.length() > 0) {
+                        configparms.deleteCharAt(configparms.length() -1);
+                    }
+                    me.setParam("configparams", configparms.toString());
+                    logger.debug("Message [" + me.getParams().toString() + "]");
+                    plugin.getResourceScheduleQueue().offer(me);
                 }
 
                 return 4;

@@ -1,20 +1,26 @@
 package com.researchworx.cresco.controller.globalscheduler;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.researchworx.cresco.controller.core.Launcher;
-import com.researchworx.cresco.controller.db.DBApplicationFunctions;
-import com.researchworx.cresco.controller.db.DBBaseFunctions;
 import com.researchworx.cresco.controller.globalcontroller.GlobalHealthWatcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
-import com.sun.media.jfxmedia.logging.Logger;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import javax.xml.bind.DatatypeConverter;
+import java.io.*;
+import java.math.BigInteger;
+import java.net.InterfaceAddress;
+import java.net.NetworkInterface;
 import java.net.URLDecoder;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.security.MessageDigest;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 import java.util.jar.Attributes;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
@@ -25,11 +31,34 @@ public class ResourceSchedulerEngine implements Runnable {
 	private Launcher plugin;
 	private GlobalHealthWatcher ghw;
 	private CLogger logger;
+    public Cache<String, String> jarStringCache;
+    public Cache<String, String> jarHashCache;
+    public Cache<String, String> jarTimeCache;
 
-	public ResourceSchedulerEngine(Launcher plugin, GlobalHealthWatcher ghw) {
+
+    public ResourceSchedulerEngine(Launcher plugin, GlobalHealthWatcher ghw) {
 		this.plugin = plugin;
 		this.ghw = ghw;
         logger = new CLogger(ResourceSchedulerEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Debug);
+
+        jarStringCache = CacheBuilder.newBuilder()
+                .concurrencyLevel(4)
+                .softValues()
+                .maximumSize(10)
+                .expireAfterWrite(15, TimeUnit.MINUTES)
+                .build();
+        jarHashCache = CacheBuilder.newBuilder()
+                .concurrencyLevel(4)
+                .softValues()
+                .maximumSize(100)
+                .expireAfterWrite(15, TimeUnit.MINUTES)
+                .build();
+        jarTimeCache = CacheBuilder.newBuilder()
+                .concurrencyLevel(4)
+                .softValues()
+                .maximumSize(100)
+                .expireAfterWrite(15, TimeUnit.MINUTES)
+                .build();
     }
 		
 	public void run() 
@@ -52,7 +81,8 @@ public class ResourceSchedulerEngine implements Runnable {
 							//do something to activate a plugin
 							logger.debug("starting precheck...");
 							//String pluginJar = verifyPlugin(ce);
-							if(!verifyPlugin(ce))
+							String pluginFile = verifyPlugin(ce);
+                            if(pluginFile == null)
 							{
 								if((plugin.getGDB().gdb.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_code","1")) &&
 										(plugin.getGDB().gdb.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_desc","iNode Failed Activation : Plugin not found!")))
@@ -67,30 +97,36 @@ public class ResourceSchedulerEngine implements Runnable {
 
 								//Here is where scheduling is taking place
 								logger.debug("plugin precheck = OK");
-								String agentPath = getLowAgent();
+								//String agentPath = getLowAgent();
 
-								if(agentPath == null)
-								{
-									logger.debug("ResourceSchedulerEngine : Unable to find agent for plugin scheduling");
-								}
-								else
-								{
-									logger.debug("agent precheck = OK");
-									
-									String[] agentPath_s = agentPath.split(",");
-									String region = agentPath_s[0];
-									String agent = agentPath_s[1];
+                                //String[] agentPath_s = agentPath.split(",");
+									String region = ce.getParam("location_region");
+									String agent = ce.getParam("location_agent");
 									String resource_id = ce.getParam("resource_id");
 									String inode_id = ce.getParam("inode_id");
+
 									//have agent download plugin
-									String pluginurl = "http://127.0.0.1:32003/";
+									//String pluginurl = "http://127.0.0.1:32003/";
 									//downloadPlugin(region,agent,pluginJar,pluginurl, false);
-									logger.debug("Downloading plugin on region=" + region + " agent=" + agent);
-									
-									
+									//logger.debug("Downloading plugin on region=" + region + " agent=" + agent);
+                                    //include jar
+
+                                    /*
+                                    String jarString = jarStringCache.getIfPresent(pluginFile);
+
+									if(jarString == null) {
+                                        jarString = getJarString(pluginFile);
+                                        jarStringCache.put(pluginFile,jarString);
+                                    }
+                                    */
+									//logger.error(getJarString(pluginFile));
+
 									//schedule plugin
 									logger.debug("Scheduling plugin on region=" + region + " agent=" + agent);
 									MsgEvent me = addPlugin(region,agent,ce.getParam("configparams"));
+                                    me.setParam("http_host",getNetworkAddresses());
+                                    me.setParam("jarmd5",jarHashCache.getIfPresent(pluginFile));
+									//me.setParam("jarstring",jarString);
 									logger.debug("pluginadd message: " + me.getParams().toString());
 									
 									//ControllerEngine.commandExec.cmdExec(me);
@@ -101,7 +137,7 @@ public class ResourceSchedulerEngine implements Runnable {
                                     plugin.msgIn(me);
 
 									new Thread(new PollAddPlugin(plugin,resource_id, inode_id,region,agent)).start();
-								}
+
 								
 								/*
 								if((ControllerEngine.gdb.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_code","10")) &&
@@ -145,14 +181,50 @@ public class ResourceSchedulerEngine implements Runnable {
             logger.error("ResourceSchedulerEngine Error: " + ex.toString());
 		}
 	}
-	
-	private Boolean verifyPlugin(MsgEvent ce) {
-	    boolean isVerified = false;
+
+    public String getJarMD5(String pluginFile) {
+        String jarString = null;
+        try
+        {
+            Path path = Paths.get(pluginFile);
+            byte[] data = Files.readAllBytes(path);
+
+            MessageDigest m= MessageDigest.getInstance("MD5");
+            m.update(data);
+            jarString = new BigInteger(1,m.digest()).toString(16);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+        return jarString;
+    }
+
+    public String getJarString(String pluginFile) {
+        String jarString = null;
+	    try
+        {
+            Path path = Paths.get(pluginFile);
+            byte[] data = Files.readAllBytes(path);
+            jarString = DatatypeConverter.printBase64Binary(data);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+        return jarString;
+    }
+
+	private String verifyPlugin(MsgEvent ce) {
+	    String returnPluginfile = null;
+	    //boolean isVerified = false;
 		//pre-schedule check
 		String configparams = ce.getParam("configparams");
 		logger.debug("verifyPlugin params " + configparams);
 
         Map<String,String> params = getMapFromString(configparams, false);
+
+        logger.debug("config params: " + params.toString());
 
         String requestedPlugin = params.get("pluginname");
 
@@ -160,9 +232,12 @@ public class ResourceSchedulerEngine implements Runnable {
         for(String pluginfile : pluginMap) {
             logger.debug("plugin = " + pluginfile);
             logger.debug("plugin name = " + getPluginName(pluginfile));
-            if(requestedPlugin.equals(getPluginName(pluginfile))) {
-                isVerified = true;
-            }
+                String pluginName = getPluginName(pluginfile);
+                if(pluginName != null) {
+                    if (requestedPlugin.equals(pluginName)) {
+                        returnPluginfile = pluginfile;
+                    }
+                }
         }
 
         /*
@@ -187,7 +262,7 @@ public class ResourceSchedulerEngine implements Runnable {
 			ce.setParam("pluginstatus","failed");
 		}
 		*/
-		return isVerified;
+		return returnPluginfile;
 	}
 	
 	public Map<String,String> paramStringToMap(String param)
@@ -343,6 +418,8 @@ public class ResourceSchedulerEngine implements Runnable {
                 pluginDirectory = jarLocation.getParent(); // to get the parent dir name
             }
 
+            logger.debug("pluginDirectory: " + pluginDirectory);
+
             File folder = new File(pluginDirectory);
             if(folder.exists())
             {
@@ -376,14 +453,36 @@ public class ResourceSchedulerEngine implements Runnable {
         return pluginFiles;
     }
 
-    public static String getPluginName(String jarFile) //This should pull the version information from jar Meta data
+    public String getPluginName(String jarFile) //This should pull the version information from jar Meta data
     {
-        String version;
+        String version = null;
         try{
             //String jarFile = AgentEngine.class.getProtectionDomain().getCodeSource().getLocation().getPath();
             //logger.debug("JARFILE:" + jarFile);
             //File file = new File(jarFile.substring(5, (jarFile.length() )));
             File file = new File(jarFile);
+
+            boolean calcHash = true;
+            BasicFileAttributes attr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
+            long fileTime = attr.creationTime().toMillis();
+
+            String jarCreateTimeString = jarTimeCache.getIfPresent(jarFile);
+
+
+            if(jarCreateTimeString != null) {
+              long jarCreateTime = Long.parseLong(jarCreateTimeString);
+              if(jarCreateTime == fileTime) {
+                calcHash = false;
+              } else {
+                  jarStringCache.invalidate(jarFile);
+                  jarHashCache.invalidate(jarFile);
+              }
+            }
+            if(calcHash) {
+                jarStringCache.put(jarFile,String.valueOf(fileTime));
+                jarHashCache.put(jarFile,getJarMD5(jarFile));
+            }
+
             FileInputStream fis = new FileInputStream(file);
             @SuppressWarnings("resource")
             JarInputStream jarStream = new JarInputStream(fis);
@@ -394,14 +493,50 @@ public class ResourceSchedulerEngine implements Runnable {
         }
         catch(Exception ex)
         {
-            String msg = "Unable to determine Plugin Version " + ex.toString();
-            System.err.println(msg);
-            version = "Unable to determine Version";
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString());
+
+            logger.error("Unable to determine Plugin Version " + ex.getMessage());
+            //version = "Unable to determine Version";
         }
         return version;
     }
 
-    public static String getPluginVersion(String jarFile) //This should pull the version information from jar Meta data
+    public String getNetworkAddresses() {
+        String netwokrAddressesString = null;
+        try {
+            List<InterfaceAddress> interfaceAddressList = new ArrayList<>();
+
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface networkInterface = interfaces.nextElement();
+                if (!networkInterface.getDisplayName().startsWith("veth") && !networkInterface.isLoopback() && networkInterface.supportsMulticast() && !networkInterface.isPointToPoint() && !networkInterface.isVirtual()) {
+                    logger.debug("Found Network Interface [" + networkInterface.getDisplayName() + "] initialized");
+                    interfaceAddressList.addAll(networkInterface.getInterfaceAddresses());
+                }
+            }
+            StringBuilder nsb = new StringBuilder();
+
+            for(InterfaceAddress inaddr : interfaceAddressList) {
+                logger.debug("interface addresses " + inaddr);
+                String hostAddress = inaddr.getAddress().getHostAddress();
+                if(!hostAddress.contains(":")) {
+                    nsb.append(hostAddress + ",");
+                }
+            }
+            if(nsb.length() > 0) {
+                nsb.deleteCharAt(nsb.length() -1 );
+            }
+            netwokrAddressesString = nsb.toString();
+        } catch (Exception ex) {
+            logger.error("getNetworkAddresses ", ex.getMessage());
+        }
+    return netwokrAddressesString;
+    }
+
+    public String getPluginVersion(String jarFile) //This should pull the version information from jar Meta data
     {
         String version;
         try{
@@ -472,7 +607,6 @@ public class ResourceSchedulerEngine implements Runnable {
 		
 	}
 
-
     public Map<String,String> getMapFromString(String param, boolean isRestricted) {
         Map<String,String> paramMap = null;
 
@@ -486,7 +620,7 @@ public class ResourceSchedulerEngine implements Runnable {
 
             for(String str : sparam)
             {
-                String[] sstr = str.split(":");
+                String[] sstr = str.split("=");
 
                 if(isRestricted)
                 {
