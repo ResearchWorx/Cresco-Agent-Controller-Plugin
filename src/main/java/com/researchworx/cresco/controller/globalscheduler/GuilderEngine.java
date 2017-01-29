@@ -62,7 +62,7 @@ public class GuilderEngine {
                 resourceLocation = new ArrayList<>();
                 for (String aNodeId : plugin.getGDB().gdb.getANodeFromIndex("location", location)) {
                     Map<String,String> nodeparams = plugin.getGDB().gdb.getNodeParams(aNodeId);
-                    resourceLocation.add(nodeparams.get("region") + "-" + nodeparams.get("agent"));
+                    resourceLocation.add(nodeparams.get("region") + "_" + nodeparams.get("agent"));
                 }
             }
             List<String> sysInfoEdgeList = plugin.getGDB().gdb.getIsAssignedEdgeIds("sysinfo_resource", "sysinfo_inode");
@@ -73,7 +73,7 @@ public class GuilderEngine {
 
                 boolean addResource = true;
 
-                String nodePath = region + "-" + agent;
+                String nodePath = region + "_" + agent;
 
                 if(location != null) {
                     if(!resourceLocation.contains(nodePath)) {
