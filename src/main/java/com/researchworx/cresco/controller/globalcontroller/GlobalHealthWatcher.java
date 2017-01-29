@@ -24,7 +24,7 @@ public class GlobalHealthWatcher implements Runnable {
 	private Map<String,String> global_host_map;
     private Timer regionalUpdateTimer;
     private Long gCheckInterval;
-    public ConcurrentLinkedQueue<MsgEvent> resourceScheduleQueue;
+
 
     public Boolean SchedulerActive;
     public Boolean AppSchedulerActive;
@@ -39,9 +39,9 @@ public class GlobalHealthWatcher implements Runnable {
         regionalUpdateTimer = new Timer();
         regionalUpdateTimer.scheduleAtFixedRate(new GlobalHealthWatcher.GlobalNodeStatusWatchDog(plugin, logger), 500, 15000);//remote
         gCheckInterval = plugin.getConfig().getLongParam("watchdogtimer",5000L);
-        resourceScheduleQueue = new ConcurrentLinkedQueue<>();
         SchedulerActive = false;
         AppSchedulerActive = false;
+        plugin.setResourceScheduleQueue(new ConcurrentLinkedQueue<MsgEvent>());
     }
 
 	public void shutdown() {

@@ -23,7 +23,7 @@ public class GlobalCommandExec {
 
 	public GlobalCommandExec(Launcher plugin)
 	{
-		this.logger = new CLogger(GlobalCommandExec.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
+		this.logger = new CLogger(GlobalCommandExec.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
 		this.plugin = plugin;
     }
 	
@@ -276,10 +276,18 @@ public class GlobalCommandExec {
                             if((ce.getParam("gpipeline") != null) && (ce.getParam("tenant_id") != null)) {
                                 String pipelineJSON = ce.getParam("gpipeline");
                                 String tenantID = ce.getParam("tenant_id");
-                                logger.info("*" + pipelineJSON + "*");
+                                if(ce.getParam("gpipeline_compressed") != null) {
+									boolean isCompressed = Boolean.parseBoolean(ce.getParam("gpipeline_compressed"));
+									if(isCompressed) {
+										pipelineJSON = plugin.getGDB().gdb.stringUncompress(pipelineJSON);
+									}
+                                    logger.debug("Pipeline Compressed " + isCompressed + " " + ce.getParam("gpipeline"));
+                                    logger.debug("*" + pipelineJSON + "*");
+
+                                }
                                 gPayload gpay = plugin.getGDB().dba.createPipelineRecord(tenantID, pipelineJSON);
-                                String returnGpipeline = plugin.getGDB().dba.JsonFromgPayLoad(gpay);
-                                ce.setParam("gpipeline",returnGpipeline);
+                                //String returnGpipeline = plugin.getGDB().dba.JsonFromgPayLoad(gpay);
+                                ce.setParam("gpipeline_id",gpay.pipeline_id);
                             }
                         }
                         catch(Exception ex)
@@ -301,6 +309,51 @@ public class GlobalCommandExec {
                         catch(Exception ex)
                         {
                             logger.error("getgpipeline " + ex.getMessage());
+                        }
+                        return ce;
+                    }
+                    else if(ce.getParam("globalcmd").equals("getgpipelinelist"))
+                    {
+                        try
+                        {
+                            StringBuilder pipelineString = new StringBuilder();
+                            List<String> pipelines = plugin.getGDB().dba.getPipelineIdList();
+                            for(String pipelineId :pipelines) {
+                                pipelineString.append(pipelineId + ",");
+                            }
+                            if(pipelineString.length() > 0) {
+                                pipelineString.deleteCharAt(pipelineString.length() - 1);
+                            }
+                            ce.setParam("gpipeline_ids",pipelineString.toString());
+
+                        }
+                        catch(Exception ex)
+                        {
+                            logger.error("getgpipelinelist " + ex.getMessage());
+                        }
+                        return ce;
+                    }
+                    else if(ce.getParam("globalcmd").equals("gpipelineremove"))
+                    {
+                        try
+                        {
+                            if(ce.getParam("pipeline_id") != null) {
+                                String pipelineId = ce.getParam("pipeline_id");
+                                List<String> iNodeList = plugin.getGDB().dba.removePipeline(pipelineId);
+                                for(String iNodeId : iNodeList) {
+                                    MsgEvent me = new MsgEvent(MsgEvent.Type.CONFIG, null, null, null, "add application node");
+                                    me.setParam("globalcmd", "removeplugin");
+                                    me.setParam("inode_id", iNodeId);
+                                    me.setParam("resource_id", pipelineId);
+                                    //ghw.resourceScheduleQueue.offer(me);
+                                    plugin.getResourceScheduleQueue().offer(me);
+                                }
+                                ce.setParam("isremoved","true");
+                            }
+                        }
+                        catch(Exception ex)
+                        {
+                            logger.error("ggpipelineremove " + ex.getMessage());
                         }
                         return ce;
                     }

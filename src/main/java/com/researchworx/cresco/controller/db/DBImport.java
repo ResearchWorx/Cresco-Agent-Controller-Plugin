@@ -253,7 +253,6 @@ public class DBImport {
         return totalRecords;
     }
 
-
     private ORecord importRecord() throws Exception {
 
         String value = jsonReader.readString(OJSONReader.END_OBJECT, true);

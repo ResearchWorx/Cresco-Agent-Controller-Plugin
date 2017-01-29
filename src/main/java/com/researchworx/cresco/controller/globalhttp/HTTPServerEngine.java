@@ -174,6 +174,7 @@ public class HTTPServerEngine implements Runnable{
         config.register(RESTResponseFilter.class);
         config.register(webDownload.class);
 
+
         //set static vars
         webDownload.connectPlugin(plugin);
         webREST.connectPlugin(plugin);

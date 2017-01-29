@@ -29,6 +29,10 @@ public class DBEngine {
         String username = plugin.getConfig().getStringParam("gdb_username");
         String password = plugin.getConfig().getStringParam("gdb_password");
         String dbname = plugin.getConfig().getStringParam("gdb_dbname");
+
+
+        String connection_string = "remote:" + host + "/" + dbname;
+
         if((host != null) && (username != null) && (password != null) && (dbname != null))
         {
             isMemory = false;
@@ -37,16 +41,18 @@ public class DBEngine {
         if(isMemory) {
             db = new ODatabaseDocumentTx("memory:internalDb").create();
 
-            factory = new OrientGraphFactory("memory:internalDb").setupPool(10,100);
+//            factory = new OrientGraphFactory("memory:internalDb").setupPool(100,1000);
+            factory = new OrientGraphFactory("memory:internalDb");
 
 
         }
         else {
 
             //String connection_string = "plocal:/opt/cresco/db";
-            String connection_string = "plocal:/Users/vcbumg2/Downloads/orientdb-community-2.2.14/databases/cresco";
+            //String connection_string = "plocal:/Users/vcbumg2/Downloads/orientdb-community-2.2.14/databases/cresco";
             db = new  ODatabaseDocumentTx(connection_string).open(username, password);
             factory = new OrientGraphFactory(connection_string, username, password).setupPool(10, 100);
+
 
         }
 

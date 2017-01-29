@@ -49,6 +49,14 @@ public class OptimaEngine {
 
             double minResourceUtil = -1;
 
+            double totalresourceAvalable = 0;
+            double totalresourceWorkloadUtil = 0;
+
+            for(ResourceProvider rp : rps) {
+                double resourceAvalable = (rp.getCpuCompositeBenchmark() * rp.getCpuLogicalCount()) * (rp.getCpuIdle()/100);
+                totalresourceAvalable += resourceAvalable;
+            }
+
             for(gNode gnode : unAssignedNodes) {
                 String containerImage = gnode.params.get("container_image");
 
@@ -56,10 +64,11 @@ public class OptimaEngine {
                 ResourceMetric rm = appSchedulerEngine.fe.getResourceMetricAve(containerImage);
                 //add metric to gnode
                 gnode.workloadUtil = rm.getWorkloadUtil();
-
+                totalresourceWorkloadUtil += gnode.workloadUtil;
                 boolean foundResourceProvider = false;
                 for(ResourceProvider rp : rps) {
                     double resourceAvalable = (rp.getCpuCompositeBenchmark() * rp.getCpuLogicalCount()) * (rp.getCpuIdle()/100);
+
                     //logger.error("provider resourceAvalable " + resourceAvalable);
                     //logger.error("provider gnode.workloadUtil " + gnode.workloadUtil);
 
@@ -85,6 +94,21 @@ public class OptimaEngine {
 
             }
 
+            logger.error("totalresourceWorkloadUtil: " + totalresourceWorkloadUtil + " totalresourceAvalable: " + totalresourceAvalable);
+
+            if(totalresourceWorkloadUtil > totalresourceAvalable) {
+                List<gNode> noResourceList = scheduleMap.get("noresource");
+                List<String> noResourceNodeId = new ArrayList<>();
+                for(gNode rnodeId : noResourceList) {
+                    noResourceNodeId.add(rnodeId.node_id);
+                }
+                //List<gNode> unAssignedNodes
+                for(gNode unassigned : unAssignedNodes) {
+                   if(!noResourceNodeId.contains(unassigned.node_id)) {
+                       scheduleMap.get("noresource").add(unassigned);
+                    }
+                }
+            }
             if(scheduleMap.get("noresource").size() == 0) {
                 //no single resource too large to schedule, composite might still be
 
@@ -129,23 +153,25 @@ public class OptimaEngine {
 
                 ProviderOptimization po = new ProviderOptimization(plugin);
                 Map<Integer, List<Integer>> opMap =  po.modelAndSolve(W,S,K,P,bCost);
+                if(opMap != null) {
 
-                for (Map.Entry<Integer, List<Integer>> entry : opMap.entrySet())
-                {
-                    int providerIndex = entry.getKey();
-                    //System.out.println("providerIndex: " + providerIndex);
-                    //System.out.println("provider: " + rps.get(providerIndex).getINodeId());
-                    for(int gnodeIndex : entry.getValue()) {
-                        //System.out.println("workloadindex: " + gnodeIndex);
-                        //System.out.println("workload: " + preAssignedNodes.get(gnodeIndex).node_name);
-                        gNode gnode = preAssignedNodes.get(gnodeIndex);
-                        gnode.params.put("location_region",rps.get(providerIndex).getRegion());
-                        gnode.params.put("location_agent",rps.get(providerIndex).getAgent());
-                        scheduleMap.get("assigned").add(gnode);
+                    for (Map.Entry<Integer, List<Integer>> entry : opMap.entrySet()) {
+                        int providerIndex = entry.getKey();
+                        //System.out.println("providerIndex: " + providerIndex);
+                        //System.out.println("provider: " + rps.get(providerIndex).getINodeId());
+                        for (int gnodeIndex : entry.getValue()) {
+                            //System.out.println("workloadindex: " + gnodeIndex);
+                            //System.out.println("workload: " + preAssignedNodes.get(gnodeIndex).node_name);
+                            gNode gnode = preAssignedNodes.get(gnodeIndex);
+                            gnode.params.put("location_region", rps.get(providerIndex).getRegion());
+                            gnode.params.put("location_agent", rps.get(providerIndex).getAgent());
+                            scheduleMap.get("assigned").add(gnode);
+                        }
+                        //System.out.println(entry.getKey() + "/" + entry.getValue());
                     }
-                    //System.out.println(entry.getKey() + "/" + entry.getValue());
+                } else {
+                    logger.error("SOLVER FAILURE ");
                 }
-
 
             }
         }

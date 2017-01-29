@@ -5,6 +5,7 @@ import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.controller.globalcontroller.GlobalCommandExec;
 import com.researchworx.cresco.controller.globalcontroller.GlobalHealthWatcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
+import com.researchworx.cresco.library.utilities.CLogger;
 
 import java.util.List;
 
@@ -15,9 +16,12 @@ public class PollRemovePlugin implements Runnable {
 	private Launcher plugin;
 	private GlobalHealthWatcher ghw;
 	private GlobalCommandExec gexec;
+	private CLogger logger;
 
 	public PollRemovePlugin(Launcher plugin, String resource_id, String inode_id)
 	{
+		logger = new CLogger(PollRemovePlugin.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Debug);
+
 		this.plugin = plugin;
 		this.resource_id = resource_id;
 		this.inode_id = inode_id;
@@ -66,12 +70,12 @@ public class PollRemovePlugin implements Runnable {
 	        			}
 	        			if(isRemoved)
 	        			{
-	        				System.out.println("Deactivated iNode: " + inode_id);
+	        				logger.debug("Deactivated iNode: " + inode_id);
 							
 	        			}
 	        			else
 	        			{
-	        				System.out.println("ResourceSchedulerEngine : pollRemovePlugin : unable to verify iNode deactivation!");
+	        				logger.debug("ResourceSchedulerEngine : pollRemovePlugin : unable to verify iNode deactivation!");
 	        			}
 	        			
     				}
@@ -82,9 +86,9 @@ public class PollRemovePlugin implements Runnable {
     		}
     		else
     		{
-    			System.out.println("Edge_id=null");
+    			logger.debug("Edge_id=null");
     		}
-    		System.out.println("Removing iNode: " + inode_id);
+    		logger.debug("Removing iNode: " + inode_id);
 			plugin.getGDB().gdb.removeINode(resource_id,inode_id);
 			
 			//remove resource_id if this is the last resource

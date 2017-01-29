@@ -13,6 +13,8 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.*;
 
 /**
@@ -27,67 +29,77 @@ public class ProviderOptimization {
     private CLogger logger;
 
     public ProviderOptimization(Launcher plugin) {
-        this.logger = new CLogger(ProviderOptimization.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+        this.logger = new CLogger(ProviderOptimization.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
         this.plugin = plugin;
     }
 
     public Map<Integer, List<Integer>> opMap = null;
 
     public Map<Integer, List<Integer>> modelAndSolve(int W, int S, int[] K, int[][] P ,int cBound) {
+        logger.debug("Starting Solver.");
+        try {
+            // A new model instance
+            Model model = new Model("WarehouseLocation");
 
-        // A new model instance
-        Model model = new Model("WarehouseLocation");
+            // VARIABLES
+            // a warehouse is either open or closed
+            BoolVar[] open = model.boolVarArray("o", W);
+            // which warehouse supplies a store
+            IntVar[] supplier = model.intVarArray("supplier", S, 1, W, false);
+            // supplying cost per store
+            IntVar[] cost = model.intVarArray("cost", S, 0, cBound, true);
+            // Total of all costs
+            IntVar tot_cost = model.intVar("tot_cost", 0, (cBound * S), true);
 
-        // VARIABLES
-        // a warehouse is either open or closed
-        BoolVar[] open = model.boolVarArray("o", W);
-        // which warehouse supplies a store
-        IntVar[] supplier = model.intVarArray("supplier", S, 1, W, false);
-        // supplying cost per store
-        IntVar[] cost = model.intVarArray("cost", S, 0, cBound, true);
-        // Total of all costs
-        IntVar tot_cost = model.intVar("tot_cost", 0, (cBound * S), true);
+            // CONSTRAINTS
+            for (int j = 0; j < S; j++) {
+                // a warehouse is 'open', if it supplies to a store
+                model.element(model.intVar(1), open, supplier[j], 1).post();
+                // Compute 'cost' for each store
+                model.element(cost[j], P[j], supplier[j], 1).post();
+            }
+            for (int i = 0; i < W; i++) {
+                // additional variable 'occ' is created on the fly
+                // its domain includes the constraint on capacity
+                logger.debug("i=" + i + " K[i] = " + K[i]);
+                IntVar occ = model.intVar("occur_" + i, 0, K[i], true);
+                // for-loop starts at 0, warehouse index starts at 1
+                // => we count occurrences of (i+1) in 'supplier'
+                model.count(i + 1, supplier, occ).post();
+                // redundant link between 'occ' and 'open' for better propagation
+                occ.ge(open[i]).post();
+            }
+            // Prepare the constraint that maintains 'tot_cost'
+            int[] coeffs = new int[W + S];
+            //Removed warehouse cost
+            //Arrays.fill(coeffs, 0, W, C);
+            Arrays.fill(coeffs, W, W + S, 1);
+            // then post it
+            model.scalar(ArrayUtils.append(open, cost), coeffs, "=", tot_cost).post();
 
-        // CONSTRAINTS
-        for (int j = 0; j < S; j++) {
-            // a warehouse is 'open', if it supplies to a store
-            model.element(model.intVar(1), open, supplier[j], 1).post();
-            // Compute 'cost' for each store
-            model.element(cost[j], P[j], supplier[j], 1).post();
+            model.setObjective(false, tot_cost);
+            Solver solver = model.getSolver();
+            solver.setSearch(Search.intVarSearch(
+                    new VariableSelectorWithTies(
+                            new FirstFail(model),
+                            new Smallest()),
+                    new IntDomainMiddle(false),
+                    ArrayUtils.append(supplier, cost, open))
+            );
+            //solver.showShortStatistics();
+            while (solver.solve()) {
+                prettyPrint(model, open, W, supplier, S, tot_cost);
+                buildReturn(model, open, W, supplier, S, tot_cost);
+            }
+
         }
-        for (int i = 0; i < W; i++) {
-            // additional variable 'occ' is created on the fly
-            // its domain includes the constraint on capacity
-            logger.debug("i=" + i + " K[i] = " + K[i]);
-            IntVar occ = model.intVar("occur_" + i, 0, K[i], true);
-            // for-loop starts at 0, warehouse index starts at 1
-            // => we count occurrences of (i+1) in 'supplier'
-            model.count(i+1, supplier, occ).post();
-            // redundant link between 'occ' and 'open' for better propagation
-            occ.ge(open[i]).post();
+        catch(Exception ex) {
+            logger.error("modelAndSolve " + ex.getMessage());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString()); // stack trace as a string
         }
-        // Prepare the constraint that maintains 'tot_cost'
-        int[] coeffs = new int[W + S];
-        //Removed warehouse cost
-        //Arrays.fill(coeffs, 0, W, C);
-        Arrays.fill(coeffs, W, W + S, 1);
-        // then post it
-        model.scalar(ArrayUtils.append(open, cost), coeffs, "=", tot_cost).post();
-
-        model.setObjective(false, tot_cost);
-        Solver solver = model.getSolver();
-        solver.setSearch(Search.intVarSearch(
-                new VariableSelectorWithTies(
-                        new FirstFail(model),
-                        new Smallest()),
-                new IntDomainMiddle(false),
-                ArrayUtils.append(supplier, cost, open))
-        );
-        //solver.showShortStatistics();
-        while(solver.solve()){
-            buildReturn(model, open, W, supplier, S, tot_cost);
-        }
-        //prettyPrint2(model, open, W, supplier, S, tot_cost);
     return opMap;
     }
 
@@ -178,26 +190,32 @@ public class ProviderOptimization {
     }
 
     private void buildReturn(Model model, IntVar[] open, int W, IntVar[] supplier, int S, IntVar tot_cost) {
-        opMap = new HashMap<>();
+        try {
+            opMap = new HashMap<>();
 
-        //StringBuilder st = new StringBuilder();
-        //st.append("Solution #").append(model.getSolver().getSolutionCount()).append("\n");
-        for (int i = 0; i < W; i++) {
-            if (open[i].getValue() > 0) {
+            StringBuilder st = new StringBuilder();
+            st.append("Solution #").append(model.getSolver().getSolutionCount()).append("\n");
+            for (int i = 0; i < W; i++) {
+                if (open[i].getValue() > 0) {
 
-                //st.append(String.format("\tWarehouse %d supplies customers : ", (i)));
-                opMap.put(i,new ArrayList<Integer>());
-                for (int j = 0; j < S; j++) {
-                    if (supplier[j].getValue() == (i + 1)) {
-                        opMap.get(i).add(j);
-                   //     st.append(String.format("%d ", (j)));
+                    st.append(String.format("\tResource Provider %d supplies workloads : ", (i)));
+                    opMap.put(i, new ArrayList<Integer>());
+                    for (int j = 0; j < S; j++) {
+                        if (supplier[j].getValue() == (i + 1)) {
+                            opMap.get(i).add(j);
+                            st.append(String.format("%d ", (j)));
+                        }
                     }
+                    st.append("\n");
                 }
-                //st.append("\n");
             }
+            st.append("\tTotal C: ").append(tot_cost.getValue());
+            logger.debug(st.toString());
         }
-        //st.append("\tTotal C: ").append(tot_cost.getValue());
-        //System.out.println(st.toString());
+        catch (Exception ex) {
+            logger.error("buildReturn " + ex.getMessage());
+        }
+
     }
 
     private void buildReturnDebug(Model model, IntVar[] open, int W, IntVar[] supplier, int S, IntVar tot_cost) {

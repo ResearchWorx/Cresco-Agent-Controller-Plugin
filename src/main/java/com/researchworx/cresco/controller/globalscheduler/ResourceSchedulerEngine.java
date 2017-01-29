@@ -41,7 +41,7 @@ public class ResourceSchedulerEngine implements Runnable {
 			{
 				try
 				{
-					MsgEvent ce = ghw.resourceScheduleQueue.poll();
+					MsgEvent ce = plugin.getResourceScheduleQueue().poll();
 					if(ce != null)
 					{
 
@@ -115,6 +115,7 @@ public class ResourceSchedulerEngine implements Runnable {
 						}
 						else if(ce.getParam("globalcmd").equals("removeplugin"))
 						{
+							logger.debug("Incoming Remove Request : resource_id: " + ce.getParam("resource_id") + " inode_id: " + ce.getParam("inode_id"));
 							new Thread(new PollRemovePlugin(plugin,  ce.getParam("resource_id"),ce.getParam("inode_id"))).start();
 						}
 					}

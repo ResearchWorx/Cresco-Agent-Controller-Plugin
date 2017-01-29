@@ -7,14 +7,13 @@ import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.controller.globalcontroller.GlobalCommandExec;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
-import org.glassfish.jersey.server.ResourceConfig;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +52,45 @@ public class webREST {
 
     }
 */
+
+    @POST
+    @Path("/addgpipeline")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response crunchifyREST11(InputStream incomingData) {
+
+        StringBuilder crunchifyBuilder = new StringBuilder();
+        String returnString = null;
+        try {
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(incomingData));
+            String line = null;
+            while ((line = in.readLine()) != null) {
+                crunchifyBuilder.append(line);
+            }
+
+            MsgEvent me = meFromJson(crunchifyBuilder.toString());
+            MsgEvent ce = gce.cmdExec(me);
+
+            if(ce != null)
+            {
+                Gson gson = new Gson();
+                returnString = gson.toJson(ce);
+            }
+            else
+            {
+                returnString = "ok";
+            }
+            //return Response.ok(returnString, MediaType.TEXT_HTML_TYPE).build();
+
+        } catch (Exception e) {
+            logger.error("Error Parsing: - ");
+        }
+        logger.debug("Data Received: " + crunchifyBuilder.toString());
+
+        // return HTTP response 200 in case of success
+        //return Response.status(200).entity("woot2").build();
+        return Response.ok(returnString, MediaType.APPLICATION_JSON_TYPE).build();
+    }
 
     @GET
 	public Response getRoot(

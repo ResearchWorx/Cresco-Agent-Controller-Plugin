@@ -46,6 +46,7 @@ public class Launcher extends CPlugin {
     private boolean ActiveBrokerManagerActive = false;
     private boolean ActiveDestManagerActive = false;
 
+    //public ConcurrentLinkedQueue<MsgEvent> resourceScheduleQueue;
 
     private boolean ConsumerThreadActive = false;
     private boolean ConsumerThreadRegionActive = false;
@@ -134,7 +135,7 @@ public class Launcher extends CPlugin {
 
     private ConcurrentLinkedQueue<MsgEvent> incomingCanidateBrokers;
     private ConcurrentLinkedQueue<MsgEvent> outgoingMessages;
-    //private ConcurrentLinkedQueue<MsgEvent> resourceScheduleQueue;
+    private ConcurrentLinkedQueue<MsgEvent> resourceScheduleQueue;
     private ConcurrentLinkedQueue<gPayload> appScheduleQueue;
 
 
@@ -737,14 +738,14 @@ public class Launcher extends CPlugin {
         ConsumerThreadActive = consumerThreadActive;
     }
 
-    /*
+
     public ConcurrentLinkedQueue<MsgEvent> getResourceScheduleQueue() {
         return resourceScheduleQueue;
     }
     public void setResourceScheduleQueue(ConcurrentLinkedQueue<MsgEvent> appScheduleQueue) {
         this.resourceScheduleQueue = appScheduleQueue;
     }
-*/
+
     public ConcurrentLinkedQueue<gPayload> getAppScheduleQueue() {
         return appScheduleQueue;
     }

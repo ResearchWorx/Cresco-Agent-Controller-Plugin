@@ -127,8 +127,6 @@ public class DBBaseFunctions {
         return nodeList;
     }
 
-
-
     public String getResourceNodeId(String resource_id)
     {
         String node_id = null;
@@ -1023,7 +1021,6 @@ public class DBBaseFunctions {
 
         return node_id;
     }
-
 
     public String addINode(String resource_id, String inode_id)
     {
@@ -2623,7 +2620,23 @@ public class DBBaseFunctions {
         return exportString;
     }
 
-    private byte[] stringCompress(String str) {
+    public String stringUncompress(String str) {
+        String uncompressedString = null;
+        try {
+
+            byte[] exportDataRawCompressed = DatatypeConverter.parseBase64Binary(str);
+            InputStream iss = new ByteArrayInputStream(exportDataRawCompressed);
+            //uncompress
+            InputStream is = new GZIPInputStream(iss);
+            uncompressedString = new Scanner(is,"UTF-8").useDelimiter("\\A").next();
+        }
+        catch(Exception ex) {
+            logger.error("uncompressParam " + ex.getMessage());
+        }
+        return uncompressedString;
+    }
+
+    public byte[] stringCompress(String str) {
         byte[] dataToCompress = str.getBytes(StandardCharsets.UTF_8);
         byte[] compressedData = null;
         try
