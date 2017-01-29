@@ -20,7 +20,7 @@ public class PollRemovePlugin implements Runnable {
 
 	public PollRemovePlugin(Launcher plugin, String resource_id, String inode_id)
 	{
-		logger = new CLogger(PollRemovePlugin.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Debug);
+		logger = new CLogger(PollRemovePlugin.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
 
 		this.plugin = plugin;
 		this.resource_id = resource_id;
@@ -44,14 +44,17 @@ public class PollRemovePlugin implements Runnable {
     				String region = plugin.getGDB().gdb.getIsAssignedParam(edge_id, "region");
     				String agent = plugin.getGDB().gdb.getIsAssignedParam(edge_id, "agent");
     				String pluginId = plugin.getGDB().gdb.getIsAssignedParam(edge_id, "plugin");
-    				
+
+    				logger.debug("r: " + region + " a:" + agent + " p:" + pluginId);
+
     				String pnode_node_id_match = plugin.getGDB().gdb.getNodeId(region, agent, pluginId);
 
 					if(pnode_node_id.equals(pnode_node_id_match))
     				{
     					//fire off remove command
         				MsgEvent me = removePlugin(region,agent,pluginId);
-        				gexec.cmdExec(me);
+        				//gexec.cmdExec(me);
+                        plugin.msgIn(me);
         				//ControllerEngine.commandExec.cmdExec(me);
         				//loop until remove is completed
         				
@@ -86,7 +89,7 @@ public class PollRemovePlugin implements Runnable {
     		}
     		else
     		{
-    			logger.debug("Edge_id=null");
+    			logger.error("Edge_id=null");
     		}
     		logger.debug("Removing iNode: " + inode_id);
 			plugin.getGDB().gdb.removeINode(resource_id,inode_id);
@@ -116,20 +119,21 @@ public class PollRemovePlugin implements Runnable {
         }
 	   catch(Exception v) 
 	   {
-            System.out.println(v);
+            logger.error(v.getMessage());
        }
     }  
 
-	public MsgEvent removePlugin(String region, String agent, String plugin)
+	public MsgEvent removePlugin(String region, String agent, String pluginId)
 	{
+
 		MsgEvent me = new MsgEvent(MsgEvent.Type.CONFIG,region,null,null,"remove plugin");
-		me.setParam("src_region", region);
-		me.setParam("src_agent", "external");
-		me.setParam("dst_region", region);
+		me.setParam("src_region", plugin.getRegion());
+		me.setParam("src_agent", plugin.getAgent());
+        me.setParam("src_plugin", plugin.getPluginID());
+        me.setParam("dst_region", region);
 		me.setParam("dst_agent", agent);
-		me.setParam("controllercmd", "regioncmd");
 		me.setParam("configtype", "pluginremove");
-		me.setParam("plugin", plugin);
+		me.setParam("plugin", pluginId);
 		return me;	
 	}
 	

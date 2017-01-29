@@ -152,6 +152,7 @@ public class ResourceSchedulerEngine implements Runnable {
 						else if(ce.getParam("globalcmd").equals("removeplugin"))
 						{
 							logger.debug("Incoming Remove Request : resource_id: " + ce.getParam("resource_id") + " inode_id: " + ce.getParam("inode_id"));
+							Map<String,String> pNodeMap = plugin.getGDB().dba.getpNodeINode(ce.getParam("inode_id"));
 							new Thread(new PollRemovePlugin(plugin,  ce.getParam("resource_id"),ce.getParam("inode_id"))).start();
 						}
 					}
@@ -518,12 +519,13 @@ public class ResourceSchedulerEngine implements Runnable {
                 }
             }
             StringBuilder nsb = new StringBuilder();
+            ////String pluginurl = "http://127.0.0.1:32003/";
 
             for(InterfaceAddress inaddr : interfaceAddressList) {
                 logger.debug("interface addresses " + inaddr);
                 String hostAddress = inaddr.getAddress().getHostAddress();
                 if(!hostAddress.contains(":")) {
-                    nsb.append(hostAddress + ",");
+                    nsb.append("http://" + hostAddress + ":32003/,");
                 }
             }
             if(nsb.length() > 0) {
