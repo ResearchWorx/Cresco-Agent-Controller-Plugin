@@ -94,7 +94,7 @@ public class OptimaEngine {
 
             }
 
-            logger.error("totalresourceWorkloadUtil: " + totalresourceWorkloadUtil + " totalresourceAvalable: " + totalresourceAvalable);
+            logger.info("totalresourceWorkloadUtil: " + totalresourceWorkloadUtil + " totalresourceAvalable: " + totalresourceAvalable);
 
             if(totalresourceWorkloadUtil > totalresourceAvalable) {
                 List<gNode> noResourceList = scheduleMap.get("noresource");
