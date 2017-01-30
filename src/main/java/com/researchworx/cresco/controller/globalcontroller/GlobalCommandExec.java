@@ -23,10 +23,10 @@ public class GlobalCommandExec {
 
 	public GlobalCommandExec(Launcher plugin)
 	{
-		this.logger = new CLogger(GlobalCommandExec.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+		this.logger = new CLogger(GlobalCommandExec.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Debug);
 		this.plugin = plugin;
     }
-	
+
 	public MsgEvent cmdExec(MsgEvent ce)
 	{
 			if(ce.getMsgType() == MsgEvent.Type.CONFIG)
@@ -38,13 +38,13 @@ public class GlobalCommandExec {
 						if((ce.getParam("inode_id") != null) && (ce.getParam("resource_id") != null) && (ce.getParam("configparams") != null))
 						{
 							
-							if(plugin.getGDB().gdb.getINodeId(ce.getParam("resource_id"),ce.getParam("inode_id")) == null)
+							if(plugin.getGDB().dba.getINodeId(ce.getParam("resource_id"),ce.getParam("inode_id")) == null)
 							{
-								if(plugin.getGDB().gdb.addINode(ce.getParam("resource_id"),ce.getParam("inode_id")) != null)
+								if(plugin.getGDB().dba.addINode(ce.getParam("resource_id"),ce.getParam("inode_id")) != null)
 								{
-									if((plugin.getGDB().gdb.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_code","0")) &&
-										(plugin.getGDB().gdb.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_desc","iNode Scheduled.")) &&
-										(plugin.getGDB().gdb.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"configparams",ce.getParam("configparams"))))
+									if((plugin.getGDB().dba.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_code","0")) &&
+										(plugin.getGDB().dba.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_desc","iNode Scheduled.")) &&
+										(plugin.getGDB().dba.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"configparams",ce.getParam("configparams"))))
 									{
 										ce.setParam("status_code","0");
 										ce.setParam("status_desc","iNode Scheduled");
@@ -80,10 +80,10 @@ public class GlobalCommandExec {
 					{
 						if((ce.getParam("inode_id") != null) && (ce.getParam("resource_id") != null))
 						{
-							if(plugin.getGDB().gdb.getINodeId(ce.getParam("resource_id"),ce.getParam("inode_id")) != null)
+							if(plugin.getGDB().dba.getINodeId(ce.getParam("resource_id"),ce.getParam("inode_id")) != null)
 							{
-								if((plugin.getGDB().gdb.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_code","10")) &&
-								(plugin.getGDB().gdb.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_desc","iNode scheduled for removal.")))
+								if((plugin.getGDB().dba.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_code","10")) &&
+								(plugin.getGDB().dba.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_desc","iNode scheduled for removal.")))
 								{
 									ce.setParam("status_code","10");
 									ce.setParam("status_desc","iNode scheduled for removal.");
@@ -180,8 +180,8 @@ public class GlobalCommandExec {
 						{
 							if((ce.getParam("inode_id") != null) && (ce.getParam("resource_id") != null))
 							{
-								String status_code = plugin.getGDB().gdb.getINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_code");
-								String status_desc = plugin.getGDB().gdb.getINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_desc");
+								String status_code = plugin.getGDB().dba.getINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_code");
+								String status_desc = plugin.getGDB().dba.getINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_desc");
 								if((status_code != null) && (status_desc != null))
 								{
 									ce.setParam("status_code",status_code);
@@ -339,15 +339,23 @@ public class GlobalCommandExec {
                         {
                             if(ce.getParam("pipeline_id") != null) {
                                 String pipelineId = ce.getParam("pipeline_id");
-                                List<String> iNodeList = plugin.getGDB().dba.removePipeline(pipelineId);
+                                List<String> iNodeList = plugin.getGDB().dba.getresourceNodeList(pipelineId,null);
+
                                 for(String iNodeId : iNodeList) {
+
+                                    logger.info("removing iNode " + iNodeId);
                                     MsgEvent me = new MsgEvent(MsgEvent.Type.CONFIG, null, null, null, "add application node");
+
                                     me.setParam("globalcmd", "removeplugin");
                                     me.setParam("inode_id", iNodeId);
                                     me.setParam("resource_id", pipelineId);
                                     //ghw.resourceScheduleQueue.offer(me);
                                     plugin.getResourceScheduleQueue().offer(me);
+
                                 }
+
+
+
                                 ce.setParam("isremoved","true");
                             }
                         }
@@ -455,7 +463,7 @@ public class GlobalCommandExec {
 				*/
 				Map<String,String> params = ce.getParams();
 				
-				plugin.getGDB().gdb.updateKPI(region, agent, pluginid, resource_id, inode_id, params);
+				plugin.getGDB().dba.updateKPI(region, agent, pluginid, resource_id, inode_id, params);
 				
 				ce.setMsgBody("updatedperf");
                 ce.setParam("source","watchdog");

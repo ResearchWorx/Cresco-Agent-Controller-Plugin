@@ -114,8 +114,8 @@ public class DBInterface {
                                             Map<String, String> pMap = paramStringToMap(pluginConfigparams);
                                             if (pMap.get("pluginname").equals("cresco-sysinfo-plugin")) {
 
-                                                String isAssignedEdgeId = gdb.getResourceEdgeId("sysinfo_resource", "sysinfo_inode",region,agent);
-                                                Map<String,String> edgeParams = gdb.getIsAssignedParams(isAssignedEdgeId);
+                                                String isAssignedEdgeId = dba.getResourceEdgeId("sysinfo_resource", "sysinfo_inode",region,agent);
+                                                Map<String,String> edgeParams = dba.getIsAssignedParams(isAssignedEdgeId);
                                                 cpu_core_count += Long.parseLong(edgeParams.get("cpu-logical-count"));
                                                 memoryAvailable += Long.parseLong(edgeParams.get("memory-available"));
                                                 memoryTotal += Long.parseLong(edgeParams.get("memory-total"));
@@ -350,7 +350,7 @@ public class DBInterface {
 				*/
             Map<String, String> params = ce.getParams();
 
-            updatedKPI = gdb.updateKPI(region, agent, plugin, resource_id, inode_id, params);
+            updatedKPI = dba.updateKPI(region, agent, plugin, resource_id, inode_id, params);
 
         }
         catch( Exception ex) {

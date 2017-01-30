@@ -65,11 +65,11 @@ public class GuilderEngine {
                     resourceLocation.add(nodeparams.get("region") + "_" + nodeparams.get("agent"));
                 }
             }
-            List<String> sysInfoEdgeList = plugin.getGDB().gdb.getIsAssignedEdgeIds("sysinfo_resource", "sysinfo_inode");
+            List<String> sysInfoEdgeList = plugin.getGDB().dba.getIsAssignedEdgeIds("sysinfo_resource", "sysinfo_inode");
             for(String edgeID : sysInfoEdgeList) {
 
-                String region = plugin.getGDB().gdb.getIsAssignedParam(edgeID,"region");
-                String agent = plugin.getGDB().gdb.getIsAssignedParam(edgeID,"agent");
+                String region = plugin.getGDB().dba.getIsAssignedParam(edgeID,"region");
+                String agent = plugin.getGDB().dba.getIsAssignedParam(edgeID,"agent");
 
                 boolean addResource = true;
 
@@ -87,7 +87,7 @@ public class GuilderEngine {
 
 
                 if(addResource) {
-                    Map<String, String> edgeParams = plugin.getGDB().gdb.getIsAssignedParams(edgeID);
+                    Map<String, String> edgeParams = plugin.getGDB().dba.getIsAssignedParams(edgeID);
                     long sysUptime = Long.parseLong(edgeParams.get("sys-uptime"));
                     double cpuIdle = Double.parseDouble(edgeParams.get("cpu-idle-load"));
                     int cpuLogicalCount = Integer.parseInt(edgeParams.get("cpu-logical-count"));
@@ -109,15 +109,15 @@ public class GuilderEngine {
     private void printResources() {
 
 
-        List<String> sysInfoEdgeList = plugin.getGDB().gdb.getIsAssignedEdgeIds("sysinfo_resource", "sysinfo_inode");
+        List<String> sysInfoEdgeList = plugin.getGDB().dba.getIsAssignedEdgeIds("sysinfo_resource", "sysinfo_inode");
         for(String edgeID : sysInfoEdgeList) {
             logger.info("ID = " + edgeID);
             //logger.info(gdb.getIsAssignedParam(String edge_id,String param_name)
-            String region = plugin.getGDB().gdb.getIsAssignedParam(edgeID,"region");
-            String agent = plugin.getGDB().gdb.getIsAssignedParam(edgeID,"agent");
-            String pluginID = plugin.getGDB().gdb.getIsAssignedParam(edgeID,"plugin");
+            String region = plugin.getGDB().dba.getIsAssignedParam(edgeID,"region");
+            String agent = plugin.getGDB().dba.getIsAssignedParam(edgeID,"agent");
+            String pluginID = plugin.getGDB().dba.getIsAssignedParam(edgeID,"plugin");
 
-            Map<String,String> edgeParams = plugin.getGDB().gdb.getIsAssignedParams(edgeID);
+            Map<String,String> edgeParams = plugin.getGDB().dba.getIsAssignedParams(edgeID);
             for (Map.Entry<String, String> entry : edgeParams.entrySet()) {
                 String key = entry.getKey();
                 String value = entry.getValue();

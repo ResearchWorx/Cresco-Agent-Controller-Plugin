@@ -1,36 +1,32 @@
 package com.researchworx.cresco.controller.db;
 
-import com.researchworx.cresco.controller.app.gEdge;
-import com.researchworx.cresco.controller.app.gNode;
-import com.researchworx.cresco.controller.app.gPayload;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.orientechnologies.common.util.OCallable;
-import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
+import com.orientechnologies.orient.core.db.OPartitionedDatabasePool;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.metadata.schema.OSchema;
 import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.sql.OCommandSQL;
+import com.researchworx.cresco.controller.app.gEdge;
+import com.researchworx.cresco.controller.app.gNode;
+import com.researchworx.cresco.controller.app.gPayload;
 import com.researchworx.cresco.controller.core.Launcher;
-import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.orient.OrientBaseGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
 
-import javax.xml.bind.DatatypeConverter;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.*;
-import java.util.zip.GZIPInputStream;
 
 
 public class DBApplicationFunctions {
@@ -38,28 +34,84 @@ public class DBApplicationFunctions {
     private Launcher plugin;
     private CLogger logger;
     private OrientGraphFactory factory;
-    private ODatabaseDocumentTx db;
+    //private ODatabaseDocumentTx db;
     private int retryCount;
-    private DBEngine dbe;
+    //private DBEngine dbe;
     //private OrientGraph odb;
+    //private OPartitionedDatabasePool pool;
+
+    private OrientGraphFactory getFactory() {
+        OrientGraphFactory getFactory = null;
+
+        try {
+            String host = plugin.getConfig().getStringParam("gdb_host");
+            String username = plugin.getConfig().getStringParam("gdb_username");
+            String password = plugin.getConfig().getStringParam("gdb_password");
+            String dbname = plugin.getConfig().getStringParam("gdb_dbname");
+
+            String connection_string = "remote:" + host + "/" + dbname;
+
+
+            if ((host != null) && (username != null) && (password != null) && (dbname != null)) {
+                getFactory = new OrientGraphFactory(connection_string, username, password);
+            }
+            else {
+                getFactory = new OrientGraphFactory("memory:internalDb");
+            }
+        }
+        catch(Exception ex) {
+            logger.error("isMemory : " + ex.getMessage());
+        }
+        return getFactory;
+
+    }
 
     public DBApplicationFunctions(Launcher plugin, DBEngine dbe) {
         this.logger = new CLogger(DBApplicationFunctions.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
         this.plugin = plugin;
+        //this.pool = dbe.pool;
+
         this.factory = dbe.factory;
-        this.db = dbe.db;
+        // this.factory = getFactory();
+        //this.db = dbe.db;
         this.retryCount = plugin.getConfig().getIntegerParam("db_retry_count",50);
         //odb = factory.getTx();
 
         //create basic application constructs
         initCrescoDB();
+
+        //object
+        //OObjectDatabaseTx db = new OObjectDatabaseTx(dbe.pool.acquire());
+
+    }
+
+    public void clearCache() {
+        factory.getDatabase().getLocalCache().invalidate();
+    }
+
+    public List<String> getPipelineINodes(String pipelineId) {
+        List<String> iNodeList = null;
+        try {
+            iNodeList = new ArrayList<>();
+            getresourceNodeList(pipelineId,null);
+            List<String> vNodeList = getNodeIdFromEdge("pipeline", "isVNode", "vnode_id", true, "pipeline_id", pipelineId);
+            for(String vNodeId : vNodeList) {
+                logger.debug("vnodes " + vNodeId);
+                iNodeList.addAll(getNodeIdFromEdge("vnode", "isINode", "inode_id", true, "vnode_id", vNodeId));
+            }
+
+        }
+        catch(Exception ex) {
+            logger.error("removePipeline " + ex.getMessage());
+        }
+        return iNodeList;
     }
 
     public List<String> removePipeline(String pipelineId) {
         List<String> iNodeList = null;
         try {
             iNodeList = new ArrayList<>();
-            plugin.getGDB().gdb.getresourceNodeList(pipelineId,null);
+            getresourceNodeList(pipelineId,null);
             List<String> vNodeList = getNodeIdFromEdge("pipeline", "isVNode", "vnode_id", true, "pipeline_id", pipelineId);
             for(String vNodeId : vNodeList) {
                 logger.debug("vnodes " + vNodeId);
@@ -76,7 +128,7 @@ public class DBApplicationFunctions {
                 removeNode(getVNodeNodeId(vNodeId));
             }
 
-            removeNode(getPipelineNodeId(pipelineId));
+            //removeNode(getPipelineNodeId(pipelineId));
         }
         catch(Exception ex) {
             logger.error("removePipeline " + ex.getMessage());
@@ -87,6 +139,8 @@ public class DBApplicationFunctions {
     public String getTenantNodeId(String tenantId) {
         String node_id = null;
         OrientGraph graph = null;
+
+        //object
 
         try
         {
@@ -521,7 +575,7 @@ public class DBApplicationFunctions {
             String submission = JsonFromgPayLoad(gpay);
             //Vertex vPipeline = odb.getVertexByKey("Pipeline.pipelineid", pipeline_id);
             Vertex vPipeline = graph.getVertex(getPipelineNodeId(pipelineId));
-            
+
             if(vPipeline != null)
             {
                 vPipeline.setProperty("status_code", status_code);
@@ -669,14 +723,17 @@ public class DBApplicationFunctions {
     public String IgetINodefromVNode(String vNode_id) {
         String iNode_id = null;
 
-        OrientGraph graph = null;
+        //OrientGraph graph = null;
+        TransactionalGraph graph = null;
         try
         {
+            /*
             List<String> iNodeList = getNodeIdFromEdge("vnode", "isINode", "inode_id", true, "vnode_id", vNode_id);
             if(iNodeList.size() > 0) {
                 iNode_id = iNodeList.get(0);
             }
-            /*
+            */
+
             graph = factory.getTx();
 
             //Vertex vNode = odb.getVertexByKey("vNode.node_id", vNode_id);
@@ -691,7 +748,7 @@ public class DBApplicationFunctions {
                 Vertex iNode = isINode.getVertex(Direction.IN);
                 return iNode.getProperty("inode_id");
             }
-            */
+
         }
         catch(Exception ex)
         {
@@ -889,6 +946,44 @@ public class DBApplicationFunctions {
         return paramMap;
     }
 
+    public String getvNodefromINode(String iNode_id) {
+        String uINode = null;
+        OrientGraph graph = null;
+        try
+        {
+            graph = factory.getTx();
+            //Vertex iNode = odb.getVertexByKey("iNode.node_id", iNode_id);
+            Vertex iNode = graph.getVertex(getINodeNodeId(iNode_id));
+            if(iNode != null)
+            {
+                //Get Enode for this iNode
+                Iterable<Edge> iNodeEdges = iNode.getEdges(Direction.IN, "isINode");
+                Iterator<Edge> iterE = iNodeEdges.iterator();
+                Edge isIn = iterE.next();
+                Vertex eNode = isIn.getVertex(Direction.OUT);
+                logger.debug("vNode: " + eNode.getId().toString());
+                uINode = eNode.getId().toString();
+
+            }
+            else
+            {
+                logger.error("getUpstreamNode: Error: Incoming iNode: " + iNode_id + " is null");
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.error("getUpstreamNode: Exception ex:" + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return uINode;
+    }
+
     public String getUpstreamNode(String iNode_id) {
         String uINode = null;
         OrientGraph graph = null;
@@ -1052,7 +1147,7 @@ public class DBApplicationFunctions {
 
                     //assoicateNtoV(vNode_id,iNode_id);
                     //keep the vnodeID
-                    node.node_id = vNode_id;
+                    node.node_id = iNode_id;
 
                     //test finding nodes
                     //getNode(node);
@@ -1098,7 +1193,8 @@ public class DBApplicationFunctions {
             gpay.status_code = "3";
             gpay.status_desc = "Pipeline Nodes Created.";
             setPipelineStatus(gpay);
-
+            //lets see what this does
+            clearCache();
             return gpay;
         }
         catch(Exception ex)
@@ -1527,6 +1623,7 @@ public class DBApplicationFunctions {
         {
             graph = factory.getTx();
 
+
             gPayload gpay = gPayLoadFromJson(gPayload);
             gpay.pipeline_id = UUID.randomUUID().toString();
             //inject real pipelineID
@@ -1553,9 +1650,12 @@ public class DBApplicationFunctions {
                 else {
                     logger.debug("Post vPipeline commit of node " + getPipelineNodeId(gpay.pipeline_id));
                 }
-
-                Vertex vTenant = graph.getVertex(getTenantNodeId(tenant_id));
-                Edge eLives = graph.addEdge(null, vPipeline, vTenant, "isPipeline");
+                String tenantNode = getTenantNodeId(tenant_id);
+                logger.error("**** CODY tenant_id : " + tenant_id + " " + tenantNode);
+                if(tenantNode != null) {
+                    Vertex vTenant = graph.getVertex(tenantNode);
+                    Edge eLives = graph.addEdge(null, vPipeline, vTenant, "isPipeline");
+                }
                 graph.commit();
                 //odb.commit();
 
@@ -1592,7 +1692,7 @@ public class DBApplicationFunctions {
     }
 
     boolean createTenant(String tenantName, String tenantId) {
-        OrientGraph graph = null;
+        TransactionalGraph graph = null;
         try
         {
             graph = factory.getTx();
@@ -1604,8 +1704,9 @@ public class DBApplicationFunctions {
             else {
                 vTenant.setProperty("tenant_id", tenantId);
             }
+            graph.commit();
             //odb.commit();
-            return true;
+            //return true;
         }
         catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException se)
         {
@@ -1774,6 +1875,58 @@ public class DBApplicationFunctions {
                     logger.debug("Create out Edge Class");
                     createEdgeClass("out",null);
 
+                    logger.debug("Create isConnected Edge Class");
+                    String[] isConnectedProps = {"edge_id"}; //Property names
+                    //createEdgeClass("isConnected",isConnectedProps);
+                    createEdgeClass("isConnected",null);
+
+                    logger.debug("Create isResource Edge Class");
+                    String[] isResourceProps = {"edge_id"}; //Property names
+                    //createEdgeClass("isResource",isResourceProps);
+                    createEdgeClass("isResource",null);
+
+                    logger.debug("Create isReachable Edge Class");
+                    String[] isReachableProps = {"edge_id"}; //Property names
+                    //createEdgeClass("isReachable",isReachableProps);
+                    createEdgeClass("isReachable",null);
+
+                    logger.debug("Create isAssigned Edge Class");
+                    String[] isAssignedProps = {"resource_id","inode_id","region", "agent"}; //Property names
+                    createEdgeClass("isAssigned",isAssignedProps);
+
+                    logger.debug("Create resourceNode Vertex Class");
+                    String[] resourceProps = {"resource_id"}; //Property names
+                    createVertexClass("resourceNode", resourceProps);
+
+                    logger.debug("Create iNode Vertex Class");
+                    String[] iProps = {"resource_id", "inode_id"}; //Property names
+                    createVertexClass("iNode", iProps);
+                    createVertexIndex("iNode","inode_id",true);
+
+
+                    //create plugin anchor resource and inodes
+                    String[]  pluginAnchors= {"sysinfo","netdiscovery","container"}; //Property names
+                    for(String pAnchor : pluginAnchors)
+                    {
+                        String resource_id = pAnchor + "_resource";
+                        String inode_id = pAnchor + "_inode";
+
+                        logger.debug("Creating " + pAnchor + " resource node.");
+                        if(getResourceNodeId(resource_id) == null)
+                        {
+                            //create resource
+                            addResourceNode(resource_id);
+                        }
+                        logger.debug("Creating " + pAnchor + " iNode.");
+                        if(getINodeId(resource_id, inode_id) == null)
+                        {
+                            //create inode
+                            addINode(resource_id, inode_id);
+                        }
+                    }
+
+
+
                     return null;
                 }
             });
@@ -1792,6 +1945,27 @@ public class DBApplicationFunctions {
                 graph.shutdown();
             }
         }
+    }
+
+    boolean createVertexClass(String className, String[] props) {
+        boolean wasCreated = false;
+        OrientGraphNoTx txGraph = factory.getNoTx();
+        //OSchema schema = ((OrientGraph)odb).getRawGraph().getMetadata().getSchema();
+        OSchema schema = ((OrientGraphNoTx)txGraph).getRawGraph().getMetadata().getSchema();
+
+        if (!schema.existsClass(className))
+        {
+            OClass vt = txGraph.createVertexType(className);
+            for(String prop : props)
+                vt.createProperty(prop, OType.STRING);
+            vt.createIndex(className + ".nodePath", OClass.INDEX_TYPE.UNIQUE, props);
+            txGraph.commit();
+            if (schema.existsClass(className)) {
+                wasCreated = true;
+            }
+        }
+        txGraph.shutdown();
+        return wasCreated;
     }
 
     boolean createEdgeClass(String className, String[] props) {
@@ -1883,5 +2057,1190 @@ public class DBApplicationFunctions {
         //logger.debug(p);
         return me;
     }
+
+    //NEW FROM BASIC
+
+    //READS
+    public String getINodeId(String resource_id, String inode_id) {
+        String node_id = null;
+        OrientGraph graph = null;
+        try
+        {
+            graph = factory.getTx();
+
+            Iterable<Vertex> resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:iNode.nodePath WHERE key = [\"" + resource_id + "\",\"" + inode_id + "\"]")).execute();
+
+            Iterator<Vertex> iter = resultIterator.iterator();
+            if(iter.hasNext())
+            {
+                Vertex v = iter.next();
+                node_id = v.getProperty("rid").toString();
+            }
+            if(node_id != null)
+            {
+                node_id = node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.debug("DBEngine : getINodeID : Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return node_id;
+    }
+
+    public String getResourceNodeId(String resource_id)
+    {
+        String node_id = null;
+        OrientGraph graph = null;
+        try
+        {
+            graph = factory.getTx();
+
+            Iterable<Vertex> resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:resourceNode.nodePath WHERE key = '" + resource_id + "'")).execute();
+
+            Iterator<Vertex> iter = resultIterator.iterator();
+            if(iter.hasNext())
+            {
+                Vertex v = iter.next();
+                node_id = v.getProperty("rid").toString();
+            }
+            if(node_id != null)
+            {
+                node_id = node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.debug("DBEngine : getResourceNodeID : Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return node_id;
+    }
+
+    public String getResourceEdgeId(String resource_id, String inode_id, String region, String agent)
+    {
+        String edge_id = null;
+        OrientGraph graph = null;
+        try
+        {
+            if((resource_id != null) && (inode_id != null) && (region != null) && (agent != null))
+            {
+
+
+
+                graph = factory.getTx();
+                String queryString = "SELECT rid FROM INDEX:isAssigned.edgeProp WHERE key = [\""+ resource_id + "\",\""+ inode_id + "\",\"" + region + "\",\"" + agent +"\"]";
+                logger.debug(queryString);
+                Iterable<Vertex> resultIterator = graph.command(new OCommandSQL(queryString)).execute();
+                Iterator<Vertex> iter = resultIterator.iterator();
+                if(iter.hasNext())
+                {
+                    Vertex v = iter.next();
+                    edge_id = v.getProperty("rid").toString();
+                }
+                //graph.shutdown();
+                //return node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
+                //node_id = node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
+                if(edge_id != null)
+                {
+                    edge_id = edge_id.substring(edge_id.indexOf("[") + 1, edge_id.indexOf("]"));
+                }
+                logger.debug("getResourceEdgeId resource_id " + resource_id + " inode_id " + inode_id + "  region " + region + " agent " + agent + " edgeid " + edge_id);
+
+                //Vertex vNode = odb.getVertexByKey("vNode.node_id", vNode_id);
+
+
+            }
+
+        }
+        catch(Exception ex)
+        {
+            logger.debug("DBEngine : getResourceEdgeId : Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return edge_id;
+    }
+
+    public String getResourceEdgeId(String resource_id, String inode_id)
+    {
+        String edge_id = null;
+        OrientGraph graph = null;
+
+        try
+        {
+            if((resource_id != null) && (inode_id != null))
+            {
+                //OrientGraph graph = factory.getTx();
+                //OrientGraphNoTx graph = factory.getNoTx();
+                graph = factory.getTx();
+                Iterable<Vertex> resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:isAssigned.edgeProp WHERE key = [\""+ resource_id + "\",\""+ inode_id +"\"]")).execute();
+                Iterator<Vertex> iter = resultIterator.iterator();
+                if(iter.hasNext())
+                {
+                    Vertex v = iter.next();
+                    edge_id = v.getProperty("rid").toString();
+                }
+                //graph.shutdown();
+                //return node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
+                //node_id = node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
+                if(edge_id != null)
+                {
+                    edge_id = edge_id.substring(edge_id.indexOf("[") + 1, edge_id.indexOf("]"));
+                }
+            }
+
+        }
+        catch(Exception ex)
+        {
+            logger.debug("DBEngine : getIsAssignedEdgeId : Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return edge_id;
+    }
+
+    public List<String> getIsAssignedEdgeIds(String resource_id, String inode_id)
+    {
+        String edge_id = null;
+        OrientGraph graph = null;
+        List<String> edge_list = null;
+        try
+        {
+            if((resource_id != null) && (inode_id != null))
+            {
+                edge_list = new ArrayList<String>();
+                //OrientGraph graph = factory.getTx();
+                //OrientGraphNoTx graph = factory.getNoTx();
+                graph = factory.getTx();
+                Iterable<Vertex> resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:isAssigned.edgeProp WHERE key = [\""+ resource_id + "\",\""+ inode_id +"\"]")).execute();
+                Iterator<Vertex> iter = resultIterator.iterator();
+                while(iter.hasNext())
+                {
+                    Vertex v = iter.next();
+                    edge_id = v.getProperty("rid").toString();
+                    if(edge_id != null)
+                    {
+                        edge_id = edge_id.substring(edge_id.indexOf("[") + 1, edge_id.indexOf("]"));
+                        edge_list.add(edge_id);
+                    }
+
+                }
+                //graph.shutdown();
+                //return node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
+                //node_id = node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
+            }
+
+        }
+        catch(Exception ex)
+        {
+            logger.debug("DBEngine : getIsAssignedEdgeId : Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return edge_list;
+    }
+
+    public String getIsAssignedParam(String edge_id,String param_name)
+    {
+        String param = null;
+        OrientGraph graph = null;
+
+        try
+        {
+            if((edge_id != null) && (param_name != null))
+            {
+                graph = factory.getTx();
+                Edge e = graph.getEdge(edge_id);
+                param = e.getProperty(param_name).toString();
+
+            }
+
+        }
+        catch(Exception ex)
+        {
+            logger.debug("DBEngine : getIsAssignedParam : Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return param;
+    }
+
+    public Map<String,String> getIsAssignedParams(String edge_id)
+    {
+        Map<String,String> params = null;
+        OrientGraph graph = null;
+
+        try
+        {
+            if(edge_id != null)
+            {
+                params = new HashMap<>();
+                graph = factory.getTx();
+                Edge e = graph.getEdge(edge_id);
+
+                for (String s : e.getPropertyKeys()) {
+                    params.put(s,e.getProperty(s).toString());
+                }
+
+            }
+
+        }
+        catch(Exception ex)
+        {
+            logger.debug("DBEngine : getIsAssignedParams : Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return params;
+    }
+
+    public List<String> getresourceNodeList(String resource_id, String inode_id)
+    {
+        List<String> node_list = null;
+        OrientGraph graph = null;
+        try
+        {
+
+            if((resource_id == null) && (inode_id == null))
+            {
+                graph = factory.getTx();
+                Iterable<Vertex> resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:resourceNode.nodePath")).execute();
+
+                Iterator<Vertex> iter = resultIterator.iterator();
+                if(iter.hasNext())
+                {
+                    node_list = new ArrayList<String>();
+                    while(iter.hasNext())
+                    {
+                        Vertex v = iter.next();
+                        String node_id = v.getProperty("rid").toString();
+                        node_id = node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
+                        Vertex rNode = graph.getVertex(node_id);
+                        node_list.add(rNode.getProperty("resource_id").toString());
+                    }
+                }
+
+            }
+            else if((resource_id != null) && (inode_id == null))
+            {
+                graph = factory.getTx();
+                //OrientGraphNoTx graph = factory.getNoTx();
+
+                Iterable<Vertex> resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:iNode.nodePath WHERE key = [\"" + resource_id + "\"]")).execute();
+                Iterator<Vertex> iter = resultIterator.iterator();
+                if(iter.hasNext())
+                {
+                    node_list = new ArrayList<String>();
+                    while(iter.hasNext())
+                    {
+                        Vertex v = iter.next();
+                        String node_id = v.getProperty("rid").toString();
+                        node_id = node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
+                        Vertex aNode = graph.getVertex(node_id);
+                        node_list.add(aNode.getProperty("inode_id").toString());
+                    }
+                }
+
+            }
+
+        }
+        catch(Exception ex)
+        {
+            logger.debug("DBEngine : getNodeList : Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return node_list;
+    }
+
+    public String getINodeParam(String resource_id,String inode_id, String param)
+    {
+        String iNode_param = null;
+        String node_id = null;
+        OrientGraph graph = null;
+
+        try
+        {
+            node_id = getINodeId(resource_id,inode_id);
+            if(node_id != null)
+            {
+                graph = factory.getTx();
+                Vertex iNode = graph.getVertex(node_id);
+                iNode_param = iNode.getProperty(param).toString();
+            }
+
+        }
+        catch(Exception ex)
+        {
+            logger.debug("getINodeParam: Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return iNode_param;
+    }
+
+    //WRITES
+
+    public String addIsAttachedEdge(String resource_id, String inode_id, String region, String agent, String plugin)
+    {
+        String edge_id = null;
+
+        int count = 0;
+        try
+        {
+
+            while((edge_id == null) && (count != retryCount))
+            {
+                if(count > 0)
+                {
+                    Thread.sleep((long)(Math.random() * 1000)); //random wait to prevent sync error
+                }
+                edge_id = IaddIsAttachedEdge(resource_id, inode_id, region, agent, plugin);
+                count++;
+
+            }
+
+            if((edge_id == null) && (count == retryCount))
+            {
+                logger.debug("DBEngine : addIsAttachedEdge : Failed to add edge in " + count + " retrys");
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.debug("DBEngine : addIsAttachedEdge : Error " + ex.toString());
+        }
+
+        return edge_id;
+    }
+
+    private String IaddIsAttachedEdge(String resource_id, String inode_id, String region, String agent, String pluginId)
+    {
+        String edge_id = null;
+        TransactionalGraph graph = null;
+        try
+        {
+            edge_id = getResourceEdgeId(resource_id,inode_id,region,agent);
+            if(edge_id != null)
+            {
+                //logger.debug("Node already Exist: region=" + region + " agent=" + agent + " plugin=" + plugin);
+            }
+            else
+            {
+
+                if((resource_id != null) && (inode_id != null) && (region != null) && (agent != null) && (pluginId != null))
+                {
+                    String inode_node_id = getINodeId(resource_id,inode_id);
+                    String pnode_node_id = plugin.getGDB().gdb.getNodeId(region,agent,pluginId);
+                    if((inode_node_id != null) && (pnode_node_id != null))
+                    {
+                        graph = factory.getTx();
+
+                        Vertex fromV = graph.getVertex(pnode_node_id);
+                        Vertex toV = graph.getVertex(inode_node_id);
+                        if((fromV != null) && (toV != null))
+                        {
+                            Edge e = graph.addEdge("class:isAssigned", fromV, toV, "isAssigned");
+                            e.setProperty("resource_id", resource_id);
+                            e.setProperty("inode_id", inode_id);
+                            e.setProperty("region", region);
+                            e.setProperty("agent", agent);
+                            e.setProperty("plugin", pluginId);
+                            graph.commit();
+                            edge_id = e.getId().toString();
+                        }
+                        graph.commit();
+                    }
+                    else
+                    {
+                        if(inode_node_id != null)
+                        {
+                            logger.debug("IaddIsAttachedEdge: iNode does not exist : " + inode_id);
+                        }
+                        if(pnode_node_id != null)
+                        {
+                            logger.debug("IaddIsAttachedEdge: pNode does not exist : " + region + agent + pluginId);
+                        }
+                    }
+                }
+                else
+                {
+                    logger.debug("IaddIsAttachedEdge: required input is null : " + resource_id + "," + inode_id + "," + region + "," + agent + "," + plugin);
+
+                }
+
+            }
+
+        }
+        catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException exc)
+        {
+            //eat exception.. this is not normal and should log somewhere
+            logger.debug("IaddIsAttachedEdge: ORecordDuplicatedException : " + exc.toString());
+        }
+        catch(com.orientechnologies.orient.core.exception.OConcurrentModificationException exc)
+        {
+            //eat exception.. this is normal
+            logger.debug("IaddIsAttachedEdge: OConcurrentModificationException : " + exc.toString());
+        }
+        catch(Exception ex)
+        {
+            long threadId = Thread.currentThread().getId();
+            logger.debug("IaddIsAttachedEdge: thread_id: " + threadId + " Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return edge_id;
+
+    }
+
+    public String addINodeResource(String resource_id, String inode_id)
+    {
+        String node_id = null;
+
+        int count = 0;
+        try
+        {
+
+            while((node_id == null) && (count != retryCount))
+            {
+                if(count > 0)
+                {
+                    Thread.sleep((long)(Math.random() * 1000)); //random wait to prevent sync error
+                }
+                node_id = IaddINodeResource(resource_id, inode_id);
+                count++;
+
+            }
+
+            if((node_id == null) && (count == retryCount))
+            {
+                logger.debug("DBEngine : addINodeResource : Failed to add node in " + count + " retrys");
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.debug("DBEngine : addINodeResource : Error " + ex.toString());
+        }
+
+        return node_id;
+    }
+
+    public String addINode(String resource_id, String inode_id)
+    {
+        String node_id = null;
+
+        int count = 0;
+        try
+        {
+
+            while((node_id == null) && (count != retryCount))
+            {
+                if(count > 0)
+                {
+                    Thread.sleep((long)(Math.random() * 1000)); //random wait to prevent sync error
+                }
+                node_id = IaddINode(resource_id, inode_id);
+                count++;
+
+            }
+
+            if((node_id == null) && (count == retryCount))
+            {
+                logger.debug("DBEngine : addINode : Failed to add node in " + count + " retrys");
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.debug("DBEngine : addINode : Error " + ex.toString());
+        }
+
+        return node_id;
+    }
+
+    private String IaddINodeResource(String resource_id, String inode_id)
+    {
+        String node_id = null;
+        String resource_node_id = null;
+
+        OrientGraph graph = null;
+        try
+        {
+
+            node_id = plugin.getGDB().dba.getINodeNodeId(inode_id);
+            if(node_id != null)
+            {
+                resource_node_id = getResourceNodeId(resource_id);
+                if(resource_node_id == null)
+                {
+                    resource_node_id = addResourceNode(resource_id);
+                }
+
+                if(resource_node_id != null)
+                {
+                    graph = factory.getTx();
+
+                    Vertex fromV = graph.getVertex(node_id);
+                    fromV.setProperty("resource_id", resource_id);
+
+                    //ADD EDGE TO RESOURCE
+                    Vertex toV = graph.getVertex(resource_node_id);
+                    graph.addEdge("class:isResource", fromV, toV, "isResource");
+                    graph.commit();
+                    node_id = fromV.getId().toString();
+                }
+            }
+            else {
+                logger.error("IaddINodeResource inode " + inode_id + " missing!");
+            }
+        }
+        catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException exc)
+        {
+            //eat exception.. this is not normal and should log somewhere
+            logger.debug("Error 0 " + exc.getMessage());
+        }
+        catch(com.orientechnologies.orient.core.exception.OConcurrentModificationException exc)
+        {
+            //eat exception.. this is normal
+            logger.debug("Error 1 " + exc.getMessage());
+        }
+        catch(Exception ex)
+        {
+            long threadId = Thread.currentThread().getId();
+            logger.debug("IaddINode: thread_id: " + threadId + " Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return node_id;
+
+    }
+
+    private String IaddINode(String resource_id, String inode_id)
+    {
+        String node_id = null;
+        String resource_node_id = null;
+
+        OrientGraph graph = null;
+        try
+        {
+            node_id = getINodeId(resource_id,inode_id);
+            if(node_id != null)
+            {
+                //logger.debug("Node already Exist: region=" + region + " agent=" + agent + " plugin=" + plugin);
+            }
+            else
+            {
+
+                resource_node_id = getResourceNodeId(resource_id);
+                if(resource_node_id == null)
+                {
+                    resource_node_id = addResourceNode(resource_id);
+                }
+
+                if(resource_node_id != null)
+                {
+                    graph = factory.getTx();
+
+                    Vertex fromV = graph.addVertex("class:iNode");
+                    fromV.setProperty("inode_id", inode_id);
+                    fromV.setProperty("resource_id", resource_id);
+
+
+                    //ADD EDGE TO RESOURCE
+                    Vertex toV = graph.getVertex(resource_node_id);
+                    graph.addEdge("class:isResource", fromV, toV, "isResource");
+                    graph.commit();
+                    node_id = fromV.getId().toString();
+                }
+            }
+        }
+        catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException exc)
+        {
+            //eat exception.. this is not normal and should log somewhere
+            logger.debug("Error 0 " + exc.getMessage());
+        }
+        catch(com.orientechnologies.orient.core.exception.OConcurrentModificationException exc)
+        {
+            //eat exception.. this is normal
+            logger.debug("Error 1 " + exc.getMessage());
+        }
+        catch(Exception ex)
+        {
+            long threadId = Thread.currentThread().getId();
+            logger.debug("IaddINode: thread_id: " + threadId + " Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return node_id;
+
+    }
+
+    public String addResourceNode(String resource_id) {
+        String node_id = null;
+
+        int count = 0;
+        try
+        {
+
+            while((node_id == null) && (count != retryCount))
+            {
+                if(count > 0)
+                {
+                    //logger.debug("ADDNODE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
+                    Thread.sleep((long)(Math.random() * 1000)); //random wait to prevent sync error
+                }
+                node_id = IaddResourceNode(resource_id);
+                count++;
+
+            }
+
+            if((node_id == null) && (count == retryCount))
+            {
+                logger.debug("DBEngine : addINode : Failed to add node in " + count + " retrys");
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.debug("DBEngine : addINode : Error " + ex.toString());
+        }
+
+        return node_id;
+    }
+
+    private String IaddResourceNode(String resource_id)
+    {
+        String node_id = null;
+        OrientGraph graph = null;
+        try
+        {
+            node_id = getResourceNodeId(resource_id);
+
+            if(node_id != null)
+            {
+                //logger.debug("Node already Exist: region=" + region + " agent=" + agent + " plugin=" + plugin);
+            }
+            else
+            {
+                graph = factory.getTx();
+                //add something
+
+                Vertex v = graph.addVertex("class:resourceNode");
+                v.setProperty("resource_id", resource_id);
+                graph.commit();
+                node_id = v.getId().toString();
+            }
+        }
+        catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException exc)
+        {
+            //eat exception.. this is not normal and should log somewhere
+        }
+        catch(com.orientechnologies.orient.core.exception.OConcurrentModificationException exc)
+        {
+            //eat exception.. this is normal
+        }
+        catch(Exception ex)
+        {
+            long threadId = Thread.currentThread().getId();
+            logger.debug("addResourceNode: thread_id: " + threadId + " Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return node_id;
+
+    }
+
+    public boolean removeINode(String resource_id, String inode_id)
+    {
+        boolean nodeRemoved = false;
+        int count = 0;
+        try
+        {
+
+            while((!nodeRemoved) && (count != retryCount))
+            {
+                if(count > 0)
+                {
+                    //logger.debug("REMOVENODE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
+                    Thread.sleep((long)(Math.random() * 1000)); //random wait to prevent sync error
+                }
+                nodeRemoved = IremoveINode(resource_id, inode_id);
+                count++;
+
+            }
+
+            if((!nodeRemoved) && (count == retryCount))
+            {
+                logger.debug("DBEngine : removeINode : Failed to add node in " + count + " retrys");
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.debug("DBEngine : removeINode : Error " + ex.toString());
+        }
+
+        return nodeRemoved;
+    }
+
+    private boolean IremoveINode(String resource_id, String inode_id)
+    {
+        boolean nodeRemoved = false;
+        OrientGraph graph = null;
+        try
+        {
+            //String pathname = getPathname(region,agent,plugin);
+            String node_id = getINodeId(resource_id, inode_id);
+            if(node_id == null)
+            {
+                logger.debug("Tried to remove missing node : resource_id=" + resource_id + " inode_id=" + inode_id);
+                nodeRemoved = true;
+            }
+            else
+            {
+                graph = factory.getTx();
+                Vertex rNode = graph.getVertex(node_id);
+                graph.removeVertex(rNode);
+                graph.commit();
+                nodeRemoved = true;
+            }
+        }
+        catch(com.orientechnologies.orient.core.exception.OConcurrentModificationException exc)
+        {
+            //eat exception
+        }
+        catch(Exception ex)
+        {
+            long threadId = Thread.currentThread().getId();
+            logger.debug("GrapgDBEngine : removeNode :  thread_id: " + threadId + " Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return nodeRemoved;
+
+    }
+
+    public boolean removeResourceNode(String resource_id)
+    {
+        boolean nodeRemoved = false;
+        int count = 0;
+        try
+        {
+
+            while((!nodeRemoved) && (count != retryCount))
+            {
+                if(count > 0)
+                {
+                    //logger.debug("REMOVENODE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
+                    Thread.sleep((long)(Math.random() * 1000)); //random wait to prevent sync error
+                }
+                nodeRemoved = IremoveResourceNode(resource_id);
+                count++;
+
+            }
+
+            if((!nodeRemoved) && (count == retryCount))
+            {
+                logger.debug("DBEngine : removeResourceNode : Failed to add node in " + count + " retrys");
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.debug("DBEngine : removeResourceNode : Error " + ex.toString());
+        }
+
+        return nodeRemoved;
+    }
+
+    private boolean IremoveResourceNode(String resource_id)
+    {
+        boolean nodeRemoved = false;
+        OrientGraph graph = null;
+        try
+        {
+            //String pathname = getPathname(region,agent,plugin);
+            String node_id = getResourceNodeId(resource_id);
+            if(node_id == null)
+            {
+                logger.debug("Tried to remove missing node : resource_id=" + resource_id);
+                nodeRemoved = true;
+            }
+            else
+            {
+                //remove iNodes First
+                List<String> inodes = getresourceNodeList(resource_id,null);
+                if(inodes != null)
+                {
+                    for(String inode_id : inodes)
+                    {
+                        removeINode(resource_id,inode_id);
+                    }
+                }
+                inodes = getresourceNodeList(resource_id,null);
+                if(inodes == null)
+                {
+                    graph = factory.getTx();
+                    Vertex resourceNode = graph.getVertex(node_id);
+                    graph.removeVertex(resourceNode);
+                    graph.commit();
+                    nodeRemoved = true;
+                }
+
+            }
+        }
+        catch(com.orientechnologies.orient.core.exception.OConcurrentModificationException exc)
+        {
+            //eat exception
+        }
+        catch(Exception ex)
+        {
+            long threadId = Thread.currentThread().getId();
+            logger.debug("DBEngine : IremoveResourceNode :  thread_id: " + threadId + " Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return nodeRemoved;
+
+    }
+
+    public boolean IsetINodeParams(String resource_id, String inode_id, Map<String,String> paramMap)
+    {
+        boolean isUpdated = false;
+        OrientGraph graph = null;
+        String node_id = null;
+        try
+        {
+            node_id = getINodeId(resource_id, inode_id);
+            if(node_id != null)
+            {
+                graph = factory.getTx();
+                Vertex iNode = graph.getVertex(node_id);
+                Iterator it = paramMap.entrySet().iterator();
+                while (it.hasNext())
+                {
+                    Map.Entry pairs = (Map.Entry)it.next();
+                    iNode.setProperty( pairs.getKey().toString(), pairs.getValue().toString());
+                }
+                graph.commit();
+                isUpdated = true;
+            }
+        }
+        catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException exc)
+        {
+            //eat exception.. this is not normal and should log somewhere
+        }
+        catch(com.orientechnologies.orient.core.exception.OConcurrentModificationException exc)
+        {
+            //eat exception.. this is normal
+        }
+        catch(Exception ex)
+        {
+            long threadId = Thread.currentThread().getId();
+            logger.debug("setINodeParams: thread_id: " + threadId + " Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return isUpdated;
+    }
+
+    public boolean setINodeParams(String resource_id, String inode_id, Map<String,String> paramMap)
+    {
+        boolean isUpdated = false;
+        int count = 0;
+        try
+        {
+
+            while((!isUpdated) && (count != retryCount))
+            {
+                if(count > 0)
+                {
+                    //logger.debug("iNODEUPDATE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
+                    Thread.sleep((long)(Math.random() * 1000)); //random wait to prevent sync error
+                }
+                isUpdated = IsetINodeParams(resource_id,inode_id, paramMap);
+                count++;
+
+            }
+
+            if((!isUpdated) && (count == retryCount))
+            {
+                logger.debug("DBEngine : setINodeParams : Failed to add node in " + count + " retrys");
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.debug("DBEngine : setINodeParams : Error " + ex.toString());
+        }
+
+        return isUpdated;
+    }
+
+    public boolean setINodeParam(String resource_id, String inode_id, String paramKey, String paramValue)
+    {
+        boolean isUpdated = false;
+        int count = 0;
+        try
+        {
+
+            while((!isUpdated) && (count != retryCount))
+            {
+                if(count > 0)
+                {
+                    //logger.debug("iNODEUPDATE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
+                    Thread.sleep((long)(Math.random() * 1000)); //random wait to prevent sync error
+                }
+                isUpdated = IsetINodeParam(resource_id, inode_id, paramKey, paramValue);
+                count++;
+
+            }
+
+            if((!isUpdated) && (count == retryCount))
+            {
+                logger.debug("DBEngine : setINodeParam : Failed to add node in " + count + " retrys");
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.debug("DBEngine : setINodeParam : Error " + ex.toString());
+        }
+
+        return isUpdated;
+    }
+
+    public boolean IsetINodeParam(String resource_id, String inode_id, String paramKey, String paramValue)
+    {
+        boolean isUpdated = false;
+        OrientGraph graph = null;
+        String node_id = null;
+        try
+        {
+            node_id = getINodeId(resource_id, inode_id);
+            if(node_id != null)
+            {
+                graph = factory.getTx();
+                Vertex iNode = graph.getVertex(node_id);
+                iNode.setProperty( paramKey, paramValue);
+                graph.commit();
+                isUpdated = true;
+            }
+        }
+        catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException exc)
+        {
+            //eat exception.. this is not normal and should log somewhere
+        }
+        catch(com.orientechnologies.orient.core.exception.OConcurrentModificationException exc)
+        {
+            //eat exception.. this is normal
+        }
+        catch(Exception ex)
+        {
+            long threadId = Thread.currentThread().getId();
+            logger.debug("setINodeParams: thread_id: " + threadId + " Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return isUpdated;
+    }
+
+    //Updateing KPI
+    public boolean updateKPI(String region, String agent, String pluginId, String resource_id, String inode_id, Map<String,String> params) {
+        boolean isUpdated = false;
+        String edge_id = null;
+        try
+        {
+            //make sure nodes exist
+            String resource_node_id = getResourceNodeId(resource_id);
+            String inode_node_id = getINodeId(resource_id,inode_id);
+            String plugin_node_id = plugin.getGDB().gdb.getNodeId(region,agent,pluginId);
+
+            //create node if not seen.. this needs to be changed.
+            if(plugin_node_id == null) {
+                plugin_node_id = plugin.getGDB().gdb.addNode(region,agent,pluginId);
+                logger.debug("updateKPI : Added Node" + region + " " + agent + " " + pluginId + " = " + plugin_node_id);
+            }
+
+            if((resource_node_id != null) && (inode_node_id != null) && (plugin_node_id != null))
+            {
+                //logger.debug("updateKPI resource_node_id " + resource_id + " inode_id " + inode_id + "  Node" + region + " " + agent + " " + plugin + " = " + plugin_node_id);
+                //check if edge is found, if not create it
+                edge_id = getResourceEdgeId(resource_id, inode_id, region, agent);
+                if(edge_id == null)
+                {
+
+                    edge_id = addIsAttachedEdge(resource_id, inode_id, region, agent, pluginId);
+                    logger.debug("updateKPI edge addIsAttachedEdge resource_node_id " + resource_id + " inode_id " + inode_id + "  Node" + region + " " + agent + " " + plugin + " = " + plugin_node_id);
+
+                }
+                //edge_id = getResourceEdgeId(resource_id, inode_id, region, agent);
+
+                //check again if edge is found
+                if(edge_id != null)
+                {
+                    logger.debug("updateKPI edge found resource_node_id " + resource_id + " inode_id " + inode_id + "  Node" + region + " " + agent + " " + plugin + " = " + plugin_node_id);
+
+                    edge_id = getResourceEdgeId(resource_id, inode_id, region, agent);
+
+                    //if(updateEdge(edge_id, params))
+                    if(updateEdgeNoTx(edge_id, params))
+                    {
+                        isUpdated = true;
+                    }
+                    else
+                    {
+                        logger.error("Controller : DBEngine : Failed to updatePerf : Failed to update Edge params!");
+                    }
+                }
+                else
+                {
+                    logger.error("Controller : DBEngine : Failed to updatePerf : edge_id not found!");
+                }
+            }
+            else
+            {
+                logger.debug("Can't update missing nodes : " + resource_id + "," + inode_id + "," + pluginId);
+                logger.debug("Can't update missing nodes : " + resource_node_id + "," + inode_node_id + "," + plugin_node_id);
+            }
+
+        }
+        catch(Exception ex)
+        {
+            logger.debug("Controller : DBEngine : Failed to updatePerf");
+
+        }
+        return isUpdated;
+    }
+
+    private boolean updateEdgeNoTx(String edge_id, Map<String,String> params) {
+        boolean isUpdated = false;
+        OrientGraphNoTx graph = null;
+        try
+        {
+            graph = factory.getNoTx();
+            Edge edge = graph.getEdge(edge_id);
+            if(edge != null)
+            {
+                for (Map.Entry<String, String> entry : params.entrySet())
+                {
+                    edge.setProperty(entry.getKey(), entry.getValue());
+                }
+                graph.commit();
+                isUpdated = true;
+            }
+            else
+            {
+                logger.debug("IupdateEdge: no edge found for edge_id=" + edge_id);
+            }
+
+        }
+        catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException exc)
+        {
+            //eat exception.. this is not normal and should log somewhere
+        }
+        catch(com.orientechnologies.orient.core.exception.OConcurrentModificationException exc)
+        {
+            //eat exception.. this is normal
+        }
+        catch(Exception ex)
+        {
+            long threadId = Thread.currentThread().getId();
+            logger.debug("IupdateEdge: thread_id: " + threadId + " Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return isUpdated;
+
+    }
+
+
 
 }

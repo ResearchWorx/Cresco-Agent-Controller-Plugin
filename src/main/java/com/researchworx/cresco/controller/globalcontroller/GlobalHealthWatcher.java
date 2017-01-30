@@ -345,12 +345,12 @@ public class GlobalHealthWatcher implements Runnable {
         List<MsgEvent> discoveryList = null;
         try {
             discoveryList = new ArrayList<>();
-                logger.info("Static Region Connection to Global Controller : " + plugin.getConfig().getStringParam("global_controller_host"));
+                logger.info("Static Region Connection to Global Controller : " + plugin.getConfig().getStringParam("gc_host"));
                 DiscoveryStatic ds = new DiscoveryStatic(plugin);
-                discoveryList.addAll(ds.discover(DiscoveryType.GLOBAL, plugin.getConfig().getIntegerParam("discovery_static_agent_timeout", 10000), plugin.getConfig().getStringParam("global_controller_host")));
+                discoveryList.addAll(ds.discover(DiscoveryType.GLOBAL, plugin.getConfig().getIntegerParam("discovery_static_agent_timeout", 10000), plugin.getConfig().getStringParam("gc_host")));
                 logger.debug("Static Agent Connection count = {}" + discoveryList.size());
                 if (discoveryList.size() == 0) {
-                    logger.info("Static Region Connection to Global Controller : " + plugin.getConfig().getStringParam("global_controller_host") + " failed! - Restarting Global Discovery");
+                    logger.info("Static Region Connection to Global Controller : " + plugin.getConfig().getStringParam("gc_host") + " failed! - Restarting Global Discovery");
                 } else {
                     //plugin.getIncomingCanidateBrokers().offer(discoveryList.get(0)); //perhaps better way to do this
                     logger.info("Global Controller Found: " + discoveryList.get(0).getParams());

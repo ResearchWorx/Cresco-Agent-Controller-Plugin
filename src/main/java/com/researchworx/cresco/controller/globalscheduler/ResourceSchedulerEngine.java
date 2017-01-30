@@ -84,8 +84,8 @@ public class ResourceSchedulerEngine implements Runnable {
 							String pluginFile = verifyPlugin(ce);
                             if(pluginFile == null)
 							{
-								if((plugin.getGDB().gdb.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_code","1")) &&
-										(plugin.getGDB().gdb.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_desc","iNode Failed Activation : Plugin not found!")))
+								if((plugin.getGDB().dba.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_code","1")) &&
+										(plugin.getGDB().dba.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_desc","iNode Failed Activation : Plugin not found!")))
 								{
 									logger.debug("Provisioning Failed: No matching controller plugins found!");
 								}
@@ -133,10 +133,10 @@ public class ResourceSchedulerEngine implements Runnable {
                                     //logger.error("before send");
                                     //MsgEvent re = plugin.getRPC().call(me);
                                     //logger.error("after send");
+                                    //will send in thread
+                                    //plugin.msgIn(me);
 
-                                    plugin.msgIn(me);
-
-									new Thread(new PollAddPlugin(plugin,resource_id, inode_id,region,agent)).start();
+									new Thread(new PollAddPlugin(plugin,resource_id, inode_id,region,agent, me)).start();
 
 								
 								/*
@@ -151,9 +151,9 @@ public class ResourceSchedulerEngine implements Runnable {
 						}
 						else if(ce.getParam("globalcmd").equals("removeplugin"))
 						{
-							logger.debug("Incoming Remove Request : resource_id: " + ce.getParam("resource_id") + " inode_id: " + ce.getParam("inode_id"));
 							Map<String,String> pNodeMap = plugin.getGDB().dba.getpNodeINode(ce.getParam("inode_id"));
-							new Thread(new PollRemovePlugin(plugin,  ce.getParam("resource_id"),ce.getParam("inode_id"))).start();
+                            logger.info("Incoming Remove Request : resource_id: " + ce.getParam("resource_id") + " inode_id: " + ce.getParam("inode_id") + " pnodeMap: " + pNodeMap.toString());
+                            new Thread(new PollRemovePlugin(plugin,  ce.getParam("resource_id"),ce.getParam("inode_id"))).start();
 						}
 					}
 					else

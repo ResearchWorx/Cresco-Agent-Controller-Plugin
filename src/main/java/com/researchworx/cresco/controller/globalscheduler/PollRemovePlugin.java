@@ -7,6 +7,7 @@ import com.researchworx.cresco.controller.globalcontroller.GlobalHealthWatcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PollRemovePlugin implements Runnable { 
@@ -33,19 +34,19 @@ public class PollRemovePlugin implements Runnable {
         try 
         {
 
-        	String edge_id = plugin.getGDB().gdb.getResourceEdgeId(resource_id, inode_id);
+        	String edge_id = plugin.getGDB().dba.getResourceEdgeId(resource_id, inode_id);
     		if(edge_id != null)
     		{
-    			String pnode_node_id = plugin.getGDB().gdb.getIsAssignedParam(edge_id, "out");
+    			String pnode_node_id = plugin.getGDB().dba.getIsAssignedParam(edge_id, "out");
     			if(pnode_node_id != null)
 				{
     				pnode_node_id = pnode_node_id.substring(pnode_node_id.indexOf("[") + 1, pnode_node_id.indexOf("]"));
     				
-    				String region = plugin.getGDB().gdb.getIsAssignedParam(edge_id, "region");
-    				String agent = plugin.getGDB().gdb.getIsAssignedParam(edge_id, "agent");
-    				String pluginId = plugin.getGDB().gdb.getIsAssignedParam(edge_id, "plugin");
+    				String region = plugin.getGDB().dba.getIsAssignedParam(edge_id, "region");
+    				String agent = plugin.getGDB().dba.getIsAssignedParam(edge_id, "agent");
+    				String pluginId = plugin.getGDB().dba.getIsAssignedParam(edge_id, "plugin");
 
-    				logger.debug("r: " + region + " a:" + agent + " p:" + pluginId);
+    				logger.debug("starting to remove r: " + region + " a:" + agent + " p:" + pluginId);
 
     				String pnode_node_id_match = plugin.getGDB().gdb.getNodeId(region, agent, pluginId);
 
@@ -65,7 +66,9 @@ public class PollRemovePlugin implements Runnable {
 	        				if(plugin.getGDB().gdb.getNodeId(region, agent, pluginId) == null)
 	        				{
 	        					isRemoved = true;
-	        				}
+                                logger.debug("removed r: " + region + " a:" + agent + " p:" + pluginId);
+
+                            }
 	        				else
 	        				{
 	        					Thread.sleep(1000);
@@ -74,7 +77,7 @@ public class PollRemovePlugin implements Runnable {
 	        			if(isRemoved)
 	        			{
 	        				logger.debug("Deactivated iNode: " + inode_id);
-							
+
 	        			}
 	        			else
 	        			{
@@ -82,9 +85,15 @@ public class PollRemovePlugin implements Runnable {
 	        			}
 	        			
     				}
+    				else {
+                        logger.error("pnode_node_id mismatch : pnode_node_id " + pnode_node_id + " != " + pnode_node_id_match);
+                    }
     				
     				
 				}
+				else {
+                    logger.error("pnode_node_id=null");
+                }
     			
     		}
     		else
@@ -92,14 +101,33 @@ public class PollRemovePlugin implements Runnable {
     			logger.error("Edge_id=null");
     		}
     		logger.debug("Removing iNode: " + inode_id);
-			plugin.getGDB().gdb.removeINode(resource_id,inode_id);
-			
+
+            //remove enodes
+            List<String> eNodeList = plugin.getGDB().dba.getNodeIdFromEdge("inode", "in", "enode_id", false, "inode_id",inode_id);
+            eNodeList.addAll(plugin.getGDB().dba.getNodeIdFromEdge("inode", "out", "enode_id",true, "inode_id",inode_id));
+            for(String eNodeId : eNodeList) {
+                logger.debug("enodes remove" + eNodeId);
+                plugin.getGDB().dba.removeNode(plugin.getGDB().dba.getENodeNodeId(eNodeId));
+            }
+
+            //remove vnode
+            plugin.getGDB().dba.removeNode(plugin.getGDB().dba.getvNodefromINode(inode_id));
+
+            //remove inode
+            plugin.getGDB().dba.removeINode(resource_id,inode_id);
+
 			//remove resource_id if this is the last resource
-			List<String> inodes = plugin.getGDB().gdb.getresourceNodeList(resource_id,null);
+			List<String> inodes = plugin.getGDB().dba.getresourceNodeList(resource_id,null);
+			logger.error("in pipeline " + resource_id + " there are " + inodes.size() + " plugins left");
+			for(String str : inodes) {
+			    logger.error("inode left " + str);
+            }
+
 			if(inodes == null)
 			{
-				plugin.getGDB().gdb.removeResourceNode(resource_id);
+				plugin.getGDB().dba.removeResourceNode(resource_id);
 			}
+
 			
         	/*
         	if(edge_id != null)

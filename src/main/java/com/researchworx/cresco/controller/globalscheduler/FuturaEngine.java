@@ -166,12 +166,12 @@ public class FuturaEngine {
         try {
 
             if(containerImage != null) {
-                List<String> containerEdgeList = plugin.getGDB().gdb.getIsAssignedEdgeIds("container_resource", "container_inode");
+                List<String> containerEdgeList = plugin.getGDB().dba.getIsAssignedEdgeIds("container_resource", "container_inode");
                 for (String edgeID : containerEdgeList) {
 
-                    String region = plugin.getGDB().gdb.getIsAssignedParam(edgeID, "region");
-                    String agent = plugin.getGDB().gdb.getIsAssignedParam(edgeID, "agent");
-                    String pluginId = plugin.getGDB().gdb.getIsAssignedParam(edgeID, "plugin");
+                    String region = plugin.getGDB().dba.getIsAssignedParam(edgeID, "region");
+                    String agent = plugin.getGDB().dba.getIsAssignedParam(edgeID, "agent");
+                    String pluginId = plugin.getGDB().dba.getIsAssignedParam(edgeID, "plugin");
 
                     logger.debug("LOOKING FOR RESOURCE PROVIDER ON Region: " + region + " Agent: " + agent);
 
@@ -188,10 +188,10 @@ public class FuturaEngine {
                         }
                         */
                         logger.debug("LOOKING FOR CONTAINER IMAGE = " + containerImage);
-                        String canidateContainerImage = plugin.getGDB().gdb.getIsAssignedParam(edgeID, "container_image");
+                        String canidateContainerImage = plugin.getGDB().dba.getIsAssignedParam(edgeID, "container_image");
 
                         if (containerImage.equals(canidateContainerImage)) {
-                            String resourceMetricJSON = plugin.getGDB().gdb.getIsAssignedParam(edgeID, "resource_metric");
+                            String resourceMetricJSON = plugin.getGDB().dba.getIsAssignedParam(edgeID, "resource_metric");
                             Gson gson = new Gson();
                             ResourceMetric rm = gson.fromJson(resourceMetricJSON, ResourceMetric.class);
                             if (resourceMetric == null) {
@@ -233,12 +233,12 @@ public class FuturaEngine {
         try {
             resourceProviders = new ArrayList<>();
 
-            List<String> containerEdgeList = plugin.getGDB().gdb.getIsAssignedEdgeIds("container_resource", "container_inode");
+            List<String> containerEdgeList = plugin.getGDB().dba.getIsAssignedEdgeIds("container_resource", "container_inode");
             for(String edgeID : containerEdgeList) {
 
-                String region = plugin.getGDB().gdb.getIsAssignedParam(edgeID,"region");
-                String agent = plugin.getGDB().gdb.getIsAssignedParam(edgeID,"agent");
-                String resourceMetricJSON = plugin.getGDB().gdb.getIsAssignedParam(edgeID,"resource_metric");
+                String region = plugin.getGDB().dba.getIsAssignedParam(edgeID,"region");
+                String agent = plugin.getGDB().dba.getIsAssignedParam(edgeID,"agent");
+                String resourceMetricJSON = plugin.getGDB().dba.getIsAssignedParam(edgeID,"resource_metric");
                 Gson gson = new Gson();
                 ResourceMetric rm = gson.fromJson(resourceMetricJSON,ResourceMetric.class);
 

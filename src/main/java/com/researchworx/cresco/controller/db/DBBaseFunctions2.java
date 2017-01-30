@@ -2,7 +2,6 @@ package com.researchworx.cresco.controller.db;
 
 import com.orientechnologies.orient.core.command.OCommandOutputListener;
 import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
-import com.orientechnologies.orient.core.db.OPartitionedDatabasePool;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.db.tool.ODatabaseExport;
 import com.orientechnologies.orient.core.db.tool.ODatabaseImport;
@@ -12,9 +11,7 @@ import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.sql.OCommandSQL;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.utilities.CLogger;
-import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
@@ -28,7 +25,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 
-public class DBBaseFunctions {
+public class DBBaseFunctions2 {
 
     private Launcher plugin;
     private CLogger logger;
@@ -36,7 +33,6 @@ public class DBBaseFunctions {
     private ODatabaseDocumentTx db;
     private int retryCount;
     //private DBEngine dbe;
-    public OPartitionedDatabasePool pool;
 
     public String[] aNodeIndexParams = {"platform","environment","location"};
 
@@ -66,14 +62,13 @@ public class DBBaseFunctions {
 
     }
 
-    public DBBaseFunctions(Launcher plugin, DBEngine dbe) {
-        this.logger = new CLogger(DBBaseFunctions.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+    public DBBaseFunctions2(Launcher plugin, DBEngine dbe) {
+        this.logger = new CLogger(DBBaseFunctions2.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
         this.plugin = plugin;
         //this.factory = dbe.factory;
         //this.factory = getFactory();
         this.factory = dbe.factory;
-        this.db = dbe.db;
-        this.pool = dbe.pool;
+        //this.db = dbe.db;
         this.retryCount = plugin.getConfig().getIntegerParam("db_retry_count",50);
 
         //ODatabaseDocumentTx db = ODatabaseDocumentPool.global().acquire("memory:MyDb", "admin", "admin");
@@ -1301,18 +1296,17 @@ public class DBBaseFunctions {
             //logger.info("Uncompressed Import :" + result);
 
             //InputStream is = new ByteArrayInputStream(exportData.getBytes(StandardCharsets.UTF_8));
-            //ODatabaseDocumentTx db = pool.acquire();
-            DBImport dbImport = new DBImport(plugin, is, this,db);
-            isImported = dbImport.importDump();
-            //db.close();
+            //DBImport dbImport = new DBImport(plugin, is, this,db);
+            //isImported = dbImport.importDump();
 
         }
         catch(Exception ex) {
-            logger.error("setDBImport  " + ex.getMessage());
+            logger.error(ex.getMessage());
+            logger.error(ex.toString());
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             ex.printStackTrace(pw);
-            logger.error(sw.toString());
+            logger.error(sw.toString()); //
         }
         //export.exportDatabase();
         //export.close();
@@ -1332,11 +1326,10 @@ public class DBBaseFunctions {
                 }
             };
             //Not sure what this does, but is needed to dump database.
-            //ODatabaseRecordThreadLocal.INSTANCE.set(db);
+            ODatabaseRecordThreadLocal.INSTANCE.set(db);
             //create location for output stream
 
             InputStream is = new ByteArrayInputStream(exportData.getBytes(StandardCharsets.UTF_8));
-            //ODatabaseDocumentTx db = pool.acquire();
 
             ODatabaseImport dbImport = new ODatabaseImport(db, is, listener);
             //operation
@@ -1356,7 +1349,7 @@ public class DBBaseFunctions {
             dbImport.importDatabase();
             dbImport.close();
             isImported = true;
-            //db.close();
+
 
 
         }
@@ -1400,23 +1393,12 @@ public class DBBaseFunctions {
                 }
             };
             //Not sure what this does, but is needed to dump database.
-
-
+            ODatabaseRecordThreadLocal.INSTANCE.set(db);
             //create location for output stream
             ByteArrayOutputStream os = new ByteArrayOutputStream();
-            //ODatabaseDocumentTx db = null;
-            //db = factory.getDatabase();
 
-            /*
-            if(pool != null) {
-                db = pool.acquire();
-            }
-            else {
-                db = factory.getDatabase();
-            }
-            */
-            ODatabaseRecordThreadLocal.INSTANCE.set(db);
             ODatabaseExport export = new ODatabaseExport(db, os, listener);
+
             //filter export
 
 
@@ -1447,11 +1429,7 @@ public class DBBaseFunctions {
 
         }
         catch(Exception ex) {
-            logger.error("getDBExport()  " + ex.getMessage());
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            ex.printStackTrace(pw);
-            logger.error(sw.toString());
+            logger.error(ex.getMessage());
         }
         //export.exportDatabase();
         //export.close();
@@ -1521,10 +1499,9 @@ public class DBBaseFunctions {
                 }
             };
             //Not sure what this does, but is needed to dump database.
-            //ODatabaseRecordThreadLocal.INSTANCE.set(db);
+            ODatabaseRecordThreadLocal.INSTANCE.set(db);
             //create location for output stream
             ByteArrayOutputStream os = new ByteArrayOutputStream();
-            //ODatabaseDocumentTx db = pool.acquire();
 
             ODatabaseExport export = new ODatabaseExport(db, os, listener);
 
@@ -1533,7 +1510,7 @@ public class DBBaseFunctions {
             exportString = new String(os.toByteArray(),"UTF-8");
 
             export.close();
-            //db.close();
+
         }
         catch(Exception ex) {
             logger.error(ex.getMessage());

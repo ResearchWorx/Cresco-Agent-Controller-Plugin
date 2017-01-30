@@ -1,9 +1,14 @@
 package com.researchworx.cresco.controller.db;
 
 import com.orientechnologies.orient.client.remote.OServerAdmin;
+import com.orientechnologies.orient.core.config.OGlobalConfiguration;
+import com.orientechnologies.orient.core.db.OPartitionedDatabasePool;
+import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.utilities.CLogger;
+import com.tinkerpop.blueprints.TransactionalGraph;
+import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
 
 
@@ -13,17 +18,62 @@ public class DBEngine {
 	public ODatabaseDocumentTx db;
     private Launcher plugin;
     private CLogger logger;
-    private boolean isMemory = true;
-
-	private int retryCount;
+    //public OrientGraphFactory factory;
+    public OPartitionedDatabasePool pool;
+    private int retryCount;
 
 	//upload
 
-	public DBEngine(Launcher plugin) {
+    private void setPool() {
+        try {
+            String host = plugin.getConfig().getStringParam("gdb_host");
+            String username = plugin.getConfig().getStringParam("gdb_username");
+            String password = plugin.getConfig().getStringParam("gdb_password");
+            String dbname = plugin.getConfig().getStringParam("gdb_dbname");
+
+
+            //String remote = "remote:localhost/";
+            //String nameDB = "domain";
+            //String url = remote + nameDB;
+            //ODatabaseDocumentTx db = pool.acquire();
+            //factory = new OrientGraphFactory(connection_string, username, password, pool);
+
+
+            String iURI = null;
+            if ((host != null) && (username != null) && (password != null) && (dbname != null)) {
+                iURI = "remote:" + host + "/" + dbname;
+                pool = new OPartitionedDatabasePool(iURI, username,password).setAutoCreate(true);
+                factory = new OrientGraphFactory(iURI, username, password, true);
+            }
+            else {
+                iURI = "memory:internalDb";
+                //db = new ODatabaseDocumentTx(iURI).create();
+                //pool = new OPartitionedDatabasePool(iURI, username,password).setAutoCreate(true);
+                //factory = new OrientGraphFactory(iURI, username, password, true);
+                db = new ODatabaseDocumentTx("memory:internalDb").create();
+
+                factory = new OrientGraphFactory("memory:internalDb");
+
+
+            }
+
+            //pool = new OPartitionedDatabasePool(iURI, username,password).setAutoCreate(true);
+            //factory = new OrientGraphFactory(iURI, username, password, pool);
+
+        }
+        catch(Exception ex) {
+            logger.error("setPool : " + ex.getMessage());
+        }
+
+    }
+
+
+    public DBEngine(Launcher plugin) {
 
         this.plugin = plugin;
         logger = new CLogger(DBEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
         this.retryCount = plugin.getConfig().getIntegerParam("db_retry_count",50);
+        //this.factory = getFactory();
 
         String host = plugin.getConfig().getStringParam("gdb_host");
         String username = plugin.getConfig().getStringParam("gdb_username");
@@ -31,31 +81,29 @@ public class DBEngine {
         String dbname = plugin.getConfig().getStringParam("gdb_dbname");
 
 
-        String connection_string = "remote:" + host + "/" + dbname;
-
-        if((host != null) && (username != null) && (password != null) && (dbname != null))
-        {
-            isMemory = false;
-        }
-
-        if(isMemory) {
-            db = new ODatabaseDocumentTx("memory:internalDb").create();
-
-//            factory = new OrientGraphFactory("memory:internalDb").setupPool(100,1000);
-            factory = new OrientGraphFactory("memory:internalDb");
+        //String remote = "remote:localhost/";
+        //String nameDB = "domain";
+        //String url = remote + nameDB;
+        //ODatabaseDocumentTx db = pool.acquire();
+        //factory = new OrientGraphFactory(connection_string, username, password, pool);
 
 
+        String iURI = null;
+        if ((host != null) && (username != null) && (password != null) && (dbname != null)) {
+            iURI = "remote:" + host + "/" + dbname;
+            pool = new OPartitionedDatabasePool(iURI, username,password).setAutoCreate(true);
+            factory = new OrientGraphFactory(iURI, username, password, true);
         }
         else {
+            //iURI = "memory:internalDb";
+            //db = new ODatabaseDocumentTx(iURI).create();
+            //pool = new OPartitionedDatabasePool(iURI, username,password).setAutoCreate(true);
+            //factory = new OrientGraphFactory(iURI, username, password, true);
+            db = new ODatabaseDocumentTx("memory:internalDb").create();
 
-            //String connection_string = "plocal:/opt/cresco/db";
-            //String connection_string = "plocal:/Users/vcbumg2/Downloads/orientdb-community-2.2.14/databases/cresco";
-            db = new  ODatabaseDocumentTx(connection_string).open(username, password);
-            factory = new OrientGraphFactory(connection_string, username, password).setupPool(10, 100);
-
+            factory = new OrientGraphFactory("memory:internalDb");
 
         }
-
     }
 
     public boolean dbCheck(String connection_string, String username, String password) {

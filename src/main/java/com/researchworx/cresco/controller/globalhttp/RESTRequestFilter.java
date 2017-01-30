@@ -88,7 +88,7 @@ public class RESTRequestFilter implements ContainerRequestFilter {
         }
         
         // For any pther methods besides login, the authToken must be verified
-        if ( (path.startsWith( "API/login" )) || (path.startsWith( "login.html" ))) 
+        if ( (path.startsWith( "API/login" )) || (path.startsWith( "login.html" )) )
         {
         	Authenticator demoAuthenticator = Authenticator.getInstance();
         	

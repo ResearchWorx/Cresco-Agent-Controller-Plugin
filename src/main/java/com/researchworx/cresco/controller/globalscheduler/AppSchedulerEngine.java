@@ -110,16 +110,21 @@ public class AppSchedulerEngine implements Runnable {
             List<String> badINodes = new ArrayList<String>();
             logger.debug("Checking Pipeline_id:" + gpay.pipeline_id + " Pipeline_name:" + gpay.pipeline_name);
             for (gNode node : gpay.nodes) {
-                String vNode_id = node.node_id;
-                logger.debug("Checking vNode_id:" + vNode_id);
-                String iNode_id = plugin.getGDB().dba.getINodefromVNode(vNode_id);
+                //String vNode_id = node.node_id;
+                //logger.info("Checking vNode_id:" + vNode_id);
+                //String iNode_id = plugin.getGDB().dba.getINodefromVNode(vNode_id);
+                String iNode_id = node.node_id;
+
                 logger.debug("Checking iNode_id:" + iNode_id);
+                plugin.getGDB().dba.addINodeResource(gpay.pipeline_id, iNode_id);
+                /*
                 if (iNode_id != null) {
                     plugin.getGDB().gdb.addINodeResource(gpay.pipeline_id, iNode_id);
                 } else {
                     logger.error("iNode is null for vNode " + vNode_id);
                     return 1;
                 }
+                */
 
             }
 
@@ -325,7 +330,7 @@ public class AppSchedulerEngine implements Runnable {
             logger.debug("Checking vNode_id:" + vNode_id + " iNode_id:" + iNode_id);
 
             //plugin.getGDB().dba.setINodeStatus(iNode_id, "0", "Status Reset on Startup");
-            plugin.getGDB().gdb.addINodeResource(gpay.pipeline_id,iNode_id);
+            plugin.getGDB().dba.addINodeResource(gpay.pipeline_id,iNode_id);
             //addINodeResource
 
             //Check resources
