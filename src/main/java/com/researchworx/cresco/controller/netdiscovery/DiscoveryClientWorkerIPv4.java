@@ -66,6 +66,8 @@ class DiscoveryClientWorkerIPv4 {
                     me.setParam("dst_port", String.valueOf(packet.getPort()));
                     me.setParam("dst_region", me.getParam("src_region"));
                     me.setParam("dst_agent", me.getParam("src_agent"));
+                    me.setParam("src_region", plugin.getRegion());
+                    me.setParam("src_agent", plugin.getAgent());
                     if (disType == DiscoveryType.AGENT || disType == DiscoveryType.REGION || disType == DiscoveryType.GLOBAL) {
                         me.setParam("validated_authenication", ValidatedAuthenication(me));
                     }

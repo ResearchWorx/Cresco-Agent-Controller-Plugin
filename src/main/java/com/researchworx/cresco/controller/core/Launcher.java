@@ -187,7 +187,7 @@ public class Launcher extends CPlugin {
             this.GlobalControllerManagerActive = false;
 
             if (this.perfMonitorNet != null) {
-                this.perfMonitorNet.timer.cancel();
+                this.perfMonitorNet.stop();
                 this.perfMonitorNet = null;
             }
 
@@ -512,7 +512,7 @@ public class Launcher extends CPlugin {
                         logger.trace("commInit {}" + bm.getParams().toString());
                         cbrokerAddress = bm.getParam("dst_ip");
                         cbrokerValidatedAuthenication = bm.getParam("validated_authenication");
-                        cRegion = bm.getParam("src_region");
+                        cRegion = bm.getParam("dst_region");
                     }
                 }
                 if ((cbrokerAddress != null) && (cbrokerValidatedAuthenication != null)) {
@@ -542,7 +542,6 @@ public class Launcher extends CPlugin {
                     //create network perf monitor service
                     perfMonitorNet = new PerfMonitorNet(this);
                     logger.info("Network performance monitoring initialized");
-
                 }
                 this.isRegionalController = false;
             }

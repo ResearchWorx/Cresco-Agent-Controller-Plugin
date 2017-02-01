@@ -19,7 +19,7 @@ class PerfMonitorNet {
     private boolean running = false;
     private Gson gson;
     private CLogger logger;
-
+    private boolean polling = false;
 
     PerfMonitorNet(Launcher plugin) {
         this.plugin = plugin;
@@ -54,22 +54,29 @@ class PerfMonitorNet {
         running = false;
     }
 
-    private void getList() {
+    private List<MsgEvent> getNetworkDiscoveryList() {
+        List<MsgEvent> discoveryList = null;
+        polling = true;
+        try {
+            discoveryList = new ArrayList<>();
+            if (plugin.isIPv6()) {
+                logger.debug("Broker Search (IPv6)...");
+                discoveryList.addAll(plugin.getDiscoveryClientIPv6().getDiscoveryResponse(DiscoveryType.NETWORK, plugin.getConfig().getIntegerParam("discovery_ipv6_agent_timeout", 2000)));
+                logger.debug("IPv6 Broker count = {}" + discoveryList.size());
+            }
+            logger.debug("Broker Search (IPv4)...");
+            discoveryList.addAll(plugin.getDiscoveryClientIPv4().getDiscoveryResponse(DiscoveryType.NETWORK, plugin.getConfig().getIntegerParam("discovery_ipv4_agent_timeout", 2000)));
+            logger.debug("Broker count = {}" + discoveryList.size());
 
-        List<MsgEvent> discoveryList = new ArrayList<>();
-        if (plugin.isIPv6()) {
-            logger.debug("Broker Search (IPv6)...");
-            discoveryList.addAll(plugin.getDiscoveryClientIPv6().getDiscoveryResponse(DiscoveryType.NETWORK, plugin.getConfig().getIntegerParam("discovery_ipv6_agent_timeout", 2000)));
-            logger.debug("IPv6 Broker count = {}" + discoveryList.size());
+            //for (MsgEvent me : discoveryList) {
+            //    logger.debug(me.getParams().toString());
+            //}
         }
-        logger.debug("Broker Search (IPv4)...");
-        discoveryList.addAll(plugin.getDiscoveryClientIPv4().getDiscoveryResponse(DiscoveryType.NETWORK, plugin.getConfig().getIntegerParam("discovery_ipv4_agent_timeout", 2000)));
-        logger.debug("Broker count = {}" + discoveryList.size());
-
-        for(MsgEvent me : discoveryList) {
-            logger.debug(me.getParams().toString());
+        catch(Exception ex) {
+            logger.error("getNetworkDiscoveryList() " + ex.getMessage());
         }
-
+        polling = false;
+        return discoveryList;
     }
 
 
@@ -81,20 +88,25 @@ class PerfMonitorNet {
         }
 
         public void run() {
-            MsgEvent tick = new MsgEvent(MsgEvent.Type.KPI, plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), "Performance Monitoring tick.");
-            tick.setParam("src_region", plugin.getRegion());
-            tick.setParam("src_agent", plugin.getAgent());
-            tick.setParam("src_plugin", plugin.getPluginID());
-            tick.setParam("dst_region", plugin.getRegion());
-            tick.setParam("resource_id",plugin.getConfig().getStringParam("resource_id","networkdiscovery_resource"));
-            tick.setParam("inode_id",plugin.getConfig().getStringParam("inode_id","networkdiscovery_inode"));
-            //tick.setParam("container_image",de.containerImage);
-            //ResourceMetric rm = de.getResourceMetric(container_id);
-            //String resourceMetricJSON = gson.toJson(rm);
-            //tick.setParam("resource_metric", resourceMetricJSON);
-            getList();
 
-            plugin.msgIn(tick);
+            if(!polling) {
+                MsgEvent tick = new MsgEvent(MsgEvent.Type.KPI, plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), "Performance Monitoring tick.");
+                tick.setParam("src_region", plugin.getRegion());
+                tick.setParam("src_agent", plugin.getAgent());
+                tick.setParam("src_plugin", plugin.getPluginID());
+                tick.setParam("dst_region", plugin.getRegion());
+                tick.setParam("resource_id", plugin.getConfig().getStringParam("resource_id", "networkdiscovery_resource"));
+                tick.setParam("inode_id", plugin.getConfig().getStringParam("inode_id", "networkdiscovery_inode"));
+
+                List<MsgEvent> discoveryList = getNetworkDiscoveryList();
+                String discoveryListString = null;
+                if(discoveryList != null) {
+                    discoveryListString = gson.toJson(discoveryList);
+                }
+                tick.setParam("network_map", discoveryListString);
+
+                plugin.msgIn(tick);
+            }
         }
     }
 }
