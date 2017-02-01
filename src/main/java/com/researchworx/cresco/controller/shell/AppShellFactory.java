@@ -92,7 +92,7 @@ public class AppShellFactory implements Factory {
 
 
         private static final String SHELL_CMD_RESOURCES = "resources";
-        private static final String SHELL_CMD_DATABASE = "db";
+        private static final String SHELL_CMD_DATABASE = "com/researchworx/cresco/controller/db";
 
         private InputStream in;
         private OutputStream out;

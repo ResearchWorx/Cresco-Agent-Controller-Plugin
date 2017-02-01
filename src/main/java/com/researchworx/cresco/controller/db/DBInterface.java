@@ -1,7 +1,6 @@
 package com.researchworx.cresco.controller.db;
 
 import com.researchworx.cresco.controller.core.Launcher;
-import com.researchworx.cresco.controller.regionalcontroller.AgentNode;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 
@@ -13,7 +12,6 @@ import java.util.Map;
 
 public class DBInterface {
 
-    private Map<String, AgentNode> agentMap;
     private Launcher plugin;
     private CLogger logger;
     private DBEngine gde;
@@ -26,7 +24,6 @@ public class DBInterface {
         this.gde = new DBEngine(plugin);
         this.gdb = new DBBaseFunctions(plugin,gde);
         this.dba = new DBApplicationFunctions(plugin,gde);
-
     }
 
     public Map<String,String> paramStringToMap(String param) {
@@ -104,17 +101,17 @@ public class DBInterface {
                             if (pluginList != null) {
 
                                 boolean isRecorded = false;
-                                for (String plugin : pluginList) {
+                                for (String pluginId : pluginList) {
                                     logger.trace("Plugin : " + plugin);
                                     plugin_count++;
                                     if (!isRecorded) {
-                                        String pluginConfigparams = gdb.getNodeParam(region, agent, plugin, "configparams");
+                                        String pluginConfigparams = gdb.getNodeParam(region, agent, pluginId, "configparams");
                                         logger.trace("configParams : " + pluginConfigparams);
                                         if (pluginConfigparams != null) {
                                             Map<String, String> pMap = paramStringToMap(pluginConfigparams);
                                             if (pMap.get("pluginname").equals("cresco-sysinfo-plugin")) {
 
-                                                String isAssignedEdgeId = dba.getResourceEdgeId("sysinfo_resource", "sysinfo_inode",region,agent);
+                                                String isAssignedEdgeId = dba.getResourceEdgeId("sysinfo_resource", "sysinfo_inode",region,agent,pluginId);
                                                 Map<String,String> edgeParams = dba.getIsAssignedParams(isAssignedEdgeId);
                                                 cpu_core_count += Long.parseLong(edgeParams.get("cpu-logical-count"));
                                                 memoryAvailable += Long.parseLong(edgeParams.get("memory-available"));
@@ -359,21 +356,6 @@ public class DBInterface {
         return updatedKPI;
     }
 
-    public Map<String, String> getNodeParams(String region, String agent, String plugin) {
-        try {
-            if ((region != null) && (agent != null) && (plugin == null)) //agent node
-            {
-                return agentMap.get(agent).getAgentParams();
-            } else if ((region != null) && (agent != null) && (plugin != null)) //plugin node
-            {
-                return agentMap.get(agent).getPluginParams(plugin);
-            }
-            return null;
-        } catch (Exception ex) {
-            System.out.println("Controller : ControllerDB : getNodeParams ERROR : " + ex.toString());
-            return null;
-        }
-    }
 
     public Boolean removeNode(MsgEvent de) {
         Boolean wasRemoved = false;

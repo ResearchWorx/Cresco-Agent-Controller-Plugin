@@ -136,10 +136,10 @@ public class webREST {
 	    	//controllercmd
 	    	
 	    	//if(me.getParam("cmd") != null) {
-                logger.info("Controller : webREST : Incoming");
-                logger.info("MsgType=" + me.getMsgType().toString());
-                logger.info("Region=" + me.getMsgRegion() + " Agent=" + me.getMsgAgent() + " plugin=" + me.getMsgPlugin());
-                logger.info("params=" + me.getParams().toString());
+                logger.debug("Controller : webREST : Incoming");
+                logger.debug("MsgType=" + me.getMsgType().toString());
+                logger.debug("Region=" + me.getMsgRegion() + " Agent=" + me.getMsgAgent() + " plugin=" + me.getMsgPlugin());
+                logger.debug("params=" + me.getParams().toString());
                 //CODY
             //}
 	    	

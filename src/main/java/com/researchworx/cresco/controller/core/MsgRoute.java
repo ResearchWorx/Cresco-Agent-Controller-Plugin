@@ -22,9 +22,11 @@ public class MsgRoute implements Runnable {
 
             int routePath = getRoutePath();
 
-            //if(rm.getMsgType() == MsgEvent.Type.CONFIG) {
+            /*
+            if(rm.getMsgType() == MsgEvent.Type.CONFIG) {
                 logger.info("msgType: [" + rm.getMsgType().toString() + "] routepath: " + routePath + "[" + rm.getParams().toString() + "]");
-            //}
+            }
+            */
 
             MsgEvent re = null;
             switch (routePath) {

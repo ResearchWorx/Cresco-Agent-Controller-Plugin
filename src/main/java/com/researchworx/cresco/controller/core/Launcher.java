@@ -456,7 +456,7 @@ public class Launcher extends CPlugin {
                 }
                 //logger.debug("Region ConsumerThread Started..");
 
-                this.gdb = new DBInterface(this); //start db service
+                this.gdb = new DBInterface(this); //start com.researchworx.cresco.controller.db service
                 logger.debug("RegionalControllerDB Service Started");
                 this.discoveryMap = new ConcurrentHashMap<>(); //discovery map
 
@@ -876,4 +876,10 @@ public class Launcher extends CPlugin {
         if (this.gdb != null)
             this.gdb.removeNode(region, agent, pluginID);
     }
+    public String getStringFromError(Exception ex) {
+        StringWriter errors = new StringWriter();
+        ex.printStackTrace(new PrintWriter(errors));
+        return errors.toString();
+    }
+
 }

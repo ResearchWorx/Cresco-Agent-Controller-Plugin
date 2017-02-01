@@ -1,14 +1,10 @@
 package com.researchworx.cresco.controller.db;
 
 import com.orientechnologies.orient.client.remote.OServerAdmin;
-import com.orientechnologies.orient.core.config.OGlobalConfiguration;
 import com.orientechnologies.orient.core.db.OPartitionedDatabasePool;
-import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.utilities.CLogger;
-import com.tinkerpop.blueprints.TransactionalGraph;
-import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
 
 
@@ -27,22 +23,34 @@ public class DBEngine {
     private void setPool() {
         try {
             String host = plugin.getConfig().getStringParam("gdb_host");
+            //String host = null;
             String username = plugin.getConfig().getStringParam("gdb_username");
             String password = plugin.getConfig().getStringParam("gdb_password");
             String dbname = plugin.getConfig().getStringParam("gdb_dbname");
 
 
-            //String remote = "remote:localhost/";
-            //String nameDB = "domain";
-            //String url = remote + nameDB;
-            //ODatabaseDocumentTx db = pool.acquire();
-            //factory = new OrientGraphFactory(connection_string, username, password, pool);
-
-
             String iURI = null;
             if ((host != null) && (username != null) && (password != null) && (dbname != null)) {
                 iURI = "remote:" + host + "/" + dbname;
+                String adminIURI = "remote:" + host + "/";
+
+                if(dbExist(iURI,username,password)) {
+                    logger.debug("remove DB");
+                    if (removeDB(iURI, username, password, dbname)) {
+                        logger.debug("removed DB");
+                    } else {
+                        logger.error("failed remove DB");
+                    }
+                }
+                if(createDB(iURI,username,password)) {
+                    logger.debug("setPool() Create Database.");
+                }
+                else {
+                    logger.error("setPool() Failed to Create Database!");
+                }
+
                 pool = new OPartitionedDatabasePool(iURI, username,password).setAutoCreate(true);
+                //pool = new OPartitionedDatabasePool(iURI, username,password, 100, 1000).setAutoCreate(true);
                 factory = new OrientGraphFactory(iURI, username, password, true);
             }
             else {
@@ -51,7 +59,6 @@ public class DBEngine {
                 //pool = new OPartitionedDatabasePool(iURI, username,password).setAutoCreate(true);
                 //factory = new OrientGraphFactory(iURI, username, password, true);
                 db = new ODatabaseDocumentTx("memory:internalDb").create();
-
                 factory = new OrientGraphFactory("memory:internalDb");
 
 
@@ -63,34 +70,76 @@ public class DBEngine {
         }
         catch(Exception ex) {
             logger.error("setPool : " + ex.getMessage());
+            logger.error(plugin.getStringFromError(ex));
         }
 
     }
 
+    private boolean dbExist(String iURI, String username, String password) {
+        boolean exist = false;
+        try {
+            OServerAdmin serverAdmin = new OServerAdmin(iURI).connect(username, password);
+            if(serverAdmin.existsDatabase("plocal")) {
+                exist = true;
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.error(plugin.getStringFromError(ex));
+        }
+        return exist;
+    }
+
+    private boolean removeDB(String iURI, String username, String password, String dbname) {
+        boolean exist = false;
+        try {
+            OServerAdmin serverAdmin = new OServerAdmin(iURI).connect(username, password);
+            serverAdmin.dropDatabase(dbname);
+            exist = true;
+        }
+        catch(Exception ex)
+        {
+            logger.error(plugin.getStringFromError(ex));
+        }
+        return exist;
+    }
+
+    private boolean createDB(String iURI, String username, String password) {
+        boolean exist = false;
+        try {
+            OServerAdmin serverAdmin = new OServerAdmin(iURI).connect(username, password);
+            //serverAdmin.createDatabase(dbname, "graph", "plocal");
+            //serverAdmin.createDatabase("graph", "plocal");
+            //OServerAdmin serverAdmin = new OServerAdmin("remote:localhost/cresco").connect("root", "cody01");
+            //OServerAdmin serverAdmin = new OServerAdmin("remote:127.0.0.1/cresco").connect("root", "cody01");
+            serverAdmin.createDatabase("graph", "plocal");
+
+            exist = true;
+        }
+        catch(Exception ex)
+        {
+            logger.error(plugin.getStringFromError(ex));
+        }
+        return exist;
+    }
 
     public DBEngine(Launcher plugin) {
 
         this.plugin = plugin;
-        logger = new CLogger(DBEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+        logger = new CLogger(DBEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Debug);
         this.retryCount = plugin.getConfig().getIntegerParam("db_retry_count",50);
         //this.factory = getFactory();
-
+        setPool();
+        /*
         String host = plugin.getConfig().getStringParam("gdb_host");
         String username = plugin.getConfig().getStringParam("gdb_username");
         String password = plugin.getConfig().getStringParam("gdb_password");
         String dbname = plugin.getConfig().getStringParam("gdb_dbname");
 
-
-        //String remote = "remote:localhost/";
-        //String nameDB = "domain";
-        //String url = remote + nameDB;
-        //ODatabaseDocumentTx db = pool.acquire();
-        //factory = new OrientGraphFactory(connection_string, username, password, pool);
-
-
         String iURI = null;
         if ((host != null) && (username != null) && (password != null) && (dbname != null)) {
             iURI = "remote:" + host + "/" + dbname;
+
             pool = new OPartitionedDatabasePool(iURI, username,password).setAutoCreate(true);
             factory = new OrientGraphFactory(iURI, username, password, true);
         }
@@ -104,6 +153,7 @@ public class DBEngine {
             factory = new OrientGraphFactory("memory:internalDb");
 
         }
+        */
     }
 
     public boolean dbCheck(String connection_string, String username, String password) {

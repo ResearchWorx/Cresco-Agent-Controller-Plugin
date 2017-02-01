@@ -2,13 +2,10 @@ package com.researchworx.cresco.controller.globalscheduler;
 
 
 import com.researchworx.cresco.controller.core.Launcher;
-import com.researchworx.cresco.controller.globalcontroller.GlobalCommandExec;
 import com.researchworx.cresco.controller.globalcontroller.GlobalHealthWatcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 
-import java.util.ArrayList;
-import java.util.List;
 
 public class PollRemovePlugin implements Runnable { 
 
@@ -16,7 +13,6 @@ public class PollRemovePlugin implements Runnable {
 	private String inode_id = null;
 	private Launcher plugin;
 	private GlobalHealthWatcher ghw;
-	private GlobalCommandExec gexec;
 	private CLogger logger;
 
 	public PollRemovePlugin(Launcher plugin, String resource_id, String inode_id)
@@ -26,128 +22,73 @@ public class PollRemovePlugin implements Runnable {
 		this.plugin = plugin;
 		this.resource_id = resource_id;
 		this.inode_id = inode_id;
-		this.gexec = new GlobalCommandExec(plugin);
-		
 	}
 
 	public void run() {
-        try 
-        {
+        try {
 
-        	String edge_id = plugin.getGDB().dba.getResourceEdgeId(resource_id, inode_id);
-    		if(edge_id != null)
-    		{
-    			String pnode_node_id = plugin.getGDB().dba.getIsAssignedParam(edge_id, "out");
-    			if(pnode_node_id != null)
-				{
-    				pnode_node_id = pnode_node_id.substring(pnode_node_id.indexOf("[") + 1, pnode_node_id.indexOf("]"));
-    				
-    				String region = plugin.getGDB().dba.getIsAssignedParam(edge_id, "region");
-    				String agent = plugin.getGDB().dba.getIsAssignedParam(edge_id, "agent");
-    				String pluginId = plugin.getGDB().dba.getIsAssignedParam(edge_id, "plugin");
+            if(plugin.getGDB().dba.getINodeStatus(inode_id) > 8) {
+            String edge_id = plugin.getGDB().dba.getResourceEdgeId(resource_id, inode_id);
+            if (edge_id != null) {
+                String pnode_node_id = plugin.getGDB().dba.getIsAssignedParam(edge_id, "out");
+                if (pnode_node_id != null) {
+                    pnode_node_id = pnode_node_id.substring(pnode_node_id.indexOf("[") + 1, pnode_node_id.indexOf("]"));
 
-    				logger.debug("starting to remove r: " + region + " a:" + agent + " p:" + pluginId);
+                    String region = plugin.getGDB().dba.getIsAssignedParam(edge_id, "region");
+                    String agent = plugin.getGDB().dba.getIsAssignedParam(edge_id, "agent");
+                    String pluginId = plugin.getGDB().dba.getIsAssignedParam(edge_id, "plugin");
 
-    				String pnode_node_id_match = plugin.getGDB().gdb.getNodeId(region, agent, pluginId);
+                    logger.debug("starting to remove r: " + region + " a:" + agent + " p:" + pluginId);
 
-					if(pnode_node_id.equals(pnode_node_id_match))
-    				{
-    					//fire off remove command
-        				MsgEvent me = removePlugin(region,agent,pluginId);
-        				//gexec.cmdExec(me);
+                    String pnode_node_id_match = plugin.getGDB().gdb.getNodeId(region, agent, pluginId);
+
+                    if (pnode_node_id.equals(pnode_node_id_match)) {
+                        MsgEvent me = removePlugin(region, agent, pluginId);
                         plugin.msgIn(me);
-        				//ControllerEngine.commandExec.cmdExec(me);
-        				//loop until remove is completed
-        				
-    					int count = 0;
-	        			boolean isRemoved = false;
-	        			while((!isRemoved) && (count < 30))
-	        			{
-	        				if(plugin.getGDB().gdb.getNodeId(region, agent, pluginId) == null)
-	        				{
-	        					isRemoved = true;
-                                logger.debug("removed r: " + region + " a:" + agent + " p:" + pluginId);
 
+                        int count = 0;
+                        boolean isRemoved = false;
+                        while ((!isRemoved) && (count < 10)) {
+                            if (plugin.getGDB().gdb.getNodeId(region, agent, pluginId) == null) {
+                                isRemoved = true;
                             }
-	        				else
-	        				{
-	        					Thread.sleep(1000);
-	        				}
-	        			}
-	        			if(isRemoved)
-	        			{
-	        				logger.debug("Deactivated iNode: " + inode_id);
+                            Thread.sleep(1000);
 
-	        			}
-	        			else
-	        			{
-	        				logger.debug("ResourceSchedulerEngine : pollRemovePlugin : unable to verify iNode deactivation!");
-	        			}
-	        			
-    				}
-    				else {
-                        logger.error("pnode_node_id mismatch : pnode_node_id " + pnode_node_id + " != " + pnode_node_id_match);
+                            if(count == 2) {
+                                isRemoved = true;
+                            }
+
+                            count++;
+                        }
+                        if (isRemoved) {
+                            plugin.getGDB().dba.setINodeParam(inode_id, "status_code", "8");
+                            plugin.getGDB().dba.setINodeParam(inode_id,"status_desc","iNode Disabled");
+                            logger.debug("removed r: " + region + " a:" + agent + " p:" + pluginId + " for inode:" + inode_id);
+                        } else {
+                            plugin.getGDB().dba.setINodeParam(inode_id, "status_code", "90");
+                            plugin.getGDB().dba.setINodeParam(inode_id,"status_desc","iNode unable to verify iNode deactivation!");
+                            logger.debug("pollRemovePlugin : unable to verify iNode deactivation! " + plugin.getGDB().dba.getINodeStatus(inode_id));
+
+                        }
+
+                    } else {
+                        String errorString = "pnode_node_id mismatch : pnode_node_id " + pnode_node_id + " != " + pnode_node_id_match;
+                        logger.error(errorString);
+                        plugin.getGDB().dba.setINodeParam(inode_id, "status_code", "91");
+                        plugin.getGDB().dba.setINodeParam(inode_id,"status_desc",errorString);
                     }
-    				
-    				
-				}
-				else {
-                    logger.error("pnode_node_id=null");
+
+                } else {
+                    plugin.getGDB().dba.setINodeParam(inode_id, "status_code", "92");
+                    logger.error("plugin not found for resource_id: " + resource_id + " inode_id:" + inode_id + " setting inode status");
                 }
-    			
-    		}
-    		else
-    		{
-    			logger.error("Edge_id=null");
-    		}
-    		logger.debug("Removing iNode: " + inode_id);
 
-            //remove enodes
-            List<String> eNodeList = plugin.getGDB().dba.getNodeIdFromEdge("inode", "in", "enode_id", false, "inode_id",inode_id);
-            eNodeList.addAll(plugin.getGDB().dba.getNodeIdFromEdge("inode", "out", "enode_id",true, "inode_id",inode_id));
-            for(String eNodeId : eNodeList) {
-                logger.debug("enodes remove" + eNodeId);
-                plugin.getGDB().dba.removeNode(plugin.getGDB().dba.getENodeNodeId(eNodeId));
+                }
             }
-
-            //remove vnode
-            plugin.getGDB().dba.removeNode(plugin.getGDB().dba.getvNodefromINode(inode_id));
-
-            //remove inode
-            plugin.getGDB().dba.removeINode(resource_id,inode_id);
-
-			//remove resource_id if this is the last resource
-			List<String> inodes = plugin.getGDB().dba.getresourceNodeList(resource_id,null);
-			logger.error("in pipeline " + resource_id + " there are " + inodes.size() + " plugins left");
-			for(String str : inodes) {
-			    logger.error("inode left " + str);
-            }
-
-			if(inodes == null)
-			{
-				plugin.getGDB().dba.removeResourceNode(resource_id);
-			}
-
-			
-        	/*
-        	if(edge_id != null)
-        	{
-        		if((ControllerEngine.gdb.setINodeParam(resource_id,inode_id,"status_code","10")) &&
-						(ControllerEngine.gdb.setINodeParam(resource_id,inode_id,"status_desc","iNode Active.")))
-				{
-						//recorded plugin activations
-        				System.out.println("ResourceSchedulerEngine : pollAddPlugin : Activated inode_id=" + inode_id);
-				}
-        	}
-        	else
-        	{
-        		System.out.println("ResourceSchedulerEngine : pollAddPlugin : unable to verify iNode activation!");
-        	}
-        	*/
         }
-	   catch(Exception v) 
+	   catch(Exception ex)
 	   {
-            logger.error(v.getMessage());
+            logger.error("PollRemovePlugin : " + ex.getMessage());
        }
     }  
 

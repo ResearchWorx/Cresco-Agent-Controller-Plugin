@@ -12,9 +12,7 @@ import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.sql.OCommandSQL;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.utilities.CLogger;
-import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
@@ -138,7 +136,6 @@ public class DBBaseFunctions {
 
             if((region != null) && (agent == null) && (plugin == null))
             {
-                //OrientGraphNoTx graph = factory.getNoTx();
                 graph = factory.getTx();
 
                 Iterable<Vertex> resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:rNode.nodePath WHERE key = '" + region + "'")).execute();
@@ -177,10 +174,26 @@ public class DBBaseFunctions {
             }
             else if((region != null) && (agent != null) && (plugin != null))
             {
+                /*
+                //TransactionalGraph tgraph = factory.getTx();
+                OIndex<?> idx = factory.getDatabase().getMetadata().getIndexManager().getIndex("pNode.nodePath");
+                String key = "[\"" + region + "\",\"" + agent + "\",\"" + plugin +"\"]";
+                //OIdentifiable rec = idx.get(key);
+                Object luke = (Object)idx.get(key);
+                logger.error(luke.toString());
+                */
+                //OIndex<OIdentifiable> idx = factory.getDatabase().getMetadata().getIndexManager().getIndex("pNode.nodePath");
+                //OIdentifiable rec = idx.get(id);
+
                 //OrientGraph graph = factory.getTx();
                 //OrientGraphNoTx graph = factory.getNoTx();
+                //graph = factory.getTx();
+                //OrientGraphNoTx g = null;
+                //g = factory.getNoTx();
                 graph = factory.getTx();
-                Iterable<Vertex> resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:pNode.nodePath WHERE key = [\"" + region + "\",\"" + agent + "\",\"" + plugin +"\"]")).execute();
+
+                String query = "SELECT rid FROM INDEX:pNode.nodePath WHERE key = [\"" + region + "\",\"" + agent + "\",\"" + plugin +"\"]";
+                Iterable<Vertex> resultIterator = graph.command(new OCommandSQL(query)).execute();
                 Iterator<Vertex> iter = resultIterator.iterator();
                 if(iter.hasNext())
                 {
@@ -194,6 +207,7 @@ public class DBBaseFunctions {
                 {
                     node_id = node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
                 }
+
             }
 
         }
@@ -1154,12 +1168,14 @@ public class DBBaseFunctions {
             //createEdgeClass("isPlugin",isPluginProps);
             createEdgeClass("isPlugin",null);
 
-
-
         }
         catch(Exception ex)
         {
-            logger.debug("initCrescoDB Error: " + ex.toString());
+            logger.debug("Base initCrescoDB Error: " + ex.toString());
+            StringWriter errors = new StringWriter();
+            ex.printStackTrace(new PrintWriter(errors));
+            logger.debug("Base initCrescoDB Error: " + errors.toString());
+
         }
     }
 
@@ -1301,7 +1317,11 @@ public class DBBaseFunctions {
             //logger.info("Uncompressed Import :" + result);
 
             //InputStream is = new ByteArrayInputStream(exportData.getBytes(StandardCharsets.UTF_8));
-            //ODatabaseDocumentTx db = pool.acquire();
+            if(db == null) {
+                ODatabaseDocumentTx db = pool.acquire();
+            }
+
+
             DBImport dbImport = new DBImport(plugin, is, this,db);
             isImported = dbImport.importDump();
             //db.close();
@@ -1336,7 +1356,10 @@ public class DBBaseFunctions {
             //create location for output stream
 
             InputStream is = new ByteArrayInputStream(exportData.getBytes(StandardCharsets.UTF_8));
-            //ODatabaseDocumentTx db = pool.acquire();
+
+            if(db == null) {
+                ODatabaseDocumentTx db = pool.acquire();
+            }
 
             ODatabaseImport dbImport = new ODatabaseImport(db, is, listener);
             //operation
@@ -1407,14 +1430,10 @@ public class DBBaseFunctions {
             //ODatabaseDocumentTx db = null;
             //db = factory.getDatabase();
 
-            /*
-            if(pool != null) {
-                db = pool.acquire();
+
+            if(db == null) {
+                ODatabaseDocumentTx db = pool.acquire();
             }
-            else {
-                db = factory.getDatabase();
-            }
-            */
             ODatabaseRecordThreadLocal.INSTANCE.set(db);
             ODatabaseExport export = new ODatabaseExport(db, os, listener);
             //filter export
@@ -1526,7 +1545,12 @@ public class DBBaseFunctions {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             //ODatabaseDocumentTx db = pool.acquire();
 
-            ODatabaseExport export = new ODatabaseExport(db, os, listener);
+            if(db == null) {
+                ODatabaseDocumentTx db = pool.acquire();
+            }
+
+
+        ODatabaseExport export = new ODatabaseExport(db, os, listener);
 
             export.exportDatabase();
 

@@ -11,6 +11,8 @@ import com.sun.media.jfxmedia.logging.Logger;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 public class AppSchedulerEngine implements Runnable {
@@ -21,12 +23,13 @@ public class AppSchedulerEngine implements Runnable {
     public FuturaEngine fe;
     public GuilderEngine ge;
     public OptimaEngine oe;
-
+    private ExecutorService addPipelineExecutor;
 
     public AppSchedulerEngine(Launcher plugin, GlobalHealthWatcher ghw) {
 		this.logger = new CLogger(AppSchedulerEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
 		this.plugin = plugin;
 		this.ghw = ghw;
+        addPipelineExecutor = Executors.newFixedThreadPool(1);
         oe = new OptimaEngine(plugin,this);
         fe = new FuturaEngine(plugin,this);
         ge = new GuilderEngine(plugin,this);
@@ -49,15 +52,15 @@ public class AppSchedulerEngine implements Runnable {
 
                         gPayload createdPipeline = plugin.getGDB().dba.createPipelineNodes(gpay);
 
-                        if(createdPipeline.status_code.equals("3"))
-                        {
+                        if(createdPipeline.status_code.equals("3")) {
                             logger.debug("Created Pipeline Records: " + gpay.pipeline_name + " id=" + gpay.pipeline_id);
                             //start creating real objects
 
                             int pipelineStatus = schedulePipeline(gpay.pipeline_id);
-                            switch (pipelineStatus ) {
+
+                            switch (pipelineStatus) {
                                 //all metrics
-                                case 1: plugin.getGDB().dba.setPipelineStatus(gpay.pipeline_id,"1","Failed to schedule pipeline resources.");
+                                case 1: plugin.getGDB().dba.setPipelineStatus(gpay.pipeline_id,"40","Failed to schedule pipeline resources.");
                                     break;
                                 case 2: logger.error("Learn to schedule resources!");
                                 case 4: plugin.getGDB().dba.setPipelineStatus(gpay.pipeline_id,"4","Pipeline resources scheduled.");
@@ -209,8 +212,13 @@ public class AppSchedulerEngine implements Runnable {
             }
 
             if ((schedulemaps.get("assigned").size() != 0) && (schedulemaps.get("unassigned").size() == 0) && (schedulemaps.get("error").size() == 0) && (schedulemaps.get("noresource").size() == 0)) {
-                logger.info("Scheduling is ready!");
+                logger.debug("Scheduling is ready!");
 
+                logger.debug("Submitting Resource Pipeline for Scheduling " + gpay.pipeline_id);
+                addPipelineExecutor.execute(new PollAddPipeline(plugin,schedulemaps.get("assigned"), gpay.pipeline_id));
+                logger.debug("Submitted Resource Pipeline for Scheduling");
+
+                /*
                 for(gNode gnode : schedulemaps.get("assigned")) {
                     logger.debug("gnode_id : " + gnode.node_id + " params : " + gnode.params);
                     MsgEvent me = new MsgEvent(MsgEvent.Type.CONFIG, null, null, null, "add application node");
@@ -235,6 +243,7 @@ public class AppSchedulerEngine implements Runnable {
                     logger.debug("Message [" + me.getParams().toString() + "]");
                     plugin.getResourceScheduleQueue().offer(me);
                 }
+                */
 
                 return 4;
             } else {

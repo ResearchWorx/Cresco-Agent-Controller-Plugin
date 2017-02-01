@@ -3,6 +3,7 @@ package com.researchworx.cresco.controller.globalcontroller;
 
 import com.researchworx.cresco.controller.app.gPayload;
 import com.researchworx.cresco.controller.core.Launcher;
+import com.researchworx.cresco.controller.globalscheduler.PollRemovePipeline;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 
@@ -14,17 +15,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.jar.*;
 
 public class GlobalCommandExec {
 
 	private Launcher plugin;
 	private CLogger logger;
+	private ExecutorService removePipelineExecutor;
 
 	public GlobalCommandExec(Launcher plugin)
 	{
-		this.logger = new CLogger(GlobalCommandExec.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Debug);
+		this.logger = new CLogger(GlobalCommandExec.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
 		this.plugin = plugin;
+		removePipelineExecutor = Executors.newFixedThreadPool(1);
     }
 
 	public MsgEvent cmdExec(MsgEvent ce)
@@ -38,13 +43,13 @@ public class GlobalCommandExec {
 						if((ce.getParam("inode_id") != null) && (ce.getParam("resource_id") != null) && (ce.getParam("configparams") != null))
 						{
 							
-							if(plugin.getGDB().dba.getINodeId(ce.getParam("resource_id"),ce.getParam("inode_id")) == null)
+							if(plugin.getGDB().dba.getpNodeINode(ce.getParam("inode_id")) == null)
 							{
 								if(plugin.getGDB().dba.addINode(ce.getParam("resource_id"),ce.getParam("inode_id")) != null)
 								{
-									if((plugin.getGDB().dba.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_code","0")) &&
-										(plugin.getGDB().dba.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_desc","iNode Scheduled.")) &&
-										(plugin.getGDB().dba.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"configparams",ce.getParam("configparams"))))
+									if((plugin.getGDB().dba.setINodeParam(ce.getParam("inode_id"),"status_code","0")) &&
+										(plugin.getGDB().dba.setINodeParam(ce.getParam("inode_id"),"status_desc","iNode Scheduled.")) &&
+										(plugin.getGDB().dba.setINodeParam(ce.getParam("inode_id"),"configparams",ce.getParam("configparams"))))
 									{
 										ce.setParam("status_code","0");
 										ce.setParam("status_desc","iNode Scheduled");
@@ -80,10 +85,10 @@ public class GlobalCommandExec {
 					{
 						if((ce.getParam("inode_id") != null) && (ce.getParam("resource_id") != null))
 						{
-							if(plugin.getGDB().dba.getINodeId(ce.getParam("resource_id"),ce.getParam("inode_id")) != null)
+							if(plugin.getGDB().dba.getpNodeINode(ce.getParam("inode_id")) != null)
 							{
-								if((plugin.getGDB().dba.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_code","10")) &&
-								(plugin.getGDB().dba.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_desc","iNode scheduled for removal.")))
+								if((plugin.getGDB().dba.setINodeParam(ce.getParam("inode_id"),"status_code","10")) &&
+								(plugin.getGDB().dba.setINodeParam(ce.getParam("inode_id"),"status_desc","iNode scheduled for removal.")))
 								{
 									ce.setParam("status_code","10");
 									ce.setParam("status_desc","iNode scheduled for removal.");
@@ -180,8 +185,8 @@ public class GlobalCommandExec {
 						{
 							if((ce.getParam("inode_id") != null) && (ce.getParam("resource_id") != null))
 							{
-								String status_code = plugin.getGDB().dba.getINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_code");
-								String status_desc = plugin.getGDB().dba.getINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_desc");
+								String status_code = plugin.getGDB().dba.getINodeParam(ce.getParam("inode_id"),"status_code");
+								String status_desc = plugin.getGDB().dba.getINodeParam(ce.getParam("inode_id"),"status_desc");
 								if((status_code != null) && (status_desc != null))
 								{
 									ce.setParam("status_code",status_code);
@@ -333,12 +338,30 @@ public class GlobalCommandExec {
                         }
                         return ce;
                     }
+                    else if(ce.getParam("globalcmd").equals("getgpipelinestatus"))
+                    {
+                        try
+                        {
+                            if(ce.getParam("pipeline_id") != null) {
+                                String pipelineId = ce.getParam("pipeline_id");
+                                int pipelineStatus = plugin.getGDB().dba.getPipelineStatus(pipelineId);
+                                ce.setParam("status_code",String.valueOf(pipelineStatus));
+                            }
+                        }
+                        catch(Exception ex)
+                        {
+                            logger.error("getgpipelinelist " + ex.getMessage());
+                        }
+                        return ce;
+                    }
                     else if(ce.getParam("globalcmd").equals("gpipelineremove"))
                     {
                         try
                         {
                             if(ce.getParam("pipeline_id") != null) {
                                 String pipelineId = ce.getParam("pipeline_id");
+                                removePipelineExecutor.execute(new PollRemovePipeline(plugin, pipelineId));
+                                /*
                                 List<String> iNodeList = plugin.getGDB().dba.getresourceNodeList(pipelineId,null);
 
                                 for(String iNodeId : iNodeList) {
@@ -353,8 +376,7 @@ public class GlobalCommandExec {
                                     plugin.getResourceScheduleQueue().offer(me);
 
                                 }
-
-
+                                */
 
                                 ce.setParam("isremoved","true");
                             }
