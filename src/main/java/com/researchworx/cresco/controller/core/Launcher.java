@@ -36,6 +36,9 @@ public class Launcher extends CPlugin {
 
     private ExecutorService msgInProcessQueue;
 
+    //perf monitor for controller for networks
+    private PerfMonitorNet perfMonitorNet;
+
     //regional
     private DBInterface gdb;
 
@@ -182,6 +185,11 @@ public class Launcher extends CPlugin {
             this.ConsumerThreadActive = false;
             this.ActiveBrokerManagerActive = false;
             this.GlobalControllerManagerActive = false;
+
+            if (this.perfMonitorNet != null) {
+                this.perfMonitorNet.timer.cancel();
+                this.perfMonitorNet = null;
+            }
 
             if (this.discoveryEngineThread != null) {
                 logger.trace("Discovery Engine shutting down");
@@ -531,6 +539,12 @@ public class Launcher extends CPlugin {
                     this.agentpath = this.region + "_" + this.agent;
                     logger.debug("AgentPath=" + this.agentpath);
 
+                    //start network service
+                    perfMonitorNet = new PerfMonitorNet(this);
+                    perfMonitorNet.start();
+
+                    logger.info("Network performance monitoring initialized");
+
                 }
                 this.isRegionalController = false;
             }
@@ -787,6 +801,13 @@ public class Launcher extends CPlugin {
     }
     public void setConsumerThreadRegionActive(boolean consumerThreadRegionActive) {
         ConsumerThreadRegionActive = consumerThreadRegionActive;
+    }
+
+    public DiscoveryClientIPv4 getDiscoveryClientIPv4() {
+        return dcv4;
+    }
+    public DiscoveryClientIPv6 getDiscoveryClientIPv6() {
+        return dcv6;
     }
 
     public ActiveBroker getBroker() {

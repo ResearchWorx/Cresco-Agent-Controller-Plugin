@@ -1,5 +1,5 @@
 package com.researchworx.cresco.controller.netdiscovery;
 
 public enum DiscoveryType {
-	AGENT,REGION,GLOBAL
+	AGENT,REGION,GLOBAL,NETWORK
 }

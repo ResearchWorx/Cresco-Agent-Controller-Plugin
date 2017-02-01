@@ -6,6 +6,8 @@ import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.*;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -14,10 +16,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class DiscoveryEngine implements Runnable {
     private Launcher plugin;
-    private CLogger logger;
     private static Map<NetworkInterface, MulticastSocket> workers = new ConcurrentHashMap<>();
     private DiscoveryCrypto discoveryCrypto;
     private Gson gson;
+    private CLogger logger;
 
     public DiscoveryEngine(Launcher plugin) {
         this.logger = new CLogger(DiscoveryEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
@@ -236,8 +238,12 @@ public class DiscoveryEngine implements Runnable {
                                 rme.setParam("src_port", String.valueOf(packet.getPort()));
 
                                 MsgEvent me = null;
+
                                 if (rme.getParam("discovery_type") != null) {
-                                    if (rme.getParam("discovery_type").equals(DiscoveryType.AGENT.name())) {
+                                    if (rme.getParam("discovery_type").equals(DiscoveryType.NETWORK.name())) {
+                                        logger.debug("{}", "agent discovery");
+                                        me = getNetworkMsg(rme); //generate payload
+                                    } else if (rme.getParam("discovery_type").equals(DiscoveryType.AGENT.name())) {
                                         logger.debug("{}", "agent discovery");
                                         me = getAgentMsg(rme); //generate payload
                                     } else if (rme.getParam("discovery_type").equals(DiscoveryType.REGION.name())) {
@@ -283,7 +289,10 @@ public class DiscoveryEngine implements Runnable {
                             packet = null;
                         }
                     } catch (Exception ex) {
-                        logger.error("{}", ex.getMessage());
+                        logger.error("sendPacket() " + ex.getMessage());
+                        StringWriter errors = new StringWriter();
+                        ex.printStackTrace(new PrintWriter(errors));
+                        logger.error(errors.toString());
                         packet = null;
                     }
                 } else {
@@ -293,6 +302,37 @@ public class DiscoveryEngine implements Runnable {
 
                 return packet;
             }
+        }
+
+        private MsgEvent getNetworkMsg(MsgEvent rme) {
+            MsgEvent me = null;
+            try {
+
+                logger.trace("getNetworkMsg : " + rme.getParams().toString());
+
+                    if (rme.getParam("src_region") != null) {
+                        me = new MsgEvent(MsgEvent.Type.DISCOVER, plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), "Broadcast discovery response.");
+                        me.setParam("dst_region", plugin.getRegion());
+                        me.setParam("dst_agent", rme.getParam("src_agent"));
+                        me.setParam("src_region", plugin.getRegion());
+                        me.setParam("src_agent", plugin.getAgent());
+                        me.setParam("dst_ip", rme.getParam("src_ip"));
+                        me.setParam("dst_port", rme.getParam("src_port"));
+                        me.setParam("agent_count", String.valueOf(plugin.reachableAgents().size()));
+                        me.setParam("discovery_type", DiscoveryType.NETWORK.name());
+                        logger.debug("getAgentMsg = " + me.getParams().toString());
+
+                    }
+                    else {
+                        if(rme.getParam("src_region") == null) {
+                            logger.trace("getAgentMsg : Invalid src_region");
+                        }
+                    }
+
+            } catch (Exception ex) {
+                logger.error("getAgentMsg " + ex.getMessage());
+            }
+            return me;
         }
 
         private MsgEvent getAgentMsg(MsgEvent rme) {

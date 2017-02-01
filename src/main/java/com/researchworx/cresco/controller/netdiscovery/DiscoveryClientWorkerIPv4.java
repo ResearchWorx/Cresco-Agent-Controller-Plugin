@@ -60,12 +60,15 @@ class DiscoveryClientWorkerIPv4 {
                         remoteAddress = remoteScope[0];
                     }
                     logger.trace("Processing packet for {} {}_{}", remoteAddress, me.getParam("src_region"), me.getParam("src_agent"));
+                    me.setParam("src_ip", me.getParam("dst_ip"));
+                    me.setParam("src_port", me.getParam("dst_port"));
                     me.setParam("dst_ip", remoteAddress);
+                    me.setParam("dst_port", String.valueOf(packet.getPort()));
                     me.setParam("dst_region", me.getParam("src_region"));
                     me.setParam("dst_agent", me.getParam("src_agent"));
-
-                    me.setParam("validated_authenication",ValidatedAuthenication(me));
-
+                    if (disType == DiscoveryType.AGENT || disType == DiscoveryType.REGION || disType == DiscoveryType.GLOBAL) {
+                        me.setParam("validated_authenication", ValidatedAuthenication(me));
+                    }
                     discoveredList.add(me);
                 }
             } catch (Exception ex) {
@@ -122,13 +125,16 @@ class DiscoveryClientWorkerIPv4 {
                         if (disType == DiscoveryType.AGENT || disType == DiscoveryType.REGION || disType == DiscoveryType.GLOBAL) {
                             logger.trace("Discovery Type = {}", disType.name());
                             sme.setParam("discovery_type", disType.name());
+                            //set crypto message for discovery
+                            sme.setParam("discovery_validator",generateValidateMessage(sme));
+                        } else if(disType == DiscoveryType.NETWORK) {
+                            sme.setParam("discovery_type", disType.name());
+                            logger.trace("Discovery Type = {}", disType.name());
                         } else {
                             logger.trace("Discovery type unknown");
                             sme = null;
                         }
 
-                        //set crypto message for discovery
-                        sme.setParam("discovery_validator",generateValidateMessage(sme));
 
                         if (sme != null) {
                             logger.trace("Building sendPacket for {}", inAddr.toString());
