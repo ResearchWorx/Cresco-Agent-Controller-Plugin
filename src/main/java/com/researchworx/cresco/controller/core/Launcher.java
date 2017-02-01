@@ -148,7 +148,7 @@ public class Launcher extends CPlugin {
     private RegionHealthWatcher regionHealthWatcher;
 
     public Launcher() {
-        this.msgInProcessQueue = Executors.newFixedThreadPool(4);
+        this.msgInProcessQueue = Executors.newFixedThreadPool(10);
     }
 
     @Override
@@ -348,27 +348,13 @@ public class Launcher extends CPlugin {
             } else {
 
                 //do this better else where
-                String agentDiscTimeout = System.getenv("CRESCO_AGENT_DISC_TIMEOUT");
-                int discTimeout = 2000;
-                if(agentDiscTimeout != null) {
-                        discTimeout = Integer.parseInt(agentDiscTimeout);
-                }
                 if (this.isIPv6) {
                     logger.debug("Broker Search (IPv6)...");
-                    if(agentDiscTimeout != null) {
-                        discoveryList.addAll(this.dcv6.getDiscoveryResponse(DiscoveryType.AGENT, discTimeout));
-                    }
-                    else {
-                        discoveryList.addAll(this.dcv6.getDiscoveryResponse(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_ipv6_agent_timeout", 2000)));
-                    }
+                    discoveryList.addAll(this.dcv6.getDiscoveryResponse(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_ipv6_agent_timeout", 2000)));
                     logger.debug("IPv6 Broker count = {}" + discoveryList.size());
                 }
                 logger.debug("Broker Search (IPv4)...");
-                if(agentDiscTimeout != null) {
-                    discoveryList.addAll(this.dcv4.getDiscoveryResponse(DiscoveryType.AGENT, discTimeout));
-                } else {
                     discoveryList.addAll(this.dcv4.getDiscoveryResponse(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_ipv4_agent_timeout", 2000)));
-                }
                     logger.debug("Broker count = {}" + discoveryList.size());
             }
             if(getConfig().getStringParam("regional_controller_host") != null) {

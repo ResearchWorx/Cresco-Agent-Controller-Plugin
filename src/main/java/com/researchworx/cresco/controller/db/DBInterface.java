@@ -60,10 +60,10 @@ public class DBInterface {
         {
 
             resourceTotal = new HashMap<>();
-            List<String> isAssignedEdgeIds = plugin.getGDB().dba.getIsAssignedEdgeIds("sysinfo-resource","sysinfo-inode");
+            List<String> sysInfoEdgeList = plugin.getGDB().dba.getIsAssignedEdgeIds("sysinfo_resource", "sysinfo_inode");
+            for(String edgeID : sysInfoEdgeList) {
 
-            for(String isAssignedEdgeId : isAssignedEdgeIds) {
-                Map<String, String> edgeParams = dba.getIsAssignedParams(isAssignedEdgeId);
+                Map<String, String> edgeParams = dba.getIsAssignedParams(edgeID);
                 cpu_core_count += Long.parseLong(edgeParams.get("cpu-logical-count"));
                 memoryAvailable += Long.parseLong(edgeParams.get("memory-available"));
                 memoryTotal += Long.parseLong(edgeParams.get("memory-total"));

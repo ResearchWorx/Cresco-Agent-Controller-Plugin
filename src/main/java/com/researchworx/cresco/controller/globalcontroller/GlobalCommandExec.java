@@ -258,7 +258,6 @@ public class GlobalCommandExec {
 									}
 								}
 								pluginList = pluginList.substring(0, pluginList.length() - 1);
-								System.out.println("pluginList=" + pluginList);
 								ce.setParam("pluginlist", pluginList);
 								ce.setMsgBody("There were " + pluginFiles.size() + " plugins found.");
 							}
@@ -528,8 +527,7 @@ public class GlobalCommandExec {
 		return null;
 	}
 	
-	public static String getPluginName(String jarFile) //This should pull the version information from jar Meta data
-	{
+	public String getPluginName(String jarFile) {
 			   String version;
 			   try{
 			   //String jarFile = AgentEngine.class.getProtectionDomain().getCodeSource().getLocation().getPath();
@@ -553,8 +551,7 @@ public class GlobalCommandExec {
 			   return version;
 	}
 	
-	public static Map<String,String> getPluginParamMap(String jarFileName)
-	{
+	public Map<String,String> getPluginParamMap(String jarFileName) {
 		Map<String,String> phm = null;
 		try 
 		{
@@ -584,8 +581,7 @@ public class GlobalCommandExec {
 		return phm;
 	}
 	
-	public static String getPluginParams(String jarFileName)
-	{
+	public  String getPluginParams(String jarFileName) {
 		String params = "";
 		try 
 		{
@@ -630,8 +626,7 @@ public class GlobalCommandExec {
 		return params;
 	}
 	
-	public static String getPluginVersion(String jarFile) //This should pull the version information from jar Meta data
-	{
+	public  String getPluginVersion(String jarFile) {
 			   String version;
 			   try{
 			   //String jarFile = AgentEngine.class.getProtectionDomain().getCodeSource().getLocation().getPath();
@@ -656,8 +651,7 @@ public class GlobalCommandExec {
 	}
 
 
-	public List<String> getPluginFiles()
-	{
+	public List<String> getPluginFiles() {
 		List<String> pluginFiles = null;
 		try
 		{
@@ -682,7 +676,6 @@ public class GlobalCommandExec {
 					if (listOfFiles[i].isFile()) 
 					{
 						pluginFiles.add(listOfFiles[i].getAbsolutePath());
-						System.out.println(listOfFiles[i].toPath());
 					} 
 		      
 				}
@@ -698,7 +691,7 @@ public class GlobalCommandExec {
 		}
 		catch(Exception ex)
 		{
-			System.out.println(ex.toString());
+			logger.error("getPluginFiles() " + ex.getMessage());
 			pluginFiles = null;
 		}
 		return pluginFiles;
