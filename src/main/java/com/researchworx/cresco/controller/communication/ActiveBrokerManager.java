@@ -56,7 +56,7 @@ public class ActiveBrokerManager implements Runnable  {
 						logger.trace("Trying to connect to: " + agentPath);
 						//logger.trace(getClass().getName() + ">>> canidate boker :" + agentPath + " canidate ip:" + agentIP) ;
 	 		      
-						BrokeredAgent ba;
+						BrokeredAgent ba = null;
 						if(this.plugin.getBrokeredAgents().containsKey(agentPath)) {
 							ba = this.plugin.getBrokeredAgents().get(agentPath);
 							//add ip to possible list
@@ -77,13 +77,15 @@ public class ActiveBrokerManager implements Runnable  {
                             String cbrokerValidatedAuthenication = null;
                             cbrokerAddress = cb.getParam("dst_ip");
                             cbrokerValidatedAuthenication = cb.getParam("validated_authenication");
-                            //set agent broker auth
-                            String[] tmpAuth = cbrokerValidatedAuthenication.split(",");
-						    //end
-							ba = new BrokeredAgent(this.plugin, agentPath, cbrokerAddress, tmpAuth[0], tmpAuth[1]);
-							this.plugin.getBrokeredAgents().put(agentPath, ba);
-							addBroker = true;
-							logger.trace("BA NEW ADDING agentPath: " + agentPath + " remote_ip: " + agentIP);
+                            if(cbrokerValidatedAuthenication != null) {
+								//set agent broker auth
+								String[] tmpAuth = cbrokerValidatedAuthenication.split(",");
+								//end
+								ba = new BrokeredAgent(this.plugin, agentPath, cbrokerAddress, tmpAuth[0], tmpAuth[1]);
+								this.plugin.getBrokeredAgents().put(agentPath, ba);
+								addBroker = true;
+								logger.trace("BA NEW ADDING agentPath: " + agentPath + " remote_ip: " + agentIP);
+							}
 						}
 						//try and connect
 						if(addBroker && !this.plugin.isReachableAgent(agentPath)) {

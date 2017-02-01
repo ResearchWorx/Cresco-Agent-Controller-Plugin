@@ -58,6 +58,65 @@ public class DBInterface {
 
         try
         {
+
+            resourceTotal = new HashMap<>();
+            List<String> isAssignedEdgeIds = plugin.getGDB().dba.getIsAssignedEdgeIds("sysinfo-resource","sysinfo-inode");
+
+            for(String isAssignedEdgeId : isAssignedEdgeIds) {
+                Map<String, String> edgeParams = dba.getIsAssignedParams(isAssignedEdgeId);
+                cpu_core_count += Long.parseLong(edgeParams.get("cpu-logical-count"));
+                memoryAvailable += Long.parseLong(edgeParams.get("memory-available"));
+                memoryTotal += Long.parseLong(edgeParams.get("memory-total"));
+                for (String fspair : edgeParams.get("fs-map").split(",")) {
+                    String[] fskey = fspair.split(":");
+                    diskAvailable += Long.parseLong(edgeParams.get("fs-" + fskey[0] + "-available"));
+                    diskTotal += Long.parseLong(edgeParams.get("fs-" + fskey[0] + "-total"));
+                }
+            }
+
+            //logger.trace("Regions :" + region_count);
+            //logger.trace("Agents :" + agent_count);
+            //logger.trace("Plugins : " + plugin_count);
+            logger.trace("Total CPU core count : " + cpu_core_count);
+            logger.trace("Total Memory Available : " + memoryAvailable);
+            logger.trace("Total Memory Total : " + memoryTotal);
+            logger.trace("Total Disk Available : " + diskAvailable);
+            logger.trace("Total Disk Total : " + diskTotal);
+            //resourceTotal.put("regions",String.valueOf(region_count));
+            //resourceTotal.put("agents",String.valueOf(agent_count));
+            //resourceTotal.put("plugins",String.valueOf(plugin_count));
+            resourceTotal.put("cpu_core_count",String.valueOf(cpu_core_count));
+            resourceTotal.put("mem_available",String.valueOf(memoryAvailable));
+            resourceTotal.put("mem_total",String.valueOf(memoryTotal));
+            resourceTotal.put("disk_available",String.valueOf(diskAvailable));
+            resourceTotal.put("disk_total",String.valueOf(diskTotal));
+
+        }
+        catch(Exception ex)
+        {
+            logger.error("getResourceTotal() " + ex.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString()); //
+        }
+
+        return resourceTotal;
+    }
+
+    public Map<String,String> getResourceTotal2() {
+        Map<String,String> resourceTotal = null;
+        long cpu_core_count = 0;
+        long memoryAvailable = 0;
+        long memoryTotal = 0;
+        long diskAvailable = 0;
+        long diskTotal = 0;
+        long region_count = 0;
+        long agent_count = 0;
+        long plugin_count = 0;
+
+        try
+        {
             /*
             logger.info("CODY START");
             List<String> sysInfoEdgeList = gdb.getIsAssignedEdgeIds("sysinfo_resource", "sysinfo_inode");

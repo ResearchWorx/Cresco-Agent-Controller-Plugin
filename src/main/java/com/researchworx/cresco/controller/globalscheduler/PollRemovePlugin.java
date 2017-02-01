@@ -48,16 +48,11 @@ public class PollRemovePlugin implements Runnable {
 
                         int count = 0;
                         boolean isRemoved = false;
-                        while ((!isRemoved) && (count < 10)) {
+                        while ((!isRemoved) && (count < 60)) {
                             if (plugin.getGDB().gdb.getNodeId(region, agent, pluginId) == null) {
                                 isRemoved = true;
                             }
                             Thread.sleep(1000);
-
-                            if(count == 2) {
-                                isRemoved = true;
-                            }
-
                             count++;
                         }
                         if (isRemoved) {

@@ -41,22 +41,6 @@ public class PollAddPlugin implements Runnable {
 	        	while((edge_id == null) && (count < 60))
 	        	{
 	        	    edge_id = plugin.getGDB().dba.getResourceEdgeId(resource_id,inode_id);
-					/*
-                    if (count == 0) {
-                            Map<String, String> params = new HashMap<>();
-                            params.put("cool", "stuff");
-                            boolean isFound = false;
-                            String pluginId = null;
-                            while(!isFound) {
-                                int pluginNum = ThreadLocalRandom.current().nextInt(0, 100);
-                                pluginId = "plugin/" + String.valueOf(pluginNum);
-                                if(plugin.getGDB().dba.getResourceEdgeId(resource_id,inode_id,region,agent,pluginId) == null) {
-                                    isFound = true;
-                                }
-                            }
-                            plugin.getGDB().dba.updateKPI(region,agent,pluginId, resource_id, inode_id, params);
-                    }
-					*/
                     Thread.sleep(1000);
                     count++;
 	        	}
