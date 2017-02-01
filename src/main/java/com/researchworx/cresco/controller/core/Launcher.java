@@ -539,10 +539,8 @@ public class Launcher extends CPlugin {
                     this.agentpath = this.region + "_" + this.agent;
                     logger.debug("AgentPath=" + this.agentpath);
 
-                    //start network service
+                    //create network perf monitor service
                     perfMonitorNet = new PerfMonitorNet(this);
-                    perfMonitorNet.start();
-
                     logger.info("Network performance monitoring initialized");
 
                 }
@@ -594,6 +592,11 @@ public class Launcher extends CPlugin {
                     logger.trace("Wait loop for Global Controller");
                 }
 
+            }
+
+            //start network performance monitor if create
+            if(perfMonitorNet != null) {
+                perfMonitorNet.start();
             }
 
 
