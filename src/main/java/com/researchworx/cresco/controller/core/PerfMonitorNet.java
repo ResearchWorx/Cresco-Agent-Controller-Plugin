@@ -23,7 +23,7 @@ class PerfMonitorNet {
 
     PerfMonitorNet(Launcher plugin) {
         this.plugin = plugin;
-        this.logger = new CLogger(PerfMonitorNet.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Trace);
+        this.logger = new CLogger(PerfMonitorNet.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
         gson = new Gson();
     }
 
