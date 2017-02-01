@@ -95,8 +95,10 @@ class PerfMonitorNet {
                 tick.setParam("src_agent", plugin.getAgent());
                 tick.setParam("src_plugin", plugin.getPluginID());
                 tick.setParam("dst_region", plugin.getRegion());
-                tick.setParam("resource_id", plugin.getConfig().getStringParam("resource_id", "networkdiscovery_resource"));
-                tick.setParam("inode_id", plugin.getConfig().getStringParam("inode_id", "networkdiscovery_inode"));
+                tick.setParam("resource_id", plugin.getConfig().getStringParam("resource_id", "netdiscovery_resource"));
+                tick.setParam("inode_id", plugin.getConfig().getStringParam("inode_id", "netdiscovery_inode"));
+                //tick.setParam("resource_id",plugin.getConfig().getStringParam("resource_id","container_resource"));
+                //tick.setParam("inode_id",plugin.getConfig().getStringParam("inode_id","container_inode"));
 
                 List<MsgEvent> discoveryList = getNetworkDiscoveryList();
                 String discoveryListString = null;

@@ -81,7 +81,7 @@ public class GlobalHealthWatcher implements Runnable {
                 gNotify();
 			}
 		} catch(Exception ex) {
-			logger.error("Run {}", ex.getMessage());
+			logger.error("globalwatcher run() " + ex.getMessage());
             logger.error(ex.getStackTrace().toString());
 		}
 	}
@@ -115,16 +115,15 @@ public class GlobalHealthWatcher implements Runnable {
 
         }
         catch(Exception ex) {
-            logger.error(ex.getMessage());
+            logger.error("gNotify() " + ex.getMessage());
         }
     }
 
 	private void gCheck() {
 	    try{
             //Static Remote Global Controller
-	        String static_global_controller_host = plugin.getConfig().getStringParam("gc_host");
-
-	        if(static_global_controller_host != null) {
+	        String static_global_controller_host = plugin.getConfig().getStringParam("gc_host",null);
+            if(static_global_controller_host != null) {
                 this.plugin.setGlobalController(false);
                 logger.trace("Starting Static Global Controller Check");
 	            if(global_host_map.containsKey(static_global_controller_host)) {
@@ -196,7 +195,7 @@ public class GlobalHealthWatcher implements Runnable {
 
         }
         catch(Exception ex) {
-	        logger.error(ex.getMessage());
+	        logger.error("gCheck() " +ex.getMessage());
         }
 	}
 
@@ -216,7 +215,7 @@ public class GlobalHealthWatcher implements Runnable {
             isStarted = true;
         }
         catch (Exception ex) {
-            logger.error(ex.getMessage());
+            logger.error("startGlobalSchedulers() " + ex.getMessage());
         }
         return isStarted;
     }
@@ -232,7 +231,7 @@ public class GlobalHealthWatcher implements Runnable {
             isStarted = true;
         }
         catch (Exception ex) {
-            logger.error(ex.getMessage());
+            logger.error("startHTTP() " + ex.getMessage());
         }
         return isStarted;
     }
@@ -288,7 +287,7 @@ public class GlobalHealthWatcher implements Runnable {
 
         }
         catch(Exception ex) {
-            logger.error(ex.getMessage());
+            logger.error("connectToGlobal()" + ex.getMessage());
         }
 
         return globalPath;
@@ -313,7 +312,7 @@ public class GlobalHealthWatcher implements Runnable {
                 }}
         }
         catch(Exception ex) {
-	        logger.error(ex.getMessage());
+	        logger.error("sendGlobalWatchDogRegister() " + ex.getMessage());
         }
 
     }
@@ -343,19 +342,19 @@ public class GlobalHealthWatcher implements Runnable {
         List<MsgEvent> discoveryList = null;
         try {
             discoveryList = new ArrayList<>();
-                logger.info("Static Region Connection to Global Controller : " + plugin.getConfig().getStringParam("gc_host"));
+                logger.info("Static Region Connection to Global Controller : " + plugin.getConfig().getStringParam("gc_host",null));
                 DiscoveryStatic ds = new DiscoveryStatic(plugin);
-                discoveryList.addAll(ds.discover(DiscoveryType.GLOBAL, plugin.getConfig().getIntegerParam("discovery_static_agent_timeout", 10000), plugin.getConfig().getStringParam("gc_host")));
+                discoveryList.addAll(ds.discover(DiscoveryType.GLOBAL, plugin.getConfig().getIntegerParam("discovery_static_agent_timeout", 10000), plugin.getConfig().getStringParam("gc_host",null)));
                 logger.debug("Static Agent Connection count = {}" + discoveryList.size());
                 if (discoveryList.size() == 0) {
-                    logger.info("Static Region Connection to Global Controller : " + plugin.getConfig().getStringParam("gc_host") + " failed! - Restarting Global Discovery");
+                    logger.info("Static Region Connection to Global Controller : " + plugin.getConfig().getStringParam("gc_host",null) + " failed! - Restarting Global Discovery");
                 } else {
                     //plugin.getIncomingCanidateBrokers().offer(discoveryList.get(0)); //perhaps better way to do this
                     logger.info("Global Controller Found: " + discoveryList.get(0).getParams());
                 }
         }
         catch(Exception ex) {
-            logger.error(ex.getMessage());
+            logger.error("staticGlobalDiscovery() " + ex.getMessage());
         }
         return discoveryList;
     }
@@ -388,7 +387,7 @@ public class GlobalHealthWatcher implements Runnable {
             }
         }
         catch(Exception ex) {
-            logger.error(ex.getMessage());
+            logger.error("regionalDBexport() " + ex.getMessage());
         }
         return me;
     }

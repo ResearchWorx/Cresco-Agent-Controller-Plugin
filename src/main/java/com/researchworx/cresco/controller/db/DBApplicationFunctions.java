@@ -2166,7 +2166,6 @@ public class DBApplicationFunctions {
             String[] resourceProps = {"resource_id"}; //Property names
             createVertexClass("resourceNode", resourceProps);
 
-
             //create plugin anchor resource and inodes
             String[]  pluginAnchors= {"sysinfo","netdiscovery","container"}; //Property names
             for(String pAnchor : pluginAnchors)

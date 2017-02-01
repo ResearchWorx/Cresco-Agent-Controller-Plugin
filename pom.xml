@@ -68,7 +68,6 @@
 			<version>${activemq.version}</version>
 		</dependency>
 
-
         <!-- OrientDB -->
 
 		<dependency>
@@ -82,7 +81,6 @@
 			<artifactId>orientdb-graphdb</artifactId>
 			<version>${orientdb.version}</version>
 		</dependency>
-
 
 		<!-- Sat Solver -->
 
@@ -159,6 +157,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
+				<version>3.0.0</version>
 				<configuration>
 					<archive>
 						<manifestEntries>
