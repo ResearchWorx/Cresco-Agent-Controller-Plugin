@@ -650,7 +650,6 @@ public class GlobalCommandExec {
 			   return version;
 	}
 
-
 	public List<String> getPluginFiles() {
 		List<String> pluginFiles = null;
 		try
