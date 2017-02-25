@@ -164,6 +164,7 @@ public class FuturaEngine {
         ResourceMetric resourceMetric = null;
 
         try {
+            logger.debug("Get ResourceMetric for Container: " + containerImage);
 
             if(containerImage != null) {
                 List<String> containerEdgeList = plugin.getGDB().dba.getIsAssignedEdgeIds("container_resource", "container_inode");

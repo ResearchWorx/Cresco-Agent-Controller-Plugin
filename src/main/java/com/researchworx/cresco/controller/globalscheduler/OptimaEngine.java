@@ -61,7 +61,6 @@ public class OptimaEngine {
                 String containerImage = gnode.params.get("container_image");
 
                 //Get past metric if it exist
-                logger.debug("Get ResourceMetric for Container: " + containerImage);
                 ResourceMetric rm = appSchedulerEngine.fe.getResourceMetricAve(containerImage);
                 //add metric to gnode
                 gnode.workloadUtil = rm.getWorkloadUtil();
