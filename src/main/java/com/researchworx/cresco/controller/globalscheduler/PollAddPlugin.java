@@ -38,7 +38,7 @@ public class PollAddPlugin implements Runnable {
                 int count = 0;
 	        	String edge_id = null;
 
-	        	while((edge_id == null) && (count < 60))
+	        	while((edge_id == null) && (count < 300))
 	        	{
 	        	    edge_id = plugin.getGDB().dba.getResourceEdgeId(resource_id,inode_id);
                     Thread.sleep(1000);
