@@ -26,7 +26,7 @@ public class AppSchedulerEngine implements Runnable {
     private ExecutorService addPipelineExecutor;
 
     public AppSchedulerEngine(Launcher plugin, GlobalHealthWatcher ghw) {
-		this.logger = new CLogger(AppSchedulerEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+		this.logger = new CLogger(AppSchedulerEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Debug);
 		this.plugin = plugin;
 		this.ghw = ghw;
         addPipelineExecutor = Executors.newFixedThreadPool(1);

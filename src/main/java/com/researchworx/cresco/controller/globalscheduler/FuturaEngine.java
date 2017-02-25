@@ -19,7 +19,7 @@ public class FuturaEngine {
     private CLogger logger;
 
     public FuturaEngine(Launcher plugin, AppSchedulerEngine appSchedulerEngine) {
-        this.logger = new CLogger(FuturaEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+        this.logger = new CLogger(FuturaEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Debug);
         this.plugin = plugin;
         this.appSchedulerEngine = appSchedulerEngine;
     }
