@@ -4,9 +4,7 @@ import com.researchworx.cresco.controller.app.gNode;
 import com.researchworx.cresco.controller.app.gPayload;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.controller.globalcontroller.GlobalHealthWatcher;
-import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
-import com.sun.media.jfxmedia.logging.Logger;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -27,7 +25,7 @@ public class AppSchedulerEngine implements Runnable {
 		this.plugin = plugin;
 		this.ghw = ghw;
         addPipelineExecutor = Executors.newFixedThreadPool(1);
-    }
+	}
 
     public void run() {
         try
@@ -130,79 +128,9 @@ public class AppSchedulerEngine implements Runnable {
             printScheduleStats(schedulemaps);
 
             if (schedulemaps.get("error").size() != 0) {
-                System.out.println("Bad Node assignments... dead dead deadsky!");
+                System.out.println("Error Node assignments... dead dead deadsky!");
             } else if (schedulemaps.get("unassigned").size() != 0) {
-                System.out.println("We need to find some resources for these request.");
-
-                //We need to deal with locations independently
-                //First build list of locations
-                Map<String, List<gNode>> locationNodes = new HashMap<>();
-                List<gNode> unassignedList = new ArrayList<>(schedulemaps.get("unassigned"));
-                for (gNode gnode : unassignedList) {
-                    if (gnode.params.containsKey("location")) {
-                        //remove from general unassigned.
-                        schedulemaps.get("unassigned").remove(gnode);
-                        String location = gnode.params.get("location");
-                        if (locationNodes.containsKey(location)) {
-                            locationNodes.get(location).add(gnode);
-                        } else {
-                            locationNodes.put(location, new ArrayList<gNode>());
-                            locationNodes.get(location).add(gnode);
-                        }
-                    }
-                }
-                unassignedList.clear();
-
-                //if there are any location nodes process them
-                if (locationNodes.size() > 0) {
-                    for (Map.Entry<String, List<gNode>> entry : locationNodes.entrySet()) {
-                        //System.out.println(entry.getKey() + "/" + entry.getValue());
-                        String location = entry.getValue().get(0).params.get("location");
-                        Map<String, List<gNode>> locationAssignments = oe.scheduleAssignment(entry.getValue(), location);
-
-                        logger.info("Location: " + location);
-                        printScheduleStats(locationAssignments);
-                        schedulemaps.get("assigned").addAll(locationAssignments.get("assigned"));
-                        schedulemaps.get("error").addAll(locationAssignments.get("error"));
-                        schedulemaps.get("noresource").addAll(locationAssignments.get("noresource"));
-                    }
-                }
-                //schedule nodes with no locations
-                if (schedulemaps.get("unassigned").size() > 0) {
-                    List<gNode> unassigned = schedulemaps.get("unassigned");
-                    Map<String, List<gNode>> noLocationAssignments = oe.scheduleAssignment(unassigned);
-                    logger.info("Location: unknown");
-                    printScheduleStats(noLocationAssignments);
-
-                    schedulemaps.get("assigned").addAll(noLocationAssignments.get("assigned"));
-                    schedulemaps.get("unassigned").addAll(noLocationAssignments.get("assigned"));
-                    schedulemaps.get("error").addAll(noLocationAssignments.get("error"));
-                    schedulemaps.get("noresource").addAll(noLocationAssignments.get("noresource"));
-                }
-                if (schedulemaps.get("noresource").size() != 0) {
-                    //nodify guilder to get resources
-                    double workloadResources = 0;
-                    for (gNode gnode : schedulemaps.get("noresource")) {
-                        workloadResources += gnode.workloadUtil;
-                    }
-                    return 2;
-                    //code here to add resources
-                    //ge.addResourceProvider(workloadResources);
-                } else if ((schedulemaps.get("assigned").size() != 0) && (schedulemaps.get("unassigned").size() == 0)) {
-                    //rebuild payload
-                    //gpay.nodes.clear();
-                    //add existing good assignments
-                    //gpay.nodes.addAll(schedulemaps.get("assigned"));
-                    //add new assign,ents
-                    Map<String, List<gNode>> schedulemapsOpt = buildNodeMaps(schedulemaps.get("assigned"));
-                    //logger.info("Final Check");
-                    //printScheduleStats(schedulemapsOpt);
-
-                    if (!((schedulemapsOpt.get("unassigned").size() == 0) && (schedulemapsOpt.get("error").size() == 0))) {
-                        logger.error("SOMETHING IS BAD WRONG WITH RESCHEDULING!");
-                    }
-                }
-
+                System.out.println("Unassigned Node assignments... dead dead deadsky!");
             }
 
             if ((schedulemaps.get("assigned").size() != 0) && (schedulemaps.get("unassigned").size() == 0) && (schedulemaps.get("error").size() == 0) && (schedulemaps.get("noresource").size() == 0)) {
