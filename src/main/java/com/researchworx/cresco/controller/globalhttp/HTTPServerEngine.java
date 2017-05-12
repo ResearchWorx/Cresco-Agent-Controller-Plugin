@@ -126,6 +126,7 @@ public class HTTPServerEngine implements Runnable{
             try {
                 return Integer.parseInt(port);
             } catch (NumberFormatException e) {
+                e.printStackTrace();
             }
         }
         return defaultPort;        
@@ -156,7 +157,7 @@ public class HTTPServerEngine implements Runnable{
     	ClassLoader classloader = this.getClass().getClassLoader(); 
     	   Enumeration<URL> urls = classloader.getResources("httpserv");
     	   while(urls.hasMoreElements()){
-    		   URL param = (URL) urls.nextElement();
+    		   URL param = urls.nextElement();
     		   logger.info(param.toString());
     		   }
     }

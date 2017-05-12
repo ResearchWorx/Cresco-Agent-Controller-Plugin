@@ -245,7 +245,7 @@ public class GlobalCommandExec {
 
                             if(pluginFiles != null)
 							{
-								String pluginList = null;;
+								String pluginList = null;
 								for (String pluginPath : pluginFiles) 
 								{
 									if(pluginList == null)

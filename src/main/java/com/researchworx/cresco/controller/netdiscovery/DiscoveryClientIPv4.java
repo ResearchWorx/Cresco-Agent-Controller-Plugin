@@ -73,11 +73,7 @@ public class DiscoveryClientIPv4 {
             //InetAddress[] addresses = InetAddress.getAllByName("www.google.com");
             InetAddress address = InetAddress.getByName(hostname);
 
-            if (address.isReachable(10000)) {
-                reachable = true;
-            } else {
-                reachable = false;
-            }
+            reachable = address.isReachable(10000);
 
         } catch (Exception ex) {
             System.out.println("DiscoveryClient : isReachable : Error " + ex.toString());

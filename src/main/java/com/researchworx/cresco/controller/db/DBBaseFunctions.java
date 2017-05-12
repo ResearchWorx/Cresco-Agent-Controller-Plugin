@@ -1187,7 +1187,7 @@ public class DBBaseFunctions {
         {
             OrientGraphNoTx txGraph = factory.getNoTx();
             //OSchema schema = ((OrientGraph)odb).getRawGraph().getMetadata().getSchema();
-            OSchema schema = ((OrientGraphNoTx)txGraph).getRawGraph().getMetadata().getSchema();
+            OSchema schema = txGraph.getRawGraph().getMetadata().getSchema();
 
             if (schema.existsClass(className))
             {
@@ -1227,7 +1227,7 @@ public class DBBaseFunctions {
         boolean wasCreated = false;
         OrientGraphNoTx txGraph = factory.getNoTx();
         //OSchema schema = ((OrientGraph)odb).getRawGraph().getMetadata().getSchema();
-        OSchema schema = ((OrientGraphNoTx)txGraph).getRawGraph().getMetadata().getSchema();
+        OSchema schema = txGraph.getRawGraph().getMetadata().getSchema();
 
         if (schema.existsClass(className))
         {
@@ -1258,7 +1258,7 @@ public class DBBaseFunctions {
         boolean wasCreated = false;
         OrientGraphNoTx txGraph = factory.getNoTx();
         //OSchema schema = ((OrientGraph)odb).getRawGraph().getMetadata().getSchema();
-        OSchema schema = ((OrientGraphNoTx)txGraph).getRawGraph().getMetadata().getSchema();
+        OSchema schema = txGraph.getRawGraph().getMetadata().getSchema();
 
         if (!schema.existsClass(className))
         {
@@ -1280,7 +1280,7 @@ public class DBBaseFunctions {
         boolean wasCreated = false;
         OrientGraphNoTx txGraph = factory.getNoTx();
         //OSchema schema = ((OrientGraph)odb).getRawGraph().getMetadata().getSchema();
-        OSchema schema = ((OrientGraphNoTx)txGraph).getRawGraph().getMetadata().getSchema();
+        OSchema schema = txGraph.getRawGraph().getMetadata().getSchema();
 
         if (!schema.existsClass(className))
         {

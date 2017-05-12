@@ -1,12 +1,14 @@
 package com.researchworx.cresco.controller.core;
 
-import com.researchworx.cresco.controller.app.gPayload;
 import com.google.auto.service.AutoService;
+import com.researchworx.cresco.controller.app.gPayload;
 import com.researchworx.cresco.controller.communication.*;
-import com.researchworx.cresco.controller.globalcontroller.*;
 import com.researchworx.cresco.controller.db.DBInterface;
+import com.researchworx.cresco.controller.globalcontroller.GlobalControllerChannel;
+import com.researchworx.cresco.controller.globalcontroller.GlobalHealthWatcher;
 import com.researchworx.cresco.controller.netdiscovery.*;
-import com.researchworx.cresco.controller.regionalcontroller.*;
+import com.researchworx.cresco.controller.regionalcontroller.AgentDiscovery;
+import com.researchworx.cresco.controller.regionalcontroller.RegionHealthWatcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.plugin.core.CPlugin;
 import com.researchworx.cresco.library.utilities.CLogger;
@@ -877,10 +879,7 @@ public class Launcher extends CPlugin {
 
 
     public boolean hasGlobalController() {
-        if(this.globalControllerPath != null)
-            return true;
-        else
-        return false;
+        return this.globalControllerPath != null;
     }
 
     public Map<String, Long> getDiscoveryMap() {

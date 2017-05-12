@@ -3,8 +3,6 @@ package com.researchworx.cresco.controller.communication;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map.Entry;
 import java.util.Timer;

@@ -1,14 +1,13 @@
 package com.researchworx.cresco.controller.db;
 
-import com.researchworx.cresco.controller.app.gEdge;
-import com.researchworx.cresco.controller.app.gNode;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.metadata.schema.OSchema;
 import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.sql.OCommandSQL;
+import com.researchworx.cresco.controller.app.gEdge;
+import com.researchworx.cresco.controller.app.gNode;
 import com.researchworx.cresco.controller.app.gPayload;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.utilities.CLogger;
@@ -2313,7 +2312,7 @@ public class DBApplicationFunctions {
         boolean wasCreated = false;
         OrientGraphNoTx txGraph = factory.getNoTx();
         //OSchema schema = ((OrientGraph)odb).getRawGraph().getMetadata().getSchema();
-        OSchema schema = ((OrientGraphNoTx)txGraph).getRawGraph().getMetadata().getSchema();
+        OSchema schema = txGraph.getRawGraph().getMetadata().getSchema();
 
         if (!schema.existsClass(className))
         {
@@ -2334,7 +2333,7 @@ public class DBApplicationFunctions {
         boolean wasCreated = false;
         OrientGraphNoTx txGraph = factory.getNoTx();
         //OSchema schema = ((OrientGraph)odb).getRawGraph().getMetadata().getSchema();
-        OSchema schema = ((OrientGraphNoTx)txGraph).getRawGraph().getMetadata().getSchema();
+        OSchema schema = txGraph.getRawGraph().getMetadata().getSchema();
 
         if (!schema.existsClass(className))
         {
@@ -2355,7 +2354,7 @@ public class DBApplicationFunctions {
     boolean createVertexClass(String className) {
         boolean wasCreated = false;
         OrientGraphNoTx txGraph = factory.getNoTx();
-        OSchema schema = ((OrientGraphNoTx)txGraph).getRawGraph().getMetadata().getSchema();
+        OSchema schema = txGraph.getRawGraph().getMetadata().getSchema();
 
         if (!schema.existsClass(className))
         {
@@ -2374,7 +2373,7 @@ public class DBApplicationFunctions {
         try
         {
             OrientGraphNoTx txGraph = factory.getNoTx();
-            OSchema schema = ((OrientGraphNoTx)txGraph).getRawGraph().getMetadata().getSchema();
+            OSchema schema = txGraph.getRawGraph().getMetadata().getSchema();
 
             if (schema.existsClass(className))
             {

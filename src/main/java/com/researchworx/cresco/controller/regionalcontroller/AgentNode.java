@@ -49,14 +49,7 @@ public class AgentNode {
 	}
 	public boolean isPlugin(String pluginSlot)
 	{
-		if(pluginMap.containsKey(pluginSlot))
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
+        return pluginMap.containsKey(pluginSlot);
 	}
 	public Map<String,String> getPluginParams(String pluginSlot)
 	{

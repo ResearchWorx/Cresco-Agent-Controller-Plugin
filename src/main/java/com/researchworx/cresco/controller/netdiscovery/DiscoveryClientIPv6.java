@@ -58,11 +58,7 @@ public class DiscoveryClientIPv6 {
             //also, this fails for an invalid address, like "www.sjdosgoogle.com1234sd"
             //InetAddress[] addresses = InetAddress.getAllByName("www.google.com");
             Inet6Address address = (Inet6Address) Inet6Address.getByName(hostname);
-            if (address.isReachable(10000)) {
-                reachable = true;
-            } else {
-                reachable = false;
-            }
+            reachable = address.isReachable(10000);
         } catch (Exception ex) {
             logger.error("isReachable {}", ex.getMessage());
         }
