@@ -32,7 +32,7 @@ public class GuilderEngine {
         }
         return resourceCost;
     }
-
+//stuff
     public ResourceProvider getResourceProvider(String region, String agent) {
         ResourceProvider rp = null;
         try {
