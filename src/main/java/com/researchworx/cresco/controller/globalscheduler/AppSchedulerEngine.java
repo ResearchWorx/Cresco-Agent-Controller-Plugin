@@ -20,9 +20,6 @@ public class AppSchedulerEngine implements Runnable {
 	private Launcher plugin;
 	private CLogger logger;
     private GlobalHealthWatcher ghw;
-    public FuturaEngine fe;
-    public GuilderEngine ge;
-    public OptimaEngine oe;
     private ExecutorService addPipelineExecutor;
 
     public AppSchedulerEngine(Launcher plugin, GlobalHealthWatcher ghw) {
@@ -30,10 +27,7 @@ public class AppSchedulerEngine implements Runnable {
 		this.plugin = plugin;
 		this.ghw = ghw;
         addPipelineExecutor = Executors.newFixedThreadPool(1);
-        oe = new OptimaEngine(plugin,this);
-        fe = new FuturaEngine(plugin,this);
-        ge = new GuilderEngine(plugin,this);
-	}
+    }
 
     public void run() {
         try
