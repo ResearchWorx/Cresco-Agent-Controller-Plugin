@@ -72,35 +72,6 @@
 			<version>${orientdb.version}</version>
 		</dependency>
 
-        <!-- commons-math3 -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-math3</artifactId>
-            <version>3.6.1</version>
-        </dependency>
-
-        <!-- Apache SSH -->
-
-        <dependency>
-			<groupId>org.apache.sshd</groupId>
-			<artifactId>sshd-core</artifactId>
-			<version>1.3.0</version>
-		</dependency>
-
-		<!-- GlassFish -->
-
-        <dependency>
-            <groupId>org.glassfish.jersey.containers</groupId>
-            <artifactId>jersey-container-grizzly2-http</artifactId>
-            <version>2.25</version>
-        </dependency>
-
-		<dependency>
-        <groupId>jline</groupId>
-        <artifactId>jline</artifactId>
-        <version>2.14.2</version>
-    </dependency>
-
 		<dependency>
 			<groupId>com.researchworx.cresco</groupId>
 			<artifactId>cresco-plugin-library</artifactId>
