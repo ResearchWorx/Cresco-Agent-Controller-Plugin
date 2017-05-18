@@ -3,7 +3,6 @@ package com.researchworx.cresco.controller.globalcontroller;
 import com.researchworx.cresco.controller.app.gPayload;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.controller.db.NodeStatusType;
-import com.researchworx.cresco.controller.globalhttp.HTTPServerEngine;
 import com.researchworx.cresco.controller.globalscheduler.AppSchedulerEngine;
 import com.researchworx.cresco.controller.globalscheduler.ResourceSchedulerEngine;
 import com.researchworx.cresco.controller.netdiscovery.DiscoveryClientIPv4;
@@ -183,8 +182,9 @@ public class GlobalHealthWatcher implements Runnable {
                         //create globalscheduler queue
                         //plugin.setResourceScheduleQueue(new ConcurrentLinkedQueue<MsgEvent>());
                         plugin.setAppScheduleQueue(new ConcurrentLinkedQueue<gPayload>());
+                        //REMOVED HTTP FROM CONTROLLER
                         //start http interface
-                        startHTTP();
+                        //startHTTP();
                         //start global scheduler
                         startGlobalSchedulers();
                         //end global start
@@ -219,10 +219,11 @@ public class GlobalHealthWatcher implements Runnable {
         }
         return isStarted;
     }
-
+/*
     private Boolean startHTTP() {
         boolean isStarted = false;
 	    try {
+
             //Start Global Controller Services
             logger.info("Starting Global HTTPInternal Service");
             HTTPServerEngine httpEngineInternal = new HTTPServerEngine(plugin);
@@ -235,7 +236,7 @@ public class GlobalHealthWatcher implements Runnable {
         }
         return isStarted;
     }
-
+*/
     private String connectToGlobal(List<MsgEvent> discoveryList) {
         String globalPath = null;
         MsgEvent cme = null;
