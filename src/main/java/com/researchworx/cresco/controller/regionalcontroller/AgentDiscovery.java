@@ -8,7 +8,7 @@ import com.researchworx.cresco.library.utilities.CLogger;
 public class AgentDiscovery {
     private Launcher plugin;
     private CLogger logger;
-    private static RPC rpc;
+    private RPC rpc;
 
     public AgentDiscovery(Launcher plugin) throws Exception {
         this.plugin = plugin;
