@@ -7,10 +7,12 @@ import com.researchworx.cresco.library.utilities.CLogger;
 class Executor extends CExecutor {
     private Launcher mainPlugin;
     private CLogger logger;
+    private PrivilegedExecutor pe;
 
     Executor(Launcher plugin) {
         super(plugin);
         this.mainPlugin = plugin;
+        this.pe = new PrivilegedExecutor(plugin);
         this.logger = new CLogger(Executor.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
     }
 
@@ -41,6 +43,9 @@ class Executor extends CExecutor {
                     logger.debug("Database Import Failed!");
                 }
                 //return msg;
+            case "privileged":
+                //put privileged auth here
+                return pe.processConfig(msg);
 
             default:
                 logger.debug("Unknown configtype found: {}", msg.getParam("configtype"));

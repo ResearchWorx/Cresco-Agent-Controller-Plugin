@@ -19,7 +19,8 @@ public class DiscoveryCrypto {
     }
 
     private Key generateKeyFromString(final String secKey) throws Exception {
-        String SALT = "MrSaltyManBaby";
+        //String SALT = "MrSaltyManBaby";
+        String SALT = "jG0vixSqlM8bCf";
         byte[] keyVal = (SALT + secKey).getBytes("UTF-8");
         MessageDigest sha = MessageDigest.getInstance("SHA-1");
         keyVal = sha.digest(keyVal);
