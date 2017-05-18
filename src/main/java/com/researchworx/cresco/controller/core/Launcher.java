@@ -124,7 +124,6 @@ public class Launcher extends CPlugin {
     private boolean GlobalControllerManagerActive = false;
 
     private Map<String, Long> discoveryMap;
-    private AgentDiscovery agentDiscover;
 
     //private boolean hasGlobalController = false;
     private GlobalControllerChannel globalControllerChannel;
@@ -271,10 +270,6 @@ public class Launcher extends CPlugin {
 
     public GlobalControllerChannel getGlobalControllerChannel() {
         return this.globalControllerChannel;
-    }
-
-    public void discover(MsgEvent msg) {
-        this.agentDiscover.discover(msg);
     }
 
     public void sendAPMessage(MsgEvent msg) {
@@ -470,11 +465,6 @@ public class Launcher extends CPlugin {
                 this.gdb = new DBInterface(this); //start com.researchworx.cresco.controller.db service
                 logger.debug("RegionalControllerDB Service Started");
                 this.discoveryMap = new ConcurrentHashMap<>(); //discovery map
-
-                logger.debug("AgentDiscover Service Started");
-                this.agentDiscover = new AgentDiscovery(this); //discovery service
-
-
 
                 this.isRegionalController = true;
                 //start regional init
@@ -757,7 +747,6 @@ public class Launcher extends CPlugin {
         ConsumerThreadActive = consumerThreadActive;
     }
 
-
     public ConcurrentLinkedQueue<MsgEvent> getResourceScheduleQueue() {
         return resourceScheduleQueue;
     }
@@ -877,6 +866,7 @@ public class Launcher extends CPlugin {
         return hasAP;
     }
 
+    public RegionHealthWatcher getRegionHealthWatcher() {return this.regionHealthWatcher;}
 
     public boolean hasGlobalController() {
         return this.globalControllerPath != null;

@@ -32,8 +32,7 @@ public class GlobalCommandExec {
 		removePipelineExecutor = Executors.newFixedThreadPool(1);
     }
 
-	public MsgEvent cmdExec(MsgEvent ce)
-	{
+	public MsgEvent execute(MsgEvent ce) {
 			if(ce.getMsgType() == MsgEvent.Type.CONFIG)
 			{
 				if(ce.getParam("globalcmd") != null)

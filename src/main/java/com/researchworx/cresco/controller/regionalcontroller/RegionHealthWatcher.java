@@ -15,11 +15,14 @@ public class RegionHealthWatcher {
     private long startTS;
     private int wdTimer;
     private Timer regionalUpdateTimer;
+    public RegionalCommandExec rce;
 
     //private static final Logger logger = LoggerFactory.getLogger(HealthWatcher.class);
 
     public RegionHealthWatcher(Launcher plugin) {
         this.logger = new CLogger(RegionHealthWatcher.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
+        rce = new RegionalCommandExec(plugin);
+        
         logger.debug("Initializing");
         this.plugin = plugin;
         wdTimer = 1000;
@@ -77,7 +80,6 @@ public class RegionHealthWatcher {
         }
     }
 
-
     class RegionalNodeStatusWatchDog extends TimerTask {
         private CLogger logger;
         private Launcher plugin;
@@ -130,7 +132,5 @@ public class RegionHealthWatcher {
             }
         }
     }
-
-
 
 }

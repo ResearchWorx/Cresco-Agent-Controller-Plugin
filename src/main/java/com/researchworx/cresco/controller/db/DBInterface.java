@@ -59,6 +59,7 @@ public class DBInterface {
         try
         {
 
+
             resourceTotal = new HashMap<>();
             List<String> sysInfoEdgeList = plugin.getGDB().dba.getIsAssignedEdgeIds("sysinfo_resource", "sysinfo_inode");
             for(String edgeID : sysInfoEdgeList) {
@@ -74,6 +75,33 @@ public class DBInterface {
                 }
             }
 
+            List<String> regionList = gdb.getNodeList(null,null,null);
+            //Map<String,Map<String,String>> ahm = new HashMap<String,Map<String,String>>();
+            //Map<String,String> rMap = new HashMap<String,String>();
+            if(regionList != null) {
+                for (String region : regionList) {
+                    region_count++;
+                    logger.trace("Region : " + region);
+                    List<String> agentList = gdb.getNodeList(region, null, null);
+                    if (agentList != null) {
+                        for (String agent : agentList) {
+                            agent_count++;
+                            logger.trace("Agent : " + agent);
+
+                            List<String> pluginList = gdb.getNodeList(region, agent, null);
+                            if (pluginList != null) {
+
+                                boolean isRecorded = false;
+                                for (String pluginId : pluginList) {
+                                    logger.trace("Plugin : " + plugin);
+                                    plugin_count++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             //logger.trace("Regions :" + region_count);
             //logger.trace("Agents :" + agent_count);
             //logger.trace("Plugins : " + plugin_count);
@@ -82,9 +110,9 @@ public class DBInterface {
             logger.trace("Total Memory Total : " + memoryTotal);
             logger.trace("Total Disk Available : " + diskAvailable);
             logger.trace("Total Disk Total : " + diskTotal);
-            //resourceTotal.put("regions",String.valueOf(region_count));
-            //resourceTotal.put("agents",String.valueOf(agent_count));
-            //resourceTotal.put("plugins",String.valueOf(plugin_count));
+            resourceTotal.put("regions",String.valueOf(region_count));
+            resourceTotal.put("agents",String.valueOf(agent_count));
+            resourceTotal.put("plugins",String.valueOf(plugin_count));
             resourceTotal.put("cpu_core_count",String.valueOf(cpu_core_count));
             resourceTotal.put("mem_available",String.valueOf(memoryAvailable));
             resourceTotal.put("mem_total",String.valueOf(memoryTotal));
