@@ -267,8 +267,8 @@ public class GlobalHealthWatcher implements Runnable {
             }
             //if we have a canadate, check to see if we are already connected a regions
             if(cme != null) {
-	            if((cme.getParam("src_region") != null) && (cme.getParam("src_agent")) !=null) {
-                    String cGlobalPath = cme.getParam("src_region") + "_" + (cme.getParam("src_agent"));
+	            if((cme.getParam("dst_region") != null) && (cme.getParam("dst_agent")) !=null) {
+                    String cGlobalPath = cme.getParam("dst_region") + "_" + (cme.getParam("dst_agent"));
                     if(!this.plugin.isReachableAgent(cGlobalPath)) {
                         plugin.getIncomingCanidateBrokers().offer(cme);
                         //while
