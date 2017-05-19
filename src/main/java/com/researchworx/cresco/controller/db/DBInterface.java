@@ -378,6 +378,7 @@ public class DBInterface {
 
                     //for now we will request a plugin inventory from the hosting agent when we experence a new plugin.
                     MsgEvent le = new MsgEvent(MsgEvent.Type.CONFIG,plugin.getRegion(),null,null,"enabled");
+                    le.setMsgBody("Get Plugin Inventory From Agent");
                     le.setParam("src_region", plugin.getRegion());
                     le.setParam("dst_region", region);
                     le.setParam("dst_agent", agent);

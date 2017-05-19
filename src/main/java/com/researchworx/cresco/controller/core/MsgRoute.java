@@ -31,6 +31,7 @@ public class MsgRoute implements Runnable {
             }
             */
 
+            rm.setParam("routepath",String.valueOf(routePath));
             MsgEvent re = null;
             switch (routePath) {
 
@@ -142,11 +143,60 @@ public class MsgRoute implements Runnable {
                         }
                     }
                     break;
+                case 112:
+                    logger.debug("REGIONAL AGENT SENDING MESSAGE TO REGIONAL CONTROLLER 112");
+                    logger.trace(rm.getParams().toString());
+                    //regionalSend();
+                    re = getRegionalCommandExec();
+                    //plugin.sendMsgEvent(rm);
+                    break;
+                case 116:
+                    logger.debug("CONTROLLER AGENT SENDING MESSAGE TO ITS CONTROLLER 116");
+                    logger.trace(rm.getParams().toString());
+                    //regionalSend();
+                    re = getRegionalCommandExec();
+                    //plugin.sendMsgEvent(rm);
+                    break;
+                case 117:
+                    logger.debug("CONTROLLER PLUGIN SENDING MESSAGE TO SELF 117");
+                    logger.trace(rm.getParams().toString());
+                    //regionalSend();
+                    re = getRegionalCommandExec();
+                    //plugin.sendMsgEvent(rm);
+                    break;
+                case 120:
+                    logger.debug("CONTROLLER PLUGIN SENDING MESSAGE TO ITS AGENT 120");
+                    logger.trace(rm.getParams().toString());
+                    //regionalSend();
+                    //re = getRegionalCommandExec();
+                    plugin.sendMsgEvent(rm);
+                    break;
+
+                //new
+
+                /*
+                case 64:  //System.out.println("CONTROLLER ROUTE CASE 64");
+                    if (rm.getParam("configtype") != null) {
+                        if (rm.getParam("configtype").equals("comminit")) {
+                            logger.debug("CONTROLLER SENDING REGIONAL MESSAGE 64");
+                            logger.trace(rm.getParams().toString());
+                            //PluginEngine.msgInQueue.offer(rm);
+                            plugin.sendMsgEvent(rm);
+                        }
+                    }
+                    break;
                 case 117:
                         logger.debug("CONTROLLER SENDING REGIONAL MESSAGE 117");
                         logger.trace(rm.getParams().toString());
                         //regionalSend();
                         re = getRegionalCommandExec();
+                    break;
+                case 240:
+                    logger.debug("CONTROLLER SENDING MESSAGE TO ITS AGENT 240");
+                    logger.trace(rm.getParams().toString());
+                    //regionalSend();
+                    re = getRegionalCommandExec();
+                    //plugin.sendMsgEvent(rm);
                     break;
                 case 244:
                         logger.debug("CONTROLLER SENDING REGIONAL MESSAGE 244");
@@ -172,6 +222,9 @@ public class MsgRoute implements Runnable {
                     //regionalSend();
                     re = getRegionalCommandExec();
                     break;
+
+*/
+                    //new
 
                 default:
                     //System.out.println("CONTROLLER ROUTE CASE " + routePath + " " + rm.getParams());
@@ -271,7 +324,6 @@ public class MsgRoute implements Runnable {
         int routePath;
         try {
             //determine if local or controller
-            String GC = "0";
             String RC = "0";
             String RXr = "0";
             String RXa = "0";
@@ -280,9 +332,6 @@ public class MsgRoute implements Runnable {
             String TXa = "0";
             String TXp = "0";
 
-            if(plugin.isGlobalController()) {
-                GC = "1";
-            }
 
             if(plugin.isRegionalController()) {
                 RC = "1";
@@ -320,7 +369,7 @@ public class MsgRoute implements Runnable {
                 }
 
             }
-            String routeString = GC + RC + RXr + TXr + RXa + TXa + RXp + TXp;
+            String routeString = RC + RXr + TXr + RXa + TXa + RXp + TXp;
             routePath = Integer.parseInt(routeString, 2);
         } catch (Exception ex) {
             System.out.println("AgentEngine : MsgRoute : getRoutePath Error: " + ex.getMessage());

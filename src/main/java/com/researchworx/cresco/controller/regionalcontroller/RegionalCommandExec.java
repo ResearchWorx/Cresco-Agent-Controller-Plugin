@@ -29,7 +29,7 @@ public class RegionalCommandExec {
 
 	public RegionalCommandExec(Launcher plugin)
 	{
-		this.logger = new CLogger(RegionalCommandExec.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+		this.logger = new CLogger(RegionalCommandExec.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Debug);
 		this.plugin = plugin;
 		regionalDiscovery = new AgentDiscovery(plugin);
 		gce = new GlobalCommandExec(plugin);
@@ -51,7 +51,7 @@ public class RegionalCommandExec {
 					logger.debug("CONFIG : AGENTDISCOVER REMOVE: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
 					logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
 					plugin.getGDB().removeNode(le);
-					le.setMsgBody("ack");
+					le.setMsgBody("ack disabled");
 					//le.setReturn();
 					return le;
 					//plugin.sendMsgEvent(le);
@@ -67,7 +67,7 @@ public class RegionalCommandExec {
 					logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
 					plugin.getGDB().addNode(le);
 					//need to regional rpc return, currently this does not work
-					le.setMsgBody("ack");
+					le.setMsgBody("ack enabled");
 					//le.setReturn();
 					return le;
 					//plugin.sendMsgEvent(le); //don't use this, only sends message to agent
@@ -98,6 +98,10 @@ public class RegionalCommandExec {
                 logger.debug("INFO: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
                 logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
             }
+
+            else if (le.getMsgType() == MsgEvent.Type.KPI) {
+            //do nothing
+			}
             /*
 			else if (le.getMsgType() == MsgEvent.Type.KPI) {
 				logger.debug("KPI: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
