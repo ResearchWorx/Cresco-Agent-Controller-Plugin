@@ -30,17 +30,6 @@ class Executor extends CExecutor {
                 msg.setParam("is_active", Boolean.toString(this.plugin.isActive()));
                 logger.debug("Returning communication details to Cresco agent");
                 return msg;
-            //there has to be a better way to do this
-            case "regionalimport":
-                logger.debug("regionalimport message type found");
-                logger.debug(msg.getParam("exportdata"));
-                if(mainPlugin.getGDB().gdb.setDBImport(msg.getParam("exportdata"))) {
-                    logger.debug("Database Imported.");
-                }
-                else {
-                    logger.debug("Database Import Failed!");
-                }
-                //return msg;
 
             default:
                 logger.debug("Unknown configtype found: {}", msg.getParam("configtype"));

@@ -35,9 +35,34 @@ public class GlobalCommandExec {
 	public MsgEvent execute(MsgEvent ce) {
 			if(ce.getMsgType() == MsgEvent.Type.CONFIG)
 			{
-				if(ce.getParam("globalcmd") != null)
-				{
-					if(ce.getParam("globalcmd").equals("addplugin"))
+                if(ce.getParam("action") != null) {
+                    switch (ce.getParam("action")) {
+                        case "disable":
+                            logger.debug("CONFIG : AGENTDISCOVER REMOVE: Region:" + ce.getParam("src_region") + " Agent:" + ce.getParam("src_agent"));
+                            logger.trace("Message Body [" + ce.getMsgBody() + "] [" + ce.getParams().toString() + "]");
+                            plugin.getGDB().removeNode(ce);
+                            break;
+                        case "enable":
+                            logger.debug("CONFIG : AGENTDISCOVER ADD: Region:" + ce.getParam("src_region") + " Agent:" + ce.getParam("src_agent"));
+                            logger.trace("Message Body [" + ce.getMsgBody() + "] [" + ce.getParams().toString() + "]");
+                            plugin.getGDB().addNode(ce);
+                            break;
+                        case "regionalimport":
+                            logger.debug("CONFIG : regionalimport message type found");
+                            logger.debug(ce.getParam("exportdata"));
+                            if(plugin.getGDB().gdb.setDBImport(ce.getParam("exportdata"))) {
+                                logger.debug("Database Imported.");
+                            }
+                            else {
+                                logger.debug("Database Import Failed!");
+                            }
+                            break;
+                        default:
+                            logger.debug("Unknown configtype found: {}", ce.getParam("action"));
+                            return null;
+                    }
+                }
+					else if(ce.getParam("globalcmd").equals("addplugin"))
 					{
 						if((ce.getParam("inode_id") != null) && (ce.getParam("resource_id") != null) && (ce.getParam("configparams") != null))
 						{
@@ -452,7 +477,7 @@ public class GlobalCommandExec {
 						return ce;
 					}
 					
-				}
+
 				
 			}
 

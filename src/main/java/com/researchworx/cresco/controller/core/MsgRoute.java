@@ -25,11 +25,11 @@ public class MsgRoute implements Runnable {
             //logger.error("CASE=" + routePath + " GC=" + plugin.isGlobalController() + " RC=" + plugin.isRegionalController());
             //logger.error(rm.getParams().toString());
             //logger.error(rm.getMsgType().toString());
-            /*
+/*
             if(rm.getMsgType() == MsgEvent.Type.CONFIG) {
-                logger.info("msgType: [" + rm.getMsgType().toString() + "] routepath: " + routePath + "[" + rm.getParams().toString() + "]");
-            }
-            */
+                logger.error("msgType: [" + rm.getMsgType().toString() + "] routepath: " + routePath + "[" + rm.getParams().toString() + "]");
+           }
+*/
 
             rm.setParam("routepath",String.valueOf(routePath));
             MsgEvent re = null;
@@ -171,8 +171,11 @@ public class MsgRoute implements Runnable {
                     //re = getRegionalCommandExec();
                     plugin.sendMsgEvent(rm);
                     break;
-
-                //new
+                case 122:
+                    logger.debug("REGIONAL CONTROLLER SENDING TO ANOTHER REGION 122");
+                    logger.trace(rm.getParams().toString());
+                    re = getRegionalCommandExec();
+                    break;
 
                 /*
                 case 64:  //System.out.println("CONTROLLER ROUTE CASE 64");

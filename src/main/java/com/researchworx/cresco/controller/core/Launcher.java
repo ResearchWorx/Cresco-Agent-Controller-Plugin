@@ -9,6 +9,7 @@ import com.researchworx.cresco.controller.globalcontroller.GlobalHealthWatcher;
 import com.researchworx.cresco.controller.netdiscovery.*;
 import com.researchworx.cresco.controller.regionalcontroller.AgentDiscovery;
 import com.researchworx.cresco.controller.regionalcontroller.RegionHealthWatcher;
+import com.researchworx.cresco.library.core.WatchDog;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.plugin.core.CPlugin;
 import com.researchworx.cresco.library.utilities.CLogger;
@@ -285,6 +286,7 @@ public class Launcher extends CPlugin {
     }
 
     public void commInit() {
+        watchDog.stop();
         logger.info("Initializing services");
         setActive(true);
 
@@ -563,6 +565,7 @@ public class Launcher extends CPlugin {
             this.ap = new ActiveProducer(this, "tcp://" + this.brokerAddressAgent + ":32010", brokerUserNameAgent, brokerPasswordAgent);
 
             logger.debug("Agent ProducerThread Started..");
+
 
             //watchDogProcess = new plugincore.WatchDog();
             //stopWatchDog();
@@ -843,7 +846,12 @@ public class Launcher extends CPlugin {
     }
 
     public void setGlobalControllerPath(String controllerPath) {
+
+        logger.error("SETTING GLOBAL CONTROLLER PATH : OLD : " + globalControllerPath);
         globalControllerPath = controllerPath;
+        logger.error("SETTING GLOBAL CONTROLLER PATH : NEW : " + globalControllerPath);
+
+
     }
 
     public boolean isGlobalController() {

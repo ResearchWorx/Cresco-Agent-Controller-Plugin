@@ -30,7 +30,7 @@ public class GlobalHealthWatcher implements Runnable {
 
 
     public GlobalHealthWatcher(Launcher plugin, DiscoveryClientIPv4 dcv4, DiscoveryClientIPv6 dcv6) {
-		this.logger = new CLogger(GlobalHealthWatcher.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+		this.logger = new CLogger(GlobalHealthWatcher.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
 		this.plugin = plugin;
         this.dcv4 = dcv4;
         this.dcv6 = dcv6;
@@ -50,7 +50,9 @@ public class GlobalHealthWatcher implements Runnable {
             MsgEvent le = new MsgEvent(MsgEvent.Type.CONFIG, globalPath[0], globalPath[1], null, "disabled");
             le.setParam("src_region", plugin.getRegion());
             le.setParam("dst_region", globalPath[0]);
-            le.setParam("is_active", Boolean.FALSE.toString());
+            le.setParam("globalcmd", Boolean.TRUE.toString());
+            le.setParam("action", "disable");
+
             le.setParam("watchdogtimer", String.valueOf(plugin.getConfig().getLongParam("watchdogtimer",5000L)));
             //MsgEvent re = new RPCCall().call(le);
             MsgEvent re = plugin.getRPC().call(le);
@@ -109,6 +111,7 @@ public class GlobalHealthWatcher implements Runnable {
                 tick.setParam("dst_region", plugin.getRegion());
                 tick.setParam("watchdog_ts", String.valueOf(System.currentTimeMillis()));
                 tick.setParam("watchdogtimer", String.valueOf(gCheckInterval));
+                //logger.error("CALLING FROM GLOBAL HEALTH: " + tick.getParams().toString());
                 plugin.getGDB().watchDogUpdate(tick);
             }
 
@@ -305,12 +308,14 @@ public class GlobalHealthWatcher implements Runnable {
                     MsgEvent le = new MsgEvent(MsgEvent.Type.CONFIG, plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), "enabled");
                     le.setParam("src_region", plugin.getRegion());
                     le.setParam("dst_region", gPath[0]);
-                    le.setParam("is_active", Boolean.TRUE.toString());
+                    //le.setParam("is_active", Boolean.TRUE.toString());
+                    le.setParam("action", "enable");
+                    //le.setParam("globalcmd", Boolean.TRUE.toString());
                     le.setParam("watchdogtimer", String.valueOf(plugin.getConfig().getLongParam("watchdogtimer", 5000L)));
                     //this should be RPC, but routing needs to be fixed route 16 -> 32 -> regionsend -> 16 -> 32 -> regionsend (goes to region, not rpc)
                     plugin.msgIn(le);
-
-                }}
+                }
+            }
         }
         catch(Exception ex) {
 	        logger.error("sendGlobalWatchDogRegister() " + ex.getMessage());
@@ -373,14 +378,12 @@ public class GlobalHealthWatcher implements Runnable {
                     String[] tmpStr = this.plugin.getGlobalControllerPath().split("_");
 
                     me = new MsgEvent(MsgEvent.Type.CONFIG, this.plugin.getRegion(), this.plugin.getAgent(), this.plugin.getPluginID(), "regionalimport");
-                    me.setParam("configtype", "regionalimport");
+                    me.setParam("action", "regionalimport");
+                    me.setParam("globalcmd", Boolean.TRUE.toString());
                     me.setParam("src_region", this.plugin.getRegion());
-                    //me.setParam("src_agent", this.plugin.getAgent());
-                    //me.setParam("src_plugin", "plugin/0");
                     me.setParam("dst_region", tmpStr[0]);
                     me.setParam("dst_agent", tmpStr[1]);
                     me.setParam("dst_plugin", plugin.getPluginID());
-                    //me.setParam("dst_plugin", "plugin/0");
                     me.setParam("exportdata",dbexport);
                     this.plugin.msgIn(me);
                 }

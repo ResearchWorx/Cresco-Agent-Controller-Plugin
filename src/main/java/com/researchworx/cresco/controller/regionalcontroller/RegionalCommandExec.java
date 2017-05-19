@@ -29,7 +29,7 @@ public class RegionalCommandExec {
 
 	public RegionalCommandExec(Launcher plugin)
 	{
-		this.logger = new CLogger(RegionalCommandExec.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Debug);
+		this.logger = new CLogger(RegionalCommandExec.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
 		this.plugin = plugin;
 		regionalDiscovery = new AgentDiscovery(plugin);
 		gce = new GlobalCommandExec(plugin);
@@ -37,55 +37,39 @@ public class RegionalCommandExec {
 
 	public MsgEvent execute(MsgEvent le) {
 
-			if(le.getMsgType() == MsgEvent.Type.CONFIG) {
-                if(le.getParam("globalcmd") != null) {
-                    //this is a global command
-                    if(plugin.isGlobalController()) {
-                        return gce.execute(le);
-                    }
-                    else {
-                        logger.error("REGIONAL COMMAND EXEC : Figure out how to route to GC");
-                    }
-                }
-				else if(le.getMsgBody().equals("disabled")) {
-					logger.debug("CONFIG : AGENTDISCOVER REMOVE: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
-					logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
-					plugin.getGDB().removeNode(le);
-					le.setMsgBody("ack disabled");
-					//le.setReturn();
-					return le;
-					//plugin.sendMsgEvent(le);
-					//plugin.msgIn(le);
-					/*
-					if(!plugin.isGlobalController()) {
-						logger.debug("MsgType=" + le.getMsgType() + " Params=" + le.getParams());
-						//globalSend(le);
-					}
-					*/
-				} else if (le.getMsgBody().equals("enabled")) {
-					logger.debug("CONFIG : AGENTDISCOVER ADD: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
-					logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
-					plugin.getGDB().addNode(le);
-					//need to regional rpc return, currently this does not work
-					le.setMsgBody("ack enabled");
-					//le.setReturn();
-					return le;
-					//plugin.sendMsgEvent(le); //don't use this, only sends message to agent
-					//plugin.msgIn(le);
-					/*
-					if(!plugin.isGlobalController()) {
-						logger.debug("MsgType=" + le.getMsgType() + " Params=" + le.getParams());
-						//globalSend(le);
-					}
-					*/
-				}
+	        //logger.error("INCOMING: " + le.getParams().toString());
 
-				else if(le.getParam("configtype") != null) {
-                    if(le.getParam("configtype").equals("plugininventory") ) {
-                        //do nothing.. fix this
-                    }
-                }
 
+            if(le.getParam("globalcmd") != null) {
+                //this is a global command
+                if(plugin.isGlobalController()) {
+                    return gce.execute(le);
+                }
+                else {
+                    logger.error("PRE FORWARDING TO GC : " + le.getParams().toString());
+                    globalSend(le);
+                    return null;
+                }
+            }
+			else if(le.getMsgType() == MsgEvent.Type.CONFIG) {
+                if(le.getParam("action") != null) {
+                    switch (le.getParam("action")) {
+                        case "disable":
+                            logger.debug("CONFIG : AGENTDISCOVER REMOVE: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
+                            logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
+                            plugin.getGDB().removeNode(le);
+                            break;
+                        case "enable":
+                            logger.debug("CONFIG : AGENTDISCOVER ADD: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
+                            logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
+                            plugin.getGDB().addNode(le);
+                            break;
+                        default:
+                            logger.debug("Unknown configtype found: {}", le.getParam("action"));
+                            return null;
+                    }
+
+                }
                 else {
                     logger.error("CONFIG : UNKNOWN ACTION: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent") + " " +  le.getParams());
                     //return gce.cmdExec(le);
@@ -95,10 +79,9 @@ public class RegionalCommandExec {
 				regionalDiscovery.discover(le);
 			}
             else if (le.getMsgType() == MsgEvent.Type.INFO) {
-                logger.debug("INFO: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
-                logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
+                //logger.debug("INFO: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
+                //logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
             }
-
             else if (le.getMsgType() == MsgEvent.Type.KPI) {
             //do nothing
 			}
@@ -118,22 +101,25 @@ public class RegionalCommandExec {
 
 			*/
 			else {
-				logger.error("UNKNOWN MESSAGE! : MsgType=" + le.getMsgType() + " " +  le.getParams());
+				//logger.error("UNKNOWN MESSAGE! : MsgType=" + le.getMsgType() + " " +  le.getParams());
 			}
 
 		return null;
 	}
 
-	/*
+
     //function to send to global controller
     private void globalSend(MsgEvent ge) {
         try {
             if(!this.plugin.isGlobalController()) {
                 if(this.plugin.getGlobalControllerPath() != null) {
+                    logger.error("PLUGIN PATH" + this.plugin.getGlobalControllerPath());
                     String[] tmpStr = this.plugin.getGlobalControllerPath().split("_");
                     ge.setParam("dst_region", tmpStr[0]);
-                    ge.setParam("dst_plugin", plugin.getPluginID());
-                    plugin.msgIn(ge);
+                    //ge.setParam("dst_plugin", plugin.getPluginID());
+                    logger.error("FORWARDING TO GC : " + ge.getParams().toString());
+
+                    plugin.sendMsgEvent(ge);
                 }
             }
         }
@@ -141,5 +127,5 @@ public class RegionalCommandExec {
             logger.error("globalSend : " + ex.getMessage());
         }
     }
-    */
+
 }

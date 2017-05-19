@@ -30,7 +30,7 @@ public class RegionHealthWatcher {
         timer = new Timer();
         timer.scheduleAtFixedRate(new CommunicationHealthWatcherTask(), 500, wdTimer);
         regionalUpdateTimer = new Timer();
-        regionalUpdateTimer.scheduleAtFixedRate(new RegionHealthWatcher.RegionalNodeStatusWatchDog(plugin, logger), 500, 15000);//remote
+        regionalUpdateTimer.scheduleAtFixedRate(new RegionHealthWatcher.RegionalNodeStatusWatchDog(plugin, logger), 15000, 15000);//remote
     }
 
     public void shutdown() {
@@ -67,6 +67,7 @@ public class RegionHealthWatcher {
                     }
 
                 }
+
                 if (!isHealthy) {
                     plugin.removeGDBNode(plugin.getRegion(), plugin.getAgent(), null); //remove self from DB
                     logger.info("System has become unhealthy, rebooting services");
@@ -113,7 +114,7 @@ public class RegionHealthWatcher {
                     else if(entry.getValue() == NodeStatusType.ERROR) { //will include more items once nodes update correctly
                         Map<String,String> nodeParams = plugin.getGDB().gdb.getNodeParams(entry.getKey());
                         for (Map.Entry<String, String> entry2 : nodeParams.entrySet()) {
-                            System.out.println("Key = " + entry2.getKey() + ", Value = " + entry2.getValue());
+                            logger.error("Key = " + entry2.getKey() + ", Value = " + entry2.getValue());
                         }
                         String region = nodeParams.get("region");
                         String agent = nodeParams.get("agent");

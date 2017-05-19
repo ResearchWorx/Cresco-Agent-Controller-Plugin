@@ -1,6 +1,7 @@
 package com.researchworx.cresco.controller.db;
 
 import com.researchworx.cresco.controller.core.Launcher;
+import com.researchworx.cresco.library.core.WatchDog;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 
@@ -277,9 +278,15 @@ public class DBInterface {
 
             for(String nodeId : queryList) {
                 Map<String,String> params = gdb.getNodeParams(nodeId);
-                if((params.containsKey("watchdogtimer") && (params.containsKey("watchdog_ts"))  && (params.containsKey("is_active")))) {
+                long watchdog_rate = 5000L;
+
+                if(params.containsKey("watchdogtimer")) {
+                    watchdog_rate = Long.parseLong(params.get("watchdogtimer"));
+
+                }
+                if((params.containsKey("watchdog_ts"))  && (params.containsKey("is_active"))) {
                     long watchdog_ts = Long.parseLong(params.get("watchdog_ts"));
-                    long watchdog_rate = Long.parseLong(params.get("watchdogtimer"));
+                    //long watchdog_rate = Long.parseLong(params.get("watchdogtimer"));
                     boolean isActive = Boolean.parseBoolean(params.get("is_active"));
                     if(isActive) {
                         long watchdog_diff = System.currentTimeMillis() - watchdog_ts;
@@ -317,6 +324,7 @@ public class DBInterface {
             String region = de.getParam("src_region");
             String agent = de.getParam("src_agent");
             String plugin = de.getParam("src_plugin");
+            de.setParam("is_active",Boolean.TRUE.toString());
 
             String nodeId = gdb.getNodeId(region,agent,plugin);
             if(nodeId != null) {
@@ -368,37 +376,22 @@ public class DBInterface {
                 wasUpdated = true;
             }
             else {
-
-                //This must be fixed
-                //logger.error("watchDogUpdate : Can't update missing node : " + de.getParams().toString());
-                //Needs to be fixed in Cresco Library for watchdog discovery message modes (start,run,stop)
+                logger.error("nodeID does not exist for region:" + region + " agent:" + agent + " pluginId:" + pluginId);
+                //logger.error(de.getMsgType().toString() + " " + de.getParams().toString());
+                /*
                 if(gdb.getNodeId(region,agent,null) != null) {
-                    //this is a plugin for which there is currently no discovery, add it for now
-                    //send a note to the agent to send information on this plugin to the region controller
 
-                    //for now we will request a plugin inventory from the hosting agent when we experence a new plugin.
                     MsgEvent le = new MsgEvent(MsgEvent.Type.CONFIG,plugin.getRegion(),null,null,"enabled");
                     le.setMsgBody("Get Plugin Inventory From Agent");
                     le.setParam("src_region", plugin.getRegion());
                     le.setParam("dst_region", region);
                     le.setParam("dst_agent", agent);
-                    //le.setParam("dst_plugin", pluginId);
                     le.setParam("configtype","plugininventory");
                     le.setParam("plugin",pluginId);
-                    //le.setParam("is_active", Boolean.TRUE.toString());
                     this.plugin.msgIn(le);
-                    /*
-                    addNode(de);
-                    nodeId = gdb.getNodeId(region,agent,plugin);
-                    gdb.setNodeParam(region,agent,plugin, "watchdog_ts", String.valueOf(System.currentTimeMillis()));
-                    String interval = de.getParam("watchdogtimer");
-                    if(interval == null) {
-                        interval = "5000";
-                    }
-                    gdb.setNodeParam(region, agent, plugin, "watchdogtimer", interval);
-                    wasUpdated = true;
-                    */
                 }
+                */
+
             }
 
         } catch (Exception ex) {
