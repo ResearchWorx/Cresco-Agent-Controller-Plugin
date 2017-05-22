@@ -71,7 +71,7 @@ public class GlobalCommandExec {
                         break;
                     case "plugininfo":
                         ce.setParam("pluginslist",plugin.getGDB().getPluginInfo(ce.getParam("action_region"),ce.getParam("action_agent"),ce.getParam("action_plugin")));
-                        logger.trace("list plugins return : " + ce.getParams().toString());
+                        logger.trace("plugins info return : " + ce.getParams().toString());
                         break;
                     default:
 						logger.debug("Unknown configtype found: {}", ce.getParam("action"));
