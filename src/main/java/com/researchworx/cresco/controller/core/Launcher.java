@@ -847,9 +847,9 @@ public class Launcher extends CPlugin {
 
     public void setGlobalControllerPath(String controllerPath) {
 
-        logger.error("SETTING GLOBAL CONTROLLER PATH : OLD : " + globalControllerPath);
+        logger.trace("SETTING GLOBAL CONTROLLER PATH : OLD : " + globalControllerPath);
         globalControllerPath = controllerPath;
-        logger.error("SETTING GLOBAL CONTROLLER PATH : NEW : " + globalControllerPath);
+        logger.trace("SETTING GLOBAL CONTROLLER PATH : NEW : " + globalControllerPath);
 
 
     }
