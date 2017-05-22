@@ -6,6 +6,7 @@ import com.researchworx.cresco.library.core.WatchDog;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 
+import javax.xml.bind.DatatypeConverter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -20,6 +21,8 @@ public class DBInterface {
     private DBEngine gde;
     public DBBaseFunctions gdb;
     public DBApplicationFunctions dba;
+    private Gson gson;
+
 
     public DBInterface(Launcher plugin) {
         this.logger = new CLogger(DBInterface.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
@@ -27,6 +30,7 @@ public class DBInterface {
         this.gde = new DBEngine(plugin);
         this.gdb = new DBBaseFunctions(plugin,gde);
         this.dba = new DBApplicationFunctions(plugin,gde);
+        this.gson = new Gson();
     }
 
     public Map<String,String> paramStringToMap(String param) {
@@ -47,6 +51,7 @@ public class DBInterface {
         }
         return params;
     }
+
 
     public Map<String,String> getResourceTotal() {
         Map<String,String> resourceTotal = null;
@@ -158,12 +163,63 @@ public class DBInterface {
                 }
             }
             queryMap.put("regions",regionArray);
-            Gson gson = new Gson();
-            queryReturn = gson.toJson(queryMap);
+
+            queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(queryMap))));
+
         }
         catch(Exception ex)
         {
             logger.error("getRegionList() " + ex.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString()); //
+        }
+
+        return queryReturn;
+    }
+
+    public String getAgentList(String actionRegion) {
+        String queryReturn = null;
+
+        Map<String,List<Map<String,String>>> queryMap;
+
+        try
+        {
+            queryMap = new HashMap<>();
+            List<Map<String,String>> regionArray = new ArrayList<>();
+
+            List<String> regionList;
+            if(actionRegion != null) {
+                regionList = new ArrayList<>();
+                regionList.add(actionRegion);
+            } else {
+                regionList = gdb.getNodeList(null,null,null);
+            }
+            for(String region : regionList) {
+
+                List<String> agentList = gdb.getNodeList(region, null, null);
+                //Map<String,Map<String,String>> ahm = new HashMap<String,Map<String,String>>();
+                //Map<String,String> rMap = new HashMap<String,String>();
+                if (agentList != null) {
+                    for (String agent : agentList) {
+                        Map<String, String> regionMap = new HashMap<>();
+                        logger.trace("Agent : " + region);
+                        List<String> pluginList = gdb.getNodeList(region, agent, null);
+                        regionMap.put("name", agent);
+                        regionMap.put("region", region);
+                        regionMap.put("plugins", String.valueOf(pluginList.size()));
+                        regionArray.add(regionMap);
+                    }
+                }
+                queryMap.put("agents", regionArray);
+            }
+            queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(queryMap))));
+
+        }
+        catch(Exception ex)
+        {
+            logger.error("getAgentList() " + ex.toString());
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             ex.printStackTrace(pw);
