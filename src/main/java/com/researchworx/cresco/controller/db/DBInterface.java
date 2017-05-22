@@ -158,7 +158,7 @@ public class DBInterface {
                     logger.trace("Region : " + region);
                     List<String> agentList = gdb.getNodeList(region, null, null);
                     regionMap.put("name",region);
-                    regionMap.put("agents",region);
+                    regionMap.put("agents",String.valueOf(agentList.size()));
                     regionArray.add(regionMap);
                 }
             }
