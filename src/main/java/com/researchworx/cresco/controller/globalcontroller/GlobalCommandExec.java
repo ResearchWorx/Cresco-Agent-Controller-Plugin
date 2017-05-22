@@ -48,23 +48,28 @@ public class GlobalCommandExec {
                         logger.trace("list regions return : " + ce.getParams().toString());
                         break;
                     case "listagents":
+                        String actionRegionAgents = null;
+
                         if(ce.getParam("action_region") != null) {
-                            ce.setParam("agentslist",plugin.getGDB().getAgentList(ce.getParam("action_region")));
+                            actionRegionAgents = ce.getParam("action_region");
                         }
-                        else {
-                            ce.setParam("agentslist",plugin.getGDB().getAgentList(null));
-                        }
-                        logger.error("list agents return : " + ce.getParams().toString());
+                        ce.setParam("agentslist",plugin.getGDB().getAgentList(actionRegionAgents));
+                        logger.trace("list agents return : " + ce.getParams().toString());
                         break;
                     case "listplugins":
-                        if(ce.getParam("action_region") != null) {
-                            ce.setParam("agentslist",plugin.getGDB().getAgentList(ce.getParam("action_region")));
+                        String actionRegionPlugins = null;
+                        String actionAgentPlugins = null;
+
+                        if((ce.getParam("action_region") != null) && (ce.getParam("action_agent") != null)) {
+                            actionRegionPlugins = ce.getParam("action_region");
+                            actionAgentPlugins = ce.getParam("action_agent");
+                        } else if((ce.getParam("action_region") != null) && (ce.getParam("action_agent") == null)) {
+                            actionRegionPlugins = ce.getParam("action_region");
                         }
-                        else {
-                            ce.setParam("agentslist",plugin.getGDB().getAgentList(null));
-                        }
-                        logger.error("list agents return : " + ce.getParams().toString());
+                        ce.setParam("agentslist",plugin.getGDB().getPluginList(actionRegionPlugins, actionAgentPlugins));
+                        logger.trace("list plugins return : " + ce.getParams().toString());
                         break;
+
                     default:
 						logger.debug("Unknown configtype found: {}", ce.getParam("action"));
 						return null;

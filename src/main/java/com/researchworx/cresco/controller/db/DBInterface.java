@@ -229,6 +229,63 @@ public class DBInterface {
         return queryReturn;
     }
 
+    public String getPluginList(String actionRegion, String actionAgent) {
+        String queryReturn = null;
+
+        Map<String,List<Map<String,String>>> queryMap;
+
+        try
+        {
+            queryMap = new HashMap<>();
+            List<Map<String,String>> regionArray = new ArrayList<>();
+
+            List<String> regionList;
+            if(actionRegion != null) {
+                regionList = new ArrayList<>();
+                regionList.add(actionRegion);
+            } else {
+                regionList = gdb.getNodeList(null,null,null);
+            }
+            for(String region : regionList) {
+                List<String> agentList;
+                if(actionAgent != null) {
+                    agentList = new ArrayList<>();
+                    agentList.add(actionAgent);
+                } else {
+                    agentList = gdb.getNodeList(region,null,null);
+                }
+                //Map<String,Map<String,String>> ahm = new HashMap<String,Map<String,String>>();
+                //Map<String,String> rMap = new HashMap<String,String>();
+                if (agentList != null) {
+                    for (String agent : agentList) {
+                        Map<String, String> regionMap = new HashMap<>();
+                        logger.trace("Agent : " + region);
+                        List<String> pluginList = gdb.getNodeList(region, agent, null);
+                        for(String plugin : pluginList) {
+                            regionMap.put("name", plugin);
+                            regionMap.put("region", region);
+                            regionMap.put("agent", agent);
+                            regionArray.add(regionMap);
+                        }
+                    }
+                }
+                queryMap.put("plugins", regionArray);
+            }
+            queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(queryMap))));
+
+        }
+        catch(Exception ex)
+        {
+            logger.error("getAgentList() " + ex.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString()); //
+        }
+
+        return queryReturn;
+    }
+
 
     public Map<String,String> getResourceTotal2() {
         Map<String,String> resourceTotal = null;
