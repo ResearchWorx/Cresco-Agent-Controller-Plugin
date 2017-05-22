@@ -258,10 +258,10 @@ public class DBInterface {
                 //Map<String,String> rMap = new HashMap<String,String>();
                 if (agentList != null) {
                     for (String agent : agentList) {
-                        Map<String, String> regionMap = new HashMap<>();
                         logger.trace("Agent : " + region);
                         List<String> pluginList = gdb.getNodeList(region, agent, null);
                         for(String plugin : pluginList) {
+                            Map<String, String> regionMap = new HashMap<>();
                             regionMap.put("name", plugin);
                             regionMap.put("region", region);
                             regionMap.put("agent", agent);
