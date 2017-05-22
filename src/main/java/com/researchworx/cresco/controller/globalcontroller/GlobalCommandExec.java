@@ -66,7 +66,7 @@ public class GlobalCommandExec {
                         } else if((ce.getParam("action_region") != null) && (ce.getParam("action_agent") == null)) {
                             actionRegionPlugins = ce.getParam("action_region");
                         }
-                        ce.setParam("agentslist",plugin.getGDB().getPluginList(actionRegionPlugins, actionAgentPlugins));
+                        ce.setParam("pluginslist",plugin.getGDB().getPluginList(actionRegionPlugins, actionAgentPlugins));
                         logger.trace("list plugins return : " + ce.getParams().toString());
                         break;
 
