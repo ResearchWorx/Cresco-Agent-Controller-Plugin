@@ -229,6 +229,7 @@ public class DBInterface {
         return queryReturn;
     }
 
+
     public String getPluginList(String actionRegion, String actionAgent) {
         String queryReturn = null;
 
@@ -277,6 +278,30 @@ public class DBInterface {
         catch(Exception ex)
         {
             logger.error("getAgentList() " + ex.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString()); //
+        }
+
+        return queryReturn;
+    }
+
+    public String getPluginInfo(String actionRegion, String actionAgent, String actionPlugin) {
+        String queryReturn = null;
+
+        try
+        {
+            List<Map<String,String>> regionArray = new ArrayList<>();
+            String nodeId = gdb.getNodeId(actionRegion, actionAgent,actionPlugin);
+            Map<String,String> nodeParams = gdb.getNodeParams(nodeId);
+
+            queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(nodeParams))));
+
+        }
+        catch(Exception ex)
+        {
+            logger.error("getPluginInfo() " + ex.toString());
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             ex.printStackTrace(pw);
