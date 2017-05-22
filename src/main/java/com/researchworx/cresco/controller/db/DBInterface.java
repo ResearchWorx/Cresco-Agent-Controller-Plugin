@@ -1,5 +1,6 @@
 package com.researchworx.cresco.controller.db;
 
+import com.google.gson.Gson;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.core.WatchDog;
 import com.researchworx.cresco.library.messaging.MsgEvent;
@@ -7,6 +8,7 @@ import com.researchworx.cresco.library.utilities.CLogger;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -132,6 +134,45 @@ public class DBInterface {
 
         return resourceTotal;
     }
+
+    public String getRegionList() {
+        String queryReturn = null;
+
+        Map<String,List<Map<String,String>>> queryMap;
+
+        try
+        {
+            queryMap = new HashMap<>();
+            List<Map<String,String>> regionArray = new ArrayList<>();
+            List<String> regionList = gdb.getNodeList(null,null,null);
+            //Map<String,Map<String,String>> ahm = new HashMap<String,Map<String,String>>();
+            //Map<String,String> rMap = new HashMap<String,String>();
+            if(regionList != null) {
+                for (String region : regionList) {
+                    Map<String,String> regionMap = new HashMap<>();
+                    logger.trace("Region : " + region);
+                    List<String> agentList = gdb.getNodeList(region, null, null);
+                    regionMap.put("name",region);
+                    regionMap.put("agents",region);
+                    regionArray.add(regionMap);
+                }
+            }
+            queryMap.put("regions",regionArray);
+            Gson gson = new Gson();
+            queryReturn = gson.toJson(queryMap);
+        }
+        catch(Exception ex)
+        {
+            logger.error("getRegionList() " + ex.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString()); //
+        }
+
+        return queryReturn;
+    }
+
 
     public Map<String,String> getResourceTotal2() {
         Map<String,String> resourceTotal = null;

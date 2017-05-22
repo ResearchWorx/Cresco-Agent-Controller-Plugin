@@ -29,7 +29,7 @@ public class RegionalCommandExec {
 
 	public RegionalCommandExec(Launcher plugin)
 	{
-		this.logger = new CLogger(RegionalCommandExec.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
+		this.logger = new CLogger(RegionalCommandExec.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
 		this.plugin = plugin;
 		regionalDiscovery = new AgentDiscovery(plugin);
 		gce = new GlobalCommandExec(plugin);
@@ -82,10 +82,6 @@ public class RegionalCommandExec {
                 //logger.debug("INFO: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
                 //logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
             }
-            else if (le.getMsgType() == MsgEvent.Type.KPI) {
-            //do nothing
-			}
-            /*
 			else if (le.getMsgType() == MsgEvent.Type.KPI) {
 				logger.debug("KPI: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
 				//logger.info("MsgType=" + le.getMsgType() + " Params=" + le.getParams());
@@ -99,9 +95,8 @@ public class RegionalCommandExec {
 
 			}
 
-			*/
 			else {
-				//logger.error("UNKNOWN MESSAGE! : MsgType=" + le.getMsgType() + " " +  le.getParams());
+				logger.error("UNKNOWN MESSAGE! : MsgType=" + le.getMsgType() + " " +  le.getParams());
 			}
 
 		return null;

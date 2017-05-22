@@ -33,7 +33,26 @@ public class GlobalCommandExec {
     }
 
 	public MsgEvent execute(MsgEvent ce) {
-			if(ce.getMsgType() == MsgEvent.Type.CONFIG)
+
+		/*
+		Region:
+  		Param - "action":"listregions"
+  		Response:
+    	Param - "regionslist":"{"regions":[{"name":"blah","agents":#}]}"
+		*/
+
+			if(ce.getMsgType() == MsgEvent.Type.EXEC) {
+				switch (ce.getParam("action")) {
+					case "listregions":
+                        //getRegionList()
+                        ce.setParam("regionslist",plugin.getGDB().getRegionList());
+						break;
+					default:
+						logger.debug("Unknown configtype found: {}", ce.getParam("action"));
+						return null;
+				}
+			}
+			else if(ce.getMsgType() == MsgEvent.Type.CONFIG)
 			{
                 if(ce.getParam("action") != null) {
                     switch (ce.getParam("action")) {
