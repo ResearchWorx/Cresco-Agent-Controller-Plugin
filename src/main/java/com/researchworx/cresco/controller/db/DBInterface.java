@@ -229,7 +229,6 @@ public class DBInterface {
         return queryReturn;
     }
 
-
     public String getPluginList(String actionRegion, String actionAgent) {
         String queryReturn = null;
 
@@ -309,6 +308,188 @@ public class DBInterface {
         }
 
         return queryReturn;
+    }
+
+    private String getGlobalResourceInfo() {
+        String queryReturn = null;
+
+        Map<String,List<Map<String,String>>> queryMap;
+
+
+        long cpu_core_count = 0;
+        long memoryAvailable = 0;
+        long memoryTotal = 0;
+        long diskAvailable = 0;
+        long diskTotal = 0;
+
+        try
+        {
+            queryMap = new HashMap<>();
+            List<Map<String,String>> regionArray = new ArrayList<>();
+
+            List<String> sysInfoEdgeList = plugin.getGDB().dba.getIsAssignedEdgeIds("sysinfo_resource", "sysinfo_inode");
+
+            for(String edgeID : sysInfoEdgeList) {
+                Map<String, String> edgeParams = dba.getIsAssignedParams(edgeID);
+
+                cpu_core_count += Long.parseLong(edgeParams.get("cpu-logical-count"));
+                memoryAvailable += Long.parseLong(edgeParams.get("memory-available"));
+                memoryTotal += Long.parseLong(edgeParams.get("memory-total"));
+                for (String fspair : edgeParams.get("fs-map").split(",")) {
+                    String[] fskey = fspair.split(":");
+                    diskAvailable += Long.parseLong(edgeParams.get("fs-" + fskey[0] + "-available"));
+                    diskTotal += Long.parseLong(edgeParams.get("fs-" + fskey[0] + "-total"));
+                }
+            }
+            Map<String,String> resourceTotal = new HashMap<>();
+            resourceTotal.put("cpu_core_count",String.valueOf(cpu_core_count));
+            resourceTotal.put("mem_available",String.valueOf(memoryAvailable));
+            resourceTotal.put("mem_total",String.valueOf(memoryTotal));
+            resourceTotal.put("disk_available",String.valueOf(diskAvailable));
+            resourceTotal.put("disk_total",String.valueOf(diskTotal));
+            regionArray.add(resourceTotal);
+            queryMap.put("globalresources",regionArray);
+
+            queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(queryMap))));
+
+} catch(Exception ex) {
+            logger.error("getGlobalResourceInfo() " + ex.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString()); //
+        }
+
+        return queryReturn;
+
+    }
+
+    private String getResourceResourceInfo(String actionRegion) {
+        String queryReturn = null;
+
+        Map<String,List<Map<String,String>>> queryMap;
+
+
+        long cpu_core_count = 0;
+        long memoryAvailable = 0;
+        long memoryTotal = 0;
+        long diskAvailable = 0;
+        long diskTotal = 0;
+
+        try
+        {
+            queryMap = new HashMap<>();
+            List<Map<String,String>> regionArray = new ArrayList<>();
+
+            List<String> sysInfoEdgeList = plugin.getGDB().dba.getIsAssignedEdgeIds("sysinfo_resource", "sysinfo_inode");
+
+            for(String edgeID : sysInfoEdgeList) {
+                Map<String, String> edgeParams = dba.getIsAssignedParams(edgeID);
+
+                if(edgeParams.get("region").toLowerCase().equals(actionRegion.toLowerCase())) {
+                    cpu_core_count += Long.parseLong(edgeParams.get("cpu-logical-count"));
+                    memoryAvailable += Long.parseLong(edgeParams.get("memory-available"));
+                    memoryTotal += Long.parseLong(edgeParams.get("memory-total"));
+                    for (String fspair : edgeParams.get("fs-map").split(",")) {
+                        String[] fskey = fspair.split(":");
+                        diskAvailable += Long.parseLong(edgeParams.get("fs-" + fskey[0] + "-available"));
+                        diskTotal += Long.parseLong(edgeParams.get("fs-" + fskey[0] + "-total"));
+                    }
+                }
+            }
+            Map<String,String> resourceTotal = new HashMap<>();
+            resourceTotal.put("cpu_core_count",String.valueOf(cpu_core_count));
+            resourceTotal.put("mem_available",String.valueOf(memoryAvailable));
+            resourceTotal.put("mem_total",String.valueOf(memoryTotal));
+            resourceTotal.put("disk_available",String.valueOf(diskAvailable));
+            resourceTotal.put("disk_total",String.valueOf(diskTotal));
+            regionArray.add(resourceTotal);
+            queryMap.put("regionresources",regionArray);
+
+            queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(queryMap))));
+
+        } catch(Exception ex) {
+            logger.error("getRegionResourceInfo() " + ex.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString()); //
+        }
+
+        return queryReturn;
+
+    }
+
+    private String getAgentResourceInfo(String actionRegion, String actionAgent) {
+        String queryReturn = null;
+
+        Map<String,List<Map<String,String>>> queryMap;
+
+        try
+        {
+            queryMap = new HashMap<>();
+            List<Map<String,String>> regionArray = new ArrayList<>();
+
+            List<String> sysInfoEdgeList = plugin.getGDB().dba.getIsAssignedEdgeIds("sysinfo_resource", "sysinfo_inode");
+
+            for(String edgeID : sysInfoEdgeList) {
+                Map<String, String> edgeParams = dba.getIsAssignedParams(edgeID);
+
+                if((edgeParams.get("region").toLowerCase().equals(actionRegion.toLowerCase())) && (edgeParams.get("agent").toLowerCase().equals(actionAgent.toLowerCase()))) {
+
+                    Map<String,String> resourceTotal = new HashMap<>(edgeParams);
+                    resourceTotal.remove("dst_region");
+                    resourceTotal.remove("src_plugin");
+                    resourceTotal.remove("src_region");
+                    resourceTotal.remove("src_agent");
+                    resourceTotal.remove("plugin");
+                    resourceTotal.remove("region");
+                    resourceTotal.remove("agent");
+                    resourceTotal.remove("inode_id");
+                    resourceTotal.remove("resource_id");
+                    regionArray.add(resourceTotal);
+
+                }
+            }
+
+            queryMap.put("agentresources",regionArray);
+
+            queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(queryMap))));
+
+        } catch(Exception ex) {
+            logger.error("getAgentResourceInfo() " + ex.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString()); //
+        }
+
+        return queryReturn;
+
+    }
+
+    public String getResourceInfo(String actionRegion, String actionAgent) {
+        String queryReturn = null;
+        try
+        {
+            if((actionRegion != null) && (actionAgent != null)) {
+                queryReturn = getAgentResourceInfo(actionRegion,actionAgent);
+            } else if (actionRegion != null) {
+                queryReturn = getResourceResourceInfo(actionRegion);
+            } else {
+                queryReturn = getGlobalResourceInfo();
+            }
+
+        } catch(Exception ex) {
+            logger.error("getResourceInfo() " + ex.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString()); //
+        }
+
+        return queryReturn;
+
     }
 
 
