@@ -348,7 +348,7 @@ public class DBInterface {
             resourceTotal.put("disk_available",String.valueOf(diskAvailable));
             resourceTotal.put("disk_total",String.valueOf(diskTotal));
             regionArray.add(resourceTotal);
-            queryMap.put("resourceinfo",regionArray);
+            queryMap.put("globalresourceinfo",regionArray);
 
             queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(queryMap))));
 
@@ -364,7 +364,7 @@ public class DBInterface {
 
     }
 
-    private String getResourceResourceInfo(String actionRegion) {
+    private String getRegionResourceInfo(String actionRegion) {
         String queryReturn = null;
 
         Map<String,List<Map<String,String>>> queryMap;
@@ -404,7 +404,7 @@ public class DBInterface {
             resourceTotal.put("disk_available",String.valueOf(diskAvailable));
             resourceTotal.put("disk_total",String.valueOf(diskTotal));
             regionArray.add(resourceTotal);
-            queryMap.put("resourceinfo",regionArray);
+            queryMap.put("regionresourceinfo",regionArray);
 
             queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(queryMap))));
 
@@ -452,7 +452,7 @@ public class DBInterface {
                 }
             }
 
-            queryMap.put("resourceinfo",regionArray);
+            queryMap.put("agentresourceinfo",regionArray);
 
             queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(queryMap))));
 
@@ -475,7 +475,7 @@ public class DBInterface {
             if((actionRegion != null) && (actionAgent != null)) {
                 queryReturn = getAgentResourceInfo(actionRegion,actionAgent);
             } else if (actionRegion != null) {
-                queryReturn = getResourceResourceInfo(actionRegion);
+                queryReturn = getRegionResourceInfo(actionRegion);
             } else {
                 queryReturn = getGlobalResourceInfo();
             }
@@ -796,7 +796,6 @@ public class DBInterface {
         }
         return updatedKPI;
     }
-
 
     public Boolean removeNode(MsgEvent de) {
         Boolean wasRemoved = false;
