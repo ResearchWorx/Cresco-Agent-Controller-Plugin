@@ -57,7 +57,7 @@ public class MsgRoute implements Runnable {
                     externalSend();
                     break;
                 case 21:
-                    logger.debug("REGIONAL CONTROLLER SENDING INTER-REGIONAL MESSAGE 21");
+                    logger.debug("PLUGIN SOURCED, REGIONAL CONTROLLER SENDING INTER-REGIONAL MESSAGE 21");
                     re = getRegionalCommandExec();
                     break;
                     /*
