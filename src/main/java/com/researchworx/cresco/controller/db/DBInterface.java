@@ -348,7 +348,7 @@ public class DBInterface {
             resourceTotal.put("disk_available",String.valueOf(diskAvailable));
             resourceTotal.put("disk_total",String.valueOf(diskTotal));
             regionArray.add(resourceTotal);
-            queryMap.put("globalresources",regionArray);
+            queryMap.put("resourceinfo",regionArray);
 
             queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(queryMap))));
 
@@ -404,7 +404,7 @@ public class DBInterface {
             resourceTotal.put("disk_available",String.valueOf(diskAvailable));
             resourceTotal.put("disk_total",String.valueOf(diskTotal));
             regionArray.add(resourceTotal);
-            queryMap.put("regionresources",regionArray);
+            queryMap.put("resourceinfo",regionArray);
 
             queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(queryMap))));
 
@@ -452,7 +452,7 @@ public class DBInterface {
                 }
             }
 
-            queryMap.put("agentresources",regionArray);
+            queryMap.put("resourceinfo",regionArray);
 
             queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(queryMap))));
 
