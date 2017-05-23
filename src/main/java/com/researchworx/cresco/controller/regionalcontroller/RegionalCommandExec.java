@@ -102,7 +102,24 @@ public class RegionalCommandExec {
 		return null;
 	}
 
+    private void globalSend(MsgEvent ge) {
+        try {
+            if(!this.plugin.isGlobalController()) {
+                if(this.plugin.getGlobalControllerPath() != null) {
+                    String[] tmpStr = this.plugin.getGlobalControllerPath().split("_");
+                    ge.setParam("dst_region", tmpStr[0]);
+                    //ge.setParam("dst_plugin", plugin.getPluginID());
+                    //plugin.msgIn(ge);
+                    plugin.sendAPMessage(ge);
+                }
+            }
+        }
+        catch (Exception ex) {
+            logger.error("globalSend : " + ex.getMessage());
+        }
+    }
 
+	/*
     //function to send to global controller
     private void globalSend(MsgEvent ge) {
         try {
@@ -113,7 +130,6 @@ public class RegionalCommandExec {
                     ge.setParam("dst_region", tmpStr[0]);
                     //ge.setParam("dst_plugin", plugin.getPluginID());
                     logger.error("FORWARDING TO GC : " + ge.getParams().toString());
-
                     plugin.sendMsgEvent(ge);
                 }
             }
@@ -122,5 +138,6 @@ public class RegionalCommandExec {
             logger.error("globalSend : " + ex.getMessage());
         }
     }
+    */
 
 }
