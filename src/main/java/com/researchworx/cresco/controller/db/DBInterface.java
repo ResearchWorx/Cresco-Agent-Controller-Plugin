@@ -290,14 +290,9 @@ public class DBInterface {
 
         try
         {
-            //List<Map<String,String>> regionArray = new ArrayList<>();
             String nodeId = gdb.getNodeId(actionRegion, actionAgent,actionPlugin);
-            logger.error("region: " + actionRegion + " agent:" + actionAgent + " plugin:" + actionPlugin);
             Map<String,String> nodeParams = gdb.getNodeParams(nodeId);
-            logger.error("nodeParams: " + nodeParams.toString());
             queryReturn = nodeParams.get("config");
-
-            //queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(nodeParams))));
 
         }
         catch(Exception ex)
