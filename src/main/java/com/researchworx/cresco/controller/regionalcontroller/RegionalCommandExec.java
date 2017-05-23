@@ -7,6 +7,8 @@ import com.researchworx.cresco.controller.globalcontroller.GlobalCommandExec;
 import com.researchworx.cresco.controller.globalscheduler.PollRemovePipeline;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
+import com.sun.org.apache.xpath.internal.operations.Bool;
+import com.sun.tools.corba.se.idl.constExpr.BooleanAnd;
 
 import java.io.*;
 import java.net.URL;
@@ -46,7 +48,6 @@ public class RegionalCommandExec {
                     return gce.execute(le);
                 }
                 else {
-                    logger.error("PRE FORWARDING TO GC : " + le.getParams().toString());
                     globalSend(le);
                     return null;
                 }
@@ -58,11 +59,15 @@ public class RegionalCommandExec {
                             logger.debug("CONFIG : AGENTDISCOVER REMOVE: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
                             logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
                             plugin.getGDB().removeNode(le);
+                            le.setParam("globalcmd", Boolean.TRUE.toString());
+                            globalSend(le);
                             break;
                         case "enable":
                             logger.debug("CONFIG : AGENTDISCOVER ADD: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
                             logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
                             plugin.getGDB().addNode(le);
+                            le.setParam("globalcmd", Boolean.TRUE.toString());
+                            globalSend(le);
                             break;
                         default:
                             logger.debug("Unknown configtype found: {}", le.getParam("action"));
