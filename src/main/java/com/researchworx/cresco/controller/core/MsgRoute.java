@@ -52,9 +52,13 @@ public class MsgRoute implements Runnable {
                     externalSend();
                     break;
                 case 20:  //INTER-REGIONAL MESSAGE OUTGOING 20
-                        logger.debug("INTER-REGIONAL MESSAGE OUTGOING 20");
-                        logger.trace(rm.getParams().toString());
-                        externalSend();
+                    logger.debug("INTER-REGIONAL MESSAGE OUTGOING 20");
+                    logger.trace(rm.getParams().toString());
+                    externalSend();
+                    break;
+                case 21:
+                    logger.debug("REGIONAL CONTROLLER SENDING INTER-REGIONAL MESSAGE 21");
+                    re = getRegionalCommandExec();
                     break;
                     /*
                 case 21:

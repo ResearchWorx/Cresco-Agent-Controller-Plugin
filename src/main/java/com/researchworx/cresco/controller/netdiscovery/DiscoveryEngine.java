@@ -71,6 +71,7 @@ public class DiscoveryEngine implements Runnable {
             logger.debug("Creating worker [{}]", networkInterface.getDisplayName());
             try {
                 if (!networkInterface.getDisplayName().startsWith("veth") && !networkInterface.isLoopback() && networkInterface.supportsMulticast() && !networkInterface.isPointToPoint() && !networkInterface.isVirtual()) {
+                //if (!networkInterface.getDisplayName().startsWith("veth") && !networkInterface.isLoopback() && networkInterface.supportsMulticast() && !networkInterface.isPointToPoint()) {
                     logger.trace("Discovery Engine Worker [" + networkInterface.getDisplayName() + "] initialized");
                     //logger.trace("Init [{}]", networkInterface.getDisplayName());
                     SocketAddress sa;

@@ -38,6 +38,14 @@
 
 	<dependencies>
 
+        <!-- Cresco -->
+
+        <dependency>
+            <groupId>com.researchworx.cresco</groupId>
+            <artifactId>cresco-plugin-library</artifactId>
+            <version>${cresco.plugin.library.version}</version>
+        </dependency>
+
         <!-- ActiveMQ -->
 
         <dependency>
@@ -46,25 +54,20 @@
 			<version>${activemq.version}</version>
 		</dependency>
 
-    <dependency>
-        <groupId>org.apache.activemq</groupId>
-        <artifactId>activemq-jaas</artifactId>
-        <version>${activemq.version}</version>
-    </dependency>
-
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
 			<artifactId>activemq-kahadb-store</artifactId>
 			<version>${activemq.version}</version>
 		</dependency>
 
-        <!-- OrientDB -->
-
         <dependency>
-            <groupId>com.orientechnologies</groupId>
-            <artifactId>orientdb-core</artifactId>
-            <version>${orientdb.version}</version>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-jaas</artifactId>
+            <version>${activemq.version}</version>
         </dependency>
+
+
+        <!-- OrientDB -->
 
         <dependency>
             <groupId>com.orientechnologies</groupId>
@@ -72,12 +75,12 @@
             <version>${orientdb.version}</version>
         </dependency>
 
-
         <dependency>
-			<groupId>com.researchworx.cresco</groupId>
-			<artifactId>cresco-plugin-library</artifactId>
-			<version>${cresco.plugin.library.version}</version>
-		</dependency>
+            <groupId>com.orientechnologies</groupId>
+            <artifactId>orientdb-core</artifactId>
+            <version>${orientdb.version}</version>
+        </dependency>
+
 	</dependencies>
 
 	<build>
