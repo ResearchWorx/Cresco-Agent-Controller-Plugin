@@ -7,8 +7,6 @@ import com.researchworx.cresco.controller.globalcontroller.GlobalCommandExec;
 import com.researchworx.cresco.controller.globalscheduler.PollRemovePipeline;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
-import com.sun.org.apache.xpath.internal.operations.Bool;
-import com.sun.tools.corba.se.idl.constExpr.BooleanAnd;
 
 import java.io.*;
 import java.net.URL;
