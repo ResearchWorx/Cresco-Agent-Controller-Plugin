@@ -56,10 +56,12 @@ public class MsgRoute implements Runnable {
                     logger.trace(rm.getParams().toString());
                     externalSend();
                     break;
+                    /*
                 case 21:
                     logger.debug("PLUGIN SOURCED, REGIONAL CONTROLLER SENDING INTER-REGIONAL MESSAGE 21");
                     re = getRegionalCommandExec();
                     break;
+                    */
                     /*
                 case 21:
                     if ((plugin.isRegionalController()) && (rm.getParam("dst_agent") == null)) {
