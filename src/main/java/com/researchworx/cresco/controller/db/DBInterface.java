@@ -52,7 +52,6 @@ public class DBInterface {
         return params;
     }
 
-
     public Map<String,String> getResourceTotal() {
         Map<String,String> resourceTotal = null;
         long cpu_core_count = 0;
@@ -294,8 +293,8 @@ public class DBInterface {
             List<Map<String,String>> regionArray = new ArrayList<>();
             String nodeId = gdb.getNodeId(actionRegion, actionAgent,actionPlugin);
             Map<String,String> nodeParams = gdb.getNodeParams(nodeId);
-
-            queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(nodeParams))));
+            queryReturn = nodeParams.get("config");
+            //queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(nodeParams))));
 
         }
         catch(Exception ex)
@@ -447,6 +446,8 @@ public class DBInterface {
                     resourceTotal.remove("agent");
                     resourceTotal.remove("inode_id");
                     resourceTotal.remove("resource_id");
+                    resourceTotal.remove("routepath");
+
                     regionArray.add(resourceTotal);
 
                 }
@@ -491,7 +492,6 @@ public class DBInterface {
         return queryReturn;
 
     }
-
 
     public Map<String,String> getResourceTotal2() {
         Map<String,String> resourceTotal = null;
