@@ -37,9 +37,6 @@ public class RegionalCommandExec {
 
 	public MsgEvent execute(MsgEvent le) {
 
-	        //logger.error("INCOMING: " + le.getParams().toString());
-
-
             if(le.getParam("globalcmd") != null) {
                 //this is a global command
                 if(plugin.isGlobalController()) {
@@ -50,7 +47,11 @@ public class RegionalCommandExec {
                     return null;
                 }
             }
-			else if(le.getMsgType() == MsgEvent.Type.CONFIG) {
+
+            le.setParam("dst_agent",plugin.getAgent());
+            le.setParam("dst_plugin",plugin.getPluginID());
+
+            if(le.getMsgType() == MsgEvent.Type.CONFIG) {
                 if(le.getParam("action") != null) {
                     switch (le.getParam("action")) {
                         case "disable":
@@ -111,6 +112,9 @@ public class RegionalCommandExec {
                 if(this.plugin.getGlobalControllerPath() != null) {
                     String[] tmpStr = this.plugin.getGlobalControllerPath().split("_");
                     ge.setParam("dst_region", tmpStr[0]);
+                    ge.removeParam("dst_agent");
+                    ge.removeParam("dst_plugin");
+                    //ge.setParam("dst_agent", tmpStr[1]);
                     //ge.setParam("dst_plugin", plugin.getPluginID());
                     //plugin.msgIn(ge);
                     plugin.sendAPMessage(ge);

@@ -44,6 +44,9 @@ public class ActiveRegionConsumer implements Runnable {
 				TextMessage msg = (TextMessage) consumer.receive(1000);
 				if (msg != null) {
 					MsgEvent me = gson.fromJson(msg.getText(), MsgEvent.class);
+					//me.setParam("dst_agent",plugin.getAgent());
+					//me.setParam("dst_plugin",plugin.getPluginID());
+
 					this.plugin.msgIn(me);
 					logger.debug("Incoming Message Region: " + me.getParams().toString());
 

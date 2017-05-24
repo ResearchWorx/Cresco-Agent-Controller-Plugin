@@ -25,6 +25,10 @@ public class MsgRoute implements Runnable {
             //logger.error("CASE=" + routePath + " GC=" + plugin.isGlobalController() + " RC=" + plugin.isRegionalController());
             //logger.error(rm.getParams().toString());
             //logger.error(rm.getMsgType().toString());
+
+            if(rm.getMsgType() == MsgEvent.Type.EXEC) {
+                logger.error("Controller msgType: [" + rm.getMsgType().toString() + "] routepath: " + routePath + "[" + rm.getParams().toString() + "]");
+            }
 /*
             if(rm.getMsgType() == MsgEvent.Type.CONFIG) {
                 logger.error("msgType: [" + rm.getMsgType().toString() + "] routepath: " + routePath + "[" + rm.getParams().toString() + "]");
@@ -415,7 +419,7 @@ public class MsgRoute implements Runnable {
             String routeString = RC + RXr + TXr + RXa + TXa + RXp + TXp;
             routePath = Integer.parseInt(routeString, 2);
         } catch (Exception ex) {
-            System.out.println("AgentEngine : MsgRoute : getRoutePath Error: " + ex.getMessage());
+            logger.error("Controller : MsgRoute : getRoutePath Error: " + ex.getMessage());
             ex.printStackTrace();
             routePath = -1;
         }
@@ -490,7 +494,7 @@ public class MsgRoute implements Runnable {
                 int ttlCount = Integer.valueOf(rm.getParam("ttl"));
 
                 if (ttlCount > 10) {
-                    System.out.println("**Agent : MsgRoute : High Loop Count**");
+                    System.out.println("**Controller : MsgRoute : High Loop Count**");
                     System.out.println("MsgType=" + rm.getMsgType().toString());
                     System.out.println("Region=" + rm.getMsgRegion() + " Agent=" + rm.getMsgAgent() + " plugin=" + rm.getMsgPlugin());
                     System.out.println("params=" + rm.getParams());

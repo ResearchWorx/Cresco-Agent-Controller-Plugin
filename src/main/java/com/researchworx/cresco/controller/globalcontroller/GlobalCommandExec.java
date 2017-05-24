@@ -33,7 +33,8 @@ public class GlobalCommandExec {
     }
 
 	public MsgEvent execute(MsgEvent ce) {
-
+		//make sure message does not return
+		ce.removeParam("globalcmd");
 		/*
 		Region:
   		Param - "action":"listregions"
