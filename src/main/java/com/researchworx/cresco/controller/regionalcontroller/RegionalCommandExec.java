@@ -48,8 +48,8 @@ public class RegionalCommandExec {
                 }
             }
 
-            le.setParam("dst_agent",plugin.getAgent());
-            le.setParam("dst_plugin",plugin.getPluginID());
+            //le.setParam("dst_agent",plugin.getAgent());
+            //le.setParam("dst_plugin",plugin.getPluginID());
 
             if(le.getMsgType() == MsgEvent.Type.CONFIG) {
                 if(le.getParam("action") != null) {

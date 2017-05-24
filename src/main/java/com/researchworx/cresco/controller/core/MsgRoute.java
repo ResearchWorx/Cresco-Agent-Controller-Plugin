@@ -25,10 +25,11 @@ public class MsgRoute implements Runnable {
             //logger.error("CASE=" + routePath + " GC=" + plugin.isGlobalController() + " RC=" + plugin.isRegionalController());
             //logger.error(rm.getParams().toString());
             //logger.error(rm.getMsgType().toString());
-
+/*
             if(rm.getMsgType() == MsgEvent.Type.EXEC) {
                 logger.error("Controller msgType: [" + rm.getMsgType().toString() + "] routepath: " + routePath + "[" + rm.getParams().toString() + "]");
             }
+*/
 /*
             if(rm.getMsgType() == MsgEvent.Type.CONFIG) {
                 logger.error("msgType: [" + rm.getMsgType().toString() + "] routepath: " + routePath + "[" + rm.getParams().toString() + "]");
@@ -201,11 +202,12 @@ public class MsgRoute implements Runnable {
                     //plugin.sendMsgEvent(rm);
                     break;
                 case 117:
-                    logger.debug("CONTROLLER PLUGIN SENDING MESSAGE TO SELF 117");
+                    logger.debug("CONTROLLER PLUGIN SENDING MESSAGE TO REGION PLUGIN 117");
                     logger.trace(rm.getParams().toString());
                     //regionalSend();
-                    re = getRegionalCommandExec();
+                    //re = getRegionalCommandExec();
                     //plugin.sendMsgEvent(rm);
+                    externalSend();
                     break;
                 case 120:
                     logger.debug("CONTROLLER PLUGIN SENDING MESSAGE TO ITS AGENT 120");
@@ -214,6 +216,23 @@ public class MsgRoute implements Runnable {
                     //re = getRegionalCommandExec();
                     plugin.sendMsgEvent(rm);
                     break;
+                case 122:
+                    logger.debug("LOCAL PLUGIN SENDING MESSAGE TO SELF 122");
+                    logger.trace(rm.getParams().toString());
+                    //regionalSend();
+                    re = getRegionalCommandExec();
+                    //plugin.sendMsgEvent(rm);
+                    //externalSend();
+                    break;
+                case 127:
+                    logger.debug("CONTROLLER PLUGIN SENDING MESSAGE TO SELF 127");
+                    logger.trace(rm.getParams().toString());
+                    //regionalSend();
+                    re = getRegionalCommandExec();
+                    //plugin.sendMsgEvent(rm);
+                    //externalSend();
+                    break;
+
                     /*
                 case 122:
                     logger.debug("REGIONAL CONTROLLER SENDING TO ANOTHER REGION 122");

@@ -35,6 +35,9 @@ public class GlobalCommandExec {
 	public MsgEvent execute(MsgEvent ce) {
 		//make sure message does not return
 		ce.removeParam("globalcmd");
+		ce.setParam("dst_agent",plugin.getAgent());
+		ce.setParam("dst_plugin",plugin.getPluginID());
+
 		/*
 		Region:
   		Param - "action":"listregions"
