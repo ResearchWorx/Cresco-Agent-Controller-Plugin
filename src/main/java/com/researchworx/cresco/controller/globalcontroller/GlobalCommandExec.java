@@ -33,6 +33,9 @@ public class GlobalCommandExec {
     }
 
 	public MsgEvent execute(MsgEvent ce) {
+
+	    logger.error("GLOBAL MESSAGE : " + ce.getParams().toString());
+
 		//make sure message does not return
 		ce.removeParam("globalcmd");
 		ce.setParam("dst_agent",plugin.getAgent());
@@ -93,6 +96,9 @@ public class GlobalCommandExec {
 			else if(ce.getMsgType() == MsgEvent.Type.CONFIG)
 			{
                 if(ce.getParam("action") != null) {
+
+                    logger.error("action: " + ce.getParam("action"));
+
                     switch (ce.getParam("action")) {
                         case "disable":
                             logger.debug("CONFIG : AGENTDISCOVER REMOVE: Region:" + ce.getParam("src_region") + " Agent:" + ce.getParam("src_agent"));
@@ -302,7 +308,7 @@ public class GlobalCommandExec {
                             return ce;
 
                         case "plugininventory":
-
+                            logger.error("inventory");
                             try
                             {
                                 List<String> pluginFiles = getPluginFiles();
@@ -335,6 +341,7 @@ public class GlobalCommandExec {
                                 System.out.println(ex.toString());
                                 ce.setMsgBody("Error: " + ex.toString());
                             }
+                            logger.error("whut " + ce.getParams().toString());
                             return ce;
 
                         case "gpipelinesubmit" :
