@@ -44,54 +44,45 @@ public class GlobalCommandExec {
 			if(ce.getMsgType() == MsgEvent.Type.EXEC) {
 				switch (ce.getParam("action")) {
 					case "listregions":
-                        ce.setParam("regionslist",plugin.getGDB().getRegionList());
-                        logger.trace("list regions return : " + ce.getParams().toString());
-                        break;
+                        return listRegions(ce);
+
                     case "listagents":
-                        String actionRegionAgents = null;
+                        return listAgents(ce);
 
-                        if(ce.getParam("action_region") != null) {
-                            actionRegionAgents = ce.getParam("action_region");
-                        }
-                        ce.setParam("agentslist",plugin.getGDB().getAgentList(actionRegionAgents));
-                        logger.trace("list agents return : " + ce.getParams().toString());
-                        break;
                     case "listplugins":
-                        String actionRegionPlugins = null;
-                        String actionAgentPlugins = null;
+                        return listPlugins(ce);
 
-                        if((ce.getParam("action_region") != null) && (ce.getParam("action_agent") != null)) {
-                            actionRegionPlugins = ce.getParam("action_region");
-                            actionAgentPlugins = ce.getParam("action_agent");
-                        } else if((ce.getParam("action_region") != null) && (ce.getParam("action_agent") == null)) {
-                            actionRegionPlugins = ce.getParam("action_region");
-                        }
-                        ce.setParam("pluginslist",plugin.getGDB().getPluginList(actionRegionPlugins, actionAgentPlugins));
-                        logger.trace("list plugins return : " + ce.getParams().toString());
-                        break;
                     case "plugininfo":
-                        ce.setParam("plugininfo",plugin.getGDB().getPluginInfo(ce.getParam("action_region"),ce.getParam("action_agent"),ce.getParam("action_plugin")));
-                        logger.trace("plugins info return : " + ce.getParams().toString());
-                        break;
-                    case "resourceinfo":
-                        String actionRegionResourceInfo = null;
-                        String actionAgentResourceInfo = null;
+                        return pluginInfo(ce);
 
-                        if((ce.getParam("action_region") != null) && (ce.getParam("action_agent") != null)) {
-                            actionRegionResourceInfo = ce.getParam("action_region");
-                            actionAgentResourceInfo = ce.getParam("action_agent");
-                        } else if((ce.getParam("action_region") != null) && (ce.getParam("action_agent") == null)) {
-                            actionRegionResourceInfo = ce.getParam("action_region");
-                        }
-                        ce.setParam("resourceinfo",plugin.getGDB().getResourceInfo(actionRegionResourceInfo, actionAgentResourceInfo));
-                        logger.trace("list plugins return : " + ce.getParams().toString());
-                        break;
+                    case "resourceinfo":
+                        return resourceInfo(ce);
+
+                    case "getenvstatus":
+                        return getEnvStatus(ce);
+
+                    case "getpluginstatus":
+                        return getPluginStatus(ce);
+
+                    case "resourceinventory":
+                        return resourceInventory(ce);
+
+                    case "plugininventory":
+                        return pluginInventory(ce);
+
+                    case "getgpipeline":
+                        return getGPipeline(ce);
+
+                    case "getgpipelinelist":
+                        return getgPipelineList(ce);
+
+                    case "getgpipelinestatus":
+                        return getGPipelineStatus(ce);
 
                     default:
 						logger.debug("Unknown configtype found: {}", ce.getParam("action"));
 						return null;
 				}
-				return ce;
 			}
 			else if(ce.getMsgType() == MsgEvent.Type.CONFIG)
 			{
@@ -101,332 +92,497 @@ public class GlobalCommandExec {
 
                     switch (ce.getParam("action")) {
                         case "disable":
-                            logger.debug("CONFIG : AGENTDISCOVER REMOVE: Region:" + ce.getParam("src_region") + " Agent:" + ce.getParam("src_agent"));
-                            logger.trace("Message Body [" + ce.getMsgBody() + "] [" + ce.getParams().toString() + "]");
-                            plugin.getGDB().removeNode(ce);
-                            break;
+                            return globalEnable(ce);
+
                         case "enable":
-                            logger.debug("CONFIG : AGENTDISCOVER ADD: Region:" + ce.getParam("src_region") + " Agent:" + ce.getParam("src_agent"));
-                            logger.trace("Message Body [" + ce.getMsgBody() + "] [" + ce.getParams().toString() + "]");
-                            plugin.getGDB().addNode(ce);
-                            break;
+                            return globalDisable(ce);
+
                         case "regionalimport":
-                            logger.debug("CONFIG : regionalimport message type found");
-                            logger.debug(ce.getParam("exportdata"));
-                            if(plugin.getGDB().gdb.setDBImport(ce.getParam("exportdata"))) {
-                                logger.debug("Database Imported.");
-                            }
-                            else {
-                                logger.debug("Database Import Failed!");
-                            }
-                            break;
+                            return regionalImport(ce);
+
                         case "addplugin":
-                            if((ce.getParam("inode_id") != null) && (ce.getParam("resource_id") != null) && (ce.getParam("configparams") != null)) {
+                            return addPlugin(ce);
 
-                                if(plugin.getGDB().dba.getpNodeINode(ce.getParam("inode_id")) == null)
-                                {
-                                    if(plugin.getGDB().dba.addINode(ce.getParam("resource_id"),ce.getParam("inode_id")) != null)
-                                    {
-                                        if((plugin.getGDB().dba.setINodeParam(ce.getParam("inode_id"),"status_code","0")) &&
-                                                (plugin.getGDB().dba.setINodeParam(ce.getParam("inode_id"),"status_desc","iNode Scheduled.")) &&
-                                                (plugin.getGDB().dba.setINodeParam(ce.getParam("inode_id"),"configparams",ce.getParam("configparams"))))
-                                        {
-                                            ce.setParam("status_code","0");
-                                            ce.setParam("status_desc","iNode Scheduled");
-                                            //ControllerEngine.resourceScheduleQueue.offer(ce);
-                                        }
-                                        else
-                                        {
-                                            ce.setParam("status_code","1");
-                                            ce.setParam("status_desc","Could not set iNode params");
-                                        }
-                                    }
-                                    else
-                                    {
-                                        ce.setParam("status_code","1");
-                                        ce.setParam("status_desc","Could not create iNode_id!");
-                                    }
-                                }
-                                else
-                                {
-                                    ce.setParam("status_code","1");
-                                    ce.setParam("status_desc","iNode_id already exist!");
-                                }
-                            }
-                            else
-                            {
-                                ce.setParam("status_code","1");
-                                ce.setParam("status_desc","No iNode_id found in payload!");
-                            }
-                            return ce;
                         case "removeplugin":
-                            if((ce.getParam("inode_id") != null) && (ce.getParam("resource_id") != null)) {
-                                if(plugin.getGDB().dba.getpNodeINode(ce.getParam("inode_id")) != null)
-                                {
-                                    if((plugin.getGDB().dba.setINodeParam(ce.getParam("inode_id"),"status_code","10")) &&
-                                            (plugin.getGDB().dba.setINodeParam(ce.getParam("inode_id"),"status_desc","iNode scheduled for removal.")))
-                                    {
-                                        ce.setParam("status_code","10");
-                                        ce.setParam("status_desc","iNode scheduled for removal.");
-                                        //ControllerEngine.resourceScheduleQueue.offer(ce);
-                                    }
-                                    else
-                                    {
-                                        ce.setParam("status_code","1");
-                                        ce.setParam("status_desc","Could not set iNode params");
-                                    }
-                                }
-                                else
-                                {
-                                    ce.setParam("status_code","1");
-                                    ce.setParam("status_desc","iNode_id does not exist in DB!");
-                                }
-                            }
-                            else
-                            {
-                                ce.setParam("status_code","1");
-                                ce.setParam("status_desc","No resource_id or iNode_id found in payload!");
-                            }
-                            return ce;
+                            return removePlugin(ce);
 
-                        case "plugininfo":
-                            try
-                            {
-                                if(ce.getParam("plugin_id") != null)
-                                {
-                                    String plugin_id = ce.getParam("plugin_id");
-                                    List<String> pluginFiles = getPluginFiles();
-
-                                    if(pluginFiles != null)
-                                    {
-                                        for (String pluginPath : pluginFiles)
-                                        {
-                                            String found_plugin_id = getPluginName(pluginPath) + "=" + getPluginVersion(pluginPath);
-                                            if(plugin_id.equals(found_plugin_id))
-                                            {
-                                                String params = getPluginParams(pluginPath);
-                                                if(params != null)
-                                                {
-                                                    System.out.println("Found Plugin: " + plugin_id);
-                                                    ce.setParam("node_name",getPluginName(pluginPath));
-                                                    ce.setParam("node_id",plugin_id);
-                                                    ce.setParam("params",params);
-                                                }
-
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        ce.setMsgBody("Plugin does not exist");
-                                    }
-                                }
-                            }
-                            catch(Exception ex)
-                            {
-                                System.out.println(ex.toString());
-                                ce.setMsgBody("Error: " + ex.toString());
-                            }
-                            return ce;
-                        case "getenvstatus":
-                            try
-                            {
-                                if((ce.getParam("environment_id") != null) && (ce.getParam("environment_value") != null))
-                                {
-                                    String indexName = ce.getParam("environment_id");
-                                    String indexValue = ce.getParam("environment_value");
-
-                                    List<String> envNodeList = plugin.getGDB().gdb.getANodeFromIndex(indexName, indexValue);
-                                    ce.setParam("count",String.valueOf(envNodeList.size()));
-                                }
-                                else
-                                {
-                                    ce.setParam("count","unknown");
-                                }
-
-                            }
-                            catch(Exception ex)
-                            {
-                                ce.setParam("count","unknown");
-                            }
-                            return ce;
-
-                        case "getpluginstatus":
-                            try
-                            {
-                                if((ce.getParam("inode_id") != null) && (ce.getParam("resource_id") != null))
-                                {
-                                    String status_code = plugin.getGDB().dba.getINodeParam(ce.getParam("inode_id"),"status_code");
-                                    String status_desc = plugin.getGDB().dba.getINodeParam(ce.getParam("inode_id"),"status_desc");
-                                    if((status_code != null) && (status_desc != null))
-                                    {
-                                        ce.setParam("status_code",status_code);
-                                        ce.setParam("status_desc",status_desc);
-                                    }
-                                    else
-                                    {
-                                        ce.setParam("status_code","1");
-                                        ce.setParam("status_desc","Could not read iNode params");
-                                    }
-                                }
-                                else
-                                {
-                                    ce.setParam("status_code","1");
-                                    ce.setParam("status_desc","No iNode_id found in payload!");
-                                }
-
-                            }
-                            catch(Exception ex)
-                            {
-                                ce.setParam("status_code","1");
-                                ce.setParam("status_desc",ex.toString());
-                            }
-                            return ce;
-
-                        case "resourceinventory":
-                            try
-                            {
-                                Map<String,String> resourceTotal = plugin.getGDB().getResourceTotal();
-
-
-                                if(resourceTotal != null)
-                                {
-                                    logger.trace(resourceTotal.toString());
-                                    ce.setParam("resourceinventory", resourceTotal.toString());
-                                    ce.setMsgBody("Inventory found.");
-                                }
-                                else
-                                {
-                                    ce.setMsgBody("No plugin directory exist to inventory");
-                                }
-                            }
-                            catch(Exception ex)
-                            {
-                                System.out.println(ex.toString());
-                                ce.setMsgBody("Error: " + ex.toString());
-                            }
-                            return ce;
-
-                        case "plugininventory":
-                            logger.error("inventory");
-                            try
-                            {
-                                List<String> pluginFiles = getPluginFiles();
-
-                                if(pluginFiles != null)
-                                {
-                                    String pluginList = null;
-                                    for (String pluginPath : pluginFiles)
-                                    {
-                                        if(pluginList == null)
-                                        {
-                                            pluginList = getPluginName(pluginPath) + "=" + getPluginVersion(pluginPath) + ",";
-                                        }
-                                        else
-                                        {
-                                            pluginList = pluginList + getPluginName(pluginPath) + "=" + getPluginVersion(pluginPath) + ",";
-                                        }
-                                    }
-                                    pluginList = pluginList.substring(0, pluginList.length() - 1);
-                                    ce.setParam("pluginlist", pluginList);
-                                    ce.setMsgBody("There were " + pluginFiles.size() + " plugins found.");
-                                }
-                                else
-                                {
-                                    ce.setMsgBody("No plugin directory exist to inventory");
-                                }
-                            }
-                            catch(Exception ex)
-                            {
-                                System.out.println(ex.toString());
-                                ce.setMsgBody("Error: " + ex.toString());
-                            }
-                            logger.error("whut " + ce.getParams().toString());
-                            return ce;
-
-                        case "gpipelinesubmit" :
-
-                            try
-                            {
-                                if((ce.getParam("gpipeline") != null) && (ce.getParam("tenant_id") != null)) {
-                                    String pipelineJSON = ce.getParam("gpipeline");
-                                    String tenantID = ce.getParam("tenant_id");
-                                    if(ce.getParam("gpipeline_compressed") != null) {
-                                        boolean isCompressed = Boolean.parseBoolean(ce.getParam("gpipeline_compressed"));
-                                        if(isCompressed) {
-                                            pipelineJSON = plugin.getGDB().gdb.stringUncompress(pipelineJSON);
-                                        }
-                                        logger.debug("Pipeline Compressed " + isCompressed + " " + ce.getParam("gpipeline"));
-                                        logger.debug("*" + pipelineJSON + "*");
-
-                                    }
-                                    gPayload gpay = plugin.getGDB().dba.createPipelineRecord(tenantID, pipelineJSON);
-                                    //String returnGpipeline = plugin.getGDB().dba.JsonFromgPayLoad(gpay);
-                                    ce.setParam("gpipeline_id",gpay.pipeline_id);
-                                }
-                            }
-                            catch(Exception ex)
-                            {
-                                logger.error("gpipelinesubmit " + ex.getMessage());
-                            }
-                            return ce;
-
-                        case "getgpipeline":
-                            try
-                            {
-                                if(ce.getParam("pipeline_id") != null) {
-                                    String pipelineId = ce.getParam("pipeline_id");
-                                    String returnGetGpipeline = plugin.getGDB().dba.getPipeline(pipelineId);
-                                    ce.setParam("gpipeline",returnGetGpipeline);
-                                }
-                            }
-                            catch(Exception ex)
-                            {
-                                logger.error("getgpipeline " + ex.getMessage());
-                            }
-                            return ce;
-
-                        case "getgpipelinelist":
-                            try
-                            {
-                                StringBuilder pipelineString = new StringBuilder();
-                                List<String> pipelines = plugin.getGDB().dba.getPipelineIdList();
-                                for(String pipelineId :pipelines) {
-                                    pipelineString.append(pipelineId + ",");
-                                }
-                                if(pipelineString.length() > 0) {
-                                    pipelineString.deleteCharAt(pipelineString.length() - 1);
-                                }
-                                ce.setParam("gpipeline_ids",pipelineString.toString());
-
-                            }
-                            catch(Exception ex)
-                            {
-                                logger.error("getgpipelinelist " + ex.getMessage());
-                            }
-                            return ce;
-
-                        case "getgpipelinestatus":
-                            try
-                            {
-                                if(ce.getParam("pipeline_id") != null) {
-                                    String pipelineId = ce.getParam("pipeline_id");
-                                    int pipelineStatus = plugin.getGDB().dba.getPipelineStatus(pipelineId);
-                                    ce.setParam("status_code",String.valueOf(pipelineStatus));
-                                }
-                            }
-                            catch(Exception ex)
-                            {
-                                logger.error("getgpipelinelist " + ex.getMessage());
-                            }
-                            return ce;
+                        case "gpipelinesubmit":
+                            return gPipelineSubmit(ce);
 
                         case "gpipelineremove":
-                            try
+                            return gPipelineRemove(ce);
+
+                        case "plugindownload":
+                            return pluginDownload(ce);
+
+                        default:
+                            logger.debug("Unknown configtype found: {}", ce.getParam("action"));
+                            return null;
+                    }
+                }
+
+			}
+			else if(ce.getMsgType() == MsgEvent.Type.WATCHDOG)
+			{
+				return globalWatchdog(ce);
+			}
+            else if(ce.getMsgType() == MsgEvent.Type.KPI)
+            {
+                return globalKPI(ce);
+            }
+		return null;
+	}
+
+
+	//EXEC
+
+	private MsgEvent pluginInfo(MsgEvent ce) {
+	    try {
+            ce.setParam("plugininfo", plugin.getGDB().getPluginInfo(ce.getParam("action_region"), ce.getParam("action_agent"), ce.getParam("action_plugin")));
+            logger.trace("plugins info return : " + ce.getParams().toString());
+        }
+        catch(Exception ex) {
+	        ce.setParam("error", ex.getMessage());
+        }
+
+        return ce;
+    }
+
+    private MsgEvent listRegions(MsgEvent ce) {
+        try {
+            ce.setParam("regionslist", plugin.getGDB().getRegionList());
+            logger.trace("list regions return : " + ce.getParams().toString());
+        }
+        catch(Exception ex) {
+            ce.setParam("error", ex.getMessage());
+        }
+
+        return ce;
+    }
+
+    private MsgEvent listAgents(MsgEvent ce) {
+
+	    try {
+	    String actionRegionAgents = null;
+
+        if(ce.getParam("action_region") != null) {
+            actionRegionAgents = ce.getParam("action_region");
+        }
+        ce.setParam("agentslist",plugin.getGDB().getAgentList(actionRegionAgents));
+        logger.trace("list agents return : " + ce.getParams().toString());
+        }
+        catch(Exception ex) {
+            ce.setParam("error", ex.getMessage());
+        }
+
+        return ce;
+    }
+
+    private MsgEvent listPlugins(MsgEvent ce) {
+	    try {
+        String actionRegionPlugins = null;
+        String actionAgentPlugins = null;
+
+        if((ce.getParam("action_region") != null) && (ce.getParam("action_agent") != null)) {
+            actionRegionPlugins = ce.getParam("action_region");
+            actionAgentPlugins = ce.getParam("action_agent");
+        } else if((ce.getParam("action_region") != null) && (ce.getParam("action_agent") == null)) {
+            actionRegionPlugins = ce.getParam("action_region");
+        }
+        ce.setParam("pluginslist",plugin.getGDB().getPluginList(actionRegionPlugins, actionAgentPlugins));
+        logger.trace("list plugins return : " + ce.getParams().toString());
+        }
+        catch(Exception ex) {
+            ce.setParam("error", ex.getMessage());
+        }
+
+        return ce;
+    }
+
+	private MsgEvent resourceInfo(MsgEvent ce) {
+	    try {
+        String actionRegionResourceInfo = null;
+        String actionAgentResourceInfo = null;
+
+        if((ce.getParam("action_region") != null) && (ce.getParam("action_agent") != null)) {
+            actionRegionResourceInfo = ce.getParam("action_region");
+            actionAgentResourceInfo = ce.getParam("action_agent");
+        } else if((ce.getParam("action_region") != null) && (ce.getParam("action_agent") == null)) {
+            actionRegionResourceInfo = ce.getParam("action_region");
+        }
+        ce.setParam("resourceinfo",plugin.getGDB().getResourceInfo(actionRegionResourceInfo, actionAgentResourceInfo));
+        logger.trace("list plugins return : " + ce.getParams().toString());
+        }
+        catch(Exception ex) {
+            ce.setParam("error", ex.getMessage());
+        }
+
+        return ce;
+    }
+
+	private MsgEvent regionalImport(MsgEvent ce) {
+	    try {
+        logger.debug("CONFIG : regionalimport message type found");
+        logger.debug(ce.getParam("exportdata"));
+        if(plugin.getGDB().gdb.setDBImport(ce.getParam("exportdata"))) {
+            logger.debug("Database Imported.");
+        }
+        else {
+            logger.debug("Database Import Failed!");
+        }
+        }
+        catch(Exception ex) {
+            ce.setParam("error", ex.getMessage());
+        }
+
+        return null;
+    }
+
+    private MsgEvent getGPipelineStatus(MsgEvent ce) {
+        try
+        {
+            if(ce.getParam("pipeline_id") != null) {
+                String pipelineId = ce.getParam("pipeline_id");
+                int pipelineStatus = plugin.getGDB().dba.getPipelineStatus(pipelineId);
+                ce.setParam("status_code",String.valueOf(pipelineStatus));
+            }
+        }
+        catch(Exception ex) {
+            ce.setParam("error", ex.getMessage());
+        }
+
+        return ce;
+    }
+
+    private MsgEvent getgPipelineList(MsgEvent ce) {
+        try
+        {
+            StringBuilder pipelineString = new StringBuilder();
+            List<String> pipelines = plugin.getGDB().dba.getPipelineIdList();
+            for(String pipelineId :pipelines) {
+                pipelineString.append(pipelineId + ",");
+            }
+            if(pipelineString.length() > 0) {
+                pipelineString.deleteCharAt(pipelineString.length() - 1);
+            }
+            ce.setParam("gpipeline_ids",pipelineString.toString());
+
+        }
+        catch(Exception ex) {
+            ce.setParam("error", ex.getMessage());
+        }
+
+        return ce;
+    }
+
+    private MsgEvent getGPipeline(MsgEvent ce) {
+        try
+        {
+            if(ce.getParam("pipeline_id") != null) {
+                String pipelineId = ce.getParam("pipeline_id");
+                String returnGetGpipeline = plugin.getGDB().dba.getPipeline(pipelineId);
+                ce.setParam("gpipeline",returnGetGpipeline);
+            }
+        }
+        catch(Exception ex) {
+            ce.setParam("error", ex.getMessage());
+        }
+
+        return ce;
+    }
+
+    private MsgEvent pluginInventory(MsgEvent ce) {
+        try
+        {
+            List<String> pluginFiles = getPluginFiles();
+
+            if(pluginFiles != null)
+            {
+                String pluginList = null;
+                for (String pluginPath : pluginFiles)
+                {
+                    if(pluginList == null)
+                    {
+                        pluginList = getPluginName(pluginPath) + "=" + getPluginVersion(pluginPath) + ",";
+                    }
+                    else
+                    {
+                        pluginList = pluginList + getPluginName(pluginPath) + "=" + getPluginVersion(pluginPath) + ",";
+                    }
+                }
+                pluginList = pluginList.substring(0, pluginList.length() - 1);
+                ce.setParam("pluginlist", pluginList);
+                ce.setMsgBody("There were " + pluginFiles.size() + " plugins found.");
+            }
+            else
+            {
+                ce.setMsgBody("No plugin directory exist to inventory");
+            }
+        }
+        catch(Exception ex) {
+            ce.setParam("error", ex.getMessage());
+        }
+        return ce;
+    }
+
+    private MsgEvent resourceInventory(MsgEvent ce) {
+        try
+        {
+            Map<String,String> resourceTotal = plugin.getGDB().getResourceTotal();
+
+
+            if(resourceTotal != null)
+            {
+                logger.trace(resourceTotal.toString());
+                ce.setParam("resourceinventory", resourceTotal.toString());
+                ce.setMsgBody("Inventory found.");
+            }
+            else
+            {
+                ce.setMsgBody("No plugin directory exist to inventory");
+            }
+        }
+        catch(Exception ex) {
+            ce.setParam("error", ex.getMessage());
+        }
+
+        return ce;
+    }
+
+    private MsgEvent getPluginStatus(MsgEvent ce) {
+        try
+        {
+            if((ce.getParam("inode_id") != null) && (ce.getParam("resource_id") != null))
+            {
+                String status_code = plugin.getGDB().dba.getINodeParam(ce.getParam("inode_id"),"status_code");
+                String status_desc = plugin.getGDB().dba.getINodeParam(ce.getParam("inode_id"),"status_desc");
+                if((status_code != null) && (status_desc != null))
+                {
+                    ce.setParam("status_code",status_code);
+                    ce.setParam("status_desc",status_desc);
+                }
+                else
+                {
+                    ce.setParam("status_code","1");
+                    ce.setParam("status_desc","Could not read iNode params");
+                }
+            }
+            else
+            {
+                ce.setParam("status_code","1");
+                ce.setParam("status_desc","No iNode_id found in payload!");
+            }
+
+        }
+        catch(Exception ex) {
+            ce.setParam("error", ex.getMessage());
+        }
+
+        return ce;
+    }
+
+    private MsgEvent getEnvStatus(MsgEvent ce) {
+        try
+        {
+            if((ce.getParam("environment_id") != null) && (ce.getParam("environment_value") != null))
+            {
+                String indexName = ce.getParam("environment_id");
+                String indexValue = ce.getParam("environment_value");
+
+                List<String> envNodeList = plugin.getGDB().gdb.getANodeFromIndex(indexName, indexValue);
+                ce.setParam("count",String.valueOf(envNodeList.size()));
+            }
+            else
+            {
+                ce.setParam("count","unknown");
+            }
+
+        }
+        catch(Exception ex) {
+            ce.setParam("error", ex.getMessage());
+        }
+
+        return ce;
+    }
+
+    private MsgEvent pluginInfo2(MsgEvent ce) {
+        try
+        {
+            if(ce.getParam("plugin_id") != null)
+            {
+                String plugin_id = ce.getParam("plugin_id");
+                List<String> pluginFiles = getPluginFiles();
+
+                if(pluginFiles != null)
+                {
+                    for (String pluginPath : pluginFiles)
+                    {
+                        String found_plugin_id = getPluginName(pluginPath) + "=" + getPluginVersion(pluginPath);
+                        if(plugin_id.equals(found_plugin_id))
+                        {
+                            String params = getPluginParams(pluginPath);
+                            if(params != null)
                             {
-                                if(ce.getParam("pipeline_id") != null) {
-                                    String pipelineId = ce.getParam("pipeline_id");
-                                    removePipelineExecutor.execute(new PollRemovePipeline(plugin, pipelineId));
+                                System.out.println("Found Plugin: " + plugin_id);
+                                ce.setParam("node_name",getPluginName(pluginPath));
+                                ce.setParam("node_id",plugin_id);
+                                ce.setParam("params",params);
+                            }
+
+                        }
+                    }
+                }
+                else
+                {
+                    ce.setMsgBody("Plugin does not exist");
+                }
+            }
+        }
+        catch(Exception ex) {
+            ce.setParam("error", ex.getMessage());
+        }
+
+        return ce;
+    }
+
+
+    //CONFIG
+
+    private MsgEvent globalDisable(MsgEvent ce) {
+	    try {
+        logger.debug("CONFIG : AGENTDISCOVER ADD: Region:" + ce.getParam("src_region") + " Agent:" + ce.getParam("src_agent"));
+        logger.trace("Message Body [" + ce.getMsgBody() + "] [" + ce.getParams().toString() + "]");
+        plugin.getGDB().addNode(ce);
+        }
+        catch(Exception ex) {
+            ce.setParam("error", ex.getMessage());
+        }
+
+        return null;
+    }
+
+    private MsgEvent globalEnable(MsgEvent ce) {
+	    try {
+        logger.debug("CONFIG : AGENTDISCOVER REMOVE: Region:" + ce.getParam("src_region") + " Agent:" + ce.getParam("src_agent"));
+        logger.trace("Message Body [" + ce.getMsgBody() + "] [" + ce.getParams().toString() + "]");
+        plugin.getGDB().removeNode(ce);
+        }
+        catch(Exception ex) {
+            ce.setParam("error", ex.getMessage());
+        }
+
+        return null;
+    }
+
+	private MsgEvent removePlugin(MsgEvent ce) {
+	    try {
+        if((ce.getParam("inode_id") != null) && (ce.getParam("resource_id") != null)) {
+            if(plugin.getGDB().dba.getpNodeINode(ce.getParam("inode_id")) != null)
+            {
+                if((plugin.getGDB().dba.setINodeParam(ce.getParam("inode_id"),"status_code","10")) &&
+                        (plugin.getGDB().dba.setINodeParam(ce.getParam("inode_id"),"status_desc","iNode scheduled for removal.")))
+                {
+                    ce.setParam("status_code","10");
+                    ce.setParam("status_desc","iNode scheduled for removal.");
+                    //ControllerEngine.resourceScheduleQueue.offer(ce);
+                }
+                else
+                {
+                    ce.setParam("status_code","1");
+                    ce.setParam("status_desc","Could not set iNode params");
+                }
+            }
+            else
+            {
+                ce.setParam("status_code","1");
+                ce.setParam("status_desc","iNode_id does not exist in DB!");
+            }
+        }
+        else
+        {
+            ce.setParam("status_code","1");
+            ce.setParam("status_desc","No resource_id or iNode_id found in payload!");
+        }
+        }
+        catch(Exception ex) {
+            ce.setParam("error", ex.getMessage());
+        }
+
+        return ce;
+    }
+
+    private MsgEvent pluginDownload(MsgEvent ce) {
+        try
+        {
+            String baseUrl = ce.getParam("pluginurl");
+            if(!baseUrl.endsWith("/"))
+            {
+                baseUrl = baseUrl + "/";
+            }
+
+            URL website = new URL(baseUrl + ce.getParam("plugin"));
+            ReadableByteChannel rbc = Channels.newChannel(website.openStream());
+
+            File jarLocation = new File(Launcher.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+            String parentDirName = jarLocation.getParent(); // to get the parent dir name
+            String pluginDir = parentDirName + "/plugins";
+            //check if directory exist, if not create it
+            File pluginDirfile = new File(pluginDir);
+            if (!pluginDirfile.exists()) {
+                if (pluginDirfile.mkdir()) {
+                    System.out.println("Directory " + pluginDir + " didn't exist and was created.");
+                } else {
+                    System.out.println("Directory " + pluginDir + " didn't exist and we failed to create it!");
+                }
+            }
+            String pluginFile = parentDirName + "/plugins/" + ce.getParam("plugin");
+            boolean forceDownload = false;
+            if(ce.getParam("forceplugindownload") != null)
+            {
+                forceDownload = true;
+                System.out.println("Forcing Plugin Download");
+            }
+
+            File pluginFileObject = new File(pluginFile);
+            if (!pluginFileObject.exists() || forceDownload)
+            {
+                FileOutputStream fos = new FileOutputStream(parentDirName + "/plugins/" + ce.getParam("plugin"));
+
+                fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+                if(pluginFileObject.exists())
+                {
+                    ce.setParam("hasplugin", ce.getParam("plugin"));
+                    ce.setMsgBody("Downloaded Plugin:" + ce.getParam("plugin"));
+                    System.out.println("Downloaded Plugin:" + ce.getParam("plugin"));
+                }
+                else
+                {
+                    ce.setMsgBody("Problem Downloading Plugin:" + ce.getParam("plugin"));
+                    System.out.println("Problem Downloading Plugin:" + ce.getParam("plugin"));
+                }
+            }
+            else
+            {
+                ce.setMsgBody("Plugin already exists:" + ce.getParam("plugin"));
+                ce.setParam("hasplugin", ce.getParam("plugin"));
+                System.out.println("Plugin already exists:" + ce.getParam("plugin"));
+            }
+
+        }
+        catch(Exception ex) {
+            ce.setParam("error", ex.getMessage());
+        }
+
+        return ce;
+
+    }
+
+    private MsgEvent gPipelineRemove(MsgEvent ce) {
+        try
+        {
+            if(ce.getParam("pipeline_id") != null) {
+                String pipelineId = ce.getParam("pipeline_id");
+                removePipelineExecutor.execute(new PollRemovePipeline(plugin, pipelineId));
                                 /*
                                 List<String> iNodeList = plugin.getGDB().dba.getresourceNodeList(pipelineId,null);
 
@@ -444,160 +600,172 @@ public class GlobalCommandExec {
                                 }
                                 */
 
-                                    ce.setParam("isremoved","true");
-                                }
-                            }
-                            catch(Exception ex)
-                            {
-                                logger.error("ggpipelineremove " + ex.getMessage());
-                            }
-                            return ce;
+                ce.setParam("isremoved","true");
+            }
+        }
+        catch(Exception ex) {
+            ce.setParam("error", ex.getMessage());
+        }
 
-                        case "plugindownload":
+        return ce;
+    }
 
-                            try
-                            {
-                                String baseUrl = ce.getParam("pluginurl");
-                                if(!baseUrl.endsWith("/"))
-                                {
-                                    baseUrl = baseUrl + "/";
-                                }
+    private MsgEvent gPipelineSubmit(MsgEvent ce) {
+        try
+        {
+            if((ce.getParam("gpipeline") != null) && (ce.getParam("tenant_id") != null)) {
+                String pipelineJSON = ce.getParam("gpipeline");
+                String tenantID = ce.getParam("tenant_id");
+                if(ce.getParam("gpipeline_compressed") != null) {
+                    boolean isCompressed = Boolean.parseBoolean(ce.getParam("gpipeline_compressed"));
+                    if(isCompressed) {
+                        pipelineJSON = plugin.getGDB().gdb.stringUncompress(pipelineJSON);
+                    }
+                    logger.debug("Pipeline Compressed " + isCompressed + " " + ce.getParam("gpipeline"));
+                    logger.debug("*" + pipelineJSON + "*");
 
-                                URL website = new URL(baseUrl + ce.getParam("plugin"));
-                                ReadableByteChannel rbc = Channels.newChannel(website.openStream());
+                }
+                gPayload gpay = plugin.getGDB().dba.createPipelineRecord(tenantID, pipelineJSON);
+                //String returnGpipeline = plugin.getGDB().dba.JsonFromgPayLoad(gpay);
+                ce.setParam("gpipeline_id",gpay.pipeline_id);
+            }
+        }
+        catch(Exception ex) {
+            ce.setParam("error", ex.getMessage());
+        }
 
-                                File jarLocation = new File(Launcher.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
-                                String parentDirName = jarLocation.getParent(); // to get the parent dir name
-                                String pluginDir = parentDirName + "/plugins";
-                                //check if directory exist, if not create it
-                                File pluginDirfile = new File(pluginDir);
-                                if (!pluginDirfile.exists()) {
-                                    if (pluginDirfile.mkdir()) {
-                                        System.out.println("Directory " + pluginDir + " didn't exist and was created.");
-                                    } else {
-                                        System.out.println("Directory " + pluginDir + " didn't exist and we failed to create it!");
-                                    }
-                                }
-                                String pluginFile = parentDirName + "/plugins/" + ce.getParam("plugin");
-                                boolean forceDownload = false;
-                                if(ce.getParam("forceplugindownload") != null)
-                                {
-                                    forceDownload = true;
-                                    System.out.println("Forcing Plugin Download");
-                                }
+        return ce;
+    }
 
-                                File pluginFileObject = new File(pluginFile);
-                                if (!pluginFileObject.exists() || forceDownload)
-                                {
-                                    FileOutputStream fos = new FileOutputStream(parentDirName + "/plugins/" + ce.getParam("plugin"));
+	private MsgEvent addPlugin(MsgEvent ce) {
+	    try {
+        if((ce.getParam("inode_id") != null) && (ce.getParam("resource_id") != null) && (ce.getParam("configparams") != null)) {
 
-                                    fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-                                    if(pluginFileObject.exists())
-                                    {
-                                        ce.setParam("hasplugin", ce.getParam("plugin"));
-                                        ce.setMsgBody("Downloaded Plugin:" + ce.getParam("plugin"));
-                                        System.out.println("Downloaded Plugin:" + ce.getParam("plugin"));
-                                    }
-                                    else
-                                    {
-                                        ce.setMsgBody("Problem Downloading Plugin:" + ce.getParam("plugin"));
-                                        System.out.println("Problem Downloading Plugin:" + ce.getParam("plugin"));
-                                    }
-                                }
-                                else
-                                {
-                                    ce.setMsgBody("Plugin already exists:" + ce.getParam("plugin"));
-                                    ce.setParam("hasplugin", ce.getParam("plugin"));
-                                    System.out.println("Plugin already exists:" + ce.getParam("plugin"));
-                                }
-
-                            }
-                            catch(Exception ex)
-                            {
-                                System.out.println(ex.toString());
-                                ce.setMsgBody("Error: " + ex.toString());
-                            }
-                            return ce;
-
-                        default:
-                            logger.debug("Unknown configtype found: {}", ce.getParam("action"));
-                            return null;
+            if(plugin.getGDB().dba.getpNodeINode(ce.getParam("inode_id")) == null)
+            {
+                if(plugin.getGDB().dba.addINode(ce.getParam("resource_id"),ce.getParam("inode_id")) != null)
+                {
+                    if((plugin.getGDB().dba.setINodeParam(ce.getParam("inode_id"),"status_code","0")) &&
+                            (plugin.getGDB().dba.setINodeParam(ce.getParam("inode_id"),"status_desc","iNode Scheduled.")) &&
+                            (plugin.getGDB().dba.setINodeParam(ce.getParam("inode_id"),"configparams",ce.getParam("configparams"))))
+                    {
+                        ce.setParam("status_code","0");
+                        ce.setParam("status_desc","iNode Scheduled");
+                        //ControllerEngine.resourceScheduleQueue.offer(ce);
+                    }
+                    else
+                    {
+                        ce.setParam("status_code","1");
+                        ce.setParam("status_desc","Could not set iNode params");
                     }
                 }
-
-			}
-
-			else if(ce.getMsgType() == MsgEvent.Type.WATCHDOG)
-			{
-				String region = null;
-				String agent = null;
-				String pluginid = null;
-				String resource_id = null;
-				String inode_id = null;
-				
-				region = ce.getParam("src_region");
-				agent = ce.getParam("src_agent");
-				pluginid = ce.getParam("src_plugin");
-				resource_id = ce.getParam("resource_id");
-				inode_id = ce.getParam("inode_id");
-				
-				//clean params for edge
-				/*
-				ce.removeParam("loop");
-				ce.removeParam("isGlobal");
-				ce.removeParam("src_agent");
-				ce.removeParam("src_region");
-				ce.removeParam("src_plugin");
-				ce.removeParam("dst_agent");
-				ce.removeParam("dst_region");
-				ce.removeParam("dst_plugin");
-				*/
-				Map<String,String> params = ce.getParams();
-				
-				plugin.getGDB().dba.updateKPI(region, agent, pluginid, resource_id, inode_id, params);
-				
-				ce.setMsgBody("updatedperf");
-                ce.setParam("source","watchdog");
-
-                return ce;
-			}
-            else if(ce.getMsgType() == MsgEvent.Type.KPI)
-            {
-                String region = null;
-                String agent = null;
-                String plugin = null;
-                String resource_id = null;
-                String inode_id = null;
-
-                region = ce.getParam("src_region");
-                agent = ce.getParam("src_agent");
-                plugin = ce.getParam("src_plugin");
-                resource_id = ce.getParam("resource_id");
-                inode_id = ce.getParam("inode_id");
-
-                //clean params for edge
-				/*
-				ce.removeParam("loop");
-				ce.removeParam("isGlobal");
-				ce.removeParam("src_agent");
-				ce.removeParam("src_region");
-				ce.removeParam("src_plugin");
-				ce.removeParam("dst_agent");
-				ce.removeParam("dst_region");
-				ce.removeParam("dst_plugin");
-				*/
-                Map<String,String> params = ce.getParams();
-
-                //plugin  updatePerf(region, agent, plugin, resource_id, inode_id, params);
-
-                ce.setMsgBody("updatedperf");
-                ce.setParam("source","watchdog");
-                return ce;
+                else
+                {
+                    ce.setParam("status_code","1");
+                    ce.setParam("status_desc","Could not create iNode_id!");
+                }
             }
-		return null;
-	}
-	
-	public String getPluginName(String jarFile) {
+            else
+            {
+                ce.setParam("status_code","1");
+                ce.setParam("status_desc","iNode_id already exist!");
+            }
+        }
+        else
+        {
+            ce.setParam("status_code","1");
+            ce.setParam("status_desc","No iNode_id found in payload!");
+        }
+        }
+        catch(Exception ex) {
+            ce.setParam("error", ex.getMessage());
+        }
+
+        return ce;
+}
+
+    //WATCHDOG
+    private MsgEvent globalWatchdog(MsgEvent ce) {
+	    try {
+        String region = null;
+        String agent = null;
+        String pluginid = null;
+        String resource_id = null;
+        String inode_id = null;
+
+        region = ce.getParam("src_region");
+        agent = ce.getParam("src_agent");
+        pluginid = ce.getParam("src_plugin");
+        resource_id = ce.getParam("resource_id");
+        inode_id = ce.getParam("inode_id");
+
+        //clean params for edge
+				/*
+				ce.removeParam("loop");
+				ce.removeParam("isGlobal");
+				ce.removeParam("src_agent");
+				ce.removeParam("src_region");
+				ce.removeParam("src_plugin");
+				ce.removeParam("dst_agent");
+				ce.removeParam("dst_region");
+				ce.removeParam("dst_plugin");
+				*/
+        Map<String,String> params = ce.getParams();
+
+        plugin.getGDB().dba.updateKPI(region, agent, pluginid, resource_id, inode_id, params);
+
+        ce.setMsgBody("updatedperf");
+        ce.setParam("source","watchdog");
+        }
+        catch(Exception ex) {
+            ce.setParam("error", ex.getMessage());
+        }
+
+        return ce;
+    }
+
+    //KPI
+    private MsgEvent globalKPI(MsgEvent ce) {
+	    try {
+        String region = null;
+        String agent = null;
+        String plugin = null;
+        String resource_id = null;
+        String inode_id = null;
+
+        region = ce.getParam("src_region");
+        agent = ce.getParam("src_agent");
+        plugin = ce.getParam("src_plugin");
+        resource_id = ce.getParam("resource_id");
+        inode_id = ce.getParam("inode_id");
+
+        //clean params for edge
+				/*
+				ce.removeParam("loop");
+				ce.removeParam("isGlobal");
+				ce.removeParam("src_agent");
+				ce.removeParam("src_region");
+				ce.removeParam("src_plugin");
+				ce.removeParam("dst_agent");
+				ce.removeParam("dst_region");
+				ce.removeParam("dst_plugin");
+				*/
+        Map<String,String> params = ce.getParams();
+
+        //plugin  updatePerf(region, agent, plugin, resource_id, inode_id, params);
+
+        ce.setMsgBody("updatedperf");
+        ce.setParam("source","watchdog");
+        }
+        catch(Exception ex) {
+            ce.setParam("error", ex.getMessage());
+        }
+
+        return ce;
+    }
+
+
+    public String getPluginName(String jarFile) {
 			   String version;
 			   try{
 			   //String jarFile = AgentEngine.class.getProtectionDomain().getCodeSource().getLocation().getPath();
