@@ -3722,12 +3722,12 @@ public class DBApplicationFunctions {
                     }
                     else
                     {
-                        logger.error("Controller : DBEngine : Failed to updatePerf : Failed to update Edge params!");
+                        logger.error("Failed to updatePerf : Failed to update Edge params!");
                     }
                 }
                 else
                 {
-                    logger.error("Controller : DBEngine : Failed to updatePerf : edge_id not found!");
+                    logger.error("Failed to updatePerf : edge_id not found!");
                 }
             }
             else
@@ -3763,22 +3763,24 @@ public class DBApplicationFunctions {
             }
             else
             {
-                logger.debug("IupdateEdge: no edge found for edge_id=" + edge_id);
+                logger.error("IupdateEdge: no edge found for edge_id=" + edge_id);
             }
 
         }
         catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException exc)
         {
             //eat exception.. this is not normal and should log somewhere
+            logger.error("IupdateEdge: duplicate exception for edge_id=" + edge_id);
         }
         catch(com.orientechnologies.orient.core.exception.OConcurrentModificationException exc)
         {
             //eat exception.. this is normal
+            logger.error("IupdateEdge: concurrent exception for edge_id=" + edge_id);
         }
         catch(Exception ex)
         {
             long threadId = Thread.currentThread().getId();
-            logger.debug("IupdateEdge: thread_id: " + threadId + " Error " + ex.toString());
+            logger.error("IupdateEdge: thread_id: " + threadId + " Error " + ex.toString());
         }
         finally
         {
@@ -3788,7 +3790,6 @@ public class DBApplicationFunctions {
             }
         }
         return isUpdated;
-
     }
 
 

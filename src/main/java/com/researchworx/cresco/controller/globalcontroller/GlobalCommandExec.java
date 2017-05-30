@@ -7,6 +7,7 @@ import com.researchworx.cresco.controller.globalscheduler.PollRemovePipeline;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 
+import javax.xml.bind.DatatypeConverter;
 import java.io.*;
 import java.net.URL;
 import java.nio.channels.Channels;
@@ -34,7 +35,7 @@ public class GlobalCommandExec {
 
 	public MsgEvent execute(MsgEvent ce) {
 
-	    logger.error("GLOBAL MESSAGE : " + ce.getParams().toString());
+	    //logger.error("GLOBAL MESSAGE : " + ce.getParams().toString());
 
 		//make sure message does not return
 		ce.removeParam("globalcmd");
@@ -74,7 +75,7 @@ public class GlobalCommandExec {
                         return getGPipeline(ce);
 
                     case "getgpipelinelist":
-                        return getgPipelineList(ce);
+                        return getGPipelineList(ce);
 
                     case "getgpipelinestatus":
                         return getGPipelineStatus(ce);
@@ -124,11 +125,11 @@ public class GlobalCommandExec {
 			}
 			else if(ce.getMsgType() == MsgEvent.Type.WATCHDOG)
 			{
-				return globalWatchdog(ce);
+				globalWatchdog(ce);
 			}
             else if(ce.getMsgType() == MsgEvent.Type.KPI)
             {
-                return globalKPI(ce);
+                globalKPI(ce);
             }
 		return null;
 	}
@@ -235,44 +236,11 @@ public class GlobalCommandExec {
         return ce;
     }
 
-    private MsgEvent getgPipelineList(MsgEvent ce) {
+    private MsgEvent getGPipelineList(MsgEvent ce) {
+        try {
 
-
-	    /*
-	    Map<String,List<Map<String,String>>> queryMap;
-
-        try
-        {
-            queryMap = new HashMap<>();
-            List<Map<String,String>> regionArray = new ArrayList<>();
-            List<String> regionList = gdb.getNodeList(null,null,null);
-            //Map<String,Map<String,String>> ahm = new HashMap<String,Map<String,String>>();
-            //Map<String,String> rMap = new HashMap<String,String>();
-            if(regionList != null) {
-                for (String region : regionList) {
-                    Map<String,String> regionMap = new HashMap<>();
-                    logger.trace("Region : " + region);
-                    List<String> agentList = gdb.getNodeList(region, null, null);
-                    regionMap.put("name",region);
-                    regionMap.put("agents",String.valueOf(agentList.size()));
-                    regionArray.add(regionMap);
-                }
-            }
-            queryMap.put("regions",regionArray);
-
-            queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(queryMap))));
-
-	     */
-
-        try
-        {
-            List<String> pipelines = plugin.getGDB().dba.getPipelineIdList();
-            for(String pipelineId :pipelines) {
-
-
-            }
-
-
+            ce.setParam("pipelineinfo",plugin.getGDB().getPipelineInfo());
+            logger.trace("list pipeline return : " + ce.getParams().toString());
         }
         catch(Exception ex) {
             ce.setParam("error", ex.getMessage());
@@ -280,6 +248,7 @@ public class GlobalCommandExec {
 
         return ce;
     }
+
 
     private MsgEvent getGPipeline(MsgEvent ce) {
         try
@@ -708,8 +677,10 @@ public class GlobalCommandExec {
 }
 
     //WATCHDOG
-    private MsgEvent globalWatchdog(MsgEvent ce) {
+    private void globalWatchdog(MsgEvent ce) {
 	    try {
+
+
         String region = null;
         String agent = null;
         String pluginid = null;
@@ -734,35 +705,47 @@ public class GlobalCommandExec {
 				ce.removeParam("dst_plugin");
 				*/
         Map<String,String> params = ce.getParams();
-
         plugin.getGDB().dba.updateKPI(region, agent, pluginid, resource_id, inode_id, params);
 
-        ce.setMsgBody("updatedperf");
-        ce.setParam("source","watchdog");
         }
         catch(Exception ex) {
-            ce.setParam("error", ex.getMessage());
+            logger.error("globalWatchdog " + ex.getMessage());
         }
 
-        return ce;
     }
 
     //KPI
-    private MsgEvent globalKPI(MsgEvent ce) {
-	    try {
-        String region = null;
-        String agent = null;
-        String plugin = null;
-        String resource_id = null;
-        String inode_id = null;
+    private void globalKPI(MsgEvent ce) {
+        try {
 
-        region = ce.getParam("src_region");
-        agent = ce.getParam("src_agent");
-        plugin = ce.getParam("src_plugin");
-        resource_id = ce.getParam("resource_id");
-        inode_id = ce.getParam("inode_id");
 
-        //clean params for edge
+            String region = null;
+            String agent = null;
+            String pluginid = null;
+            String resource_id = null;
+            String inode_id = null;
+
+            region = ce.getParam("src_region");
+            agent = ce.getParam("src_agent");
+            pluginid = ce.getParam("src_plugin");
+            resource_id = ce.getParam("resource_id");
+            inode_id = ce.getParam("inode_id");
+
+
+            ce.removeParam("ttl");
+            ce.removeParam("msg");
+            ce.removeParam("routepath");
+
+            ce.removeParam("src_agent");
+            ce.removeParam("src_region");
+            ce.removeParam("src_plugin");
+            ce.removeParam("dst_agent");
+            ce.removeParam("dst_region");
+            ce.removeParam("dst_plugin");
+
+            Map<String,String> params = ce.getParams();
+
+            //clean params for edge
 				/*
 				ce.removeParam("loop");
 				ce.removeParam("isGlobal");
@@ -773,19 +756,16 @@ public class GlobalCommandExec {
 				ce.removeParam("dst_region");
 				ce.removeParam("dst_plugin");
 				*/
-        Map<String,String> params = ce.getParams();
+            logger.trace("GLOBAL KPI " + params);
+            plugin.getGDB().dba.updateKPI(region, agent, pluginid, resource_id, inode_id, params);
 
-        //plugin  updatePerf(region, agent, plugin, resource_id, inode_id, params);
-
-        ce.setMsgBody("updatedperf");
-        ce.setParam("source","watchdog");
         }
         catch(Exception ex) {
-            ce.setParam("error", ex.getMessage());
+            logger.error("globalKPI " + ex.getMessage());
         }
 
-        return ce;
     }
+
 
 
     public String getPluginName(String jarFile) {

@@ -491,6 +491,38 @@ public class DBInterface {
 
     }
 
+    public String getPipelineInfo() {
+        String queryReturn = null;
+        try
+        {
+            Map<String,List<Map<String,String>>> queryMap;
+
+                queryMap = new HashMap<>();
+                List<Map<String,String>> pipelineArray = new ArrayList<>();
+
+                List<String> pipelines = plugin.getGDB().dba.getPipelineIdList();
+                for(String pipelineId :pipelines) {
+                    Map<String,String> pipelineMap = new HashMap<>(plugin.getGDB().dba.getPipelineParams(pipelineId));
+                    pipelineMap.remove("submission");
+                    pipelineArray.add(pipelineMap);
+                }
+                queryMap.put("pipelines",pipelineArray);
+
+                queryReturn = DatatypeConverter.printBase64Binary(plugin.getGDB().gdb.stringCompress((gson.toJson(queryMap))));
+
+
+            } catch(Exception ex) {
+            logger.error("getResourceInfo() " + ex.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString()); //
+        }
+
+        return queryReturn;
+
+    }
+
     public Map<String,String> getResourceTotal2() {
         Map<String,String> resourceTotal = null;
         long cpu_core_count = 0;

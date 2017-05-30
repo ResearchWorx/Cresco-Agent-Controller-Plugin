@@ -238,6 +238,11 @@ public class MsgRoute implements Runnable {
                     //externalSend();
                     plugin.sendMsgEvent(rm);
                     break;
+                case 126:
+                    logger.debug("CONTROLLER AGENT SENDING MESSAGE TO ITS CONTROLLER PLUGIN 126");
+                    logger.trace(rm.getParams().toString());
+                    re = getRegionalCommandExec();
+                    break;
                 case 127:
                     logger.debug("CONTROLLER PLUGIN SENDING MESSAGE TO SELF 127");
                     logger.trace(rm.getParams().toString());
@@ -309,7 +314,8 @@ public class MsgRoute implements Runnable {
                 default:
                     //System.out.println("CONTROLLER ROUTE CASE " + routePath + " " + rm.getParams());
                     logger.error("CONTROLLER ROUTE CASE " + routePath + " " + rm.getParams());
-                    logger.error(rm.getParams().toString());
+                    //logger.error(rm.getParams().toString());
+                    re = null;
                     break;
             }
 
@@ -323,7 +329,8 @@ public class MsgRoute implements Runnable {
 
         } catch (Exception ex) {
             ex.printStackTrace();
-            System.out.println("Agent : MsgRoute : Route Failed " + ex.toString());
+            System.out.println("Controller : MsgRoute : Route Failed " + ex.toString() + " " + rm.getParams().toString());
+
         }
 
     }
@@ -452,7 +459,11 @@ public class MsgRoute implements Runnable {
             String routeString = RC + RXr + TXr + RXa + TXa + RXp + TXp;
             routePath = Integer.parseInt(routeString, 2);
         } catch (Exception ex) {
-            logger.error("Controller : MsgRoute : getRoutePath Error: " + ex.getMessage());
+            if(rm != null) {
+                logger.error("Controller : MsgRoute : getRoutePath Error: " + ex.getMessage() + " " + rm.getParams().toString());
+            } else {
+                logger.error("Controller : MsgRoute : getRoutePath Error: " + ex.getMessage() + " RM=NULL");
+            }
             ex.printStackTrace();
             routePath = -1;
         }
