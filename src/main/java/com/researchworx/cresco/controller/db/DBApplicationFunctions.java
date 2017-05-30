@@ -730,26 +730,21 @@ public class DBApplicationFunctions {
 
     }
 
-    public int getPipelineStatus(String pipelineId) {
+    public int getPipelineStatusCode(String pipelineId) {
         int statusCode = -1;
         OrientGraph graph = null;
         try
         {
-            graph = factory.getTx();
-            //Vertex vPipeline = odb.getVertexByKey("Pipeline.pipelineid", pipeline_id);
-            Vertex vPipeline = graph.getVertex(getPipelineNodeId(pipelineId));
+            //Map<String,String> statusMap = getPipelineStatus(pipelineId);
+            //String statusCodeString = statusMap.get("status_code");
+            //if(statusCodeString != null) {
+                statusCode = Integer.parseInt(getPipelineStatus(pipelineId).get("status_code"));
+            //}
 
-            if(vPipeline != null)
-            {
-                String statusString = vPipeline.getProperty("status_code");
-                if(statusString != null) {
-                    statusCode = Integer.parseInt(statusString);
-                }
-            }
         }
         catch(Exception ex)
         {
-            logger.debug("setPipelineStatus Error: " + ex.toString());
+            logger.debug("getPipelineStatusCode Error: " + ex.toString());
         }
         finally
         {
@@ -758,12 +753,71 @@ public class DBApplicationFunctions {
                 graph.shutdown();
             }
         }
+        //return statusCode;
         return statusCode;
-
     }
 
 
-    public Map<String,String> getPipelineParams(String pipelineId) {
+    public Map<String,String> getPipelineStatus(String pipelineId) {
+        Map<String,String> statusMap = new HashMap<>();
+        OrientGraph graph = null;
+        try
+        {
+            graph = factory.getTx();
+            Vertex vPipeline = graph.getVertex(getPipelineNodeId(pipelineId));
+
+            if(vPipeline != null)
+            {
+
+                String nameString = vPipeline.getProperty("pipeline_name");
+                if(nameString != null) {
+                    statusMap.put("pipeline_name",nameString);
+                } else {
+                    statusMap.put("pipeline_name","unknown");
+                }
+
+                statusMap.put("pipeline_id",pipelineId);
+
+                String descString = vPipeline.getProperty("status_desc");
+                if(descString != null) {
+                    statusMap.put("status_desc",descString);
+                } else {
+                    statusMap.put("status_desc","unknown");
+                }
+
+                String tenantString = vPipeline.getProperty("tenant_id");
+                if(tenantString != null) {
+                    statusMap.put("tenant_id",tenantString);
+                } else {
+                    statusMap.put("tenant_id","unknown");
+                }
+
+                String statusString = vPipeline.getProperty("status_code");
+                if(statusString != null) {
+                    statusMap.put("status_code",statusString);
+                } else {
+                    statusMap.put("status_code","unknown");
+                }
+
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.error("setPipelineStatus Error: " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        //return statusCode;
+        return statusMap;
+    }
+
+
+    public Map<String,String> getPipelineParam(String pipelineId, String param) {
         //String params = null;
         OrientGraph graph = null;
         Map<String,String> params = null;
@@ -772,12 +826,13 @@ public class DBApplicationFunctions {
 
             String node_id = getPipelineNodeId(pipelineId);
             if(node_id != null) {
+
                 Vertex iNode = graph.getVertex(node_id);
-                params = getMapFromString(iNode.getProperty("params").toString(), false);
+                params = getMapFromString(iNode.getProperty(param).toString(), false);
             }
         }
         catch(Exception ex) {
-            logger.error("getPipelineParams " + ex.toString());
+            logger.error("getPipelineParam " + ex.toString());
         }
         finally
         {

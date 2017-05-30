@@ -502,17 +502,18 @@ public class DBInterface {
 
                 List<String> pipelines = plugin.getGDB().dba.getPipelineIdList();
                 for(String pipelineId :pipelines) {
-                    Map<String,String> pipelineMap = new HashMap<>(plugin.getGDB().dba.getPipelineParams(pipelineId));
-                    pipelineMap.remove("submission");
-                    pipelineArray.add(pipelineMap);
+                    Map<String,String> pipelineMap = plugin.getGDB().dba.getPipelineStatus(pipelineId);
+                    logger.error("pipelineMap : " + pipelineMap.toString());
+                    if(!pipelineMap.isEmpty()) {
+                        pipelineArray.add(pipelineMap);
+                    }
                 }
                 queryMap.put("pipelines",pipelineArray);
 
                 queryReturn = DatatypeConverter.printBase64Binary(plugin.getGDB().gdb.stringCompress((gson.toJson(queryMap))));
 
-
             } catch(Exception ex) {
-            logger.error("getResourceInfo() " + ex.toString());
+            logger.error("getPipelineInfo() " + ex.toString());
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             ex.printStackTrace(pw);

@@ -28,7 +28,10 @@ public class PollRemovePipeline implements Runnable {
 	}
 	 public void run() {
 	        try {
-                int pipelineStatus = plugin.getGDB().dba.getPipelineStatus(pipelineId);
+
+	            int pipelineStatus = plugin.getGDB().dba.getPipelineStatusCode(pipelineId);
+
+
                 //logger.error("PIPELINE ID " + pipelineId + " SCHEDILER FOR REMOVAL!!! STATUS " + pipelineStatus);
 
                 //if((pipelineStatus >= 10) && (pipelineStatus < 19)) {

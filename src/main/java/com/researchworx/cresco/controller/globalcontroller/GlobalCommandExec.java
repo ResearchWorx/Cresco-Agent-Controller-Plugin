@@ -223,11 +223,13 @@ public class GlobalCommandExec {
     private MsgEvent getGPipelineStatus(MsgEvent ce) {
         try
         {
+            /*
             if(ce.getParam("pipeline_id") != null) {
                 String pipelineId = ce.getParam("pipeline_id");
                 int pipelineStatus = plugin.getGDB().dba.getPipelineStatus(pipelineId);
                 ce.setParam("status_code",String.valueOf(pipelineStatus));
             }
+            */
         }
         catch(Exception ex) {
             ce.setParam("error", ex.getMessage());
