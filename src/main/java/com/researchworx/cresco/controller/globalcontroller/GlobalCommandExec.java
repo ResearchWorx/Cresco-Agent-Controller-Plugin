@@ -133,7 +133,6 @@ public class GlobalCommandExec {
 		return null;
 	}
 
-
 	//EXEC
 
 	private MsgEvent pluginInfo(MsgEvent ce) {
@@ -220,24 +219,6 @@ public class GlobalCommandExec {
         return ce;
     }
 
-	private MsgEvent regionalImport(MsgEvent ce) {
-	    try {
-        logger.debug("CONFIG : regionalimport message type found");
-        logger.debug(ce.getParam("exportdata"));
-        if(plugin.getGDB().gdb.setDBImport(ce.getParam("exportdata"))) {
-            logger.debug("Database Imported.");
-        }
-        else {
-            logger.debug("Database Import Failed!");
-        }
-        }
-        catch(Exception ex) {
-            ce.setParam("error", ex.getMessage());
-        }
-
-        return null;
-    }
-
     private MsgEvent getGPipelineStatus(MsgEvent ce) {
         try
         {
@@ -255,17 +236,42 @@ public class GlobalCommandExec {
     }
 
     private MsgEvent getgPipelineList(MsgEvent ce) {
+
+
+	    /*
+	    Map<String,List<Map<String,String>>> queryMap;
+
         try
         {
-            StringBuilder pipelineString = new StringBuilder();
+            queryMap = new HashMap<>();
+            List<Map<String,String>> regionArray = new ArrayList<>();
+            List<String> regionList = gdb.getNodeList(null,null,null);
+            //Map<String,Map<String,String>> ahm = new HashMap<String,Map<String,String>>();
+            //Map<String,String> rMap = new HashMap<String,String>();
+            if(regionList != null) {
+                for (String region : regionList) {
+                    Map<String,String> regionMap = new HashMap<>();
+                    logger.trace("Region : " + region);
+                    List<String> agentList = gdb.getNodeList(region, null, null);
+                    regionMap.put("name",region);
+                    regionMap.put("agents",String.valueOf(agentList.size()));
+                    regionArray.add(regionMap);
+                }
+            }
+            queryMap.put("regions",regionArray);
+
+            queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(queryMap))));
+
+	     */
+
+        try
+        {
             List<String> pipelines = plugin.getGDB().dba.getPipelineIdList();
             for(String pipelineId :pipelines) {
-                pipelineString.append(pipelineId + ",");
+
+
             }
-            if(pipelineString.length() > 0) {
-                pipelineString.deleteCharAt(pipelineString.length() - 1);
-            }
-            ce.setParam("gpipeline_ids",pipelineString.toString());
+
 
         }
         catch(Exception ex) {
@@ -283,6 +289,38 @@ public class GlobalCommandExec {
                 String returnGetGpipeline = plugin.getGDB().dba.getPipeline(pipelineId);
                 ce.setParam("gpipeline",returnGetGpipeline);
             }
+        }
+        catch(Exception ex) {
+            ce.setParam("error", ex.getMessage());
+        }
+
+        return ce;
+    }
+
+    private MsgEvent getPluginStatus(MsgEvent ce) {
+        try
+        {
+            if((ce.getParam("inode_id") != null) && (ce.getParam("resource_id") != null))
+            {
+                String status_code = plugin.getGDB().dba.getINodeParam(ce.getParam("inode_id"),"status_code");
+                String status_desc = plugin.getGDB().dba.getINodeParam(ce.getParam("inode_id"),"status_desc");
+                if((status_code != null) && (status_desc != null))
+                {
+                    ce.setParam("status_code",status_code);
+                    ce.setParam("status_desc",status_desc);
+                }
+                else
+                {
+                    ce.setParam("status_code","1");
+                    ce.setParam("status_desc","Could not read iNode params");
+                }
+            }
+            else
+            {
+                ce.setParam("status_code","1");
+                ce.setParam("status_desc","No iNode_id found in payload!");
+            }
+
         }
         catch(Exception ex) {
             ce.setParam("error", ex.getMessage());
@@ -341,38 +379,6 @@ public class GlobalCommandExec {
             {
                 ce.setMsgBody("No plugin directory exist to inventory");
             }
-        }
-        catch(Exception ex) {
-            ce.setParam("error", ex.getMessage());
-        }
-
-        return ce;
-    }
-
-    private MsgEvent getPluginStatus(MsgEvent ce) {
-        try
-        {
-            if((ce.getParam("inode_id") != null) && (ce.getParam("resource_id") != null))
-            {
-                String status_code = plugin.getGDB().dba.getINodeParam(ce.getParam("inode_id"),"status_code");
-                String status_desc = plugin.getGDB().dba.getINodeParam(ce.getParam("inode_id"),"status_desc");
-                if((status_code != null) && (status_desc != null))
-                {
-                    ce.setParam("status_code",status_code);
-                    ce.setParam("status_desc",status_desc);
-                }
-                else
-                {
-                    ce.setParam("status_code","1");
-                    ce.setParam("status_desc","Could not read iNode params");
-                }
-            }
-            else
-            {
-                ce.setParam("status_code","1");
-                ce.setParam("status_desc","No iNode_id found in payload!");
-            }
-
         }
         catch(Exception ex) {
             ce.setParam("error", ex.getMessage());
@@ -447,6 +453,23 @@ public class GlobalCommandExec {
 
 
     //CONFIG
+    private MsgEvent regionalImport(MsgEvent ce) {
+        try {
+            logger.debug("CONFIG : regionalimport message type found");
+            logger.debug(ce.getParam("exportdata"));
+            if(plugin.getGDB().gdb.setDBImport(ce.getParam("exportdata"))) {
+                logger.debug("Database Imported.");
+            }
+            else {
+                logger.debug("Database Import Failed!");
+            }
+        }
+        catch(Exception ex) {
+            ce.setParam("error", ex.getMessage());
+        }
+
+        return null;
+    }
 
     private MsgEvent globalDisable(MsgEvent ce) {
 	    try {

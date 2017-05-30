@@ -692,7 +692,12 @@ public class DBInterface {
                     String nodeAgentId = gdb.getNodeId(region,agent,null);
                     logger.trace("region: " + region + " agent:" + agent + " plugin:" + " null id:" + nodeAgentId);
                     logger.trace("params: " + gdb.getNodeParams(nodeAgentId).toString());
+                    gdb.setNodeParams(region,agent,plugin, de.getParams());
+
+                } else {
+                    gdb.setNodeParams(region,agent,null, de.getParams());
                 }
+
             }
             else {
                 logger.debug("Adding Node: " + de.getParams().toString());

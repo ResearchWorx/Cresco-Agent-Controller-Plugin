@@ -71,13 +71,13 @@
 
         <dependency>
             <groupId>com.orientechnologies</groupId>
-            <artifactId>orientdb-core</artifactId>
+            <artifactId>orientdb-graphdb</artifactId>
             <version>${orientdb.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.orientechnologies</groupId>
-            <artifactId>orientdb-graphdb</artifactId>
+            <artifactId>orientdb-core</artifactId>
             <version>${orientdb.version}</version>
         </dependency>
 

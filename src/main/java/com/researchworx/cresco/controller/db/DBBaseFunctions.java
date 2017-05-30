@@ -126,8 +126,7 @@ public class DBBaseFunctions {
         return nodeList;
     }
 
-    public String getNodeId(String region, String agent, String plugin)
-    {
+    public String getNodeId(String region, String agent, String plugin) {
         String node_id = null;
         OrientGraph graph = null;
 
@@ -225,8 +224,7 @@ public class DBBaseFunctions {
         return node_id;
     }
 
-    public List<String> getNodeIds(String region, String agent, String plugin, boolean getAll)
-    {
+    public List<String> getNodeIds(String region, String agent, String plugin, boolean getAll) {
         OrientGraph graph = null;
         List<String> nodeIdList = null;
         try
@@ -324,8 +322,7 @@ public class DBBaseFunctions {
         return nodeIdList;
     }
 
-    public List<String> getNodeList(String region, String agent, String plugin)
-    {
+    public List<String> getNodeList(String region, String agent, String plugin) {
         List<String> node_list = null;
         OrientGraph graph = null;
         try
@@ -413,8 +410,7 @@ public class DBBaseFunctions {
         return node_list;
     }
 
-    public String getNodeParam(String node_id, String param)
-    {
+    public String getNodeParam(String node_id, String param) {
         String paramVal = null;
 
         int count = 0;
@@ -445,8 +441,7 @@ public class DBBaseFunctions {
         return paramVal;
     }
 
-    public String getNodeParam(String region, String agent, String plugin, String param)
-    {
+    public String getNodeParam(String region, String agent, String plugin, String param) {
         String paramVal = null;
         String node_id  = getNodeId(region,agent,plugin);
 
@@ -478,8 +473,7 @@ public class DBBaseFunctions {
         return paramVal;
     }
 
-    public String IgetNodeParam(String node_id, String param)
-    {
+    public String IgetNodeParam(String node_id, String param) {
         String node_param = null;
         OrientGraph graph = null;
 
@@ -504,8 +498,7 @@ public class DBBaseFunctions {
         return node_param;
     }
 
-    public Map<String,String> IgetNodeParams(String node_id)
-    {
+    public Map<String,String> IgetNodeParams(String node_id) {
         OrientGraph graph = null;
         Map<String,String> params = new HashMap();
 
@@ -531,8 +524,7 @@ public class DBBaseFunctions {
         return params;
     }
 
-    public Map<String,String> getNodeParams(String node_id)
-    {
+    public Map<String,String> getNodeParams(String node_id) {
         Map<String,String> paramsVal = null;
 
         int count = 0;

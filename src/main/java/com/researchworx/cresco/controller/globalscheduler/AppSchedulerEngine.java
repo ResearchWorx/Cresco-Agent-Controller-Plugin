@@ -24,7 +24,7 @@ public class AppSchedulerEngine implements Runnable {
     private ExecutorService addPipelineExecutor;
 
     public AppSchedulerEngine(Launcher plugin, GlobalHealthWatcher ghw) {
-		this.logger = new CLogger(AppSchedulerEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Debug);
+		this.logger = new CLogger(AppSchedulerEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
 		this.plugin = plugin;
 		this.ghw = ghw;
         addPipelineExecutor = Executors.newFixedThreadPool(1);
@@ -183,6 +183,8 @@ public class AppSchedulerEngine implements Runnable {
         return scheduleStatus;
     }
 
+
+
     public boolean nodeExist(String region, String agent) {
         boolean nodeExist = false;
         try {
@@ -227,7 +229,7 @@ public class AppSchedulerEngine implements Runnable {
 
             //verify predicates
             for (gNode node : nodes) {
-
+                logger.trace("node_id=" + node.node_id + " node_name=" + node.node_name + " type" + node.type + " params" + node.params.toString());
                 if (node.params.containsKey("location_region") && node.params.containsKey("location_agent")) {
                     if (nodeExist(node.params.get("location_region"), node.params.get("location_agent"))) {
                         unAssignedNodes.remove(node);
@@ -235,8 +237,16 @@ public class AppSchedulerEngine implements Runnable {
                     } else {
                         errorNodes.add(node);
                     }
+                } else if(node.params.containsKey("location")) {
+                    String nodeId = getLocationNodeId(node.params.get("location"));
+                    if(nodeId != null) {
+                        Map<String,String> nodeMap = plugin.getGDB().gdb.getNodeParams(nodeId);
+                        node.params.put("location_region",nodeMap.get("region"));
+                        node.params.put("location_agent",nodeMap.get("agent"));
+                        unAssignedNodes.remove(node);
+                        assignedNodes.add(node);
+                    }
                 }
-
             }
             nodeResults.put("assigned",assignedNodes);
             nodeResults.put("unassigned", unAssignedNodes);
@@ -248,6 +258,19 @@ public class AppSchedulerEngine implements Runnable {
             ex.printStackTrace();
         }
         return nodeResults;
+    }
+
+    private String getLocationNodeId(String location) {
+        String locationNodeId = null;
+        try {
+            List<String> aNodeList = plugin.getGDB().gdb.getANodeFromIndex("location", location);
+            if(!aNodeList.isEmpty()) {
+                locationNodeId = aNodeList.get(0);
+            }
+        } catch(Exception ex) {
+            logger.error(ex.getMessage());
+        }
+        return locationNodeId;
     }
 
 }

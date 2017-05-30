@@ -126,7 +126,7 @@ public class DBEngine {
     public DBEngine(Launcher plugin) {
 
         this.plugin = plugin;
-        logger = new CLogger(DBEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Debug);
+        logger = new CLogger(DBEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
         this.retryCount = plugin.getConfig().getIntegerParam("db_retry_count",50);
         //this.factory = getFactory();
         setPool();
