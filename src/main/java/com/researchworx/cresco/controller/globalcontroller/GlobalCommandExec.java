@@ -74,9 +74,6 @@ public class GlobalCommandExec {
                     case "getgpipeline":
                         return getGPipeline(ce);
 
-                    case "getgpipelinelist":
-                        return getGPipelineList(ce);
-
                     case "getgpipelinestatus":
                         return getGPipelineStatus(ce);
 
@@ -221,27 +218,15 @@ public class GlobalCommandExec {
     }
 
     private MsgEvent getGPipelineStatus(MsgEvent ce) {
-        try
-        {
-            /*
-            if(ce.getParam("pipeline_id") != null) {
-                String pipelineId = ce.getParam("pipeline_id");
-                int pipelineStatus = plugin.getGDB().dba.getPipelineStatus(pipelineId);
-                ce.setParam("status_code",String.valueOf(pipelineStatus));
-            }
-            */
-        }
-        catch(Exception ex) {
-            ce.setParam("error", ex.getMessage());
-        }
 
-        return ce;
-    }
+        String actionPipeline = null;
 
-    private MsgEvent getGPipelineList(MsgEvent ce) {
         try {
+            if(ce.getParam("action_pipeline") != null) {
+                actionPipeline = ce.getParam("action_pipeline");
+            }
 
-            ce.setParam("pipelineinfo",plugin.getGDB().getPipelineInfo());
+            ce.setParam("pipelineinfo",plugin.getGDB().getPipelineInfo(actionPipeline));
             logger.trace("list pipeline return : " + ce.getParams().toString());
         }
         catch(Exception ex) {

@@ -491,7 +491,7 @@ public class DBInterface {
 
     }
 
-    public String getPipelineInfo() {
+    public String getPipelineInfo(String pipeline_action) {
         String queryReturn = null;
         try
         {
@@ -499,11 +499,16 @@ public class DBInterface {
 
                 queryMap = new HashMap<>();
                 List<Map<String,String>> pipelineArray = new ArrayList<>();
+                List<String> pipelines = null;
+                if(pipeline_action != null) {
+                    pipelines = new ArrayList<>();
+                    pipelines.add(pipeline_action);
+                } else {
+                    pipelines = plugin.getGDB().dba.getPipelineIdList();
+                }
 
-                List<String> pipelines = plugin.getGDB().dba.getPipelineIdList();
                 for(String pipelineId :pipelines) {
                     Map<String,String> pipelineMap = plugin.getGDB().dba.getPipelineStatus(pipelineId);
-                    logger.error("pipelineMap : " + pipelineMap.toString());
                     if(!pipelineMap.isEmpty()) {
                         pipelineArray.add(pipelineMap);
                     }
