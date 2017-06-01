@@ -5,6 +5,7 @@ import com.researchworx.cresco.controller.app.gPayload;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.controller.globalcontroller.GlobalCommandExec;
 import com.researchworx.cresco.controller.globalscheduler.PollRemovePipeline;
+import com.researchworx.cresco.library.core.WatchDog;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 
@@ -55,6 +56,7 @@ public class RegionalCommandExec {
                 if(le.getParam("action") != null) {
                     switch (le.getParam("action")) {
                         case "disable":
+                            logger.error("DISABLE!!!! " + le.getMsgType().toString() + " " + le.getParams().toString());
                             logger.debug("CONFIG : AGENTDISCOVER REMOVE: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
                             logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
                             plugin.getGDB().removeNode(le);

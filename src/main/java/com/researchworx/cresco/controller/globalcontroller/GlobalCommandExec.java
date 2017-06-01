@@ -6,6 +6,7 @@ import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.controller.globalscheduler.PollRemovePipeline;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.*;
@@ -62,8 +63,8 @@ public class GlobalCommandExec {
                     case "getenvstatus":
                         return getEnvStatus(ce);
 
-                    case "getpluginstatus":
-                        return getPluginStatus(ce);
+                    case "getinodestatus":
+                        return getINodeStatus(ce);
 
                     case "resourceinventory":
                         return resourceInventory(ce);
@@ -85,8 +86,6 @@ public class GlobalCommandExec {
 			else if(ce.getMsgType() == MsgEvent.Type.CONFIG)
 			{
                 if(ce.getParam("action") != null) {
-
-                    logger.error("action: " + ce.getParam("action"));
 
                     switch (ce.getParam("action")) {
                         case "disable":
@@ -112,6 +111,10 @@ public class GlobalCommandExec {
 
                         case "plugindownload":
                             return pluginDownload(ce);
+
+                        case "setinodestatus":
+                            return setINodeStatus(ce);
+
 
                         default:
                             logger.error("Unknown configtype found: {}", ce.getParam("action"));
@@ -236,7 +239,6 @@ public class GlobalCommandExec {
         return ce;
     }
 
-
     private MsgEvent getGPipeline(MsgEvent ce) {
         try
         {
@@ -254,7 +256,7 @@ public class GlobalCommandExec {
         return ce;
     }
 
-    private MsgEvent getPluginStatus(MsgEvent ce) {
+    private MsgEvent getINodeStatus(MsgEvent ce) {
         try
         {
             if((ce.getParam("inode_id") != null) && (ce.getParam("resource_id") != null))
@@ -410,6 +412,27 @@ public class GlobalCommandExec {
 
 
     //CONFIG
+
+    private MsgEvent setINodeStatus(MsgEvent ce) {
+        try
+        {
+            if((ce.getParam("action_inodeid") != null) && (ce.getParam("action_statuscode") != null) && (ce.getParam("action_statusdesc") != null))
+            {
+                plugin.getGDB().dba.setINodeParam(ce.getParam("action_inodeid"),"status_code",ce.getParam("action_statuscode"));
+                plugin.getGDB().dba.setINodeParam(ce.getParam("action_inodeid"),"status_desc",ce.getParam("action_statusdesc"));
+                ce.setParam("success", Boolean.TRUE.toString());
+            } else {
+                ce.setParam("error", "Missing Information action_inodeid=" + ce.getParam("action_inodeid") + " action_statuscode=" + ce.getParam("action_statuscode") + " action_statusdesc=" + ce.getParam("action_statusdesc"));
+            }
+
+        }
+        catch(Exception ex) {
+            ce.setParam("error", ex.getMessage());
+        }
+
+        return ce;
+    }
+
     private MsgEvent regionalImport(MsgEvent ce) {
         try {
             logger.debug("CONFIG : regionalimport message type found");
@@ -456,6 +479,7 @@ public class GlobalCommandExec {
 
 	private MsgEvent removePlugin(MsgEvent ce) {
 	    try {
+
         if((ce.getParam("inode_id") != null) && (ce.getParam("resource_id") != null)) {
             if(plugin.getGDB().dba.getpNodeINode(ce.getParam("inode_id")) != null)
             {

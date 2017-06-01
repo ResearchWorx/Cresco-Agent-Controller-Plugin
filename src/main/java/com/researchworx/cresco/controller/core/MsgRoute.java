@@ -346,6 +346,7 @@ public class MsgRoute implements Runnable {
     }
     */
 
+
     private MsgEvent getRegionalCommandExec() {
         try {
             String callId = "callId-" + /*PluginEngine.region*/plugin.getRegion() + "_" + /*PluginEngine.agent*/plugin.getAgent() + "_" + /*PluginEngine.plugin*/plugin.getPluginID(); //calculate callID
@@ -354,7 +355,16 @@ public class MsgRoute implements Runnable {
                 plugin.receiveRPC(rm.getParam(callId), rm);
             } else {
                 //return PluginEngine.commandExec.cmdExec(rm);
-                return plugin.getRegionHealthWatcher().rce.execute(rm);
+                if(plugin.getRegionHealthWatcher() != null) {
+                    if(plugin.getRegionHealthWatcher().rce != null) {
+                        return plugin.getRegionHealthWatcher().rce.execute(rm);
+                    } else {
+                        logger.error("getRegionHealthWatcher().rce = null");
+                    }
+
+                } else {
+                    logger.error("getRegionHealthWatcher() = null");
+                }
             }
         } catch (Exception ex) {
             logger.error("getRegionalCommandExec - " + ex.getMessage());
@@ -362,6 +372,8 @@ public class MsgRoute implements Runnable {
         }
         return null;
     }
+
+
 
     private MsgEvent getCommandExec() {
         try {
