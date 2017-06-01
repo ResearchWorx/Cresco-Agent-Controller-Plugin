@@ -90,7 +90,7 @@ public class DiscoveryClientWorkerIPv6 {
     List<MsgEvent> discover() {
         // Find the server using UDP broadcast
         //logger.info("Discovery (IPv6) started");
-        logger.info(disType.toString() + " Discovery (IPv6) started ");
+        logger.debug(disType.toString() + " Discovery (IPv6) started ");
         try {
             discoveredList = new ArrayList<>();
             // Broadcast the message over all the network interfaces

@@ -78,7 +78,7 @@ public class GlobalCommandExec {
                         return getGPipelineStatus(ce);
 
                     default:
-						logger.debug("Unknown configtype found: {}", ce.getParam("action"));
+						logger.error("Unknown configtype found: {}", ce.getParam("action"));
 						return null;
 				}
 			}
@@ -114,7 +114,7 @@ public class GlobalCommandExec {
                             return pluginDownload(ce);
 
                         default:
-                            logger.debug("Unknown configtype found: {}", ce.getParam("action"));
+                            logger.error("Unknown configtype found: {}", ce.getParam("action"));
                             return null;
                     }
                 }
@@ -240,11 +240,12 @@ public class GlobalCommandExec {
     private MsgEvent getGPipeline(MsgEvent ce) {
         try
         {
-            if(ce.getParam("pipeline_id") != null) {
-                String pipelineId = ce.getParam("pipeline_id");
-                String returnGetGpipeline = plugin.getGDB().dba.getPipeline(pipelineId);
+            if(ce.getParam("action_pipelineid") != null) {
+                String actionPipelineId = ce.getParam("action_pipelineid");
+                String returnGetGpipeline = plugin.getGDB().getGPipeline(actionPipelineId);
                 ce.setParam("gpipeline",returnGetGpipeline);
             }
+
         }
         catch(Exception ex) {
             ce.setParam("error", ex.getMessage());

@@ -491,6 +491,27 @@ public class DBInterface {
 
     }
 
+    public String getGPipeline(String actionPipelineId) {
+        String queryReturn = null;
+        try
+        {
+            String returnGetGpipeline = plugin.getGDB().dba.getPipeline(actionPipelineId);
+            queryReturn = DatatypeConverter.printBase64Binary(plugin.getGDB().gdb.stringCompress(returnGetGpipeline));
+
+        } catch(Exception ex) {
+            logger.error("getGPipeline() " + ex.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString());
+        }
+
+        return queryReturn;
+
+    }
+
+
+
     public String getPipelineInfo(String pipeline_action) {
         String queryReturn = null;
         try
