@@ -2,6 +2,7 @@ package com.researchworx.cresco.controller.regionalcontroller;
 
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.controller.db.NodeStatusType;
+import com.researchworx.cresco.library.core.WatchDog;
 import com.researchworx.cresco.library.utilities.CLogger;
 
 import java.util.Map;
@@ -87,7 +88,6 @@ public class RegionHealthWatcher {
         public RegionalNodeStatusWatchDog(Launcher plugin, CLogger logger) {
             this.plugin = plugin;
             this.logger = logger;
-
         }
         public void run() {
             if(plugin.isRegionalController()) { //only run if node is regional controller

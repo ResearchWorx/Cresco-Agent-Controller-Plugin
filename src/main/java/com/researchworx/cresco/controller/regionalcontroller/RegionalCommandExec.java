@@ -56,7 +56,6 @@ public class RegionalCommandExec {
                 if(le.getParam("action") != null) {
                     switch (le.getParam("action")) {
                         case "disable":
-                            logger.error("DISABLE!!!! " + le.getMsgType().toString() + " " + le.getParams().toString());
                             logger.debug("CONFIG : AGENTDISCOVER REMOVE: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
                             logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
                             plugin.getGDB().removeNode(le);

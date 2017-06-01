@@ -6,9 +6,7 @@ import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.controller.globalscheduler.PollRemovePipeline;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 
-import javax.xml.bind.DatatypeConverter;
 import java.io.*;
 import java.net.URL;
 import java.nio.channels.Channels;
@@ -114,7 +112,6 @@ public class GlobalCommandExec {
 
                         case "setinodestatus":
                             return setINodeStatus(ce);
-
 
                         default:
                             logger.error("Unknown configtype found: {}", ce.getParam("action"));
@@ -584,8 +581,8 @@ public class GlobalCommandExec {
     private MsgEvent gPipelineRemove(MsgEvent ce) {
         try
         {
-            if(ce.getParam("pipeline_id") != null) {
-                String pipelineId = ce.getParam("pipeline_id");
+            if(ce.getParam("action_pipelineid") != null) {
+                String pipelineId = ce.getParam("action_pipelineid");
                 removePipelineExecutor.execute(new PollRemovePipeline(plugin, pipelineId));
                                 /*
                                 List<String> iNodeList = plugin.getGDB().dba.getresourceNodeList(pipelineId,null);
@@ -604,7 +601,7 @@ public class GlobalCommandExec {
                                 }
                                 */
 
-                ce.setParam("isremoved","true");
+                ce.setParam("success", Boolean.TRUE.toString());
             }
         }
         catch(Exception ex) {
@@ -617,9 +614,13 @@ public class GlobalCommandExec {
     private MsgEvent gPipelineSubmit(MsgEvent ce) {
         try
         {
-            if((ce.getParam("gpipeline") != null) && (ce.getParam("tenant_id") != null)) {
-                String pipelineJSON = ce.getParam("gpipeline");
-                String tenantID = ce.getParam("tenant_id");
+            if((ce.getParam("action_gpipeline") != null) && (ce.getParam("action_tenantid") != null)) {
+                String pipelineJSON = ce.getParam("action_gpipeline");
+                String tenantID = ce.getParam("action_tenantid");
+
+                pipelineJSON = plugin.getGDB().gdb.stringUncompress(pipelineJSON);
+
+                /*
                 if(ce.getParam("gpipeline_compressed") != null) {
                     boolean isCompressed = Boolean.parseBoolean(ce.getParam("gpipeline_compressed"));
                     if(isCompressed) {
@@ -629,6 +630,8 @@ public class GlobalCommandExec {
                     logger.debug("*" + pipelineJSON + "*");
 
                 }
+                */
+
                 gPayload gpay = plugin.getGDB().dba.createPipelineRecord(tenantID, pipelineJSON);
                 //String returnGpipeline = plugin.getGDB().dba.JsonFromgPayLoad(gpay);
                 ce.setParam("gpipeline_id",gpay.pipeline_id);
