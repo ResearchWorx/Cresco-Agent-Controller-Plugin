@@ -501,6 +501,10 @@ public class DBInterface {
             int nodeSize = gpay.nodes.size();
             for(int i=0; i < nodeSize; i++) {
                 gpay.nodes.get(i).params.clear();
+                String inodeid = plugin.getGDB().dba.getINodefromVNode(gpay.nodes.get(i).node_id);
+                String status_code = plugin.getGDB().dba.getINodeParam(inodeid,"status_code");
+                String status_desc = plugin.getGDB().dba.getINodeParam(inodeid,"status_desc");
+
 
             }
             String returnGetGpipeline = gson.toJson(gpay);
