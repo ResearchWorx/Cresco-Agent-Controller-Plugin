@@ -537,7 +537,9 @@ public class DBInterface {
         try
         {
             String returnGetGpipeline = plugin.getGDB().dba.getPipeline(actionPipelineId);
-            queryReturn = DatatypeConverter.printBase64Binary(plugin.getGDB().gdb.stringCompress(returnGetGpipeline));
+            if(returnGetGpipeline != null) {
+                queryReturn = DatatypeConverter.printBase64Binary(plugin.getGDB().gdb.stringCompress(returnGetGpipeline));
+            }
 
         } catch(Exception ex) {
             logger.error("getGPipelineExport() " + ex.toString());

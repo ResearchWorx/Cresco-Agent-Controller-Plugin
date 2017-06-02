@@ -270,9 +270,16 @@ public class GlobalCommandExec {
             if(ce.getParam("action_pipelineid") != null) {
                 String actionPipelineId = ce.getParam("action_pipelineid");
                 String returnGetGpipeline = plugin.getGDB().getGPipelineExport(actionPipelineId);
-                ce.setParam("gpipeline",returnGetGpipeline);
-            }
+                if (returnGetGpipeline != null) {
+                    ce.setParam("gpipeline", returnGetGpipeline);
+                    ce.setParam("success", Boolean.TRUE.toString());
 
+                } else {
+                    ce.setParam("error", "action_pipelineid does not exist.");
+                }
+            } else {
+                ce.setParam("error", "no action_pipelineid provided.");
+            }
         }
         catch(Exception ex) {
             ce.setParam("error", ex.getMessage());
@@ -611,7 +618,10 @@ public class GlobalCommandExec {
         {
             if(ce.getParam("action_pipelineid") != null) {
                 String pipelineId = ce.getParam("action_pipelineid");
-                removePipelineExecutor.execute(new PollRemovePipeline(plugin, pipelineId));
+                if(pipelineId != null) {
+                    String pipelinString = plugin.getGDB().dba.getPipeline(pipelineId);
+                    if(pipelinString != null) {
+                        removePipelineExecutor.execute(new PollRemovePipeline(plugin, pipelineId));
                                 /*
                                 List<String> iNodeList = plugin.getGDB().dba.getresourceNodeList(pipelineId,null);
 
@@ -629,7 +639,14 @@ public class GlobalCommandExec {
                                 }
                                 */
 
-                ce.setParam("success", Boolean.TRUE.toString());
+                        ce.setParam("success", Boolean.TRUE.toString());
+                    } else {
+                        ce.setParam("error", "action_pipelineid does not exist");
+                    }
+                } else {
+                    ce.setParam("error", "missing action_pipelineid.");
+                }
+
             }
         }
         catch(Exception ex) {
