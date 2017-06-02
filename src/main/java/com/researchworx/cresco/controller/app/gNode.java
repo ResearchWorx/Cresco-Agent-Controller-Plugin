@@ -8,6 +8,7 @@ public class gNode {
 	  public String type;
 	  public String node_name;
 	  public String node_id;
+
 	  public boolean isSource = false;
 	  public double workloadUtil;
 	  public Map<String, String> params;

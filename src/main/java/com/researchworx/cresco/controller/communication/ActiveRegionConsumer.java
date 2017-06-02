@@ -11,6 +11,8 @@ import javax.jms.MessageConsumer;
 import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.TextMessage;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 public class ActiveRegionConsumer implements Runnable {
 	private Launcher plugin;
@@ -43,13 +45,15 @@ public class ActiveRegionConsumer implements Runnable {
 			while (this.plugin.isConsumerThreadRegionActive()) {
 				TextMessage msg = (TextMessage) consumer.receive(1000);
 				if (msg != null) {
+
 					MsgEvent me = gson.fromJson(msg.getText(), MsgEvent.class);
 
 					me.setParam("dst_agent",plugin.getAgent());
                     me.setParam("dst_plugin",plugin.getPluginID());
 
-					this.plugin.msgIn(me);
 					logger.debug("Incoming Message Region: " + me.getParams().toString());
+
+					this.plugin.msgIn(me);
 
 					/*
 					if (me.getMsgBody().toLowerCase().equals("ping")) {
@@ -74,7 +78,11 @@ public class ActiveRegionConsumer implements Runnable {
 			conn.close();
 			logger.debug("Shutdown");
 		} catch (Exception ex) {
-			logger.error("Run {}", ex.toString());
+			logger.error("ActiveRegionConsumer().run() " + ex.toString());
+			StringWriter sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			ex.printStackTrace(pw);
+			logger.error(sw.toString()); //
 			this.plugin.setConsumerThreadRegionActive(false);
 		}
 	}
