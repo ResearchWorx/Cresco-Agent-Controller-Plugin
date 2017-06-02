@@ -202,7 +202,8 @@ public class Launcher extends CPlugin {
             }
             if (this.watchDog != null) {
                 this.watchDog.stop();
-                this.watchDog = null;
+                //this might be wrong
+                //this.watchDog = null;
             }
             if (this.regionHealthWatcher != null) {
                 this.regionHealthWatcher.timer.cancel();

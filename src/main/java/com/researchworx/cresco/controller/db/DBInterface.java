@@ -1,6 +1,8 @@
 package com.researchworx.cresco.controller.db;
 
 import com.google.gson.Gson;
+import com.researchworx.cresco.controller.app.gNode;
+import com.researchworx.cresco.controller.app.gPayload;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.core.WatchDog;
 import com.researchworx.cresco.library.messaging.MsgEvent;
@@ -495,7 +497,14 @@ public class DBInterface {
         String queryReturn = null;
         try
         {
-            String returnGetGpipeline = plugin.getGDB().dba.getPipeline(actionPipelineId);
+            gPayload gpay = plugin.getGDB().dba.getPipelineObj(actionPipelineId);
+            int nodeSize = gpay.nodes.size();
+            for(int i=0; i < nodeSize; i++) {
+                gpay.nodes.get(i).params.clear();
+
+            }
+            String returnGetGpipeline = gson.toJson(gpay);
+            //String returnGetGpipeline = plugin.getGDB().dba.getPipeline(actionPipelineId);
             queryReturn = DatatypeConverter.printBase64Binary(plugin.getGDB().gdb.stringCompress(returnGetGpipeline));
 
         } catch(Exception ex) {
@@ -510,6 +519,24 @@ public class DBInterface {
 
     }
 
+    public String getGPipelineExport(String actionPipelineId) {
+        String queryReturn = null;
+        try
+        {
+            String returnGetGpipeline = plugin.getGDB().dba.getPipeline(actionPipelineId);
+            queryReturn = DatatypeConverter.printBase64Binary(plugin.getGDB().gdb.stringCompress(returnGetGpipeline));
+
+        } catch(Exception ex) {
+            logger.error("getGPipelineExport() " + ex.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString());
+        }
+
+        return queryReturn;
+
+    }
 
 
     public String getPipelineInfo(String pipeline_action) {

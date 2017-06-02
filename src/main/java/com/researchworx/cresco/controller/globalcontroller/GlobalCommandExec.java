@@ -73,6 +73,9 @@ public class GlobalCommandExec {
                     case "getgpipeline":
                         return getGPipeline(ce);
 
+                    case "getgpipelineexport":
+                        return getGPipelineExport(ce);
+
                     case "getgpipelinestatus":
                         return getGPipelineStatus(ce);
 
@@ -242,6 +245,23 @@ public class GlobalCommandExec {
             if(ce.getParam("action_pipelineid") != null) {
                 String actionPipelineId = ce.getParam("action_pipelineid");
                 String returnGetGpipeline = plugin.getGDB().getGPipeline(actionPipelineId);
+                ce.setParam("gpipeline",returnGetGpipeline);
+            }
+
+        }
+        catch(Exception ex) {
+            ce.setParam("error", ex.getMessage());
+        }
+
+        return ce;
+    }
+
+    private MsgEvent getGPipelineExport(MsgEvent ce) {
+        try
+        {
+            if(ce.getParam("action_pipelineid") != null) {
+                String actionPipelineId = ce.getParam("action_pipelineid");
+                String returnGetGpipeline = plugin.getGDB().getGPipelineExport(actionPipelineId);
                 ce.setParam("gpipeline",returnGetGpipeline);
             }
 
