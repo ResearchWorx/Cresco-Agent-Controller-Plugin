@@ -877,10 +877,13 @@ public class DBApplicationFunctions {
             graph = factory.getTx();
 
             //Vertex vPipeline = odb.getVertexByKey("Pipeline.pipelineid", pipeline_id);
-            Vertex vPipeline = graph.getVertex(getPipelineNodeId(pipelineId));
-            if (vPipeline != null) {
-                String json = vPipeline.getProperty("submission");
-                gpay = gPayLoadFromJson(json);
+            String pipelineNodeId = getPipelineNodeId(pipelineId);
+            if(pipelineNodeId != null) {
+                Vertex vPipeline = graph.getVertex(pipelineNodeId);
+                if (vPipeline != null) {
+                    String json = vPipeline.getProperty("submission");
+                    gpay = gPayLoadFromJson(json);
+                }
             }
         }
         catch(Exception ex) {

@@ -496,27 +496,29 @@ public class DBInterface {
         try
         {
             gPayload gpay = plugin.getGDB().dba.getPipelineObj(actionPipelineId);
-            Map<String,String> pipeStatMap = plugin.getGDB().dba.getPipelineStatus(actionPipelineId);
-            gpay.status_code = pipeStatMap.get("status_code");
-            gpay.status_desc = pipeStatMap.get("status_desc");
+            if(gpay != null) {
+                Map<String, String> pipeStatMap = plugin.getGDB().dba.getPipelineStatus(actionPipelineId);
+                gpay.status_code = pipeStatMap.get("status_code");
+                gpay.status_desc = pipeStatMap.get("status_desc");
 
-            int nodeSize = gpay.nodes.size();
-            for(int i=0; i < nodeSize; i++) {
-                gpay.nodes.get(i).params.clear();
-                //logger.error("vnode=" + gpay.nodes.get(i).node_id);
-                //String inodeid = plugin.getGDB().dba.getINodefromVNode(gpay.nodes.get(i).node_id);
-                //logger.error("inode=" + inodeid);
-                //String status_code = plugin.getGDB().dba.getINodeParam(inodeid,"status_code");
-                //String status_desc = plugin.getGDB().dba.getINodeParam(inodeid,"status_desc");
-                //gpay.nodes.get(i).params.put("inode_id",inodeid);
-                String status_code = plugin.getGDB().dba.getINodeParam(gpay.nodes.get(i).node_id,"status_code");
-                String status_desc = plugin.getGDB().dba.getINodeParam(gpay.nodes.get(i).node_id,"status_desc");
-                gpay.nodes.get(i).params.put("status_code",status_code);
-                gpay.nodes.get(i).params.put("status_desc",status_desc);
+                int nodeSize = gpay.nodes.size();
+                for (int i = 0; i < nodeSize; i++) {
+                    gpay.nodes.get(i).params.clear();
+                    //logger.error("vnode=" + gpay.nodes.get(i).node_id);
+                    //String inodeid = plugin.getGDB().dba.getINodefromVNode(gpay.nodes.get(i).node_id);
+                    //logger.error("inode=" + inodeid);
+                    //String status_code = plugin.getGDB().dba.getINodeParam(inodeid,"status_code");
+                    //String status_desc = plugin.getGDB().dba.getINodeParam(inodeid,"status_desc");
+                    //gpay.nodes.get(i).params.put("inode_id",inodeid);
+                    String status_code = plugin.getGDB().dba.getINodeParam(gpay.nodes.get(i).node_id, "status_code");
+                    String status_desc = plugin.getGDB().dba.getINodeParam(gpay.nodes.get(i).node_id, "status_desc");
+                    gpay.nodes.get(i).params.put("status_code", status_code);
+                    gpay.nodes.get(i).params.put("status_desc", status_desc);
+                }
+                String returnGetGpipeline = gson.toJson(gpay);
+                //String returnGetGpipeline = plugin.getGDB().dba.getPipeline(actionPipelineId);
+                queryReturn = DatatypeConverter.printBase64Binary(plugin.getGDB().gdb.stringCompress(returnGetGpipeline));
             }
-            String returnGetGpipeline = gson.toJson(gpay);
-            //String returnGetGpipeline = plugin.getGDB().dba.getPipeline(actionPipelineId);
-            queryReturn = DatatypeConverter.printBase64Binary(plugin.getGDB().gdb.stringCompress(returnGetGpipeline));
 
         } catch(Exception ex) {
             logger.error("getGPipeline() " + ex.toString());

@@ -245,7 +245,15 @@ public class GlobalCommandExec {
             if(ce.getParam("action_pipelineid") != null) {
                 String actionPipelineId = ce.getParam("action_pipelineid");
                 String returnGetGpipeline = plugin.getGDB().getGPipeline(actionPipelineId);
-                ce.setParam("gpipeline",returnGetGpipeline);
+                if(returnGetGpipeline != null) {
+                    ce.setParam("gpipeline", returnGetGpipeline);
+                    ce.setParam("success", Boolean.TRUE.toString());
+
+                } else {
+                    ce.setParam("error", "action_pipelineid does not exist.");
+                }
+            } else {
+                ce.setParam("error", "no action_pipelineid provided.");
             }
 
         }
