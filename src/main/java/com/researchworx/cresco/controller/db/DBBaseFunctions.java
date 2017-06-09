@@ -51,10 +51,10 @@ public class DBBaseFunctions {
 
 
             if ((host != null) && (username != null) && (password != null) && (dbname != null)) {
-                getFactory = new OrientGraphFactory(connection_string, username, password).setupPool(1, 20);
+                getFactory = new OrientGraphFactory(connection_string, username, password).setupPool(10, 1000);
             }
             else {
-                getFactory = new OrientGraphFactory("memory:internalDb").setupPool(1, 20);
+                getFactory = new OrientGraphFactory("memory:internalDb").setupPool(10, 1000);
             }
         }
         catch(Exception ex) {
@@ -567,7 +567,7 @@ public class DBBaseFunctions {
 
             if(node_id != null)
             {
-                //logger.debug("Node already Exist: region=" + region + " agent=" + agent + " plugin=" + plugin);
+                logger.error("Node already Exist: region=" + region + " agent=" + agent + " plugin=" + plugin);
             }
             else
             {
@@ -577,6 +577,7 @@ public class DBBaseFunctions {
                     graph = factory.getTx();
                     Vertex v = graph.addVertex("class:rNode");
                     v.setProperty("region", region);
+
                     graph.commit();
                     node_id = v.getId().toString();
                 }
@@ -588,6 +589,9 @@ public class DBBaseFunctions {
                     {
                         //logger.debug("Must add region=" + region + " before adding agent=" + agent);
                         region_id = addNode(region,null,null);
+                        //v.setProperty("enable_pending",Boolean.TRUE.toString());
+                        setNodeParam(region,null,null, "enable_pending", Boolean.TRUE.toString());
+
 
                     }
                     if(region_id != null)
@@ -623,6 +627,7 @@ public class DBBaseFunctions {
                     {
                         //logger.debug("For region=" + region + " we must add agent=" + agent + " before adding plugin=" + plugin);
                         agent_id = addNode(region,agent,null);
+                        setNodeParam(region,agent,null, "enable_pending", Boolean.TRUE.toString());
 
                     }
 

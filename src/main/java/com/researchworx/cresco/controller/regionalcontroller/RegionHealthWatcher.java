@@ -4,6 +4,7 @@ import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.controller.db.NodeStatusType;
 import com.researchworx.cresco.library.core.WatchDog;
 import com.researchworx.cresco.library.utilities.CLogger;
+import jdk.nashorn.internal.runtime.regexp.joni.constants.NodeStatus;
 
 import java.util.Map;
 import java.util.Timer;
@@ -29,7 +30,7 @@ public class RegionHealthWatcher {
         wdTimer = 1000;
         startTS = System.currentTimeMillis();
         timer = new Timer();
-        timer.scheduleAtFixedRate(new CommunicationHealthWatcherTask(), 500, wdTimer);
+        timer.scheduleAtFixedRate(new CommunicationHealthWatcherTask(), 1000, wdTimer);
         regionalUpdateTimer = new Timer();
         regionalUpdateTimer.scheduleAtFixedRate(new RegionHealthWatcher.RegionalNodeStatusWatchDog(plugin, logger), 15000, 15000);//remote
     }

@@ -153,7 +153,7 @@ public class Launcher extends CPlugin {
     private RegionHealthWatcher regionHealthWatcher;
 
     public Launcher() {
-        this.msgInProcessQueue = Executors.newFixedThreadPool(10);
+        this.msgInProcessQueue = Executors.newFixedThreadPool(100);
     }
 
     @Override

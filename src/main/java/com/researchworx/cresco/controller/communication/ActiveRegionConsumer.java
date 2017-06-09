@@ -29,7 +29,12 @@ public class ActiveRegionConsumer implements Runnable {
 			conn = (ActiveMQConnection)new ActiveMQConnectionFactory(brokerUserNameAgent,brokerPasswordAgent,URI).createConnection();
 			conn.start();
 			this.sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
-			this.RXqueue = sess.createQueue(RXQueueName);
+			//todo Figure out if this does anything consumer.excl
+			//this.RXqueue = sess.createQueue(RXQueueName + "?consumer.exclusive=true");
+			this.RXqueue = sess.createQueue(RXQueueName + "?consumer.prefetchSize=10000");
+
+			//this.RXqueue = sess.createQueue(RXQueueName);
+
 		} catch(Exception ex) {
 			logger.error("Init {}", ex.getMessage());
 		}

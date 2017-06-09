@@ -741,9 +741,20 @@ public class DBInterface {
 
                 if(params.containsKey("watchdogtimer")) {
                     watchdog_rate = Long.parseLong(params.get("watchdogtimer"));
-
                 }
-                if((params.containsKey("watchdog_ts"))  && (params.containsKey("is_active"))) {
+
+                boolean isPending = false;
+
+                if(params.containsKey("enable_pending")) {
+                    if(Boolean.parseBoolean(params.get("enable_pending"))) {
+                        isPending = true;
+                    }
+                }
+
+                if(isPending) {
+                    nodeStatusMap.put(nodeId, NodeStatusType.PENDING);
+                }
+                else if((params.containsKey("watchdog_ts"))  && (params.containsKey("is_active"))) {
                     long watchdog_ts = Long.parseLong(params.get("watchdog_ts"));
                     //long watchdog_rate = Long.parseLong(params.get("watchdogtimer"));
                     boolean isActive = Boolean.parseBoolean(params.get("is_active"));
@@ -764,7 +775,7 @@ public class DBInterface {
                 }
                 else {
                     //Plugins will trigger this problem, need to fix Cresco Library
-                    //logger.error(nodeId + " could not find watchdog_ts or watchdog_rate");
+                    logger.error(nodeId + " could not find watchdog_ts or watchdog_rate");
                     nodeStatusMap.put(nodeId,NodeStatusType.ERROR);
                 }
             }
@@ -784,9 +795,26 @@ public class DBInterface {
             String agent = de.getParam("src_agent");
             String plugin = de.getParam("src_plugin");
             de.setParam("is_active",Boolean.TRUE.toString());
+            de.setParam("watchdog_ts", String.valueOf(System.currentTimeMillis()));
+
 
             String nodeId = gdb.getNodeId(region,agent,plugin);
             if(nodeId != null) {
+
+                Map<String,String> paramMap = gdb.getNodeParams(nodeId);
+                if(paramMap.containsKey("enable_pending")) {
+                    if(Boolean.parseBoolean(paramMap.get("enable_pending"))) {
+                        gdb.setNodeParams(region, agent, plugin, de.getParams());
+                        gdb.setNodeParam(region, agent, plugin, "enable_pending", Boolean.FALSE.toString());
+                    }
+
+                } else {
+
+
+                    logger.error("Tried to add existing node!");
+                    logger.error("region: " + region + " agent:" + agent + " plugin:" + plugin + " id:" + nodeId);
+                    logger.error("params: " + gdb.getNodeParams(nodeId).toString());
+                /*
                 logger.trace("region: " + region + " agent:" + agent + " plugin:" + plugin + " id:" + nodeId);
                 logger.trace("params: " + gdb.getNodeParams(nodeId).toString());
                 if(plugin != null) {
@@ -798,13 +826,16 @@ public class DBInterface {
                 } else {
                     gdb.setNodeParams(region,agent,null, de.getParams());
                 }
-
+                */
+                }
             }
             else {
+
                 logger.debug("Adding Node: " + de.getParams().toString());
                 gdb.addNode(region, agent,plugin);
                 gdb.setNodeParams(region,agent,plugin, de.getParams());
-                gdb.setNodeParam(region,agent,plugin, "watchdog_ts", String.valueOf(System.currentTimeMillis()));
+                //gdb.setNodeParam(region,agent,plugin, "watchdog_ts", String.valueOf(System.currentTimeMillis()));
+                //gdb.setNodeParam(region,agent,plugin, "watchdog_ts", String.valueOf(System.currentTimeMillis()));
                 wasAdded = true;
             }
 
@@ -825,6 +856,8 @@ public class DBInterface {
 
             String nodeId = gdb.getNodeId(region,agent,pluginId);
 
+            logger.info("watchdog() region=" + region + " agent=" + agent + " plugin=" + pluginId);
+
             if(nodeId != null) {
                 logger.debug("Updating WatchDog Node: " + de.getParams().toString());
                 //update watchdog_ts for local db
@@ -840,8 +873,8 @@ public class DBInterface {
                 wasUpdated = true;
             }
             else {
-                logger.error("nodeID does not exist for region:" + region + " agent:" + agent + " pluginId:" + pluginId);
-                //logger.error(de.getMsgType().toString() + " " + de.getParams().toString());
+                logger.error("watchdog() nodeID does not exist for region:" + region + " agent:" + agent + " pluginId:" + pluginId);
+                logger.error(de.getMsgType().toString() + " [" + de.getParams().toString() + "]");
                 /*
                 if(gdb.getNodeId(region,agent,null) != null) {
 
@@ -864,43 +897,6 @@ public class DBInterface {
         return wasUpdated;
     }
 
-    public Boolean updateKPI(MsgEvent ce) {
-        boolean updatedKPI = false;
-        try {
-            String region = null;
-            String agent = null;
-            String plugin = null;
-            String resource_id = null;
-            String inode_id = null;
-
-            region = ce.getParam("src_region");
-            agent = ce.getParam("src_agent");
-            plugin = ce.getParam("src_plugin");
-            resource_id = ce.getParam("resource_id");
-            inode_id = ce.getParam("inode_id");
-
-            //clean params for edge
-				/*
-				ce.removeParam("loop");
-				ce.removeParam("isGlobal");
-				ce.removeParam("src_agent");
-				ce.removeParam("src_region");
-				ce.removeParam("src_plugin");
-				ce.removeParam("dst_agent");
-				ce.removeParam("dst_region");
-				ce.removeParam("dst_plugin");
-				*/
-            Map<String, String> params = ce.getParams();
-
-            updatedKPI = dba.updateKPI(region, agent, plugin, resource_id, inode_id, params);
-
-        }
-        catch( Exception ex) {
-            logger.error("updateKPI :" + ex.getMessage());
-        }
-        return updatedKPI;
-    }
-
     public Boolean removeNode(MsgEvent de) {
         Boolean wasRemoved = false;
 
@@ -917,7 +913,7 @@ public class DBInterface {
                 wasRemoved = true;
             }
             else {
-                logger.error("region: " + region + " agent:" + agent + " plugin:" + plugin + " does not exist!");
+                logger.error("removeNode() MsgEvent region: " + region + " agent:" + agent + " plugin:" + plugin + " does not exist!");
             }
 
         } catch (Exception ex) {
@@ -938,7 +934,7 @@ public class DBInterface {
                 wasRemoved = true;
             }
             else {
-                logger.error("region: " + region + " agent:" + agent + " plugin:" + plugin + " does not exist!");
+                logger.error("RemoveNode() region: " + region + " agent:" + agent + " plugin:" + plugin + " does not exist!");
             }
 
         } catch (Exception ex) {
