@@ -736,7 +736,7 @@ public class DBInterface {
             }
 
             for(String nodeId : queryList) {
-                Map<String,String> params = gdb.getNodeParams(nodeId);
+                Map<String,String> params = gdb.getNodeParamsNoTx(nodeId);
                 long watchdog_rate = 5000L;
 
                 if(params.containsKey("watchdogtimer")) {
@@ -763,7 +763,12 @@ public class DBInterface {
                         if (watchdog_diff > (watchdog_rate * 3)) {
                             //node is stale
                             logger.trace(nodeId + " is stale");
-                            nodeStatusMap.put(nodeId, NodeStatusType.STALE);
+                            //todo MAKE STALE WORK
+                            //nodeStatusMap.put(nodeId, NodeStatusType.STALE);
+                            logger.error(nodeId + " is stale");
+
+                            nodeStatusMap.put(nodeId, NodeStatusType.ACTIVE);
+
                         } else {
                             nodeStatusMap.put(nodeId, NodeStatusType.ACTIVE);
                         }
@@ -856,19 +861,28 @@ public class DBInterface {
 
             String nodeId = gdb.getNodeId(region,agent,pluginId);
 
-            logger.info("watchdog() region=" + region + " agent=" + agent + " plugin=" + pluginId);
+            logger.trace("watchdog() region=" + region + " agent=" + agent + " plugin=" + pluginId);
 
             if(nodeId != null) {
                 logger.debug("Updating WatchDog Node: " + de.getParams().toString());
                 //update watchdog_ts for local db
-                gdb.setNodeParam(region,agent,pluginId, "watchdog_ts", String.valueOf(System.currentTimeMillis()));
-                gdb.setNodeParam(region,agent,pluginId, "is_active", Boolean.TRUE.toString());
 
                 String interval = de.getParam("watchdogtimer");
                 if(interval == null) {
                     interval = "5000";
                 }
-                gdb.setNodeParam(region, agent, pluginId, "watchdogtimer", interval);
+                //setNodeParamsNoTx
+
+                Map<String,String> updateMap = new HashMap<>();
+                updateMap.put("watchdogtimer", interval);
+                updateMap.put("watchdog_ts", String.valueOf(System.currentTimeMillis()));
+                updateMap.put("is_active", Boolean.TRUE.toString());
+
+                gdb.setNodeParamsNoTx(region, agent, pluginId, updateMap);
+
+                //gdb.setNodeParam(region, agent, pluginId, "watchdogtimer", interval);
+                //gdb.setNodeParam(region,agent,pluginId, "watchdog_ts", String.valueOf(System.currentTimeMillis()));
+                //gdb.setNodeParam(region,agent,pluginId, "is_active", Boolean.TRUE.toString());
 
                 wasUpdated = true;
             }

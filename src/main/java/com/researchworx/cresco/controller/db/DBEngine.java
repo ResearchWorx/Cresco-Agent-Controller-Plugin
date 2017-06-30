@@ -49,8 +49,8 @@ public class DBEngine {
                     logger.error("setPool() Failed to Create Database!");
                 }
 
-                pool = new OPartitionedDatabasePool(iURI, username,password).setAutoCreate(true);
-                //pool = new OPartitionedDatabasePool(iURI, username,password, 100, 1000).setAutoCreate(true);
+                //pool = new OPartitionedDatabasePool(iURI, username,password).setAutoCreate(true);
+                pool = new OPartitionedDatabasePool(iURI, username,password, 1, 1).setAutoCreate(true);
                 factory = new OrientGraphFactory(iURI, username, password, true);
             }
             else {

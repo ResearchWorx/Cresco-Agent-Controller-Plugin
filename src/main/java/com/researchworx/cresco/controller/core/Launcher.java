@@ -429,14 +429,14 @@ public class Launcher extends CPlugin {
                 //logger.debug("IPv6 DiscoveryEngine Started..");
 
                 logger.debug("Broker starting");
-                //if((getConfig().getStringParam("regional_broker_username") != null) && (getConfig().getStringParam("regional_broker_password") != null)) {
-                //    brokerUserNameAgent = getConfig().getStringParam("regional_broker_username");
-                //    brokerPasswordAgent = getConfig().getStringParam("regional_broker_password");
-                //}
-                //else {
+                if((getConfig().getStringParam("broker_username") != null) && (getConfig().getStringParam("broker_password") != null)) {
+                    brokerUserNameAgent = getConfig().getStringParam("broker_username");
+                    brokerPasswordAgent = getConfig().getStringParam("broker_password");
+                }
+                else {
                     brokerUserNameAgent = java.util.UUID.randomUUID().toString();
                     brokerPasswordAgent = java.util.UUID.randomUUID().toString();
-                //}
+                }
                 this.broker = new ActiveBroker(this, this.agentpath,brokerUserNameAgent,brokerPasswordAgent);
 
                 //broker manager
@@ -469,7 +469,16 @@ public class Launcher extends CPlugin {
                 logger.debug("RegionalControllerDB Service Started");
                 this.discoveryMap = new ConcurrentHashMap<>(); //discovery map
 
+                //enable this regional controller in the DB
+                MsgEvent le = new MsgEvent(MsgEvent.Type.CONFIG, getRegion(), getAgent(), getPluginID(), "enabled");
+                le.setParam("src_region", getRegion());
+                le.setParam("dst_region", getRegion());
+                le.setParam("action", "enable");
+                le.setParam("watchdogtimer", String.valueOf(getConfig().getLongParam("watchdogtimer", 5000L)));
+                getGDB().addNode(le);
+
                 this.isRegionalController = true;
+
                 //start regional init
 
                 //start regional discovery
@@ -548,7 +557,7 @@ public class Launcher extends CPlugin {
             while(!consumerAgentConnected && (consumerAgentConnectCount < 10)) {
                 try {
                     //consumer agent
-                    this.consumerAgentThread = new Thread(new ActiveAgentConsumer(this, this.agentpath, "tcp://" + this.brokerAddressAgent + ":32010", brokerUserNameAgent, brokerPasswordAgent));
+                    this.consumerAgentThread = new Thread(new ActiveAgentConsumer(this, this.agentpath, "failover:tcp://" + this.brokerAddressAgent + ":32010?useKeepAlive=true&keepAlive=true", brokerUserNameAgent, brokerPasswordAgent));
                     this.consumerAgentThread.start();
                     while (!this.ConsumerThreadActive) {
                         Thread.sleep(1000);
@@ -563,9 +572,10 @@ public class Launcher extends CPlugin {
                 }
                 consumerAgentConnectCount++;
             }
-            this.ap = new ActiveProducer(this, "tcp://" + this.brokerAddressAgent + ":32010", brokerUserNameAgent, brokerPasswordAgent);
+            this.ap = new ActiveProducer(this, "failover:tcp://" + this.brokerAddressAgent + ":32010?useKeepAlive=true&keepAlive=true", brokerUserNameAgent, brokerPasswordAgent);
 
             logger.debug("Agent ProducerThread Started..");
+
 
 
             //watchDogProcess = new plugincore.WatchDog();

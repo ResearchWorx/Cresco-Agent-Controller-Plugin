@@ -35,6 +35,7 @@ public class DBBaseFunctions {
     private int retryCount;
     //private DBEngine dbe;
     public OPartitionedDatabasePool pool;
+    private Boolean regionalImportActive = false;
 
     public String[] aNodeIndexParams = {"platform","environment","location"};
 
@@ -51,10 +52,10 @@ public class DBBaseFunctions {
 
 
             if ((host != null) && (username != null) && (password != null) && (dbname != null)) {
-                getFactory = new OrientGraphFactory(connection_string, username, password).setupPool(10, 1000);
+                getFactory = new OrientGraphFactory(connection_string, username, password).setupPool(100, 10000);
             }
             else {
-                getFactory = new OrientGraphFactory("memory:internalDb").setupPool(10, 1000);
+                getFactory = new OrientGraphFactory("memory:internalDb").setupPool(100, 10000);
             }
         }
         catch(Exception ex) {
@@ -498,6 +499,64 @@ public class DBBaseFunctions {
         return node_param;
     }
 
+    public Map<String,String> IgetNodeParamsNoTx(String node_id) {
+        OrientGraphNoTx graph = null;
+        Map<String,String> params = new HashMap();
+
+        try
+        {
+            graph = factory.getNoTx();
+            Vertex iNode = graph.getVertex(node_id);
+            for(String key : iNode.getPropertyKeys()) {
+                params.put(key,iNode.getProperty(key).toString());
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.debug("IgetNodeParamsNoTX: Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return params;
+    }
+
+    public Map<String,String> getNodeParamsNoTx(String node_id) {
+        Map<String,String> paramsVal = null;
+
+        int count = 0;
+        try
+        {
+
+            while((paramsVal == null) && (count != retryCount))
+            {
+                if(count > 0)
+                {
+                    Thread.sleep((long)(Math.random() * 1000)); //random wait to prevent sync error
+                }
+                paramsVal = IgetNodeParamsNoTx(node_id);
+                count++;
+
+            }
+
+            if((paramsVal == null) && (count == retryCount))
+            {
+                logger.debug("DBEngine : getNodeParamsNoTX : Failed to add node in " + count + " retrys");
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.debug("DBEngine : getNodeParamsNoTX : Error " + ex.toString());
+        }
+
+        return paramsVal;
+    }
+
+
     public Map<String,String> IgetNodeParams(String node_id) {
         OrientGraph graph = null;
         Map<String,String> params = new HashMap();
@@ -889,6 +948,163 @@ public class DBBaseFunctions {
         return nodeRemoved;
 
     }
+
+    public boolean setNodeParamsNoTx(String nodeId, Map<String,String> paramMap)
+    {
+        boolean isUpdated = false;
+        int count = 0;
+        try
+        {
+
+            while((!isUpdated) && (count != retryCount))
+            {
+                if(count > 0)
+                {
+                    //logger.debug("iNODEUPDATE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
+                    Thread.sleep((long)(Math.random() * 1000)); //random wait to prevent sync error
+                }
+                isUpdated = IsetNodeParamsNoTx(nodeId, paramMap);
+                count++;
+
+            }
+
+            if((!isUpdated) && (count == retryCount))
+            {
+                logger.debug("DBEngine : setINodeParamsNoTX : Failed to add node in " + count + " retrys");
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.debug("DBEngine : setINodeParamsNoTX : Error " + ex.toString());
+        }
+
+        return isUpdated;
+    }
+
+    public boolean IsetNodeParamsNoTx(String nodeId, Map<String,String> paramMap)
+    {
+
+        boolean isUpdated = false;
+        OrientGraphNoTx graph = null;
+
+        try
+        {
+
+            if(nodeId != null)
+            {
+                graph = factory.getNoTx();
+                Vertex iNode = graph.getVertex(nodeId);
+                Iterator it = paramMap.entrySet().iterator();
+                while (it.hasNext())
+                {
+                    Map.Entry pairs = (Map.Entry)it.next();
+                    iNode.setProperty( pairs.getKey().toString(), pairs.getValue().toString());
+                }
+                graph.commit();
+                isUpdated = true;
+            }
+        }
+        catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException exc)
+        {
+            //eat exception.. this is not normal and should log somewhere
+        }
+        catch(com.orientechnologies.orient.core.exception.OConcurrentModificationException exc)
+        {
+            //eat exception.. this is normal
+        }
+        catch(Exception ex)
+        {
+            long threadId = Thread.currentThread().getId();
+            logger.debug("setINodeParams: thread_id: " + threadId + " Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return isUpdated;
+    }
+
+    public boolean setNodeParamsNoTx(String region, String agent, String plugin, Map<String,String> paramMap)
+    {
+        boolean isUpdated = false;
+        int count = 0;
+        try
+        {
+
+            while((!isUpdated) && (count != retryCount))
+            {
+                if(count > 0)
+                {
+                    //logger.debug("iNODEUPDATE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
+                    Thread.sleep((long)(Math.random() * 1000)); //random wait to prevent sync error
+                }
+                isUpdated = IsetNodeParamsNoTx(region, agent, plugin, paramMap);
+                count++;
+
+            }
+
+            if((!isUpdated) && (count == retryCount))
+            {
+                logger.debug("DBEngine : setINodeParams : Failed to add node in " + count + " retrys");
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.debug("DBEngine : setINodeParams : Error " + ex.toString());
+        }
+
+        return isUpdated;
+    }
+
+    public boolean IsetNodeParamsNoTx(String region, String agent, String plugin, Map<String,String> paramMap)
+    {
+
+        boolean isUpdated = false;
+        OrientGraphNoTx graph = null;
+        String node_id = null;
+        try
+        {
+            node_id = getNodeId(region,agent,plugin);
+            if(node_id != null)
+            {
+                graph = factory.getNoTx();
+                Vertex iNode = graph.getVertex(node_id);
+                Iterator it = paramMap.entrySet().iterator();
+                while (it.hasNext())
+                {
+                    Map.Entry pairs = (Map.Entry)it.next();
+                    iNode.setProperty( pairs.getKey().toString(), pairs.getValue().toString());
+                }
+                graph.commit();
+                isUpdated = true;
+            }
+        }
+        catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException exc)
+        {
+            //eat exception.. this is not normal and should log somewhere
+        }
+        catch(com.orientechnologies.orient.core.exception.OConcurrentModificationException exc)
+        {
+            //eat exception.. this is normal
+        }
+        catch(Exception ex)
+        {
+            long threadId = Thread.currentThread().getId();
+            logger.debug("setINodeParams: thread_id: " + threadId + " Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return isUpdated;
+    }
+
 
     public boolean setNodeParams(String region, String agent, String plugin, Map<String,String> paramMap)
     {
@@ -1301,6 +1517,8 @@ public class DBBaseFunctions {
         boolean isImported = false;
         try {
 
+            //regionalImportActive
+
             //logger.info("Import Raw : " + exportData);
 
             //decode base64
@@ -1314,14 +1532,20 @@ public class DBBaseFunctions {
             //logger.info("Uncompressed Import :" + result);
 
             //InputStream is = new ByteArrayInputStream(exportData.getBytes(StandardCharsets.UTF_8));
-            if(db == null) {
+
+            logger.error("setDBImport() Created Instances " + pool.getCreatedInstances());
+            logger.error("setDBImport() Max Partition Size " + pool.getMaxPartitonSize());
+
+            //if(db == null) {
+
                 ODatabaseDocumentTx db = pool.acquire();
-            }
 
+            //}
 
-            DBImport dbImport = new DBImport(plugin, is, this,db);
-            isImported = dbImport.importDump();
-            //db.close();
+            //todo FIX IMPORT
+            //DBImport dbImport = new DBImport(plugin, is, this,db);
+            //isImported = dbImport.importDump();
+            db.close();
 
         }
         catch(Exception ex) {
@@ -1354,9 +1578,9 @@ public class DBBaseFunctions {
 
             InputStream is = new ByteArrayInputStream(exportData.getBytes(StandardCharsets.UTF_8));
 
-            if(db == null) {
+            //if(db == null) {
                 ODatabaseDocumentTx db = pool.acquire();
-            }
+            //}
 
             ODatabaseImport dbImport = new ODatabaseImport(db, is, listener);
             //operation
@@ -1394,8 +1618,9 @@ public class DBBaseFunctions {
         return isImported;
     }
 
-    public String getDBExport() {
+        public String getDBExport() {
         String exportString = null;
+        Boolean createDB = false;
         try {
 
             Set<String> crescoDbClasses = new HashSet<String>();
@@ -1427,10 +1652,15 @@ public class DBBaseFunctions {
             //ODatabaseDocumentTx db = null;
             //db = factory.getDatabase();
 
+            //logger.error("setDBExport() Created Instances " + pool.getCreatedInstances());
+            //logger.error("setDBExport() Max Partition Size " + pool.getMaxPartitonSize());
 
             if(db == null) {
-                ODatabaseDocumentTx db = pool.acquire();
+                //ODatabaseDocumentTx db = pool.acquire();
+                createDB = true;
+                db = pool.acquire();
             }
+
             ODatabaseRecordThreadLocal.INSTANCE.set(db);
             ODatabaseExport export = new ODatabaseExport(db, os, listener);
             //filter export
@@ -1459,7 +1689,10 @@ public class DBBaseFunctions {
             //byte[] message = "hello world".getBytes("UTF-8");
             //String encoded = DatatypeConverter.printBase64Binary(message);
             //byte[] decoded = DatatypeConverter.parseBase64Binary(encoded);
-
+            if(createDB) {
+                db.close();
+                db = null;
+            }
 
         }
         catch(Exception ex) {
@@ -1526,41 +1759,5 @@ public class DBBaseFunctions {
         return compressedData;
     }
 
-    public String getDBExport2() {
-        String exportString = null;
-        try {
-
-            OCommandOutputListener listener = new OCommandOutputListener() {
-                @Override
-                public void onMessage(String iText) {
-                    // System.out.print(iText);
-                }
-            };
-            //Not sure what this does, but is needed to dump database.
-            //ODatabaseRecordThreadLocal.INSTANCE.set(db);
-            //create location for output stream
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            //ODatabaseDocumentTx db = pool.acquire();
-
-            if(db == null) {
-                ODatabaseDocumentTx db = pool.acquire();
-            }
-
-
-        ODatabaseExport export = new ODatabaseExport(db, os, listener);
-
-            export.exportDatabase();
-
-            exportString = new String(os.toByteArray(),"UTF-8");
-
-            export.close();
-            //db.close();
-        }
-        catch(Exception ex) {
-            logger.error(ex.getMessage());
-        }
-
-        return exportString;
-    }
 
 }

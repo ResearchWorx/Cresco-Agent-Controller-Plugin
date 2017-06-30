@@ -22,7 +22,7 @@ public class RegionHealthWatcher {
     //private static final Logger logger = LoggerFactory.getLogger(HealthWatcher.class);
 
     public RegionHealthWatcher(Launcher plugin) {
-        this.logger = new CLogger(RegionHealthWatcher.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
+        this.logger = new CLogger(RegionHealthWatcher.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
         rce = new RegionalCommandExec(plugin);
         
         logger.debug("Initializing");

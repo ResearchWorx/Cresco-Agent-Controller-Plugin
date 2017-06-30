@@ -344,7 +344,7 @@ public class DiscoveryEngine implements Runnable {
                 //determine if we should respond to request
                 //String validateMsgEvent(rme)
                  //       validatedAuthenication
-                if (plugin.reachableAgents().size() < 25)  {
+                if (plugin.reachableAgents().size() < 250)  {
 
 
                     String validatedAuthenication = validateMsgEvent(rme); //create auth string

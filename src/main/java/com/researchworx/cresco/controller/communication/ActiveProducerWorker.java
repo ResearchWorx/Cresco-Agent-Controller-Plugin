@@ -26,6 +26,7 @@ public class ActiveProducerWorker {
 			conn = (ActiveMQConnection)new ActiveMQConnectionFactory(brokerUserNameAgent, brokerPasswordAgent, URI).createConnection();
 			conn.start();
 			sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
+			
 			Destination destination = sess.createQueue(TXQueueName);
 			producer = sess.createProducer(destination);
 			producer.setTimeToLive(300000L);

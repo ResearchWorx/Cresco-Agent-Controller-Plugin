@@ -8,14 +8,22 @@ import org.apache.activemq.broker.region.policy.PolicyEntry;
 import org.apache.activemq.broker.region.policy.PolicyMap;
 import org.apache.activemq.command.ActiveMQDestination;
 import org.apache.activemq.network.NetworkConnector;
+import org.apache.activemq.usage.MemoryUsage;
+import org.apache.activemq.usage.StoreUsage;
+import org.apache.activemq.usage.SystemUsage;
 import org.apache.activemq.util.ServiceStopper;
 
+import javax.management.remote.JMXConnector;
+import javax.management.remote.JMXConnectorFactory;
+import javax.management.remote.JMXServiceURL;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 public class ActiveBroker {
 	private CLogger logger;
@@ -26,14 +34,40 @@ public class ActiveBroker {
 	public BrokerService broker;
 
 	public ActiveBroker(Launcher plugin, String brokerName, String brokerUserNameAgent, String brokerPasswordAgent) {
-		this.logger = new CLogger(ActiveBroker.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
+		this.logger = new CLogger(ActiveBroker.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Trace);
 		logger.info("Initialized");
 		try {
 			if(portAvailable(32010)) {
+
+
+				/*
+				SystemUsage systemUsage = new SystemUsage();
+				systemUsage.setSendFailIfNoSpace(true);
+
+				MemoryUsage memoryUsage = new MemoryUsage();
+				memoryUsage.setUsage(10000);
+
+				StoreUsage storeUsage = new StoreUsage();
+				storeUsage.setLimit(1000000000);
+
+				systemUsage.setMemoryUsage(memoryUsage);
+				systemUsage.setStoreUsage(storeUsage);
+				*/
+
 				PolicyEntry entry = new PolicyEntry();
 		        entry.setGcInactiveDestinations(true);
-		        entry.setInactiveTimeoutBeforeGC(5000);
-		        PolicyMap map = new PolicyMap();
+		        entry.setInactiveTimeoutBeforeGC(15000);
+		        //todo Does this need to be here?
+
+				entry.setProducerFlowControl(true);
+				entry.setQueue(">");
+				entry.setMemoryLimit(1000000000);
+				entry.setTopic(">");
+				entry.setAllConsumersExclusiveByDefault(true);
+				entry.setAdvisoryWhenFull(true);
+
+
+				PolicyMap map = new PolicyMap();
 		        map.setDefaultEntry(entry);
 
 				broker = new BrokerService();
@@ -42,7 +76,11 @@ public class ActiveBroker {
 				broker.setBrokerName(brokerName);
 				broker.setSchedulePeriodForDestinationPurge(2500);
 				broker.setDestinationPolicy(map);
-				broker.setUseJmx(false);
+
+				broker.setUseJmx(true);
+				broker.getManagementContext().setConnectorPort(2099);
+				broker.getManagementContext().setCreateConnector(true);
+
 
 				//authorizationPlugin = new CrescoAuthorizationPlugin();
 				//authenticationPlugin = new CrescoAuthenticationPlugin();
@@ -172,8 +210,13 @@ public class ActiveBroker {
 		NetworkConnector bridge = null;
 		try {
 		    logger.trace("URI: static:tcp://" + URI + ":32010" + " brokerUserName: " + brokerUserName + " brokerPassword: " + brokerPassword);
-			bridge = broker.addNetworkConnector(new URI("static:tcp://" + URI + ":32010"));
-			//RandomString rs = new RandomString(5);
+			//todo Make sure keep alive is needed
+		    //bridge = broker.addNetworkConnector(new URI("static:tcp://" + URI + ":32010"));
+			//bridge = broker.addNetworkConnector(new URI("static:tcp://" + URI + ":32010?useKeepAlive=true&keepAlive=true"));
+			bridge = broker.addNetworkConnector(new URI("static:tcp://" + URI + ":32010?useKeepAlive=true&keepAlive=true"));
+
+
+		    //RandomString rs = new RandomString(5);
 			bridge.setUserName(brokerUserName);
             bridge.setPassword(brokerPassword);
 			bridge.setName(java.util.UUID.randomUUID().toString());
@@ -181,7 +224,8 @@ public class ActiveBroker {
 			//bridge.setDynamicOnly(true);
 			//bridge.setDynamicallyIncludedDestinations(getDest(agentPath));
 
-			bridge.setPrefetchSize(1);
+			//todo Is this right?
+			bridge.setPrefetchSize(10000);
 
 
 		} catch(Exception ex) {

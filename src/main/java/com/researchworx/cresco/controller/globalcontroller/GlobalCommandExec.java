@@ -740,7 +740,7 @@ public class GlobalCommandExec {
     private void globalWatchdog(MsgEvent ce) {
 	    try {
 
-
+/*
         String region = null;
         String agent = null;
         String pluginid = null;
@@ -753,19 +753,11 @@ public class GlobalCommandExec {
         resource_id = ce.getParam("resource_id");
         inode_id = ce.getParam("inode_id");
 
-        //clean params for edge
-				/*
-				ce.removeParam("loop");
-				ce.removeParam("isGlobal");
-				ce.removeParam("src_agent");
-				ce.removeParam("src_region");
-				ce.removeParam("src_plugin");
-				ce.removeParam("dst_agent");
-				ce.removeParam("dst_region");
-				ce.removeParam("dst_plugin");
-				*/
         Map<String,String> params = ce.getParams();
         plugin.getGDB().dba.updateKPI(region, agent, pluginid, resource_id, inode_id, params);
+ */
+        plugin.getGDB().watchDogUpdate(ce);
+
 
         }
         catch(Exception ex) {
@@ -825,7 +817,6 @@ public class GlobalCommandExec {
         }
 
     }
-
 
 
     public String getPluginName(String jarFile) {

@@ -77,7 +77,6 @@ public class GlobalHealthWatcher implements Runnable {
 
             while (this.plugin.isActiveBrokerManagerActive()) {
                 Thread.sleep(gCheckInterval);
-                logger.trace("Loop gCheck");
                 gCheck();
                 gNotify();
 			}
@@ -88,41 +87,61 @@ public class GlobalHealthWatcher implements Runnable {
 	}
 
 	private void gNotify() {
+        logger.trace("gNotify End");
         try {
             //if there is a remote global controller and it is reachable
             String globalPath = plugin.getGlobalControllerPath();
             if((globalPath != null) && (!plugin.isGlobalController())) {
+                logger.debug("gNotify !Global Controller Message");
                 //is the global controller reachable
                 if(plugin.isReachableAgent(plugin.getGlobalControllerPath())) {
                     String[] gPath = globalPath.split("_");
                     MsgEvent tick = new MsgEvent(MsgEvent.Type.WATCHDOG, plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), "WatchDog timer tick.");
+                    tick.setParam("globalcmd", Boolean.TRUE.toString());
                     tick.setParam("src_region", plugin.getRegion());
                     tick.setParam("dst_region", gPath[0]);
                     tick.setParam("watchdog_ts", String.valueOf(System.currentTimeMillis()));
                     tick.setParam("watchdogtimer", String.valueOf(gCheckInterval));
+
+                    logger.trace("gNotify !Global Controller Message : " + tick.getParams().toString());
+
                     plugin.msgIn(tick);
+
 
                 }
             }
             else if(plugin.isGlobalController()) {
                 //plugin.getGDB().watchDogUpdate()
+                logger.trace("gNotify Global Controller Message");
+
                 MsgEvent tick = new MsgEvent(MsgEvent.Type.WATCHDOG, plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), "WatchDog timer tick.");
                 tick.setParam("src_region", plugin.getRegion());
                 tick.setParam("dst_region", plugin.getRegion());
                 tick.setParam("watchdog_ts", String.valueOf(System.currentTimeMillis()));
                 tick.setParam("watchdogtimer", String.valueOf(gCheckInterval));
                 //logger.error("CALLING FROM GLOBAL HEALTH: " + tick.getParams().toString());
+
+                logger.trace("gNotify Global Controller Message : " + tick.getParams().toString());
+
                 plugin.getGDB().watchDogUpdate(tick);
+            }
+            else {
+                logger.debug("gNotify : Why and I here!");
             }
 
         }
         catch(Exception ex) {
             logger.error("gNotify() " + ex.getMessage());
         }
+        logger.trace("gNotify End");
+
     }
 
 	private void gCheck() {
-	    try{
+        logger.trace("gCheck Start");
+
+        try{
+
             //Static Remote Global Controller
 	        String static_global_controller_host = plugin.getConfig().getStringParam("gc_host",null);
             if(static_global_controller_host != null) {
@@ -182,16 +201,15 @@ public class GlobalHealthWatcher implements Runnable {
                         //No global controller found, starting global services
                         logger.info("No Global Controller Found: Starting Global Services");
                         //start global stuff
+
                         //create globalscheduler queue
                         //plugin.setResourceScheduleQueue(new ConcurrentLinkedQueue<MsgEvent>());
                         plugin.setAppScheduleQueue(new ConcurrentLinkedQueue<gPayload>());
-                        //REMOVED HTTP FROM CONTROLLER
-                        //start http interface
-                        //startHTTP();
-                        //start global scheduler
                         startGlobalSchedulers();
                         //end global start
                         this.plugin.setGlobalController(true);
+
+
                     }
                 }
             }
@@ -200,7 +218,9 @@ public class GlobalHealthWatcher implements Runnable {
         catch(Exception ex) {
 	        logger.error("gCheck() " +ex.getMessage());
         }
-	}
+        logger.trace("gCheck End");
+
+    }
 
     private Boolean startGlobalSchedulers() {
         boolean isStarted = false;
@@ -222,24 +242,7 @@ public class GlobalHealthWatcher implements Runnable {
         }
         return isStarted;
     }
-/*
-    private Boolean startHTTP() {
-        boolean isStarted = false;
-	    try {
 
-            //Start Global Controller Services
-            logger.info("Starting Global HTTPInternal Service");
-            HTTPServerEngine httpEngineInternal = new HTTPServerEngine(plugin);
-            Thread httpServerThreadExternal = new Thread(httpEngineInternal);
-            httpServerThreadExternal.start();
-            isStarted = true;
-        }
-        catch (Exception ex) {
-            logger.error("startHTTP() " + ex.getMessage());
-        }
-        return isStarted;
-    }
-*/
     private String connectToGlobal(List<MsgEvent> discoveryList) {
         String globalPath = null;
         MsgEvent cme = null;
@@ -370,7 +373,7 @@ public class GlobalHealthWatcher implements Runnable {
 	    try {
             if(!this.plugin.isGlobalController()) {
                 if(this.plugin.getGlobalControllerPath() != null) {
-
+                    //todo Enable Export
                     String dbexport = plugin.getGDB().gdb.getDBExport();
                     logger.trace("EXPORT" + dbexport + "EXPORT");
 
@@ -408,6 +411,9 @@ public class GlobalHealthWatcher implements Runnable {
         public void run() {
             if(plugin.isGlobalController()) { //only run if node is a global controller
                 logger.debug("GlobalNodeStatusWatchDog");
+                //update own database
+
+
                 Map<String, NodeStatusType> nodeListStatus = plugin.getGDB().getNodeStatus(null, null, null);
                 for (Map.Entry<String, NodeStatusType> entry : nodeListStatus.entrySet()) {
 
@@ -439,7 +445,9 @@ public class GlobalHealthWatcher implements Runnable {
                 //send full export of region to global controller
                 //Need to develop a better inconsistency method
                 //logger.info("Regional Export");
-                regionalDBexport();
+                //todo enable global export
+                //regionalDBexport();
+
             }
         }
     }

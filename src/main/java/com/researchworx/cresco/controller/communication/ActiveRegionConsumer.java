@@ -29,6 +29,7 @@ public class ActiveRegionConsumer implements Runnable {
 			conn = (ActiveMQConnection)new ActiveMQConnectionFactory(brokerUserNameAgent,brokerPasswordAgent,URI).createConnection();
 			conn.start();
 			this.sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
+
 			//todo Figure out if this does anything consumer.excl
 			//this.RXqueue = sess.createQueue(RXQueueName + "?consumer.exclusive=true");
 			this.RXqueue = sess.createQueue(RXQueueName + "?consumer.prefetchSize=10000");
@@ -55,6 +56,13 @@ public class ActiveRegionConsumer implements Runnable {
 
 					me.setParam("dst_agent",plugin.getAgent());
                     me.setParam("dst_plugin",plugin.getPluginID());
+
+                    if(me.getParam("src_agent") == null) {
+						//logger.error("src_agent = null: " + me.getParams().toString());
+					}
+                    else if(!me.getParam("src_agent").equals(plugin.getAgent())) {
+						//logger.info("region message: " + me.getParams().toString());
+					}
 
 					logger.debug("Incoming Message Region: " + me.getParams().toString());
 
