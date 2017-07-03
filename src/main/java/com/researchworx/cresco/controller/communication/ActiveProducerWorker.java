@@ -19,7 +19,8 @@ public class ActiveProducerWorker {
 	private String queueName;
 	
 	public ActiveProducerWorker(Launcher plugin, String TXQueueName, String URI, String brokerUserNameAgent, String brokerPasswordAgent)  {
-		this.logger = new CLogger(ActiveProducerWorker.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
+		this.logger = new CLogger(ActiveProducerWorker.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+
 		try {
 			queueName = TXQueueName;
 			gson = new Gson();

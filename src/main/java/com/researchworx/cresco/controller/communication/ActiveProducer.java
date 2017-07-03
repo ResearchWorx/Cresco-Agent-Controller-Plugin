@@ -94,7 +94,7 @@ public class ActiveProducer {
                 if (plugin.isReachableAgent(dstPath)) {
                     apw = producerWorkers.get(dstPath);
                 } else {
-                    logger.trace(dstPath + " is unreachable...");
+                    logger.error(dstPath + " is unreachable...");
                 }
             } else {
 
@@ -137,10 +137,10 @@ public class ActiveProducer {
                 apw.sendMessage(sm);
                 isSent = true;
             } else {
-                logger.trace("apw is null");
+                logger.error("apw [" + apw.toString() + "] is null");
             }
         } catch (Exception ex) {
-            logger.trace("ActiveProducer : sendMessage Error " + ex.toString());
+            logger.error("ActiveProducer : sendMessage Error " + ex.toString());
         }
         return isSent;
     }

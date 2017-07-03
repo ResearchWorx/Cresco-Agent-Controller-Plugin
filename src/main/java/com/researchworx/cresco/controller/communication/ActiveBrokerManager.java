@@ -140,11 +140,13 @@ public class ActiveBrokerManager implements Runnable  {
 					//logger.trace("stopping agentPath: " + ba.agentPath);
 		    		ba.setStop();
 		    		logger.info("Cleared agentPath: " + ba.agentPath);
-		    		if(plugin.getGlobalControllerPath().equals(ba.agentPath)) {
+
+		    		if((plugin.getGlobalControllerPath()) != null && (plugin.getGlobalControllerPath().equals(ba.agentPath))) {
                         logger.info("Clearing Global Controller Path " +ba.agentPath);
                         plugin.setGlobalControllerPath(null);
                     }
-		    		plugin.getBrokeredAgents().remove(entry.getKey());//remove agent
+
+                    plugin.getBrokeredAgents().remove(entry.getKey());//remove agent
 				}
                 logger.trace("Brokered Agents: " + ba.agentPath);
 			}

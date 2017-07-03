@@ -52,8 +52,13 @@ public class ActiveRegionConsumer implements Runnable {
 				TextMessage msg = (TextMessage) consumer.receive(1000);
 				if (msg != null) {
 
-					MsgEvent me = gson.fromJson(msg.getText(), MsgEvent.class);
-
+					MsgEvent me = null;
+					try {
+						me = gson.fromJson(msg.getText(), MsgEvent.class);
+					} catch(Exception ex) {
+						logger.error("Invalid MsgEvent Format : " + msg.getText());
+					}
+					if(me != null) {
 					me.setParam("dst_agent",plugin.getAgent());
                     me.setParam("dst_plugin",plugin.getPluginID());
 
@@ -82,7 +87,7 @@ public class ActiveRegionConsumer implements Runnable {
 						logger.trace("[{}] {}_{} sent a message.", new Timestamp(new Date().getTime()), me.getParam("src_region"), me.getParam("src_agent"));
 						System.out.print("Name of Agent to message [q to quit]: ");
 					}
-					*/
+					*/ }
 				}
 			}
 			logger.debug("Cleaning up");
