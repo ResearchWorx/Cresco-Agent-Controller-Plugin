@@ -22,7 +22,7 @@ public class DiscoveryEngine implements Runnable {
     private CLogger logger;
 
     public DiscoveryEngine(Launcher plugin) {
-        this.logger = new CLogger(DiscoveryEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Trace);
+        this.logger = new CLogger(DiscoveryEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
         logger.trace("Initializing");
         this.plugin = plugin;
         discoveryCrypto = new DiscoveryCrypto(plugin);

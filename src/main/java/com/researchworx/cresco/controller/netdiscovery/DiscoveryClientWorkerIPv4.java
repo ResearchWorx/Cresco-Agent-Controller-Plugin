@@ -23,7 +23,7 @@ class DiscoveryClientWorkerIPv4 {
     private DiscoveryCrypto discoveryCrypto;
 
     DiscoveryClientWorkerIPv4(Launcher plugin, DiscoveryType disType, int discoveryTimeout, String broadCastNetwork) {
-        this.logger = new CLogger(DiscoveryClientWorkerIPv4.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Trace);
+        this.logger = new CLogger(DiscoveryClientWorkerIPv4.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
         this.plugin = plugin;
         gson = new Gson();
         this.discoveryTimeout = discoveryTimeout;

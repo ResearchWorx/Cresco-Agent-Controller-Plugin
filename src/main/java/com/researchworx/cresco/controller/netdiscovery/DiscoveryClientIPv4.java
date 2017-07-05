@@ -14,7 +14,7 @@ public class DiscoveryClientIPv4 {
     private CLogger logger;
 
     public DiscoveryClientIPv4(Launcher plugin) {
-        this.logger = new CLogger(DiscoveryClientIPv4.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Trace);
+        this.logger = new CLogger(DiscoveryClientIPv4.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
         this.plugin = plugin;
         //discoveryTimeout = Integer.parseInt(PluginEngine.config.getParam("discoverytimeout"));
         //System.out.println("DiscoveryClient : discoveryTimeout = " + discoveryTimeout);
