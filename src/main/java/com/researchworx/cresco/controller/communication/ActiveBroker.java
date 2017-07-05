@@ -82,7 +82,7 @@ public class ActiveBroker {
 				broker.setUseJmx(true);
 				broker.getManagementContext().setConnectorPort(2099);
 				broker.getManagementContext().setCreateConnector(true);
-				*/
+                */
 
 				//authorizationPlugin = new CrescoAuthorizationPlugin();
 				//authenticationPlugin = new CrescoAuthenticationPlugin();
@@ -93,6 +93,12 @@ public class ActiveBroker {
 					connector.setUri(new URI("tcp://[::]:32010"));
 				else
 					connector.setUri(new URI("tcp://0.0.0.0:32010"));
+
+                /*
+                connector.setUpdateClusterClients(true);
+                connector.setRebalanceClusterClients(true);
+                connector.setUpdateClusterClientsOnRemove(true);
+                */
 
 				broker.addConnector(connector);
 

@@ -322,8 +322,7 @@ public class DiscoveryEngine implements Runnable {
                         me.setParam("src_agent", plugin.getAgent());
                         me.setParam("dst_ip", rme.getParam("src_ip"));
                         me.setParam("dst_port", rme.getParam("src_port"));
-                        //todo enable this
-                        //me.setParam("agent_count", String.valueOf(plugin.reachableAgents().size()));
+                        me.setParam("agent_count", String.valueOf(plugin.reachableAgents().size()));
                         me.setParam("discovery_type", DiscoveryType.NETWORK.name());
                         logger.debug("getAgentMsg = " + me.getParams().toString());
 

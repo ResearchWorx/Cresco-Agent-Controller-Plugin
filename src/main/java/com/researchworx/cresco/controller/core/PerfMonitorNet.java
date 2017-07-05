@@ -29,8 +29,9 @@ class PerfMonitorNet {
 
     PerfMonitorNet(Launcher plugin) {
         this.plugin = plugin;
-        this.logger = new CLogger(PerfMonitorNet.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Trace);
+        this.logger = new CLogger(PerfMonitorNet.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
         gson = new Gson();
+        plugin.isStarted = true;
     }
 
     PerfMonitorNet start() {
@@ -61,9 +62,6 @@ class PerfMonitorNet {
     }
 
     private List<MsgEvent> getNetworkDiscoveryList() {
-
-        //this.dcv4 = new DiscoveryClientIPv4(this);
-        //this.dcv6 = new DiscoveryClientIPv6(this);
 
 
         List<MsgEvent> discoveryList = null;
@@ -122,7 +120,7 @@ class PerfMonitorNet {
                 if(discoveryList != null) {
                     discoveryListString = gson.toJson(discoveryList);
                 }
-                tick.setParam("network_map", discoveryListString);
+                tick.setCompressedParam("network_map", discoveryListString);
 
                 plugin.msgIn(tick);
             }

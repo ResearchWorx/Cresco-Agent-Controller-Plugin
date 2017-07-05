@@ -71,7 +71,9 @@ class DiscoveryClientWorkerIPv4 {
                     if (disType == DiscoveryType.AGENT || disType == DiscoveryType.REGION || disType == DiscoveryType.GLOBAL) {
                         me.setParam("validated_authenication", ValidatedAuthenication(me));
                     }
-                    discoveredList.add(me);
+                        discoveredList.add(me);
+
+
                 }
             } catch (Exception ex) {
                 logger.error("DiscoveryClientWorker in loop {}", ex.getMessage());
@@ -161,7 +163,7 @@ class DiscoveryClientWorkerIPv4 {
                                         }
                                     }
                                     synchronized (receivePacket) {
-                                        processIncoming(receivePacket);
+                                            processIncoming(receivePacket);
                                     }
                                 } catch (SocketException se) {
                                     // Eat the message, this is normal

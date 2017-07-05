@@ -147,6 +147,9 @@ public class Launcher extends CPlugin {
 
     private RegionHealthWatcher regionHealthWatcher;
 
+    public boolean isStarted = false;
+
+
     public Launcher() {
         this.msgInProcessQueue = Executors.newFixedThreadPool(100);
     }
@@ -548,9 +551,8 @@ public class Launcher extends CPlugin {
                     logger.debug("AgentPath=" + this.agentpath);
 
                     //create network perf monitor service
-                    //todo reenable network monitoring
-                    //perfMonitorNet = new PerfMonitorNet(this);
-                    //logger.info("Network performance monitoring initialized");
+                    perfMonitorNet = new PerfMonitorNet(this);
+                    logger.info("Network performance monitoring initialized");
                 }
                 this.isRegionalController = false;
             }
@@ -562,7 +564,9 @@ public class Launcher extends CPlugin {
             while(!consumerAgentConnected && (consumerAgentConnectCount < 10)) {
                 try {
                     //consumer agent
-                    this.consumerAgentThread = new Thread(new ActiveAgentConsumer(this, this.agentpath, "failover:tcp://" + this.brokerAddressAgent + ":32010?useKeepAlive=true&keepAlive=true", brokerUserNameAgent, brokerPasswordAgent));
+                    //this.consumerAgentThread = new Thread(new ActiveAgentConsumer(this, this.agentpath, "failover:tcp://" + this.brokerAddressAgent + ":32010?timeout=3000", brokerUserNameAgent, brokerPasswordAgent));
+                    //this.consumerAgentThread = new Thread(new ActiveAgentConsumer(this, this.agentpath, "failover:(tcp://" + this.brokerAddressAgent + ":32010)?timeout=3000", brokerUserNameAgent, brokerPasswordAgent));
+                    this.consumerAgentThread = new Thread(new ActiveAgentConsumer(this, this.agentpath, "tcp://" + this.brokerAddressAgent + ":32010", brokerUserNameAgent, brokerPasswordAgent));
                     this.consumerAgentThread.start();
                     while (!this.ConsumerThreadActive) {
                         Thread.sleep(1000);
@@ -577,7 +581,9 @@ public class Launcher extends CPlugin {
                 }
                 consumerAgentConnectCount++;
             }
-            this.ap = new ActiveProducer(this, "failover:tcp://" + this.brokerAddressAgent + ":32010?useKeepAlive=true&keepAlive=true", brokerUserNameAgent, brokerPasswordAgent);
+            //this.ap = new ActiveProducer(this, "failover:tcp://" + this.brokerAddressAgent + ":32010?timeout=3000", brokerUserNameAgent, brokerPasswordAgent);
+            //this.ap = new ActiveProducer(this, "failover:(tcp://" + this.brokerAddressAgent + ":32010)?timeout=3000", brokerUserNameAgent, brokerPasswordAgent);
+            this.ap = new ActiveProducer(this, "tcp://" + this.brokerAddressAgent + ":32010", brokerUserNameAgent, brokerPasswordAgent);
 
             logger.debug("Agent ProducerThread Started..");
 

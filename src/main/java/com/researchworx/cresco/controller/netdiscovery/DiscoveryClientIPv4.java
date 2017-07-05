@@ -36,6 +36,8 @@ public class DiscoveryClientIPv4 {
             //populate map with possible peers
             logger.debug("Searching {}", broadCastNetwork);
             discoveryList.addAll(dcw.discover());
+
+
         } catch (Exception ex) {
             System.out.println("IPv4 getDiscoveryMap " + ex.getMessage());
             logger.error("getDiscoveryMap {}", ex.getMessage());

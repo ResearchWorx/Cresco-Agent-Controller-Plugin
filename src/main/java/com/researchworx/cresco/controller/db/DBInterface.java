@@ -762,9 +762,7 @@ public class DBInterface {
                         long watchdog_diff = System.currentTimeMillis() - watchdog_ts;
                         if (watchdog_diff > (watchdog_rate * 3)) {
                             //node is stale
-                            logger.trace(nodeId + " is stale");
-                            //todo MAKE STALE WORK
-                            //nodeStatusMap.put(nodeId, NodeStatusType.STALE);
+                            nodeStatusMap.put(nodeId, NodeStatusType.STALE);
                             logger.error(nodeId + " is stale");
 
                             nodeStatusMap.put(nodeId, NodeStatusType.ACTIVE);
