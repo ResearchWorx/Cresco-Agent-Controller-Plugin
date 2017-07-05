@@ -143,11 +143,6 @@ public class Launcher extends CPlugin {
     private ConcurrentLinkedQueue<MsgEvent> resourceScheduleQueue;
     private ConcurrentLinkedQueue<gPayload> appScheduleQueue;
 
-
-
-    private DiscoveryClientIPv4 dcv4;
-    private DiscoveryClientIPv6 dcv6;
-
     private ActiveBroker broker;
 
     private RegionHealthWatcher regionHealthWatcher;
@@ -335,8 +330,17 @@ public class Launcher extends CPlugin {
             this.outgoingMessages = new ConcurrentLinkedQueue<>();
             this.brokerAddressAgent = null;
             this.isIPv6 = isIPv6();
+
+            /*
+            private DiscoveryClientIPv4 dcv4;
+            private DiscoveryClientIPv6 dcv6;
+
             this.dcv4 = new DiscoveryClientIPv4(this);
             this.dcv6 = new DiscoveryClientIPv6(this);
+            */
+
+            DiscoveryClientIPv4 dcv4 = new DiscoveryClientIPv4(this);
+            DiscoveryClientIPv6 dcv6 = new DiscoveryClientIPv6(this);
 
             //List<MsgEvent> discoveryList = new ArrayList<>();
             List<MsgEvent> discoveryList = new ArrayList<>();
@@ -358,11 +362,11 @@ public class Launcher extends CPlugin {
                 //do this better else where
                 if (this.isIPv6) {
                     logger.debug("Broker Search (IPv6)...");
-                    discoveryList.addAll(this.dcv6.getDiscoveryResponse(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_ipv6_agent_timeout", 2000)));
+                    discoveryList.addAll(dcv6.getDiscoveryResponse(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_ipv6_agent_timeout", 2000)));
                     logger.debug("IPv6 Broker count = {}" + discoveryList.size());
                 }
                 logger.debug("Broker Search (IPv4)...");
-                    discoveryList.addAll(this.dcv4.getDiscoveryResponse(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_ipv4_agent_timeout", 2000)));
+                    discoveryList.addAll(dcv4.getDiscoveryResponse(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_ipv4_agent_timeout", 2000)));
                     logger.debug("Broker count = {}" + discoveryList.size());
             }
             if(getConfig().getStringParam("regional_controller_host") != null) {
@@ -486,9 +490,9 @@ public class Launcher extends CPlugin {
 
                 //Try and discover other regions, connect to as many as possible.
                 if (this.isIPv6) {
-                    discoveryList = this.dcv6.getDiscoveryResponse(DiscoveryType.REGION, getConfig().getIntegerParam("discovery_ipv6_region_timeout", 2000));
+                    discoveryList = dcv6.getDiscoveryResponse(DiscoveryType.REGION, getConfig().getIntegerParam("discovery_ipv6_region_timeout", 2000));
                 }
-                    discoveryList.addAll(this.dcv4.getDiscoveryResponse(DiscoveryType.REGION, getConfig().getIntegerParam("discovery_ipv4_region_timeout", 2000)));
+                    discoveryList.addAll(dcv4.getDiscoveryResponse(DiscoveryType.REGION, getConfig().getIntegerParam("discovery_ipv4_region_timeout", 2000)));
 
                 if (!discoveryList.isEmpty()) {
                     for (MsgEvent ime : discoveryList) {
@@ -544,8 +548,9 @@ public class Launcher extends CPlugin {
                     logger.debug("AgentPath=" + this.agentpath);
 
                     //create network perf monitor service
-                    perfMonitorNet = new PerfMonitorNet(this);
-                    logger.info("Network performance monitoring initialized");
+                    //todo reenable network monitoring
+                    //perfMonitorNet = new PerfMonitorNet(this);
+                    //logger.info("Network performance monitoring initialized");
                 }
                 this.isRegionalController = false;
             }
@@ -603,7 +608,6 @@ public class Launcher extends CPlugin {
             if(perfMonitorNet != null) {
                 perfMonitorNet.start();
             }
-
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -808,13 +812,6 @@ public class Launcher extends CPlugin {
     }
     public void setConsumerThreadRegionActive(boolean consumerThreadRegionActive) {
         ConsumerThreadRegionActive = consumerThreadRegionActive;
-    }
-
-    public DiscoveryClientIPv4 getDiscoveryClientIPv4() {
-        return dcv4;
-    }
-    public DiscoveryClientIPv6 getDiscoveryClientIPv6() {
-        return dcv6;
     }
 
     public ActiveBroker getBroker() {

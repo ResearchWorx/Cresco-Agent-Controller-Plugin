@@ -6,10 +6,18 @@ import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.command.ActiveMQTempDestination;
+import org.apache.activemq.command.BrokerId;
+import org.apache.activemq.command.BrokerInfo;
+import org.apache.activemq.command.ConnectionInfo;
 
 import javax.jms.*;
+import java.util.Map;
+import java.util.Properties;
+import java.util.UUID;
 
 public class ActiveProducerWorker {
+	private String producerWorkerName;
 	private CLogger logger;
 	private Session sess;
 	private ActiveMQConnection  conn;
@@ -17,10 +25,11 @@ public class ActiveProducerWorker {
 	private Gson gson;
 	public boolean isActive;
 	private String queueName;
+	private Destination destination;
 	
 	public ActiveProducerWorker(Launcher plugin, String TXQueueName, String URI, String brokerUserNameAgent, String brokerPasswordAgent)  {
 		this.logger = new CLogger(ActiveProducerWorker.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
-
+		this.producerWorkerName = UUID.randomUUID().toString();
 		try {
 			queueName = TXQueueName;
 			gson = new Gson();
@@ -28,10 +37,12 @@ public class ActiveProducerWorker {
 			conn.start();
 			sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
 			
-			Destination destination = sess.createQueue(TXQueueName);
+			destination = sess.createQueue(TXQueueName);
 			producer = sess.createProducer(destination);
 			producer.setTimeToLive(300000L);
+			//producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
 			producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+
 			isActive = true;
 			logger.debug("Initialized", queueName);
 		} catch (Exception e) {
@@ -58,11 +69,12 @@ public class ActiveProducerWorker {
 	}
 	public boolean sendMessage(MsgEvent se) {
 		try {
+
 			producer.send(sess.createTextMessage(gson.toJson(se)));
-			logger.trace("sendMessage to : " + queueName + " message:" + se.getParams());
+			logger.trace("sendMessage to : {} : from : {}", queueName, producerWorkerName);
 			return true;
 		} catch (JMSException jmse) {
-			logger.error("sendMessage: {} : {}", se.getParams(), jmse.getMessage());
+			logger.error("sendMessage: jmse {} : {}", se.getParams(), jmse.getMessage());
 			return false;
 		}
 	}

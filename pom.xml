@@ -69,6 +69,9 @@
 
         <!-- OrientDB -->
 
+		<!-- Embedded: 1. core 2. graphdb -->
+		<!-- Stand Alone: 1. graphdb 2. core -->
+
 		<dependency>
 			<groupId>com.orientechnologies</groupId>
 			<artifactId>orientdb-core</artifactId>
@@ -80,6 +83,7 @@
 			<artifactId>orientdb-graphdb</artifactId>
 			<version>${orientdb.version}</version>
 		</dependency>
+
 
 
 	</dependencies>

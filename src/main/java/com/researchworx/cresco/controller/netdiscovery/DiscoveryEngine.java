@@ -22,7 +22,7 @@ public class DiscoveryEngine implements Runnable {
     private CLogger logger;
 
     public DiscoveryEngine(Launcher plugin) {
-        this.logger = new CLogger(DiscoveryEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
+        this.logger = new CLogger(DiscoveryEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Trace);
         logger.trace("Initializing");
         this.plugin = plugin;
         discoveryCrypto = new DiscoveryCrypto(plugin);
@@ -160,7 +160,7 @@ public class DiscoveryEngine implements Runnable {
                     CIDRUtils cutil = new CIDRUtils(cdirAddress);
                     if (cutil.isInRange(remoteAddress)) {
                         sAddress = entry.getKey();
-                        logger.trace("Found address in range : cdirAddress: " + cdirAddress + "== remoteAddress: " + remoteAddress);
+                        logger.trace("Found address in range : cdirAddress: " + cdirAddress + " == remoteAddress: " + remoteAddress);
                     }
                 }
             } catch (Exception ex) {
@@ -231,9 +231,12 @@ public class DiscoveryEngine implements Runnable {
                         if (rme != null) {
                             //check for static discovery
                             //&& (sourceAddress != null)
-                            logger.trace("Static Discovery Status = " + rme.getParam("discovery_static_agent"));
+
+
                             if ((sourceAddress != null) || (rme.getParam("discovery_static_agent") != null)) {
                             //if (sourceAddress != null) {
+
+                                logger.trace("Static Discovery Status = " + rme.getParam("discovery_static_agent"));
 
                                 rme.setParam("src_ip", remoteAddress);
                                 rme.setParam("src_port", String.valueOf(packet.getPort()));
@@ -242,7 +245,7 @@ public class DiscoveryEngine implements Runnable {
 
                                 if (rme.getParam("discovery_type") != null) {
                                     if (rme.getParam("discovery_type").equals(DiscoveryType.NETWORK.name())) {
-                                        logger.debug("{}", "agent discovery");
+                                        logger.debug("{}", "network discovery");
                                         me = getNetworkMsg(rme); //generate payload
                                     } else if (rme.getParam("discovery_type").equals(DiscoveryType.AGENT.name())) {
                                         logger.debug("{}", "agent discovery");
@@ -319,7 +322,8 @@ public class DiscoveryEngine implements Runnable {
                         me.setParam("src_agent", plugin.getAgent());
                         me.setParam("dst_ip", rme.getParam("src_ip"));
                         me.setParam("dst_port", rme.getParam("src_port"));
-                        me.setParam("agent_count", String.valueOf(plugin.reachableAgents().size()));
+                        //todo enable this
+                        //me.setParam("agent_count", String.valueOf(plugin.reachableAgents().size()));
                         me.setParam("discovery_type", DiscoveryType.NETWORK.name());
                         logger.debug("getAgentMsg = " + me.getParams().toString());
 

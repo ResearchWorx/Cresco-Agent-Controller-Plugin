@@ -1,6 +1,8 @@
 package com.researchworx.cresco.controller.core;
 
 import com.google.gson.Gson;
+import com.researchworx.cresco.controller.netdiscovery.DiscoveryClientIPv4;
+import com.researchworx.cresco.controller.netdiscovery.DiscoveryClientIPv6;
 import com.researchworx.cresco.controller.netdiscovery.DiscoveryType;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.plugin.core.CPlugin;
@@ -21,9 +23,13 @@ class PerfMonitorNet {
     private CLogger logger;
     private boolean polling = false;
 
+    private DiscoveryClientIPv4 ip4dc;
+    private DiscoveryClientIPv6 ip6dc;
+
+
     PerfMonitorNet(Launcher plugin) {
         this.plugin = plugin;
-        this.logger = new CLogger(PerfMonitorNet.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
+        this.logger = new CLogger(PerfMonitorNet.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Trace);
         gson = new Gson();
     }
 
@@ -55,18 +61,29 @@ class PerfMonitorNet {
     }
 
     private List<MsgEvent> getNetworkDiscoveryList() {
+
+        //this.dcv4 = new DiscoveryClientIPv4(this);
+        //this.dcv6 = new DiscoveryClientIPv6(this);
+
+
         List<MsgEvent> discoveryList = null;
         polling = true;
         try {
             discoveryList = new ArrayList<>();
             if (plugin.isIPv6()) {
+                if(ip6dc == null) {
+                    ip6dc = new DiscoveryClientIPv6(plugin);
+                }
                 logger.debug("Broker Search (IPv6)...");
-                discoveryList.addAll(plugin.getDiscoveryClientIPv6().getDiscoveryResponse(DiscoveryType.NETWORK, plugin.getConfig().getIntegerParam("discovery_ipv6_agent_timeout", 2000)));
-                logger.debug("IPv6 Broker count = {}" + discoveryList.size());
+                discoveryList.addAll(ip6dc.getDiscoveryResponse(DiscoveryType.NETWORK, plugin.getConfig().getIntegerParam("discovery_ipv6_agent_timeout", 2000)));
+                logger.debug("IPv6 Broker count = {} " + discoveryList.size());
+            }
+            if(ip4dc == null) {
+                ip4dc = new DiscoveryClientIPv4(plugin);
             }
             logger.debug("Broker Search (IPv4)...");
-            discoveryList.addAll(plugin.getDiscoveryClientIPv4().getDiscoveryResponse(DiscoveryType.NETWORK, plugin.getConfig().getIntegerParam("discovery_ipv4_agent_timeout", 2000)));
-            logger.debug("Broker count = {}" + discoveryList.size());
+            discoveryList.addAll(ip4dc.getDiscoveryResponse(DiscoveryType.NETWORK, plugin.getConfig().getIntegerParam("discovery_ipv4_agent_timeout", 2000)));
+            logger.debug("Broker count = {} " + discoveryList.size());
 
             //for (MsgEvent me : discoveryList) {
             //    logger.debug(me.getParams().toString());

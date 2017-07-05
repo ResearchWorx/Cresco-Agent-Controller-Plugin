@@ -57,7 +57,8 @@ public class ActiveBroker {
 				PolicyEntry entry = new PolicyEntry();
 		        entry.setGcInactiveDestinations(true);
 		        entry.setInactiveTimeoutBeforeGC(15000);
-		        //todo Does this need to be here?
+
+		        /*
 
 				entry.setProducerFlowControl(true);
 				entry.setQueue(">");
@@ -65,7 +66,7 @@ public class ActiveBroker {
 				entry.setTopic(">");
 				entry.setAllConsumersExclusiveByDefault(true);
 				entry.setAdvisoryWhenFull(true);
-
+				*/
 
 				PolicyMap map = new PolicyMap();
 		        map.setDefaultEntry(entry);
@@ -77,6 +78,7 @@ public class ActiveBroker {
 				broker.setSchedulePeriodForDestinationPurge(2500);
 				broker.setDestinationPolicy(map);
 
+				//todo disable
 				broker.setUseJmx(true);
 				broker.getManagementContext().setConnectorPort(2099);
 				broker.getManagementContext().setCreateConnector(true);
@@ -210,22 +212,13 @@ public class ActiveBroker {
 		NetworkConnector bridge = null;
 		try {
 		    logger.trace("URI: static:tcp://" + URI + ":32010" + " brokerUserName: " + brokerUserName + " brokerPassword: " + brokerPassword);
-			//todo Make sure keep alive is needed
-		    //bridge = broker.addNetworkConnector(new URI("static:tcp://" + URI + ":32010"));
-			//bridge = broker.addNetworkConnector(new URI("static:tcp://" + URI + ":32010?useKeepAlive=true&keepAlive=true"));
 			bridge = broker.addNetworkConnector(new URI("static:tcp://" + URI + ":32010?useKeepAlive=true&keepAlive=true"));
 
 
-		    //RandomString rs = new RandomString(5);
-			bridge.setUserName(brokerUserName);
+		    bridge.setUserName(brokerUserName);
             bridge.setPassword(brokerPassword);
 			bridge.setName(java.util.UUID.randomUUID().toString());
 			bridge.setDuplex(true);
-			//bridge.setDynamicOnly(true);
-			//bridge.setDynamicallyIncludedDestinations(getDest(agentPath));
-
-			//todo Is this right?
-			bridge.setPrefetchSize(10000);
 
 
 		} catch(Exception ex) {

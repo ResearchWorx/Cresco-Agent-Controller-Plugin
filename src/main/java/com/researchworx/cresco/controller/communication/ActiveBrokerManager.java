@@ -3,6 +3,7 @@ package com.researchworx.cresco.controller.communication;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
+import org.apache.activemq.network.NetworkConnector;
 
 import java.util.Map.Entry;
 import java.util.Timer;
@@ -75,7 +76,8 @@ public class ActiveBrokerManager implements Runnable  {
                             String cbrokerValidatedAuthenication = null;
                             cbrokerAddress = cb.getParam("dst_ip");
                             cbrokerValidatedAuthenication = cb.getParam("validated_authenication");
-                            if(cbrokerValidatedAuthenication != null) {
+
+							if(cbrokerValidatedAuthenication != null) {
 								//set agent broker auth
 								String[] tmpAuth = cbrokerValidatedAuthenication.split(",");
 								//end

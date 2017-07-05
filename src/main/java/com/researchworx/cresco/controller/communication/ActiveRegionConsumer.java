@@ -30,10 +30,9 @@ public class ActiveRegionConsumer implements Runnable {
 			conn.start();
 			this.sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
-			//todo Figure out if this does anything consumer.excl
-			//this.RXqueue = sess.createQueue(RXQueueName + "?consumer.exclusive=true");
-			this.RXqueue = sess.createQueue(RXQueueName + "?consumer.prefetchSize=10000");
-
+			//might not need this
+			this.RXqueue = sess.createQueue(RXQueueName + "?consumer.exclusive=true");
+			//this.RXqueue = sess.createQueue(RXQueueName + "?consumer.prefetchSize=1");
 			//this.RXqueue = sess.createQueue(RXQueueName);
 
 		} catch(Exception ex) {

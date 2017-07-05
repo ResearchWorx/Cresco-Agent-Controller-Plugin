@@ -82,6 +82,7 @@ public class ActiveAgentConsumer implements Runnable {
 			logger.debug("Shutdown complete");
 		} catch (JMSException e) {
 			plugin.setConsumerThreadActive(false);
+			logger.error("JMS Error : " + e.getMessage());
 		} catch (Exception ex) {
 			logger.error("Run: {}", ex.getMessage());
 			plugin.setConsumerThreadActive(false);
