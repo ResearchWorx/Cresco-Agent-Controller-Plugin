@@ -78,11 +78,11 @@ public class ActiveBroker {
 				broker.setSchedulePeriodForDestinationPurge(2500);
 				broker.setDestinationPolicy(map);
 
-				//todo disable
+				/*
 				broker.setUseJmx(true);
 				broker.getManagementContext().setConnectorPort(2099);
 				broker.getManagementContext().setCreateConnector(true);
-
+				*/
 
 				//authorizationPlugin = new CrescoAuthorizationPlugin();
 				//authenticationPlugin = new CrescoAuthenticationPlugin();
