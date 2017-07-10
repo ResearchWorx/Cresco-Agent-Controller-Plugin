@@ -1533,19 +1533,19 @@ public class DBBaseFunctions {
 
             //InputStream is = new ByteArrayInputStream(exportData.getBytes(StandardCharsets.UTF_8));
 
-            logger.error("setDBImport() Created Instances " + pool.getCreatedInstances());
-            logger.error("setDBImport() Max Partition Size " + pool.getMaxPartitonSize());
-
-            //if(db == null) {
-
+            boolean createdDb = false;
+            if(db == null) {
                 ODatabaseDocumentTx db = pool.acquire();
-
-            //}
+                createdDb = true;
+            }
 
             //todo FIX IMPORT
-            //DBImport dbImport = new DBImport(plugin, is, this,db);
-            //isImported = dbImport.importDump();
-            db.close();
+            DBImport dbImport = new DBImport(plugin, is, this,db);
+            isImported = dbImport.importDump();
+            if(createdDb) {
+                db.close();
+            }
+
 
         }
         catch(Exception ex) {

@@ -764,9 +764,6 @@ public class DBInterface {
                             //node is stale
                             nodeStatusMap.put(nodeId, NodeStatusType.STALE);
                             logger.error(nodeId + " is stale");
-
-                            nodeStatusMap.put(nodeId, NodeStatusType.ACTIVE);
-
                         } else {
                             nodeStatusMap.put(nodeId, NodeStatusType.ACTIVE);
                         }

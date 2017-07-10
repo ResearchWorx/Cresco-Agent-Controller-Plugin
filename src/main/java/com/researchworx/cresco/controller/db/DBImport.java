@@ -69,7 +69,7 @@ public class DBImport {
     private DBBaseFunctions gdb;
 
     public DBImport(Launcher plugin, final InputStream iStream, DBBaseFunctions gdb, ODatabaseDocumentTx db) throws IOException {
-        this.logger = new CLogger(DBImport.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
+        this.logger = new CLogger(DBImport.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
         this.db = db;
         jsonReader = new OJSONReader(new InputStreamReader(iStream));
         this.gdb = gdb;

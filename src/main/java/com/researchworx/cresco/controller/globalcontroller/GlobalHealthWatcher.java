@@ -166,7 +166,8 @@ public class GlobalHealthWatcher implements Runnable {
                     plugin.setGlobalControllerPath(globalPath);
                     //register with global controller
                     sendGlobalWatchDogRegister();
-
+                    //todo is this correct?
+                    regionalDBexport();
                 }
             }
             else if(this.plugin.isGlobalController()) {
@@ -195,6 +196,8 @@ public class GlobalHealthWatcher implements Runnable {
                             this.plugin.setGlobalControllerPath(globalPath);
                             //register with global controller
                             sendGlobalWatchDogRegister();
+                            //todo is this right to do
+                            regionalDBexport();
                         }
                     }
                     else {

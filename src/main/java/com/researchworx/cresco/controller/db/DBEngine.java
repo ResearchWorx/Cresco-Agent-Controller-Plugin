@@ -54,10 +54,12 @@ public class DBEngine {
                 factory = new OrientGraphFactory(iURI, username, password, true);
             }
             else {
-                iURI = "memory:internalDb";
+                //iURI = "memory:internalDb/" + dbname;
                 //db = new ODatabaseDocumentTx(iURI).create();
                 //pool = new OPartitionedDatabasePool(iURI, username,password).setAutoCreate(true);
                 //factory = new OrientGraphFactory(iURI, username, password, true);
+
+
                 db = new ODatabaseDocumentTx("memory:internalDb").create();
                 factory = new OrientGraphFactory("memory:internalDb");
 
