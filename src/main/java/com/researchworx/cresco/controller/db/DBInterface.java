@@ -208,6 +208,16 @@ public class DBInterface {
                         regionMap.put("name", agent);
                         regionMap.put("region", region);
                         regionMap.put("plugins", String.valueOf(pluginList.size()));
+                        //todo there must be a better way to do this
+                        try {
+                            String nodeId = gdb.getNodeId(region, agent, null);
+                            Map<String, String> params = gdb.getNodeParams(nodeId);
+                            regionMap.put("location",params.get("location"));
+                            regionMap.put("platform",params.get("platform"));
+                            regionMap.put("environment",params.get("environment"));
+                        } catch (Exception ex) {
+                            //do nothing
+                        }
                         regionArray.add(regionMap);
                     }
                 }
@@ -769,8 +779,9 @@ public class DBInterface {
                         }
                     }
                     else {
-                        logger.trace(nodeId + " is lost");
+                        logger.error(nodeId + " is lost");
                         nodeStatusMap.put(nodeId, NodeStatusType.LOST);
+
                     }
                 }
                 else {
