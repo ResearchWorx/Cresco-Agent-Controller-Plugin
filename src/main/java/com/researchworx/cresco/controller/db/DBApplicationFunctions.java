@@ -1875,8 +1875,8 @@ public class DBApplicationFunctions {
         {
             graph = factory.getTx();
 
-
             gpay = gPayLoadFromJson(gPayload);
+
             gpay.pipeline_id = UUID.randomUUID().toString();
             //inject real pipelineID
             gPayload = JsonFromgPayLoad(gpay);

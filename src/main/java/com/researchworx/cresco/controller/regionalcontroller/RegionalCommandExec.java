@@ -94,7 +94,9 @@ public class RegionalCommandExec {
                     return gce.execute(le);
                 }
                 else {
-                    globalSend(le);
+                    if(plugin.getConfig().getBooleanParam("forward_global_kpi",true)){
+                        globalSend(le);
+                    }
                     return null;
                 }
 			}
