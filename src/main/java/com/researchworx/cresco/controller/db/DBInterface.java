@@ -520,10 +520,23 @@ public class DBInterface {
                     //String status_code = plugin.getGDB().dba.getINodeParam(inodeid,"status_code");
                     //String status_desc = plugin.getGDB().dba.getINodeParam(inodeid,"status_desc");
                     //gpay.nodes.get(i).params.put("inode_id",inodeid);
-                    String status_code = plugin.getGDB().dba.getINodeParam(gpay.nodes.get(i).node_id, "status_code");
-                    String status_desc = plugin.getGDB().dba.getINodeParam(gpay.nodes.get(i).node_id, "status_desc");
+                    logger.error("iNODE: " + gpay.nodes.get(i).node_id);
+                    String inodeNodeid = dba.getINodeNodeId(gpay.nodes.get(i).node_id);
+                    Map<String,String> inodeParams = plugin.getGDB().gdb.getNodeParamsNoTx(inodeNodeid);
+
+                    String status_code = inodeParams.get("status_code");
+                    String status_desc = inodeParams.get("status_desc");
+                    String params = inodeParams.get("params");
+                    String inode_id = inodeParams.get("inode_id");
+                    String resource_id = inodeParams.get("resource_id");
+
+                    //String status_code = plugin.getGDB().dba.getINodeParam(gpay.nodes.get(i).node_id, "status_code");
+                    //String status_desc = plugin.getGDB().dba.getINodeParam(gpay.nodes.get(i).node_id, "status_desc");
                     gpay.nodes.get(i).params.put("status_code", status_code);
                     gpay.nodes.get(i).params.put("status_desc", status_desc);
+                    gpay.nodes.get(i).params.put("params", params);
+                    gpay.nodes.get(i).params.put("inode_id", inode_id);
+                    gpay.nodes.get(i).params.put("resource_id", resource_id);
                 }
                 String returnGetGpipeline = gson.toJson(gpay);
                 //String returnGetGpipeline = plugin.getGDB().dba.getPipeline(actionPipelineId);
@@ -563,6 +576,34 @@ public class DBInterface {
 
     }
 
+    public String getIsAssignedInfo(String resourceid,String inodeid, boolean isResourceMetric) {
+
+        String queryReturn = null;
+        try
+        {
+            String isAssignedEdgeId = plugin.getGDB().dba.getResourceEdgeId(resourceid, inodeid);
+
+            if(isResourceMetric) {
+                   String resourceMetric = plugin.getGDB().dba.getIsAssignedParam(isAssignedEdgeId,"resource_metric");
+                   if(resourceMetric != null) {
+                       queryReturn = DatatypeConverter.printBase64Binary(plugin.getGDB().gdb.stringCompress(resourceMetric));
+                   }
+            } else {
+                Map<String, String> queryMap = plugin.getGDB().dba.getIsAssignedParams(isAssignedEdgeId);
+                queryReturn = DatatypeConverter.printBase64Binary(plugin.getGDB().gdb.stringCompress((gson.toJson(queryMap))));
+            }
+
+        } catch(Exception ex) {
+            logger.error("getIsAssignedInfo() " + ex.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString()); //
+        }
+
+        return queryReturn;
+
+    }
 
     public String getPipelineInfo(String pipeline_action) {
         String queryReturn = null;

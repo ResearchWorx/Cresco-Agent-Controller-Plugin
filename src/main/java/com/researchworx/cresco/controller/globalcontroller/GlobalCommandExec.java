@@ -79,6 +79,9 @@ public class GlobalCommandExec {
                     case "getgpipelinestatus":
                         return getGPipelineStatus(ce);
 
+                    case "getisassignmentinfo":
+                        return getIsAssignment(ce);
+
                     default:
 						logger.error("Unknown configtype found: {}", ce.getParam("action"));
 						return null;
@@ -231,6 +234,29 @@ public class GlobalCommandExec {
 
             ce.setParam("pipelineinfo",plugin.getGDB().getPipelineInfo(actionPipeline));
             logger.trace("list pipeline return : " + ce.getParams().toString());
+        }
+        catch(Exception ex) {
+            ce.setParam("error", ex.getMessage());
+        }
+
+        return ce;
+    }
+
+    private MsgEvent getIsAssignment(MsgEvent ce) {
+
+	    String actionInodeId = null;
+        String actionResourceId = null;
+
+        try {
+            if((ce.getParam("action_inodeid") != null) && (ce.getParam("action_resourceid") != null)) {
+                actionInodeId = ce.getParam("action_inodeid");
+                actionResourceId = ce.getParam("action_resourceid");
+            }
+
+            ce.setParam("isassignmentinfo",plugin.getGDB().getIsAssignedInfo(actionResourceId,actionInodeId,false));
+            ce.setParam("isassignmentresourceinfo",plugin.getGDB().getIsAssignedInfo(actionResourceId,actionInodeId,true));
+
+            logger.trace("get isassigned params : " + ce.getParams().toString());
         }
         catch(Exception ex) {
             ce.setParam("error", ex.getMessage());
