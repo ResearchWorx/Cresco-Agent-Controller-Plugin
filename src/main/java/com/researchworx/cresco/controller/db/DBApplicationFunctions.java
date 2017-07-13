@@ -844,7 +844,7 @@ public class DBApplicationFunctions {
         return params;
     }
 
-    public String getINodeParams2(String iNode_id) {
+    public String getINodeParams(String iNode_id) {
         String params = null;
         OrientGraph graph = null;
 
