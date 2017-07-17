@@ -552,6 +552,7 @@ public class Launcher extends CPlugin {
 
                     //create network perf monitor service
                     perfMonitorNet = new PerfMonitorNet(this);
+                    perfMonitorNet.start();
                     logger.info("Network performance monitoring initialized");
                 }
                 this.isRegionalController = false;

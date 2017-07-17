@@ -42,7 +42,7 @@ public class ResourceSchedulerEngine implements Runnable {
     public ResourceSchedulerEngine(Launcher plugin, GlobalHealthWatcher ghw) {
 		this.plugin = plugin;
 		this.ghw = ghw;
-        logger = new CLogger(ResourceSchedulerEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+        logger = new CLogger(ResourceSchedulerEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
 
         jarStringCache = CacheBuilder.newBuilder()
                 .concurrencyLevel(4)
