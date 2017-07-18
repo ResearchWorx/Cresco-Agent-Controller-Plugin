@@ -22,7 +22,7 @@ public class DiscoveryClientWorkerIPv6 {
     private boolean timerActive = false;
     private List<MsgEvent> discoveredList;
     private DiscoveryCrypto discoveryCrypto;
-
+    private int discoveryPort;
 
     public DiscoveryClientWorkerIPv6(Launcher plugin, DiscoveryType disType, int discoveryTimeout, String multiCastNetwork) {
         this.logger = new CLogger(DiscoveryClientWorkerIPv6.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
@@ -34,6 +34,21 @@ public class DiscoveryClientWorkerIPv6 {
         this.multiCastNetwork = multiCastNetwork;
         this.disType = disType;
         discoveryCrypto = new DiscoveryCrypto(plugin);
+        this.discoveryPort = plugin.getConfig().getIntegerParam("netdiscoveryport",32005);
+
+    }
+
+    public DiscoveryClientWorkerIPv6(Launcher plugin, DiscoveryType disType, int discoveryTimeout, String multiCastNetwork, int discoveryPort) {
+        this.logger = new CLogger(DiscoveryClientWorkerIPv6.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
+        this.plugin = plugin;
+        gson = new Gson();
+        //timer = new Timer();
+        //timer.scheduleAtFixedRate(new StopListnerTask(), 1000, discoveryTimeout);
+        this.discoveryTimeout = discoveryTimeout;
+        this.multiCastNetwork = multiCastNetwork;
+        this.disType = disType;
+        discoveryCrypto = new DiscoveryCrypto(plugin);
+        this.discoveryPort = discoveryPort;
     }
 
     private class StopListnerTask extends TimerTask {
@@ -66,6 +81,8 @@ public class DiscoveryClientWorkerIPv6 {
             try {
                 MsgEvent me = gson.fromJson(json, MsgEvent.class);
                 if (me != null) {
+
+                    me.setParam("broadcast_latency", String.valueOf(System.currentTimeMillis()-Long.parseLong(me.getParam("broadcast_ts"))));
 
                     String remoteAddress = packet.getAddress().getHostAddress();
                     if (remoteAddress.contains("%")) {
@@ -135,6 +152,8 @@ public class DiscoveryClientWorkerIPv6 {
                                 timerActive = true;
                                 MsgEvent sme = new MsgEvent(MsgEvent.Type.DISCOVER, this.plugin.getRegion(), this.plugin.getAgent(), this.plugin.getPluginID(), "Discovery request.");
                                 sme.setParam("broadcast_ip", multiCastNetwork);
+                                sme.setParam("broadcast_interface", networkInterface.getDisplayName());
+                                sme.setParam("broadcast_ts", String.valueOf(System.currentTimeMillis()));
                                 sme.setParam("src_region", this.plugin.getRegion());
                                 sme.setParam("src_agent", this.plugin.getAgent());
 
@@ -149,6 +168,7 @@ public class DiscoveryClientWorkerIPv6 {
                                 } else {
                                     sme = null;
                                 }
+
 
                                 sme.setParam("discovery_validator",generateValidateMessage(sme));
 

@@ -21,6 +21,7 @@ class DiscoveryClientWorkerIPv4 {
     private boolean timerActive = false;
     private List<MsgEvent> discoveredList;
     private DiscoveryCrypto discoveryCrypto;
+    private int discoveryPort;
 
     DiscoveryClientWorkerIPv4(Launcher plugin, DiscoveryType disType, int discoveryTimeout, String broadCastNetwork) {
         this.logger = new CLogger(DiscoveryClientWorkerIPv4.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
@@ -30,7 +31,21 @@ class DiscoveryClientWorkerIPv4 {
         this.broadCastNetwork = broadCastNetwork;
         this.disType = disType;
         discoveryCrypto = new DiscoveryCrypto(plugin);
+        this.discoveryPort = plugin.getConfig().getIntegerParam("netdiscoveryport",32005);
     }
+
+    DiscoveryClientWorkerIPv4(Launcher plugin, DiscoveryType disType, int discoveryTimeout, String broadCastNetwork, int discoveryPort) {
+        this.logger = new CLogger(DiscoveryClientWorkerIPv4.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
+        this.plugin = plugin;
+        gson = new Gson();
+        this.discoveryTimeout = discoveryTimeout;
+        this.broadCastNetwork = broadCastNetwork;
+        this.disType = disType;
+        discoveryCrypto = new DiscoveryCrypto(plugin);
+        this.discoveryPort = discoveryPort;
+    }
+
+
 
     private class StopListenerTask extends TimerTask {
         public void run() {
@@ -53,6 +68,8 @@ class DiscoveryClientWorkerIPv4 {
             try {
                 MsgEvent me = gson.fromJson(json, MsgEvent.class);
                 if (me != null) {
+
+                    me.setParam("broadcast_latency", String.valueOf(System.currentTimeMillis()-Long.parseLong(me.getParam("broadcast_ts"))));
 
                     String remoteAddress = packet.getAddress().getHostAddress();
                     if (remoteAddress.contains("%")) {
@@ -122,6 +139,8 @@ class DiscoveryClientWorkerIPv4 {
 
                         MsgEvent sme = new MsgEvent(MsgEvent.Type.DISCOVER, this.plugin.getRegion(), this.plugin.getAgent(), this.plugin.getPluginID(), "Discovery request.");
                         sme.setParam("broadcast_ip", broadCastNetwork);
+                        sme.setParam("broadcast_interface", networkInterface.getDisplayName());
+                        sme.setParam("broadcast_ts", String.valueOf(System.currentTimeMillis()));
                         sme.setParam("src_region", this.plugin.getRegion());
                         sme.setParam("src_agent", this.plugin.getAgent());
 
@@ -144,7 +163,7 @@ class DiscoveryClientWorkerIPv4 {
                             logger.trace("Building sendPacket for {}", inAddr.toString());
                             String sendJson = gson.toJson(sme);
                             byte[] sendData = sendJson.getBytes();
-                            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet4Address.getByName(broadCastNetwork), 32005);
+                            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet4Address.getByName(broadCastNetwork), discoveryPort);
                             synchronized (c) {
                                 c.send(sendPacket);
                                 logger.trace("Sent sendPacket via {}", inAddr.toString());

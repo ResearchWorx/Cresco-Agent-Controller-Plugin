@@ -4,12 +4,9 @@ import com.google.auto.service.AutoService;
 import com.researchworx.cresco.controller.app.gPayload;
 import com.researchworx.cresco.controller.communication.*;
 import com.researchworx.cresco.controller.db.DBInterface;
-import com.researchworx.cresco.controller.globalcontroller.GlobalControllerChannel;
 import com.researchworx.cresco.controller.globalcontroller.GlobalHealthWatcher;
 import com.researchworx.cresco.controller.netdiscovery.*;
-import com.researchworx.cresco.controller.regionalcontroller.AgentDiscovery;
 import com.researchworx.cresco.controller.regionalcontroller.RegionHealthWatcher;
-import com.researchworx.cresco.library.core.WatchDog;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.plugin.core.CPlugin;
 import com.researchworx.cresco.library.utilities.CLogger;
@@ -126,8 +123,6 @@ public class Launcher extends CPlugin {
 
     private Map<String, Long> discoveryMap;
 
-    //private boolean hasGlobalController = false;
-    private GlobalControllerChannel globalControllerChannel;
 
     private boolean isIPv6 = false;
     private boolean isActive = false;
@@ -191,13 +186,10 @@ public class Launcher extends CPlugin {
                 this.perfMonitorNet = null;
             }
 
-            if (this.discoveryEngineThread != null) {
-                logger.trace("Discovery Engine shutting down");
-                DiscoveryEngine.shutdown();
-                this.discoveryEngineThread.join();
-                this.discoveryEngineThread = null;
-                this.isActive = false;
+            if(!stopNetDiscoveryEngine()) {
+                logger.error("Failed to stop Network Discovery Engine");
             }
+
             if (this.watchDog != null) {
                 this.watchDog.stop();
                 //this might be wrong
@@ -266,10 +258,6 @@ public class Launcher extends CPlugin {
 
     public ControllerConfig getControllerConfig() {
         return this.controllerConfig;
-    }
-
-    public GlobalControllerChannel getGlobalControllerChannel() {
-        return this.globalControllerChannel;
     }
 
     public void sendAPMessage(MsgEvent msg) {
@@ -428,10 +416,8 @@ public class Launcher extends CPlugin {
                 //Start controller services
 
                 //discovery engine
-                this.discoveryEngineThread = new Thread(new DiscoveryEngine(this));
-                this.discoveryEngineThread.start();
-                while (!this.DiscoveryActive) {
-                    Thread.sleep(1000);
+                if(!startNetDiscoveryEngine()) {
+                    logger.error("Start Network Discovery Engine Failed!");
                 }
                 //logger.debug("IPv6 DiscoveryEngine Started..");
 
@@ -770,6 +756,41 @@ public class Launcher extends CPlugin {
     }
     public void setConsumerThreadActive(boolean consumerThreadActive) {
         ConsumerThreadActive = consumerThreadActive;
+    }
+
+    public boolean stopNetDiscoveryEngine() {
+        boolean isStopped = false;
+        try {
+            if (this.discoveryEngineThread != null) {
+                logger.trace("Discovery Engine shutting down");
+                DiscoveryEngine.shutdown();
+                this.discoveryEngineThread.join();
+                this.discoveryEngineThread = null;
+                this.DiscoveryActive = false;
+            }
+            isStopped = true;
+        } catch(Exception ex) {
+            logger.error("stopNetDiscoveryEngine: " + ex.getMessage());
+        }
+        return isStopped;
+    }
+
+    public boolean startNetDiscoveryEngine() {
+        boolean isStarted = false;
+        try {
+            if(!this.DiscoveryActive) {
+                //discovery engine
+                this.discoveryEngineThread = new Thread(new DiscoveryEngine(this));
+                this.discoveryEngineThread.start();
+                while (!this.DiscoveryActive) {
+                    Thread.sleep(1000);
+                }
+            }
+            isStarted = true;
+        } catch(Exception ex) {
+            logger.error("startNetDiscoveryEngine: " + ex.getMessage());
+        }
+        return isStarted;
     }
 
     public ConcurrentLinkedQueue<MsgEvent> getResourceScheduleQueue() {

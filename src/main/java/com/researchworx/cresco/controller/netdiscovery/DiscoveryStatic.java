@@ -20,6 +20,7 @@ public class DiscoveryStatic {
     private CLogger logger;
     private DatagramSocket c;
     private Gson gson;
+    private int discoveryPort;
     //private Timer timer;
     //private int discoveryTimeout;
     //private DiscoveryType disType;
@@ -34,6 +35,17 @@ public class DiscoveryStatic {
         //this.discoveryTimeout = discoveryTimeout;
         //this.disType = disType;
         this.discoveryCrypto = new DiscoveryCrypto(plugin);
+        this.discoveryPort = plugin.getConfig().getIntegerParam("netdiscoveryport",32005);
+    }
+
+    public DiscoveryStatic(Launcher plugin, int discoveryPort) {
+        this.logger = new CLogger(DiscoveryStatic.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+        this.plugin = plugin;
+        gson = new Gson();
+        //this.discoveryTimeout = discoveryTimeout;
+        //this.disType = disType;
+        this.discoveryCrypto = new DiscoveryCrypto(plugin);
+        this.discoveryPort = discoveryPort;
     }
 
     /*
@@ -121,7 +133,7 @@ public class DiscoveryStatic {
                             //logger.trace("Building sendPacket for {}", inAddr.toString());
                             String sendJson = gson.toJson(sme);
                             byte[] sendData = sendJson.getBytes();
-                            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(hostAddress), 32005);
+                            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(hostAddress), discoveryPort);
                             synchronized (c) {
                                 c.send(sendPacket);
                                 logger.trace("Sent sendPacket to {}", hostAddress);

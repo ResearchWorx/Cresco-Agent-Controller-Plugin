@@ -20,6 +20,7 @@ public class DiscoveryEngine implements Runnable {
     private DiscoveryCrypto discoveryCrypto;
     private Gson gson;
     private CLogger logger;
+    private int discoveryPort;
 
     public DiscoveryEngine(Launcher plugin) {
         this.logger = new CLogger(DiscoveryEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
@@ -27,7 +28,16 @@ public class DiscoveryEngine implements Runnable {
         this.plugin = plugin;
         discoveryCrypto = new DiscoveryCrypto(plugin);
         gson = new Gson();
+        this.discoveryPort = plugin.getConfig().getIntegerParam("netdiscoveryport",32005);
+    }
 
+    public DiscoveryEngine(Launcher plugin, int discoveryPort) {
+        this.logger = new CLogger(DiscoveryEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
+        logger.trace("Initializing");
+        this.plugin = plugin;
+        discoveryCrypto = new DiscoveryCrypto(plugin);
+        gson = new Gson();
+        this.discoveryPort = discoveryPort;
     }
 
     public static void shutdown() {
@@ -76,9 +86,9 @@ public class DiscoveryEngine implements Runnable {
                     //logger.trace("Init [{}]", networkInterface.getDisplayName());
                     SocketAddress sa;
                     if (plugin.isIPv6()) {
-                        sa = new InetSocketAddress("[::]", 32005);
+                        sa = new InetSocketAddress("[::]", discoveryPort);
                     } else {
-                        sa = new InetSocketAddress("0.0.0.0", 32005);
+                        sa = new InetSocketAddress("0.0.0.0", discoveryPort);
                     }
                     socket = new MulticastSocket(null);
                     socket.bind(sa);
@@ -91,9 +101,9 @@ public class DiscoveryEngine implements Runnable {
 
                     if (plugin.isIPv6()) {
                         //find to network and site multicast addresses
-                        //SocketAddress saj = new InetSocketAddress(Inet6Address.getByName("ff05::1:c"),32005);
+                        //SocketAddress saj = new InetSocketAddress(Inet6Address.getByName("ff05::1:c"),discoveryPort);
                         //socket.joinGroup(saj, networkInterface);
-                        SocketAddress saj2 = new InetSocketAddress(Inet6Address.getByName("ff02::1:c"), 32005);
+                        SocketAddress saj2 = new InetSocketAddress(Inet6Address.getByName("ff02::1:c"), discoveryPort);
                         socket.joinGroup(saj2, networkInterface);
                     }
 
@@ -247,21 +257,23 @@ public class DiscoveryEngine implements Runnable {
                                     if (rme.getParam("discovery_type").equals(DiscoveryType.NETWORK.name())) {
                                         logger.debug("{}", "network discovery");
                                         me = getNetworkMsg(rme); //generate payload
-                                    } else if (rme.getParam("discovery_type").equals(DiscoveryType.AGENT.name())) {
-                                        logger.debug("{}", "agent discovery");
-                                        me = getAgentMsg(rme); //generate payload
-                                    } else if (rme.getParam("discovery_type").equals(DiscoveryType.REGION.name())) {
-                                        logger.debug("{}", "regional discovery");
-                                        me = getRegionMsg(rme);
-                                    } else if (rme.getParam("discovery_type").equals(DiscoveryType.GLOBAL.name())) {
-                                        //if this is not a global controller, don't respond
-                                        if(this.plugin.isGlobalController()) {
-                                            logger.debug("{}", "global discovery");
-                                            me = getGlobalMsg(rme);
+                                    }
+                                    if(this.plugin.isRegionalController()) {
+                                        if (rme.getParam("discovery_type").equals(DiscoveryType.AGENT.name())) {
+                                            logger.debug("{}", "agent discovery");
+                                            me = getAgentMsg(rme); //generate payload
+                                        } else if (rme.getParam("discovery_type").equals(DiscoveryType.REGION.name())) {
+                                            logger.debug("{}", "regional discovery");
+                                            me = getRegionMsg(rme);
+                                        } else if (rme.getParam("discovery_type").equals(DiscoveryType.GLOBAL.name())) {
+                                            //if this is not a global controller, don't respond
+                                            if(this.plugin.isGlobalController()) {
+                                                logger.debug("{}", "global discovery");
+                                                me = getGlobalMsg(rme);
+                                            }
                                         }
                                     }
                                 }
-
 
                                 if (me != null) {
 
@@ -324,6 +336,8 @@ public class DiscoveryEngine implements Runnable {
                         me.setParam("dst_port", rme.getParam("src_port"));
                         me.setParam("agent_count", String.valueOf(plugin.reachableAgents().size()));
                         me.setParam("discovery_type", DiscoveryType.NETWORK.name());
+                        me.setParam("broadcast_ts", rme.getParam("broadcast_ts"));
+
                         logger.debug("getAgentMsg = " + me.getParams().toString());
 
                     }
@@ -365,6 +379,7 @@ public class DiscoveryEngine implements Runnable {
                             me.setParam("agent_count", String.valueOf(plugin.reachableAgents().size()));
                             me.setParam("discovery_type", DiscoveryType.AGENT.name());
                             me.setParam("validated_authenication",validatedAuthenication);
+                            me.setParam("broadcast_ts", rme.getParam("broadcast_ts"));
                             logger.debug("getAgentMsg = " + me.getParams().toString());
                         //}
                     }
@@ -416,6 +431,7 @@ public class DiscoveryEngine implements Runnable {
                         me.setParam("dst_port", rme.getParam("src_port"));
                         me.setParam("agent_count", String.valueOf(plugin.reachableAgents().size()));
                         me.setParam("discovery_type", DiscoveryType.GLOBAL.name());
+                        me.setParam("broadcast_ts", rme.getParam("broadcast_ts"));
                         me.setParam("validated_authenication", validatedAuthenication);
                     }
                 }
@@ -444,6 +460,7 @@ public class DiscoveryEngine implements Runnable {
                         me.setParam("dst_port", rme.getParam("src_port"));
                         me.setParam("agent_count", String.valueOf(plugin.reachableAgents().size()));
                         me.setParam("discovery_type", DiscoveryType.REGION.name());
+                        me.setParam("broadcast_ts", rme.getParam("broadcast_ts"));
                         me.setParam("validated_authenication", validatedAuthenication);
                     }
                 }

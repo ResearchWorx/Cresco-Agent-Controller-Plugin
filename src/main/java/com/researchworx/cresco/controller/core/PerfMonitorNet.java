@@ -67,6 +67,7 @@ class PerfMonitorNet {
         List<MsgEvent> discoveryList = null;
         polling = true;
         try {
+
             discoveryList = new ArrayList<>();
             if (plugin.isIPv6()) {
                 if(ip6dc == null) {
@@ -96,9 +97,9 @@ class PerfMonitorNet {
 
 
     private class PerfMonitorTask extends TimerTask {
-        private CPlugin plugin;
+        private Launcher plugin;
 
-        PerfMonitorTask(CPlugin plugin) {
+        PerfMonitorTask(Launcher plugin) {
             this.plugin = plugin;
         }
 
@@ -112,17 +113,17 @@ class PerfMonitorNet {
                 tick.setParam("dst_region", plugin.getRegion());
                 tick.setParam("resource_id", plugin.getConfig().getStringParam("resource_id", "netdiscovery_resource"));
                 tick.setParam("inode_id", plugin.getConfig().getStringParam("inode_id", "netdiscovery_inode"));
-                //tick.setParam("resource_id",plugin.getConfig().getStringParam("resource_id","container_resource"));
-                //tick.setParam("inode_id",plugin.getConfig().getStringParam("inode_id","container_inode"));
 
-                List<MsgEvent> discoveryList = getNetworkDiscoveryList();
-                String discoveryListString = null;
-                if(discoveryList != null) {
-                    discoveryListString = gson.toJson(discoveryList);
+                if(!plugin.isDiscoveryActive()) {
+                    List<MsgEvent> discoveryList = getNetworkDiscoveryList();
+                    String discoveryListString = null;
+                    if (discoveryList != null) {
+                        discoveryListString = gson.toJson(discoveryList);
+                    }
+                    tick.setCompressedParam("network_map", discoveryListString);
+
+                    plugin.msgIn(tick);
                 }
-                tick.setCompressedParam("network_map", discoveryListString);
-
-                plugin.msgIn(tick);
             }
         }
     }

@@ -317,6 +317,62 @@ public class DBInterface {
         return queryReturn;
     }
 
+    private String getGlobalNetResourceInfo() {
+        String queryReturn = null;
+
+        Map<String,List<Map<String,String>>> queryMap;
+
+
+        try
+        {
+            queryMap = new HashMap<>();
+            List<Map<String,String>> regionArray = new ArrayList<>();
+
+            List<String> netInfoEdgeList = plugin.getGDB().dba.getIsAssignedEdgeIds("netdiscovery_resource", "netdiscovery_inode");
+
+            for(String edgeID : netInfoEdgeList) {
+                Map<String, String> edgeParams = dba.getIsAssignedParams(edgeID);
+
+                String network_map = gdb.stringUncompress(edgeParams.get("network_map"));
+                logger.error(network_map);
+                /*
+                cpu_core_count += Long.parseLong(edgeParams.get("cpu-logical-count"));
+                memoryAvailable += Long.parseLong(edgeParams.get("memory-available"));
+                memoryTotal += Long.parseLong(edgeParams.get("memory-total"));
+                for (String fspair : edgeParams.get("fs-map").split(",")) {
+                    String[] fskey = fspair.split(":");
+                    diskAvailable += Long.parseLong(edgeParams.get("fs-" + fskey[0] + "-available"));
+                    diskTotal += Long.parseLong(edgeParams.get("fs-" + fskey[0] + "-total"));
+                }
+                */
+            }
+
+            /*
+            Map<String,String> resourceTotal = new HashMap<>();
+            resourceTotal.put("cpu_core_count",String.valueOf(cpu_core_count));
+            resourceTotal.put("mem_available",String.valueOf(memoryAvailable));
+            resourceTotal.put("mem_total",String.valueOf(memoryTotal));
+            resourceTotal.put("disk_available",String.valueOf(diskAvailable));
+            resourceTotal.put("disk_total",String.valueOf(diskTotal));
+            regionArray.add(resourceTotal);
+            queryMap.put("globalresourceinfo",regionArray);
+
+            queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(queryMap))));
+            */
+
+        } catch(Exception ex) {
+            logger.error("getGlobalNetResourceInfo() " + ex.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString()); //
+        }
+
+        return queryReturn;
+
+    }
+
+
     private String getGlobalResourceInfo() {
         String queryReturn = null;
 
@@ -467,6 +523,24 @@ public class DBInterface {
 
         } catch(Exception ex) {
             logger.error("getAgentResourceInfo() " + ex.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString()); //
+        }
+
+        return queryReturn;
+
+    }
+
+    public String getNetResourceInfo() {
+        String queryReturn = null;
+        try
+        {
+                queryReturn = getGlobalNetResourceInfo();
+
+        } catch(Exception ex) {
+            logger.error("getNetResourceInfo() " + ex.toString());
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             ex.printStackTrace(pw);

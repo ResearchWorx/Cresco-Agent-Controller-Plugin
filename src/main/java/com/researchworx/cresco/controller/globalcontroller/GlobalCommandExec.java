@@ -58,6 +58,9 @@ public class GlobalCommandExec {
                     case "resourceinfo":
                         return resourceInfo(ce);
 
+                    case "netresourceinfo":
+                        return netResourceInfo(ce);
+
                     case "getenvstatus":
                         return getEnvStatus(ce);
 
@@ -194,6 +197,31 @@ public class GlobalCommandExec {
         }
         ce.setParam("pluginslist",plugin.getGDB().getPluginList(actionRegionPlugins, actionAgentPlugins));
         logger.trace("list plugins return : " + ce.getParams().toString());
+        }
+        catch(Exception ex) {
+            ce.setParam("error", ex.getMessage());
+        }
+
+        return ce;
+    }
+
+    private MsgEvent netResourceInfo(MsgEvent ce) {
+        try {
+            ce.setParam("netresourceinfo",plugin.getGDB().getNetResourceInfo());
+
+            /*
+            String actionRegionResourceInfo = null;
+            String actionAgentResourceInfo = null;
+
+            if((ce.getParam("action_region") != null) && (ce.getParam("action_agent") != null)) {
+                actionRegionResourceInfo = ce.getParam("action_region");
+                actionAgentResourceInfo = ce.getParam("action_agent");
+            } else if((ce.getParam("action_region") != null) && (ce.getParam("action_agent") == null)) {
+                actionRegionResourceInfo = ce.getParam("action_region");
+            }
+            ce.setParam("netresourceinfo",plugin.getGDB().getResourceInfo(actionRegionResourceInfo, actionAgentResourceInfo));
+            logger.trace("list plugins return : " + ce.getParams().toString());
+            */
         }
         catch(Exception ex) {
             ce.setParam("error", ex.getMessage());
