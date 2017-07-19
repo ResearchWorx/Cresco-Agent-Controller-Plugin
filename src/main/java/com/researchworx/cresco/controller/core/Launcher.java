@@ -415,10 +415,13 @@ public class Launcher extends CPlugin {
                 logger.debug("AgentPath=" + this.agentpath);
                 //Start controller services
 
+                //todo perhaps add this back
                 //discovery engine
+                /*
                 if(!startNetDiscoveryEngine()) {
                     logger.error("Start Network Discovery Engine Failed!");
                 }
+                */
                 //logger.debug("IPv6 DiscoveryEngine Started..");
 
                 logger.debug("Broker starting");
@@ -599,8 +602,15 @@ public class Launcher extends CPlugin {
 
             //start network performance monitor if create
             if(perfMonitorNet != null) {
+                logger.info("Starting perfMonNet...");
                 perfMonitorNet.start();
             }
+
+            logger.info("Starting Network Discovery Engine...");
+            if(!startNetDiscoveryEngine()) {
+                logger.error("Start Network Discovery Engine Failed!");
+            }
+
 
         } catch (Exception e) {
             e.printStackTrace();
