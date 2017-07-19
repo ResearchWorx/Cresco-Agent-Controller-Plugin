@@ -415,13 +415,11 @@ public class Launcher extends CPlugin {
                 logger.debug("AgentPath=" + this.agentpath);
                 //Start controller services
 
-                //todo perhaps add this back
                 //discovery engine
-                /*
                 if(!startNetDiscoveryEngine()) {
                     logger.error("Start Network Discovery Engine Failed!");
                 }
-                */
+
                 //logger.debug("IPv6 DiscoveryEngine Started..");
 
                 logger.debug("Broker starting");
@@ -543,8 +541,16 @@ public class Launcher extends CPlugin {
                     perfMonitorNet = new PerfMonitorNet(this);
                     perfMonitorNet.start();
                     logger.info("Network performance monitoring initialized");
+
                 }
                 this.isRegionalController = false;
+                if(this.getConfig().getBooleanParam("enable_clientnetdiscovery",true)) {
+                    //discovery engine
+                    if (!startNetDiscoveryEngine()) {
+                        logger.error("Start Network Discovery Engine Failed!");
+                    }
+                }
+
             }
 
             this.logger = new CLogger(msgOutQueue, region, agent, pluginID, CLogger.Level.Info);
@@ -606,11 +612,12 @@ public class Launcher extends CPlugin {
                 perfMonitorNet.start();
             }
 
+            /*
             logger.info("Starting Network Discovery Engine...");
             if(!startNetDiscoveryEngine()) {
                 logger.error("Start Network Discovery Engine Failed!");
             }
-
+            */
 
         } catch (Exception e) {
             e.printStackTrace();

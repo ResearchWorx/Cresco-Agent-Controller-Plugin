@@ -36,7 +36,7 @@ class PerfMonitorNet {
 
     PerfMonitorNet start() {
         if (this.running) return this;
-        Long interval = plugin.getConfig().getLongParam("perftimer", 5000L);
+        Long interval = plugin.getConfig().getLongParam("perftimer", 10000L);
 
         MsgEvent initial = new MsgEvent(MsgEvent.Type.INFO, plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), "Performance Monitoring timer set to " + interval + " milliseconds.");
         initial.setParam("src_region", plugin.getRegion());
@@ -114,7 +114,7 @@ class PerfMonitorNet {
                 tick.setParam("resource_id", plugin.getConfig().getStringParam("resource_id", "netdiscovery_resource"));
                 tick.setParam("inode_id", plugin.getConfig().getStringParam("inode_id", "netdiscovery_inode"));
 
-                if(!plugin.isDiscoveryActive()) {
+                //if(!plugin.isDiscoveryActive()) {
                     List<MsgEvent> discoveryList = getNetworkDiscoveryList();
                     String discoveryListString = null;
                     if (discoveryList != null) {
@@ -123,7 +123,7 @@ class PerfMonitorNet {
                     tick.setCompressedParam("network_map", discoveryListString);
 
                     plugin.msgIn(tick);
-                }
+                //}
             }
         }
     }
