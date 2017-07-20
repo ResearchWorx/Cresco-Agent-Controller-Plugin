@@ -54,16 +54,8 @@ class Executor extends CExecutor {
                     iplist.add(ipliststr);
                 }
 
-                List<MsgEvent> discoveryList = new ArrayList<>();
-                DiscoveryStatic ds = new DiscoveryStatic(mainPlugin);
-
-                for(String ip : iplist) {
-                    discoveryList.addAll(ds.discover(DiscoveryType.NETWORK, mainPlugin.getConfig().getIntegerParam("discovery_static_agent_timeout",10000), ip));
-                }
-
-                for(MsgEvent me : discoveryList) {
-                    logger.info(me.getParams().toString());
-                }
+                String discoveryListString = mainPlugin.getPerfMonitorNet().getStaticNetworkDiscovery(iplist);
+                msg.setCompressedParam("network_map", discoveryListString);
 
             } else {
                 logger.error("staticNetworkDiscovery: no ip list");

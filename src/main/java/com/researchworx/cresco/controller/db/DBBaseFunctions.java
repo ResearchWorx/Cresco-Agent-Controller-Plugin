@@ -11,6 +11,7 @@ import com.orientechnologies.orient.core.metadata.schema.OSchema;
 import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.sql.OCommandSQL;
 import com.researchworx.cresco.controller.core.Launcher;
+import com.researchworx.cresco.controller.netdiscovery.DiscoveryNode;
 import com.researchworx.cresco.library.utilities.CLogger;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
@@ -556,7 +557,6 @@ public class DBBaseFunctions {
         return paramsVal;
     }
 
-
     public Map<String,String> IgetNodeParams(String node_id) {
         OrientGraph graph = null;
         Map<String,String> params = new HashMap();
@@ -614,10 +614,11 @@ public class DBBaseFunctions {
         return paramsVal;
     }
 
+    //todo put is reachable code here
+
     //WRITES
 
-    private String IaddNode(String region, String agent, String plugin)
-    {
+    private String IaddNode(String region, String agent, String plugin) {
         String node_id = null;
         OrientGraph graph = null;
         try
@@ -741,8 +742,7 @@ public class DBBaseFunctions {
 
     }
 
-    public String addNode(String region, String agent, String plugin)
-    {
+    public String addNode(String region, String agent, String plugin) {
         String node_id = null;
         int count = 0;
         try
@@ -773,8 +773,68 @@ public class DBBaseFunctions {
         return node_id;
     }
 
-    public String addEdge(String src_region, String src_agent, String src_plugin, String dst_region, String dst_agent, String dst_plugin, String className)
-    {
+    public String addIsReachableEdge(String src_region, String src_agent, String src_plugin, String dst_region, String dst_agent, String dst_plugin, DiscoveryNode dn) {
+        String edge_id = null;
+        int count = 0;
+        try
+        {
+
+            while((edge_id == null) && (count != retryCount))
+            {
+                edge_id = IaddIsReachableEdge(src_region, src_agent, src_plugin, dst_region, dst_agent, dst_plugin, dn);
+                count++;
+            }
+
+            if((edge_id == null) && (count == retryCount))
+            {
+                logger.debug("DBEngine : addIsReachableEdge : Failed to add edge in " + count + " retrys");
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.debug("DBEngine : addIsReachableEdge : Error " + ex.toString());
+        }
+
+        return edge_id;
+    }
+
+    private String IaddIsReachableEdge(String src_region, String src_agent, String src_plugin, String dst_region, String dst_agent, String dst_plugin, DiscoveryNode dn) {
+        String edge_id = null;
+        try
+        {
+            String src_node_id = getNodeId(src_region,src_agent,src_plugin);
+            String dst_node_id = getNodeId(dst_region,dst_agent,dst_plugin);
+
+            OrientGraph graph = factory.getTx();
+            Vertex fromV = graph.getVertex(src_node_id);
+            Vertex toV = graph.getVertex(dst_node_id);
+
+            Edge isEdge = graph.addEdge("class:isReachable", fromV, toV, "isReachable");
+            isEdge.setProperty("src_ip",dn.src_ip);
+            isEdge.setProperty("src_port",dn.src_port);
+            isEdge.setProperty("src_ip",dn.dst_ip);
+            isEdge.setProperty("src_port",dn.dst_port);
+            isEdge.setProperty("broadcast_ts",dn.broadcast_ts);
+            isEdge.setProperty("broadcast_latency",dn.broadcast_latency);
+
+            graph.commit();
+            graph.shutdown();
+            edge_id = isEdge.getId().toString();
+        }
+        catch(com.orientechnologies.orient.core.exception.OConcurrentModificationException exc)
+        {
+            //eat exception
+        }
+        catch(Exception ex)
+        {
+            logger.debug("IaddIsReachableEdge Error: " + ex.toString());
+
+        }
+        return edge_id;
+
+    }
+
+    public String addEdge(String src_region, String src_agent, String src_plugin, String dst_region, String dst_agent, String dst_plugin, String className) {
         String edge_id = null;
         int count = 0;
         try
@@ -799,8 +859,7 @@ public class DBBaseFunctions {
         return edge_id;
     }
 
-    private String IaddEdge(String src_region, String src_agent, String src_plugin, String dst_region, String dst_agent, String dst_plugin, String className)
-    {
+    private String IaddEdge(String src_region, String src_agent, String src_plugin, String dst_region, String dst_agent, String dst_plugin, String className) {
         String edge_id = null;
         try
         {
@@ -829,8 +888,8 @@ public class DBBaseFunctions {
 
     }
 
-    public boolean removeNode(String region, String agent, String plugin)
-    {
+
+    public boolean removeNode(String region, String agent, String plugin) {
         boolean nodeRemoved = false;
         int count = 0;
         try
@@ -1346,8 +1405,7 @@ public class DBBaseFunctions {
     }
 
     //Base INIT Functions
-    public void initCrescoDB()
-    {
+    public void initCrescoDB() {
         try
         {
             //index properties
@@ -1381,6 +1439,11 @@ public class DBBaseFunctions {
             //createEdgeClass("isPlugin",isPluginProps);
             createEdgeClass("isPlugin",null);
 
+            logger.debug("Create isReachable Edge Class");
+            String[] isReachableProps = {"src_agent", "dst_agent"}; //Property names
+            //createEdgeClass("isConnected",isConnectedProps);
+            createEdgeClass("isReachable",null);
+
         }
         catch(Exception ex)
         {
@@ -1393,8 +1456,7 @@ public class DBBaseFunctions {
     }
 
     //Class Create Functions
-    boolean createVertexIndex(String className, String indexName, boolean isUnique)
-    {
+    boolean createVertexIndex(String className, String indexName, boolean isUnique) {
         boolean wasCreated = false;
         try
         {
@@ -1435,8 +1497,7 @@ public class DBBaseFunctions {
         return wasCreated;
     }
 
-    boolean createVertexIndex(String className, String[] props, String indexName, boolean isUnique)
-    {
+    boolean createVertexIndex(String className, String[] props, String indexName, boolean isUnique) {
         boolean wasCreated = false;
         OrientGraphNoTx txGraph = factory.getNoTx();
         //OSchema schema = ((OrientGraph)odb).getRawGraph().getMetadata().getSchema();
@@ -1466,8 +1527,7 @@ public class DBBaseFunctions {
         return wasCreated;
     }
 
-    boolean createVertexClass(String className, String[] props)
-    {
+    boolean createVertexClass(String className, String[] props) {
         boolean wasCreated = false;
         OrientGraphNoTx txGraph = factory.getNoTx();
         //OSchema schema = ((OrientGraph)odb).getRawGraph().getMetadata().getSchema();
@@ -1488,8 +1548,7 @@ public class DBBaseFunctions {
         return wasCreated;
     }
 
-    boolean createEdgeClass(String className, String[] props)
-    {
+    boolean createEdgeClass(String className, String[] props) {
         boolean wasCreated = false;
         OrientGraphNoTx txGraph = factory.getNoTx();
         //OSchema schema = ((OrientGraph)odb).getRawGraph().getMetadata().getSchema();
@@ -1618,7 +1677,7 @@ public class DBBaseFunctions {
         return isImported;
     }
 
-        public String getDBExport() {
+    public String getDBExport() {
         String exportString = null;
         Boolean createDB = false;
         try {

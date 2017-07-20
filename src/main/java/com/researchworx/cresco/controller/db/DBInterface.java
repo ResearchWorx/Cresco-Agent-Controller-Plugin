@@ -1,14 +1,18 @@
 package com.researchworx.cresco.controller.db;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.researchworx.cresco.controller.app.gPayload;
 import com.researchworx.cresco.controller.core.Launcher;
+import com.researchworx.cresco.controller.netdiscovery.DiscoveryNode;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -322,9 +326,11 @@ public class DBInterface {
 
         Map<String,List<Map<String,String>>> queryMap;
 
-
+        List<DiscoveryNode> dsList = null;
         try
         {
+            dsList = new ArrayList<>();
+
             queryMap = new HashMap<>();
             List<Map<String,String>> regionArray = new ArrayList<>();
 
@@ -333,8 +339,18 @@ public class DBInterface {
             for(String edgeID : netInfoEdgeList) {
                 Map<String, String> edgeParams = dba.getIsAssignedParams(edgeID);
 
-                String network_map = gdb.stringUncompress(edgeParams.get("network_map"));
-                logger.error(network_map);
+                String network_map_json = gdb.stringUncompress(edgeParams.get("network_map"));
+
+
+                Type listType = new TypeToken<ArrayList<DiscoveryNode>>(){}.getType();
+                List<DiscoveryNode> tmpDsList = new Gson().fromJson(network_map_json, listType);
+                dsList.addAll(tmpDsList);
+
+                //MsgEvent me = msgEventFromJson(network_map_json);
+
+
+                //MsgEvent
+                //logger.error(network_map);
                 /*
                 cpu_core_count += Long.parseLong(edgeParams.get("cpu-logical-count"));
                 memoryAvailable += Long.parseLong(edgeParams.get("memory-available"));
@@ -346,6 +362,12 @@ public class DBInterface {
                 }
                 */
             }
+
+            for(DiscoveryNode dn : dsList) {
+                logger.info("src_ip {} src_port {} src_region {} src_agent {}",dn.src_ip, dn.src_port, dn.src_region, dn.src_agent);
+                logger.info("dst_ip {} dst_port {} dst_region {} dst_agent {}",dn.dst_ip, dn.dst_port, dn.dst_region, dn.dst_agent);
+            }
+
 
             /*
             Map<String,String> resourceTotal = new HashMap<>();

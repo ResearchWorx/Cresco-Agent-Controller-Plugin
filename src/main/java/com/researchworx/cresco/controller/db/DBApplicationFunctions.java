@@ -2683,7 +2683,8 @@ public class DBApplicationFunctions {
     public List<String> getIsAssignedEdgeIds(String resource_id, String inode_id)
     {
         String edge_id = null;
-        OrientGraph graph = null;
+        //OrientGraph graph = null;
+        OrientGraphNoTx graph = null;
         List<String> edge_list = null;
         try
         {
@@ -2692,13 +2693,15 @@ public class DBApplicationFunctions {
                 edge_list = new ArrayList<String>();
                 //OrientGraph graph = factory.getTx();
                 //OrientGraphNoTx graph = factory.getNoTx();
-                graph = factory.getTx();
+                //graph = factory.getTx();
+                graph = factory.getNoTx();
                 Iterable<Vertex> resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:isAssigned.edgeProp WHERE key = [\""+ resource_id + "\",\""+ inode_id +"\"]")).execute();
                 Iterator<Vertex> iter = resultIterator.iterator();
                 while(iter.hasNext())
                 {
                     Vertex v = iter.next();
                     edge_id = v.getProperty("rid").toString();
+
                     if(edge_id != null)
                     {
                         edge_id = edge_id.substring(edge_id.indexOf("[") + 1, edge_id.indexOf("]"));
@@ -3036,8 +3039,7 @@ public class DBApplicationFunctions {
 
     }
   */
-    public String addIsAttachedEdge(String resource_id, String inode_id, String region, String agent, String plugin)
-    {
+    public String addIsAttachedEdge(String resource_id, String inode_id, String region, String agent, String plugin) {
         String edge_id = null;
 
         int count = 0;
@@ -3068,8 +3070,7 @@ public class DBApplicationFunctions {
         return edge_id;
     }
 
-    private String IaddIsAttachedEdge(String resource_id, String inode_id, String region, String agent, String pluginId)
-    {
+    private String IaddIsAttachedEdge(String resource_id, String inode_id, String region, String agent, String pluginId) {
         String edge_id = null;
         TransactionalGraph graph = null;
         try
@@ -3151,7 +3152,6 @@ public class DBApplicationFunctions {
         return edge_id;
 
     }
-
 
 
     public String addINode(String resource_id, String inode_id)

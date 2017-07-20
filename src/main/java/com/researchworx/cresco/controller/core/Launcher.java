@@ -66,6 +66,8 @@ public class Launcher extends CPlugin {
 
     private Thread discoveryEngineThread;
 
+    public PerfMonitorNet getPerfMonitorNet() {return perfMonitorNet; }
+
     public Thread getActiveBrokerManagerThread() {
         return activeBrokerManagerThread;
     }
