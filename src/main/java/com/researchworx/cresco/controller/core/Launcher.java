@@ -391,7 +391,8 @@ public class Launcher extends CPlugin {
                     }
                     if ((this.region.equals("init")) && (this.agent.equals("init"))) {
                         //RandomString rs = new RandomString(4);
-                        this.agent = "agent-" + java.util.UUID.randomUUID().toString();//rs.nextString();
+                        this.agent = getConfig().getStringParam("agent_name", "agent-" + java.util.UUID.randomUUID().toString());
+                        //this.agent = "agent-" + java.util.UUID.randomUUID().toString();//rs.nextString();
                         //logger.warn("Agent region changed from :" + oldRegion + " to " + region);
                     }
                     this.brokerAddressAgent = cbrokerAddress;
@@ -409,8 +410,10 @@ public class Launcher extends CPlugin {
                 //String oldRegion = region; //keep old region if assigned
 
                 if ((this.region.equals("init")) && (this.agent.equals("init"))) {
-                    region = "region-" + java.util.UUID.randomUUID().toString();
-                    agent = "agent-" + java.util.UUID.randomUUID().toString();
+                    region = getConfig().getStringParam("region_name", "region-" + java.util.UUID.randomUUID().toString());
+                    agent = getConfig().getStringParam("agent_name", "agent-" + java.util.UUID.randomUUID().toString());
+                    //region = "region-" + java.util.UUID.randomUUID().toString();
+                    //agent = "agent-" + java.util.UUID.randomUUID().toString();
                     logger.debug("Generated regionid=" + this.region);
                 }
                 this.agentpath = this.region + "_" + this.agent;
@@ -529,7 +532,8 @@ public class Launcher extends CPlugin {
                     }
                     if ((this.region.equals("init")) && (this.agent.equals("init"))) {
                         //RandomString rs = new RandomString(4);
-                        this.agent = "agent-" + java.util.UUID.randomUUID().toString();//rs.nextString();
+                        this.agent = getConfig().getStringParam("agent_name" ,"agent-" + java.util.UUID.randomUUID().toString());
+                        //this.agent = "agent-" + java.util.UUID.randomUUID().toString();//rs.nextString();
                         //logger.warn("Agent region changed from :" + oldRegion + " to " + region);
                     }
                     this.brokerAddressAgent = cbrokerAddress;
