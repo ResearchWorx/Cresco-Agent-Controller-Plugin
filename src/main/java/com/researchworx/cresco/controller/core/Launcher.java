@@ -391,7 +391,7 @@ public class Launcher extends CPlugin {
                     }
                     if ((this.region.equals("init")) && (this.agent.equals("init"))) {
                         //RandomString rs = new RandomString(4);
-                        this.agent = getConfig().getStringParam("agent_name", "agent-" + java.util.UUID.randomUUID().toString());
+                        this.agent = getConfig().getStringParam("agentname", "agent-" + java.util.UUID.randomUUID().toString());
                         //this.agent = "agent-" + java.util.UUID.randomUUID().toString();//rs.nextString();
                         //logger.warn("Agent region changed from :" + oldRegion + " to " + region);
                     }
@@ -410,8 +410,8 @@ public class Launcher extends CPlugin {
                 //String oldRegion = region; //keep old region if assigned
 
                 if ((this.region.equals("init")) && (this.agent.equals("init"))) {
-                    region = getConfig().getStringParam("region_name", "region-" + java.util.UUID.randomUUID().toString());
-                    agent = getConfig().getStringParam("agent_name", "agent-" + java.util.UUID.randomUUID().toString());
+                    region = getConfig().getStringParam("regionname", "region-" + java.util.UUID.randomUUID().toString());
+                    agent = getConfig().getStringParam("agentname", "agent-" + java.util.UUID.randomUUID().toString());
                     //region = "region-" + java.util.UUID.randomUUID().toString();
                     //agent = "agent-" + java.util.UUID.randomUUID().toString();
                     logger.debug("Generated regionid=" + this.region);
@@ -532,7 +532,7 @@ public class Launcher extends CPlugin {
                     }
                     if ((this.region.equals("init")) && (this.agent.equals("init"))) {
                         //RandomString rs = new RandomString(4);
-                        this.agent = getConfig().getStringParam("agent_name" ,"agent-" + java.util.UUID.randomUUID().toString());
+                        this.agent = getConfig().getStringParam("agentname" ,"agent-" + java.util.UUID.randomUUID().toString());
                         //this.agent = "agent-" + java.util.UUID.randomUUID().toString();//rs.nextString();
                         //logger.warn("Agent region changed from :" + oldRegion + " to " + region);
                     }
