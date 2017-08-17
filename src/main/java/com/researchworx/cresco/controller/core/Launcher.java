@@ -146,9 +146,9 @@ public class Launcher extends CPlugin {
 
     public boolean isStarted = false;
 
-
     public Launcher() {
-        this.msgInProcessQueue = Executors.newFixedThreadPool(100);
+        //this.msgInProcessQueue = Executors.newFixedThreadPool(100);
+        this.msgInProcessQueue = Executors.newCachedThreadPool();
     }
 
     @Override
@@ -158,6 +158,7 @@ public class Launcher extends CPlugin {
 
     public void start() {
         this.config = new ControllerConfig(config.getConfig());
+        System.setProperty("log.console.level", "SEVERE");
     }
 
     @Override
@@ -233,7 +234,7 @@ public class Launcher extends CPlugin {
             }
             if (this.restartOnShutdown) {
                 MsgEvent ce = new MsgEvent(MsgEvent.Type.CONFIG, this.region, this.agent, null, "comminit");
-                ce.setParam("configtype","comminit");
+                ce.setParam("action","comminit");
                 ce.setParam("src_region", this.region);
                 ce.setParam("src_agent", this.agent);
                 ce.setParam("src_plugin", this.pluginID);
@@ -275,7 +276,11 @@ public class Launcher extends CPlugin {
     }
 
     public void commInit() {
+
+
         watchDog.stop();
+
+
         logger.info("Initializing services");
         setActive(true);
 
@@ -777,6 +782,7 @@ public class Launcher extends CPlugin {
     public boolean isConsumerThreadActive() {
         return ConsumerThreadActive;
     }
+
     public void setConsumerThreadActive(boolean consumerThreadActive) {
         ConsumerThreadActive = consumerThreadActive;
     }
@@ -903,7 +909,6 @@ public class Launcher extends CPlugin {
     public String getGlobalControllerPath() {
         return this.globalControllerPath;
     }
-
     public void setGlobalControllerPath(String controllerPath) {
 
         logger.trace("SETTING GLOBAL CONTROLLER PATH : OLD : " + globalControllerPath);
@@ -942,6 +947,7 @@ public class Launcher extends CPlugin {
     public Map<String, Long> getDiscoveryMap() {
         return discoveryMap;
     }
+
     public void setDiscoveryMap(Map<String, Long> discoveryMap) {
         this.discoveryMap = discoveryMap;
     }
@@ -952,10 +958,12 @@ public class Launcher extends CPlugin {
     public void setGDB(DBInterface gdb) {
         this.gdb = gdb;
     }
+
     public void removeGDBNode(String region, String agent, String pluginID) {
         if (this.gdb != null)
             this.gdb.removeNode(region, agent, pluginID);
     }
+
     public String getStringFromError(Exception ex) {
         StringWriter errors = new StringWriter();
         ex.printStackTrace(new PrintWriter(errors));

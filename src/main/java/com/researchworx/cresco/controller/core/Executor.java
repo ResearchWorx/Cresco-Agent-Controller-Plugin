@@ -20,11 +20,37 @@ class Executor extends CExecutor {
     }
 
     @Override
-    public MsgEvent processConfig(MsgEvent msg) {
+    public MsgEvent processConfig(MsgEvent ce) {
         logger.trace("Processing Config message");
+
+        if (ce.getMsgType() == MsgEvent.Type.EXEC) {
+            switch (ce.getParam("action")) {
+
+                default:
+                    logger.error("Unknown configtype found {} for {}:", ce.getParam("action"), ce.getMsgType().toString());
+                    return null;
+            }
+        } else if (ce.getMsgType() == MsgEvent.Type.CONFIG) {
+            switch (ce.getParam("action")) {
+                case "comminit":
+                    return commInit(ce);
+
+                default:
+                    logger.error("Unknown configtype found {} for {}:", ce.getParam("action"), ce.getMsgType().toString());
+                    return null;
+            }
+        } else {
+            logger.error("Unknown configtype found {} for {}:", ce.getParam("action"), ce.getMsgType().toString());
+        }
+
+        return null;
+    }
+
+        /*
+
         if (msg.getParam("configtype") == null || msg.getMsgBody() == null) return null;
         logger.debug("Config-type is properly set, as well as message body");
-        switch (msg.getParam("configtype")) {
+        switch (msg.getParam("action")) {
             case "comminit":
                 return commInit(msg);
             case "enablenetdiscovery":
@@ -37,7 +63,9 @@ class Executor extends CExecutor {
                 logger.debug("Unknown configtype found: {}", msg.getParam("configtype"));
                 return null;
         }
-    }
+        */
+
+
 
     MsgEvent staticNetworkDiscovery(MsgEvent msg) {
         boolean isEnabled = false;
