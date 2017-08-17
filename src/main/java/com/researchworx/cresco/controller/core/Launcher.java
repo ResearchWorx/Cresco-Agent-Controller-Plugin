@@ -158,7 +158,7 @@ public class Launcher extends CPlugin {
 
     public void start() {
         this.config = new ControllerConfig(config.getConfig());
-        //System.setProperty("log.console.level", "SEVERE");
+        System.setProperty("log.console.level", "SEVERE");
     }
 
     @Override
@@ -634,6 +634,9 @@ public class Launcher extends CPlugin {
             e.printStackTrace();
             logger.trace("commInit " + e.getMessage());
         }
+
+        String dbexport = getGDB().gdb.getDBExport();
+
 
     }
 

@@ -1741,7 +1741,7 @@ public class DBBaseFunctions {
 
             String exportStringRaw = new String(os.toByteArray(),"UTF-8");
 
-            logger.error("[" + exportString + "]");
+            logger.trace("[" + exportString + "]");
 
             export.close();
 
