@@ -1741,6 +1741,8 @@ public class DBBaseFunctions {
 
             String exportStringRaw = new String(os.toByteArray(),"UTF-8");
 
+            logger.error("[" + exportString + "]");
+
             export.close();
 
             //Now Compress and Encode
