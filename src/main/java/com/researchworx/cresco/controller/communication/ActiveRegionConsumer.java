@@ -48,7 +48,9 @@ public class ActiveRegionConsumer implements Runnable {
 			this.plugin.setConsumerThreadRegionActive(true);
 			MessageConsumer consumer = sess.createConsumer(RXqueue);
 			while (this.plugin.isConsumerThreadRegionActive()) {
-				TextMessage msg = (TextMessage) consumer.receive(1000);
+				//todo remove delay
+				//TextMessage msg = (TextMessage) consumer.receive(100);
+				TextMessage msg = (TextMessage) consumer.receive();
 				if (msg != null) {
 
 					MsgEvent me = null;
@@ -58,8 +60,8 @@ public class ActiveRegionConsumer implements Runnable {
 						logger.error("Invalid MsgEvent Format : " + msg.getText());
 					}
 					if(me != null) {
-					me.setParam("dst_agent",plugin.getAgent());
-                    me.setParam("dst_plugin",plugin.getPluginID());
+					//me.setParam("dst_agent",plugin.getAgent());
+                    //me.setParam("dst_plugin",plugin.getPluginID());
 
                     if(me.getParam("src_agent") == null) {
 						//logger.error("src_agent = null: " + me.getParams().toString());

@@ -38,7 +38,12 @@ public class RegionalCommandExec {
 
 	public MsgEvent execute(MsgEvent le) {
 
-            if(le.getParam("globalcmd") != null) {
+	    //Add Region specific information for return information
+        le.setParam("dst_agent",plugin.getAgent());
+        le.setParam("dst_plugin",plugin.getPluginID());
+
+
+        if(le.getParam("globalcmd") != null) {
                 //this is a global command
                 if(plugin.isGlobalController()) {
                     return gce.execute(le);
@@ -52,7 +57,21 @@ public class RegionalCommandExec {
             //le.setParam("dst_agent",plugin.getAgent());
             //le.setParam("dst_plugin",plugin.getPluginID());
 
-            if(le.getMsgType() == MsgEvent.Type.CONFIG) {
+
+
+        if(le.getMsgType() == MsgEvent.Type.EXEC) {
+            if(le.getParam("action") != null) {
+                switch (le.getParam("action")) {
+
+                        case "ping":
+                            return pingReply(le);
+
+                        default:
+                            logger.error("RegionalCommandExec Unknown configtype found {} for {}:", le.getParam("action"), le.getMsgType().toString());
+                            return null;
+                }
+            }
+            } else if(le.getMsgType() == MsgEvent.Type.CONFIG) {
                 if(le.getParam("action") != null) {
                     switch (le.getParam("action")) {
                         case "disable":
@@ -70,7 +89,7 @@ public class RegionalCommandExec {
                             globalSend(le);
                             break;
                         default:
-                            logger.debug("Unknown configtype found: {}", le.getParam("action"));
+                            logger.debug("RegionalCommandExec Unknown configtype found: {}", le.getParam("action"));
                             return null;
                     }
 
@@ -102,11 +121,20 @@ public class RegionalCommandExec {
 			}
 
 			else {
-				logger.error("UNKNOWN MESSAGE! : MsgType=" + le.getMsgType() + " " +  le.getParams());
+				logger.error("RegionalCommandExec UNKNOWN MESSAGE! : MsgType=" + le.getMsgType() + " " +  le.getParams());
 			}
 
 		return null;
 	}
+
+    private MsgEvent pingReply(MsgEvent msg) {
+        logger.debug("ping message type found");
+        msg.setParam("action","pong");
+        msg.setParam("remote_ts", String.valueOf(System.currentTimeMillis()));
+        msg.setParam("type", "agent_controller");
+        logger.debug("Returning communication details to Cresco agent");
+        return msg;
+    }
 
     private void globalSend(MsgEvent ge) {
         try {

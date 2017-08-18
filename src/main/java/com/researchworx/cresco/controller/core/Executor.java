@@ -13,6 +13,8 @@ class Executor extends CExecutor {
     private Launcher mainPlugin;
     private CLogger logger;
 
+    private long messageCount = 0;
+
     Executor(Launcher plugin) {
         super(plugin);
         this.mainPlugin = plugin;
@@ -20,30 +22,53 @@ class Executor extends CExecutor {
     }
 
     @Override
-    public MsgEvent processConfig(MsgEvent ce) {
-        logger.trace("Processing Config message");
+    public MsgEvent processExec(MsgEvent ce) {
+        logger.trace("Processing Exec message");
 
-        if (ce.getMsgType() == MsgEvent.Type.EXEC) {
             switch (ce.getParam("action")) {
+
+                case "ping":
+                    return pingReply(ce);
+
+                case "noop":
+                    noop();
+                    break;
 
                 default:
                     logger.error("Unknown configtype found {} for {}:", ce.getParam("action"), ce.getMsgType().toString());
-                    return null;
+
             }
-        } else if (ce.getMsgType() == MsgEvent.Type.CONFIG) {
+
+        return null;
+    }
+
+    @Override
+    public MsgEvent processConfig(MsgEvent ce) {
+        logger.trace("Processing Config message");
+
             switch (ce.getParam("action")) {
                 case "comminit":
                     return commInit(ce);
 
                 default:
                     logger.error("Unknown configtype found {} for {}:", ce.getParam("action"), ce.getMsgType().toString());
-                    return null;
+
             }
-        } else {
-            logger.error("Unknown configtype found {} for {}:", ce.getParam("action"), ce.getMsgType().toString());
-        }
 
         return null;
+    }
+
+    private MsgEvent pingReply(MsgEvent msg) {
+        logger.debug("ping message type found");
+        msg.setParam("action","pong");
+        msg.setParam("remote_ts", String.valueOf(System.currentTimeMillis()));
+        msg.setParam("type", "agent_controller");
+        logger.debug("Returning communication details to Cresco agent");
+        return msg;
+    }
+
+    private void noop() {
+
     }
 
         /*

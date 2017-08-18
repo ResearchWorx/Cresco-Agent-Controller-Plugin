@@ -241,7 +241,8 @@ public class MsgRoute implements Runnable {
                 case 126:
                     logger.debug("CONTROLLER AGENT SENDING MESSAGE TO ITS CONTROLLER PLUGIN 126");
                     logger.trace(rm.getParams().toString());
-                    re = getRegionalCommandExec();
+                    re = getCommandExec();
+                    //re = getRegionalCommandExec();
                     break;
                 case 127:
                     logger.debug("CONTROLLER PLUGIN SENDING MESSAGE TO SELF 127");

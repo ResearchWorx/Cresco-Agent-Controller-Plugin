@@ -4,6 +4,7 @@ import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.utilities.CLogger;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.broker.TransportConnector;
+import org.apache.activemq.broker.jmx.ManagementContext;
 import org.apache.activemq.broker.region.policy.PolicyEntry;
 import org.apache.activemq.broker.region.policy.PolicyMap;
 import org.apache.activemq.command.ActiveMQDestination;
@@ -58,6 +59,9 @@ public class ActiveBroker {
 		        entry.setGcInactiveDestinations(true);
 		        entry.setInactiveTimeoutBeforeGC(15000);
 
+				ManagementContext mc = new ManagementContext();
+				mc.setSuppressMBean("endpoint=dynamicProducer,endpoint=Consumer");
+
 		        /*
 
 				entry.setProducerFlowControl(true);
@@ -77,7 +81,7 @@ public class ActiveBroker {
 				broker.setBrokerName(brokerName);
 				broker.setSchedulePeriodForDestinationPurge(2500);
 				broker.setDestinationPolicy(map);
-
+				broker.setManagementContext(mc);
 				/*
 				broker.setUseJmx(true);
 				broker.getManagementContext().setConnectorPort(2099);

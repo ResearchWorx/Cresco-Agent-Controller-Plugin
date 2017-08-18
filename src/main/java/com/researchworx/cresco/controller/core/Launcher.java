@@ -147,8 +147,9 @@ public class Launcher extends CPlugin {
     public boolean isStarted = false;
 
     public Launcher() {
-        //this.msgInProcessQueue = Executors.newFixedThreadPool(100);
+        //this.msgInProcessQueue = Executors.newFixedThreadPool(4);
         this.msgInProcessQueue = Executors.newCachedThreadPool();
+        //this.msgInProcessQueue = Executors.newSingleThreadExecutor();
     }
 
     @Override

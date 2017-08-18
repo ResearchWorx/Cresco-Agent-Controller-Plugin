@@ -62,7 +62,9 @@ public class ActiveAgentConsumer implements Runnable {
 			plugin.setConsumerThreadActive(true);
 			MessageConsumer consumer = sess.createConsumer(RXqueue);
 			while (plugin.isConsumerThreadActive()) {
-				TextMessage msg = (TextMessage) consumer.receive(1000);
+				//todo remove delay
+				//TextMessage msg = (TextMessage) consumer.receive(100);
+				TextMessage msg = (TextMessage) consumer.receive();
 				if (msg != null) {
 					logger.debug("Incoming Queue: {}", RXqueue);
 					MsgEvent me = gson.fromJson(msg.getText(), MsgEvent.class);
