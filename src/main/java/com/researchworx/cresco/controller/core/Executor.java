@@ -92,7 +92,12 @@ class Executor extends CExecutor {
             long endtime = System.currentTimeMillis();
             long elapsed = (endtime - starttime);
             float timemp = elapsed/samples;
-            float mps = samples/((endtime - starttime)/1000);
+            float mps = -1;
+            try {
+                mps = samples / ((endtime - starttime) / 1000);
+            } catch(Exception ex) {
+                //do nothing
+            }
             msg.setParam("elapsedtime",String.valueOf(elapsed));
             msg.setParam("timepermessage",String.valueOf(timemp));
             msg.setParam("mps",String.valueOf(mps));
