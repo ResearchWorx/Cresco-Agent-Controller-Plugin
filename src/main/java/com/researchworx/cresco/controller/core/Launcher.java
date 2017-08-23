@@ -267,6 +267,7 @@ public class Launcher extends CPlugin {
     public void sendAPMessage(MsgEvent msg) {
         if ((this.ap == null) && (!region.equals("init"))) {
             logger.error("AP is null");
+            logger.error("Message: " + msg.getParams());
             return;
         }
         else if(this.ap == null) {
@@ -498,7 +499,7 @@ public class Launcher extends CPlugin {
                 if (!discoveryList.isEmpty()) {
                     for (MsgEvent ime : discoveryList) {
                         this.incomingCanidateBrokers.offer(ime);
-                        logger.info("Regional Controller Found: " + ime.getParams());
+                        logger.debug("Regional Controller Found: " + ime.getParams());
                     }
                 }
 
@@ -550,10 +551,12 @@ public class Launcher extends CPlugin {
                     logger.debug("AgentPath=" + this.agentpath);
 
                     //create network perf monitor service
+                    //todo enable perfmonitor
+                    /*
                     perfMonitorNet = new PerfMonitorNet(this);
                     perfMonitorNet.start();
                     logger.info("Network performance monitoring initialized");
-
+                    */
                 }
                 this.isRegionalController = false;
                 if(this.getConfig().getBooleanParam("enable_clientnetdiscovery",true)) {
@@ -635,9 +638,6 @@ public class Launcher extends CPlugin {
             e.printStackTrace();
             logger.trace("commInit " + e.getMessage());
         }
-
-        String dbexport = getGDB().gdb.getDBExport();
-
 
     }
 

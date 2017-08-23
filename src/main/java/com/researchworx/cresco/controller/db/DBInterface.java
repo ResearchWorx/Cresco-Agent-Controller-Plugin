@@ -9,6 +9,7 @@ import com.researchworx.cresco.controller.netdiscovery.DiscoveryNode;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 
+import javax.sound.sampled.Line;
 import javax.xml.bind.DatatypeConverter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -874,13 +875,18 @@ public class DBInterface {
         try {
             nodeStatusMap = new HashMap<>();
             List<String> queryList = gdb.getNodeIds(region,agent,plugin,false);
+
+            //region queries will not include plugins, make second request if that is what is needed
+            /*
             if((region != null) && (agent == null)) {
-                //region queries should include plugins
+
                 for(String agentNodeId : queryList) {
                     agent = gdb.getNodeParam(agentNodeId,"agent");
                     nodeStatusMap.putAll(getNodeStatus(region,agent,null));
                 }
+
             }
+            */
 
             for(String nodeId : queryList) {
                 Map<String,String> params = gdb.getNodeParamsNoTx(nodeId);
@@ -984,6 +990,32 @@ public class DBInterface {
                 gdb.setNodeParams(region,agent,plugin, de.getParams());
                 //gdb.setNodeParam(region,agent,plugin, "watchdog_ts", String.valueOf(System.currentTimeMillis()));
                 //gdb.setNodeParam(region,agent,plugin, "watchdog_ts", String.valueOf(System.currentTimeMillis()));
+
+                if((region != null) && (agent != null) && (plugin == null)) {
+                    //add plugin configs for agent
+                    if (de.getParam("pluginconfigs") != null) {
+                        List<Map<String, String>> configMapList = new Gson().fromJson(de.getCompressedParam("pluginconfigs"),
+                                new com.google.common.reflect.TypeToken<List<Map<String, String>>>() {
+                                }.getType());
+
+                        for (Map<String, String> configMap : configMapList) {
+                            String pluginId = configMap.get("pluginid");
+                            gdb.addNode(region, agent, pluginId);
+                            gdb.setNodeParams(region, agent, pluginId, configMap);
+
+                            /*
+                            for (Map.Entry<String, String> entry : configMap.entrySet())
+                            {
+                                System.out.println(entry.getKey() + "/" + entry.getValue());
+                                //gdb.addNode(region, agent,plugin);
+                                //gdb.setNodeParams(region,agent,plugin, de.getParams());
+                            }
+                            */
+
+                        }
+                    }
+                }
+
                 wasAdded = true;
             }
 
@@ -1022,6 +1054,35 @@ public class DBInterface {
                 updateMap.put("is_active", Boolean.TRUE.toString());
 
                 gdb.setNodeParamsNoTx(region, agent, pluginId, updateMap);
+
+                if((region != null) && (agent != null) && (plugin == null)) {
+                    //add plugin configs for agent
+                    if (de.getParam("pluginconfigs") != null) {
+                        List<Map<String, String>> configMapList = new Gson().fromJson(de.getCompressedParam("pluginconfigs"),
+                                new com.google.common.reflect.TypeToken<List<Map<String, String>>>() {
+                                }.getType());
+
+                        for (Map<String, String> configMap : configMapList) {
+                            String subpluginId = configMap.get("pluginid");
+                            gdb.addNode(region, agent, subpluginId);
+                            gdb.setNodeParams(region, agent, subpluginId, configMap);
+
+                            /*
+                            for (Map.Entry<String, String> entry : configMap.entrySet())
+                            {
+                                System.out.println(entry.getKey() + "/" + entry.getValue());
+                                //gdb.addNode(region, agent,plugin);
+                                //gdb.setNodeParams(region,agent,plugin, de.getParams());
+                            }
+                            */
+
+                        }
+                    }
+                }
+
+                //check for config update
+
+
 
                 //gdb.setNodeParam(region, agent, pluginId, "watchdogtimer", interval);
                 //gdb.setNodeParam(region,agent,pluginId, "watchdog_ts", String.valueOf(System.currentTimeMillis()));

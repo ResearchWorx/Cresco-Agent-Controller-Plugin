@@ -1,6 +1,8 @@
 package com.researchworx.cresco.controller.regionalcontroller;
 
 
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
 import com.researchworx.cresco.controller.app.gPayload;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.controller.globalcontroller.GlobalCommandExec;
@@ -82,11 +84,7 @@ public class RegionalCommandExec {
                             globalSend(le);
                             break;
                         case "enable":
-                            logger.debug("CONFIG : AGENTDISCOVER ADD: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
-                            logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
-                            plugin.getGDB().addNode(le);
-                            le.setParam("globalcmd", Boolean.TRUE.toString());
-                            globalSend(le);
+                            enableAgent(le);
                             break;
                         default:
                             logger.debug("RegionalCommandExec Unknown configtype found: {}", le.getParam("action"));
@@ -126,6 +124,23 @@ public class RegionalCommandExec {
 
 		return null;
 	}
+
+	private MsgEvent enableAgent(MsgEvent le) {
+        logger.debug("CONFIG : AGENTDISCOVER ADD: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
+        logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
+        plugin.getGDB().addNode(le);
+
+        //gdb.addNode(region, agent,plugin);
+        //gdb.setNodeParams(region,agent,plugin, de.getParams());
+
+        //process agent configs
+
+
+        //le.setParam("globalcmd", Boolean.TRUE.toString());
+        //globalSend(le);
+
+        return le;
+    }
 
     private MsgEvent pingReply(MsgEvent msg) {
         logger.debug("ping message type found");
