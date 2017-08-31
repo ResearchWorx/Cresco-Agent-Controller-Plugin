@@ -77,7 +77,7 @@ public class ResourceSchedulerEngine implements Runnable {
 					if(ce != null)
 					{
 
-						logger.debug("me offered");
+						logger.debug("me.added");
 						//check the pipeline node
 						if(ce.getParam("globalcmd").equals("addplugin"))
 						{

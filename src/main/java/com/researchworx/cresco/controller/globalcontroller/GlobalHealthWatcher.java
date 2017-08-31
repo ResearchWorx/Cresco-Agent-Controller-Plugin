@@ -13,7 +13,7 @@ import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class GlobalHealthWatcher implements Runnable {
 	private Launcher plugin;
@@ -40,7 +40,7 @@ public class GlobalHealthWatcher implements Runnable {
         gCheckInterval = plugin.getConfig().getLongParam("watchdogtimer",5000L);
         SchedulerActive = false;
         AppSchedulerActive = false;
-        plugin.setResourceScheduleQueue(new ConcurrentLinkedQueue<MsgEvent>());
+        plugin.setResourceScheduleQueue(new LinkedBlockingQueue<MsgEvent>());
     }
 
 	public void shutdown() {
@@ -206,8 +206,8 @@ public class GlobalHealthWatcher implements Runnable {
                         //start global stuff
 
                         //create globalscheduler queue
-                        //plugin.setResourceScheduleQueue(new ConcurrentLinkedQueue<MsgEvent>());
-                        plugin.setAppScheduleQueue(new ConcurrentLinkedQueue<gPayload>());
+                        //plugin.setResourceScheduleQueue(new LinkedBlockingQueue<MsgEvent>());
+                        plugin.setAppScheduleQueue(new LinkedBlockingQueue<gPayload>());
                         startGlobalSchedulers();
                         //end global start
                         this.plugin.setGlobalController(true);
@@ -276,7 +276,7 @@ public class GlobalHealthWatcher implements Runnable {
 	            if((cme.getParam("dst_region") != null) && (cme.getParam("dst_agent")) !=null) {
                     String cGlobalPath = cme.getParam("dst_region") + "_" + (cme.getParam("dst_agent"));
                     if(!this.plugin.isReachableAgent(cGlobalPath)) {
-                        plugin.getIncomingCanidateBrokers().offer(cme);
+                        plugin.getIncomingCanidateBrokers().add(cme);
                         //while
                         int timeout = 0;
                         while((!this.plugin.isReachableAgent(cGlobalPath)) && (timeout < 10)) {
@@ -361,7 +361,7 @@ public class GlobalHealthWatcher implements Runnable {
                 if (discoveryList.size() == 0) {
                     logger.info("Static Region Connection to Global Controller : " + plugin.getConfig().getStringParam("gc_host",null) + " failed! - Restarting Global Discovery");
                 } else {
-                    //plugin.getIncomingCanidateBrokers().offer(discoveryList.get(0)); //perhaps better way to do this
+                    //plugin.getIncomingCanidateBrokers().add(discoveryList.get(0)); //perhaps better way to do this
                     logger.info("Global Controller Found: " + discoveryList.get(0).getParams());
                 }
         }

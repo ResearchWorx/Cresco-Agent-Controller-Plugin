@@ -1915,8 +1915,8 @@ public class DBApplicationFunctions {
                 graph.commit();
                 //odb.commit();
 
-                logger.info("Offer Pipeline to Scheduler Queue");
-                //plugin.getAppScheduleQueue().offer(gpay);
+                logger.info(.add Pipeline to Scheduler Queue");
+                //plugin.getAppScheduleQueue().add(gpay);
                 //return gpay;
                 */
                 graph.commit();
@@ -1927,7 +1927,7 @@ public class DBApplicationFunctions {
                 else {
                     logger.debug("Post vPipeline commit of node " + getPipelineNodeId(gpay.pipeline_id));
                 }
-                plugin.getAppScheduleQueue().offer(gpay);
+                plugin.getAppScheduleQueue().add(gpay);
 
             }
             else {

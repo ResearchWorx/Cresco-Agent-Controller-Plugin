@@ -46,7 +46,7 @@ public class MsgRoute implements Runnable {
                         if (rm.getParam("configtype").equals("comminit")) {
                             logger.debug("CONTROLLER SENDING REGIONAL MESSAGE 0");
                             logger.trace(rm.getParams().toString());
-                            //PluginEngine.msgInQueue.offer(rm);
+                            //PluginEngine.msgInQueue.add(rm);
                             plugin.sendMsgEvent(rm);
                         }
                     }
@@ -90,7 +90,7 @@ public class MsgRoute implements Runnable {
                     break;
                 */
                 case 40:  ////INTER-REGIONAL MESSAGE INCOMING 40
-                    //PluginEngine.msgInQueue.offer(rm);
+                    //PluginEngine.msgInQueue.add(rm);
                     logger.debug("INTER-REGIONAL MESSAGE INCOMING 40");
                     logger.trace(rm.getParams().toString());
                     plugin.sendMsgEvent(rm);
@@ -124,7 +124,7 @@ public class MsgRoute implements Runnable {
 
                     break;
                 case 56:  //System.out.println("CONTROLLER ROUTE TO LOCAL AGENT : 56 "  + rm.getParams());
-                    //PluginEngine.msgInQueue.offer(rm);
+                    //PluginEngine.msgInQueue.add(rm);
                     logger.debug("CONTROLLER SENDING REGIONAL MESSAGE TO ITS AGENT 56");
                     logger.trace(rm.getParams().toString());
                     plugin.sendMsgEvent(rm);
@@ -150,7 +150,7 @@ public class MsgRoute implements Runnable {
                         if (rm.getParam("configtype").equals("comminit")) {
                             logger.debug("CONTROLLER SENDING REGIONAL MESSAGE 64");
                             logger.trace(rm.getParams().toString());
-                            //PluginEngine.msgInQueue.offer(rm);
+                            //PluginEngine.msgInQueue.add(rm);
                             plugin.sendMsgEvent(rm);
                         }
                     }
@@ -267,7 +267,7 @@ public class MsgRoute implements Runnable {
                         if (rm.getParam("configtype").equals("comminit")) {
                             logger.debug("CONTROLLER SENDING REGIONAL MESSAGE 64");
                             logger.trace(rm.getParams().toString());
-                            //PluginEngine.msgInQueue.offer(rm);
+                            //PluginEngine.msgInQueue.add(rm);
                             plugin.sendMsgEvent(rm);
                         }
                     }
@@ -298,7 +298,7 @@ public class MsgRoute implements Runnable {
                         re = getRegionalCommandExec();
                         break;
                 case 248:  //System.out.println("CONTROLLER ROUTE TO LOCAL AGENT : 56 "  + rm.getParams());
-                    //PluginEngine.msgInQueue.offer(rm);
+                    //PluginEngine.msgInQueue.add(rm);
                     logger.debug("CONTROLLER SENDING REGIONAL MESSAGE TO ITS AGENT 248");
                     logger.trace(rm.getParams().toString());
                     plugin.sendMsgEvent(rm);
@@ -323,7 +323,7 @@ public class MsgRoute implements Runnable {
 
             if (re != null) {
                 re.setReturn(); //reverse to-from for return
-                //PluginEngine.msgInQueue.offer(re);
+                //PluginEngine.msgInQueue.add(re);
                 plugin.sendMsgEvent(re);
                 //PluginEngine.msgIn(re);
             }

@@ -52,10 +52,10 @@ public class PollRemovePipeline implements Runnable {
                                 me.setParam("globalcmd", "removeplugin");
                                 me.setParam("inode_id", gnode.node_id);
                                 me.setParam("resource_id", pipelineId);
-                                //ghw.resourceScheduleQueue.offer(me);
+                                //ghw.resourceScheduleQueue.add(me);
                                 plugin.getGDB().dba.setINodeParam(gnode.node_id,"status_code","9");
                                 plugin.getGDB().dba.setINodeParam(gnode.node_id,"status_desc","iNode Pipeline Scheduled for Removal");
-                                plugin.getResourceScheduleQueue().offer(me);
+                                plugin.getResourceScheduleQueue().add(me);
                             }
                             else if(statusCode > 19) {
                                 plugin.getGDB().dba.setINodeParam(gnode.node_id,"status_code","8");

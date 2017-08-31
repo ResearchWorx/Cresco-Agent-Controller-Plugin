@@ -23,10 +23,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @AutoService(CPlugin.class)
@@ -49,7 +46,7 @@ public class Launcher extends CPlugin {
     private boolean ActiveBrokerManagerActive = false;
     private boolean ActiveDestManagerActive = false;
 
-    //public ConcurrentLinkedQueue<MsgEvent> resourceScheduleQueue;
+    //public LinkedBlockingQueue<MsgEvent> resourceScheduleQueue;
 
     private boolean ConsumerThreadActive = false;
     private boolean ConsumerThreadRegionActive = false;
@@ -135,10 +132,10 @@ public class Launcher extends CPlugin {
 
     private ConcurrentHashMap<String, BrokeredAgent> brokeredAgents;
 
-    private ConcurrentLinkedQueue<MsgEvent> incomingCanidateBrokers;
-    private ConcurrentLinkedQueue<MsgEvent> outgoingMessages;
-    private ConcurrentLinkedQueue<MsgEvent> resourceScheduleQueue;
-    private ConcurrentLinkedQueue<gPayload> appScheduleQueue;
+    private BlockingQueue<MsgEvent> incomingCanidateBrokers;
+    private BlockingQueue<MsgEvent> outgoingMessages;
+    private BlockingQueue<MsgEvent> resourceScheduleQueue;
+    private BlockingQueue<gPayload> appScheduleQueue;
 
     private ActiveBroker broker;
 
@@ -247,7 +244,7 @@ public class Launcher extends CPlugin {
                 ce.setParam("set_agent", this.agent);
                 ce.setParam("is_regional_controller", Boolean.toString(this.isRegionalController));
                 ce.setParam("is_active", Boolean.toString(this.isActive));
-                //PluginEngine.msgInQueue.offer(ce);
+                //PluginEngine.msgInQueue.add(ce);
                 this.sendMsgEvent(ce);
                 this.restartOnShutdown = false;
             }
@@ -326,8 +323,8 @@ public class Launcher extends CPlugin {
             }
             */
             this.brokeredAgents = new ConcurrentHashMap<>();
-            this.incomingCanidateBrokers = new ConcurrentLinkedQueue<>();
-            this.outgoingMessages = new ConcurrentLinkedQueue<>();
+            this.incomingCanidateBrokers = new LinkedBlockingQueue<>();
+            this.outgoingMessages = new LinkedBlockingQueue<>();
             this.brokerAddressAgent = null;
             this.isIPv6 = isIPv6();
 
@@ -498,7 +495,7 @@ public class Launcher extends CPlugin {
 
                 if (!discoveryList.isEmpty()) {
                     for (MsgEvent ime : discoveryList) {
-                        this.incomingCanidateBrokers.offer(ime);
+                        this.incomingCanidateBrokers.add(ime);
                         logger.debug("Regional Controller Found: " + ime.getParams());
                     }
                 }
@@ -827,24 +824,24 @@ public class Launcher extends CPlugin {
         return isStarted;
     }
 
-    public ConcurrentLinkedQueue<MsgEvent> getResourceScheduleQueue() {
+    public BlockingQueue<MsgEvent> getResourceScheduleQueue() {
         return resourceScheduleQueue;
     }
-    public void setResourceScheduleQueue(ConcurrentLinkedQueue<MsgEvent> appScheduleQueue) {
+    public void setResourceScheduleQueue(BlockingQueue<MsgEvent> appScheduleQueue) {
         this.resourceScheduleQueue = appScheduleQueue;
     }
 
-    public ConcurrentLinkedQueue<gPayload> getAppScheduleQueue() {
+    public BlockingQueue<gPayload> getAppScheduleQueue() {
         return appScheduleQueue;
     }
-    public void setAppScheduleQueue(ConcurrentLinkedQueue<gPayload> appScheduleQueue) {
+    public void setAppScheduleQueue(BlockingQueue<gPayload> appScheduleQueue) {
         this.appScheduleQueue = appScheduleQueue;
     }
 
-    public ConcurrentLinkedQueue<MsgEvent> getIncomingCanidateBrokers() {
+    public BlockingQueue<MsgEvent> getIncomingCanidateBrokers() {
         return incomingCanidateBrokers;
     }
-    public void setIncomingCanidateBrokers(ConcurrentLinkedQueue<MsgEvent> incomingCanidateBrokers) {
+    public void setIncomingCanidateBrokers(BlockingQueue<MsgEvent> incomingCanidateBrokers) {
         this.incomingCanidateBrokers = incomingCanidateBrokers;
     }
 

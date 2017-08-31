@@ -43,7 +43,7 @@ public class AppSchedulerEngine implements Runnable {
 
                     if(gpay != null)
                     {
-                        logger.debug("gPayload offered");
+                        logger.debug("gPayload.added");
 
                         gPayload createdPipeline = plugin.getGDB().dba.createPipelineNodes(gpay);
 
@@ -166,7 +166,7 @@ public class AppSchedulerEngine implements Runnable {
                     }
                     me.setParam("configparams", configparms.toString());
                     logger.debug("Message [" + me.getParams().toString() + "]");
-                    plugin.getResourceScheduleQueue().offer(me);
+                    plugin.getResourceScheduleQueue().add(me);
                 }
                 */
 

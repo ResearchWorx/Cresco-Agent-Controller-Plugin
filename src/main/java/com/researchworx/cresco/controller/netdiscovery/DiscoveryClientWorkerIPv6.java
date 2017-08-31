@@ -94,7 +94,7 @@ public class DiscoveryClientWorkerIPv6 {
                     me.setParam("dst_agent", me.getParam("src_agent"));
                     me.setParam("validated_authenication",ValidatedAuthenication(me));
 
-                    //PluginEngine.incomingCanidateBrokers.offer(me);
+                    //PluginEngine.incomingCanidateBrokers.add(me);
                     discoveredList.add(me);
                 }
             } catch (Exception ex) {

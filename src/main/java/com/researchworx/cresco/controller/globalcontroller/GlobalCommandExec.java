@@ -574,7 +574,7 @@ public class GlobalCommandExec {
                 {
                     ce.setParam("status_code","10");
                     ce.setParam("status_desc","iNode scheduled for removal.");
-                    //ControllerEngine.resourceScheduleQueue.offer(ce);
+                    //ControllerEngine.resourceScheduleQueue.add(ce);
                 }
                 else
                 {
@@ -687,8 +687,8 @@ public class GlobalCommandExec {
                                     me.setParam("globalcmd", "removeplugin");
                                     me.setParam("inode_id", iNodeId);
                                     me.setParam("resource_id", pipelineId);
-                                    //ghw.resourceScheduleQueue.offer(me);
-                                    plugin.getResourceScheduleQueue().offer(me);
+                                    //ghw.resourceScheduleQueue.add(me);
+                                    plugin.getResourceScheduleQueue().add(me);
 
                                 }
                                 */
@@ -757,7 +757,7 @@ public class GlobalCommandExec {
                     {
                         ce.setParam("status_code","0");
                         ce.setParam("status_desc","iNode Scheduled");
-                        //ControllerEngine.resourceScheduleQueue.offer(ce);
+                        //ControllerEngine.resourceScheduleQueue.add(ce);
                     }
                     else
                     {
