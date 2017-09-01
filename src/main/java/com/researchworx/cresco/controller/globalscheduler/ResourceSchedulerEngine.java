@@ -73,7 +73,7 @@ public class ResourceSchedulerEngine implements Runnable {
 			{
 				try
 				{
-					MsgEvent ce = plugin.getResourceScheduleQueue().poll();
+					MsgEvent ce = plugin.getResourceScheduleQueue().take();
 					if(ce != null)
 					{
 
@@ -159,10 +159,7 @@ public class ResourceSchedulerEngine implements Runnable {
                             new Thread(new PollRemovePlugin(plugin,  ce.getParam("resource_id"),ce.getParam("inode_id"))).start();
 						}
 					}
-					else
-					{
-						Thread.sleep(1000);
-					}
+
 				}
 				catch(Exception ex)
 				{

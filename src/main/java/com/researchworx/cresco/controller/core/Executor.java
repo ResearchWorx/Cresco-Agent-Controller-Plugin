@@ -110,6 +110,7 @@ class Executor extends CExecutor {
         msg.setParam("type", "agent_controller");
         logger.debug("Returning communication details to Cresco agent");
         return msg;
+
     }
 
     private void noop() {

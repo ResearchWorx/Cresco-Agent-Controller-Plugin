@@ -46,7 +46,7 @@ public class ActiveBrokerManager implements Runnable  {
 		this.plugin.setActiveBrokerManagerActive(true);
 		while(this.plugin.isActiveBrokerManagerActive()) {
 			try {
-				MsgEvent cb = this.plugin.getIncomingCanidateBrokers().poll();
+				MsgEvent cb = this.plugin.getIncomingCanidateBrokers().take();
 				if(cb != null) {
 					String agentIP = cb.getParam("dst_ip");
 					if(!this.plugin.isLocal(agentIP)) { //ignore local responses
@@ -115,9 +115,7 @@ public class ActiveBrokerManager implements Runnable  {
                         }
 					}
 		  			//Thread.sleep(500); //allow HM to catch up
-			  	} else {
-					Thread.sleep(1000);
-				}
+			  	}
 			} catch (Exception ex) {
 				logger.error("Run {}", ex.getMessage());
                 ex.printStackTrace();
