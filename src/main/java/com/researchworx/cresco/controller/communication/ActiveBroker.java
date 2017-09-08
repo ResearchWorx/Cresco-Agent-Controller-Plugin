@@ -17,6 +17,8 @@ import org.apache.activemq.util.ServiceStopper;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
@@ -72,6 +74,31 @@ public class ActiveBroker {
 				entry.setAdvisoryWhenFull(true);
 				*/
 
+		        /*
+		        <beans
+  <amq:broker useJmx="false" persistent="false">
+
+    <amq:sslContext>
+      <amq:sslContext
+            keyStore="broker.ks" keyStorePassword="password"
+            trustStore="client.ks" trustStorePassword="password"/>
+    </amq:sslContext>
+
+    <amq:transportConnectors>
+      <amq:transportConnector uri="ssl://localhost:61616" />
+    </amq:transportConnectors>
+
+  </amq:broker>
+</beans>
+		         */
+
+
+
+				//SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
+				//sslContext.init(null, null, null);
+				//sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new java.security.SecureRandom());
+				org.apache.activemq.broker.SslContext sslContext = new org.apache.activemq.broker.SslContext();
+
 				PolicyMap map = new PolicyMap();
 		        map.setDefaultEntry(entry);
 
@@ -82,6 +109,9 @@ public class ActiveBroker {
 				broker.setSchedulePeriodForDestinationPurge(2500);
 				broker.setDestinationPolicy(map);
 				broker.setManagementContext(mc);
+
+				broker.setSslContext(sslContext);
+
 				/*
 				broker.setUseJmx(true);
 				broker.getManagementContext().setConnectorPort(2099);
@@ -91,12 +121,15 @@ public class ActiveBroker {
 				//authorizationPlugin = new CrescoAuthorizationPlugin();
 				//authenticationPlugin = new CrescoAuthenticationPlugin();
 				//broker.setPlugins(new BrokerPlugin[]{authorizationPlugin,authenticationPlugin});
+				//<amq:transportConnector uri="ssl://localhost:61616" />
 
-                connector = new TransportConnector();
+				connector = new TransportConnector();
 				if (plugin.isIPv6())
 					connector.setUri(new URI("tcp://[::]:32010"));
+					//connector.setUri(new URI("ssl://[::]:32010"));
 				else
 					connector.setUri(new URI("tcp://0.0.0.0:32010"));
+					//connector.setUri(new URI("ssl://0.0.0.0:32010"));
 
                 /*
                 connector.setUpdateClusterClients(true);

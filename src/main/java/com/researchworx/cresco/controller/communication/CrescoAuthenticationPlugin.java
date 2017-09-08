@@ -3,10 +3,10 @@ package com.researchworx.cresco.controller.communication;
 import org.apache.activemq.broker.Broker;
 import org.apache.activemq.broker.BrokerPlugin;
 import org.apache.activemq.jaas.GroupPrincipal;
-import org.apache.activemq.security.AuthenticationUser;
-import org.apache.activemq.security.SimpleAuthenticationBroker;
+import org.apache.activemq.security.*;
 
 import java.security.Principal;
+import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -27,6 +27,17 @@ public class CrescoAuthenticationPlugin implements BrokerPlugin {
     }
 
     public Broker installPlugin(Broker parent) {
+
+        /*
+        AbstractAuthenticationBroker ac = new AbstractAuthenticationBroker() {
+            @Override
+            public SecurityContext authenticate(String s, String s1, X509Certificate[] x509Certificates) throws SecurityException {
+                return null;
+            }
+        }
+
+       */
+
         SimpleAuthenticationBroker broker = new SimpleAuthenticationBroker(parent, userPasswords, userGroups);
         broker.setAnonymousAccessAllowed(anonymousAccessAllowed);
         broker.setAnonymousUser(anonymousUser);
