@@ -3,6 +3,7 @@ package com.researchworx.cresco.controller.communication;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.utilities.CLogger;
 import org.apache.activemq.broker.BrokerService;
+import org.apache.activemq.broker.SslContext;
 import org.apache.activemq.broker.TransportConnector;
 import org.apache.activemq.broker.jmx.ManagementContext;
 import org.apache.activemq.broker.region.policy.PolicyEntry;
@@ -23,6 +24,7 @@ import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.URI;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -33,12 +35,14 @@ public class ActiveBroker {
 	private TransportConnector connector;
 	private CrescoAuthenticationPlugin authenticationPlugin;
 	private CrescoAuthorizationPlugin authorizationPlugin;
+	private Launcher plugin;
 
 	public BrokerService broker;
 
 	public ActiveBroker(Launcher plugin, String brokerName, String brokerUserNameAgent, String brokerPasswordAgent) {
 		this.logger = new CLogger(ActiveBroker.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
 		logger.info("Initialized");
+		this.plugin = plugin;
 		try {
 			if(portAvailable(32010)) {
 
@@ -92,12 +96,14 @@ public class ActiveBroker {
 </beans>
 		         */
 
-
-
+				org.apache.activemq.broker.SslContext sslContextBroker = new SslContext();
+				SSLContext sslContext = sslContextBroker.getSSLContext();
 				//SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
-				//sslContext.init(null, null, null);
-				//sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new java.security.SecureRandom());
-				org.apache.activemq.broker.SslContext sslContext = new org.apache.activemq.broker.SslContext();
+				//SSLContext sslContext = SSLContext.getInstance("TLS");
+				//SSLContext sslContext = SSLContext.getInstance("Default");
+				sslContext.init(plugin.getCertificateManager().getKeyManagers(), plugin.getCertificateManager().getTrustManagers(), new SecureRandom());
+				sslContextBroker.setSSLContext(sslContext);
+
 
 				PolicyMap map = new PolicyMap();
 		        map.setDefaultEntry(entry);
@@ -109,8 +115,10 @@ public class ActiveBroker {
 				broker.setSchedulePeriodForDestinationPurge(2500);
 				broker.setDestinationPolicy(map);
 				broker.setManagementContext(mc);
+				broker.setSslContext(sslContextBroker);
+				broker.setPopulateJMSXUserID(true);
+				broker.setUseAuthenticatedPrincipalForJMSXUserID(true);
 
-				broker.setSslContext(sslContext);
 
 				/*
 				broker.setUseJmx(true);
@@ -125,11 +133,13 @@ public class ActiveBroker {
 
 				connector = new TransportConnector();
 				if (plugin.isIPv6())
-					connector.setUri(new URI("tcp://[::]:32010"));
-					//connector.setUri(new URI("ssl://[::]:32010"));
+					//connector.setUri(new URI("tcp://[::]:32010"));
+				    connector.setUri(new URI("ssl://[::]:32010?needClientAuth=true"));
+
+				//connector.setUri(new URI("ssl://[::]:32010"));
 				else
-					connector.setUri(new URI("tcp://0.0.0.0:32010"));
-					//connector.setUri(new URI("ssl://0.0.0.0:32010"));
+					//connector.setUri(new URI("tcp://0.0.0.0:32010"));
+					connector.setUri(new URI("ssl://0.0.0.0:32010?needClientAuth=true"));
 
                 /*
                 connector.setUpdateClusterClients(true);
@@ -155,6 +165,25 @@ public class ActiveBroker {
 		} catch(Exception ex) {
 			//ex.printStackTrace();
 			logger.error("Init {}" + ex.getMessage());
+		}
+	}
+
+	public void updateTrustManager() {
+		try {
+			broker.getSslContext().getSSLContext().init(plugin.getCertificateManager().getKeyManagers(), plugin.getCertificateManager().getTrustManagers(), new SecureRandom());
+
+	        /*
+	        org.apache.activemq.broker.SslContext sslContextBroker = new SslContext();
+            SSLContext sslContext = sslContextBroker.getSSLContext();
+            //SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
+            //SSLContext sslContext = SSLContext.getInstance("TLS");
+            //SSLContext sslContext = SSLContext.getInstance("Default");
+            sslContext.init(main.cg.getKeyManagers(), main.cg.getTrustManagers(), new SecureRandom());
+            sslContextBroker.setSSLContext(sslContext);
+            */
+
+		} catch(Exception ex) {
+			System.out.println("updateTrustManager() : Error " + ex.getMessage());
 		}
 	}
 
@@ -255,7 +284,8 @@ public class ActiveBroker {
 		NetworkConnector bridge = null;
 		try {
 		    logger.trace("URI: static:tcp://" + URI + ":32010" + " brokerUserName: " + brokerUserName + " brokerPassword: " + brokerPassword);
-			bridge = broker.addNetworkConnector(new URI("static:tcp://" + URI + ":32010?useKeepAlive=true&keepAlive=true"));
+			//bridge = broker.addNetworkConnector(new URI("static:tcp://" + URI + ":32010?useKeepAlive=true&keepAlive=true"));
+			bridge = broker.addNetworkConnector(new URI("static:ssl://" + URI + ":32010?useKeepAlive=true&keepAlive=true"));
 
 
 		    bridge.setUserName(brokerUserName);

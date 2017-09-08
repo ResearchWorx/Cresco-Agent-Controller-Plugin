@@ -31,6 +31,9 @@ public class Launcher extends CPlugin {
 
     private String agentpath;
 
+    //manager for all certificates
+    private CertificateManager certificateManager;
+
     private ExecutorService msgInProcessQueue;
 
     //perf monitor for controller for networks
@@ -64,6 +67,10 @@ public class Launcher extends CPlugin {
     private Thread discoveryEngineThread;
 
     public PerfMonitorNet getPerfMonitorNet() {return perfMonitorNet; }
+
+    public CertificateManager getCertificateManager() {
+        return certificateManager;
+    }
 
     public Thread getActiveBrokerManagerThread() {
         return activeBrokerManagerThread;
@@ -121,7 +128,6 @@ public class Launcher extends CPlugin {
     private boolean GlobalControllerManagerActive = false;
 
     private Map<String, Long> discoveryMap;
-
 
     private boolean isIPv6 = false;
     private boolean isActive = false;
@@ -284,6 +290,9 @@ public class Launcher extends CPlugin {
         setActive(true);
 
         try {
+
+            //create certificate store
+
             /*
             if(getConfig().getBooleanParam("enable_sshd",false)) {
                 SshServer sshd = SshServer.setUpDefaultServer();
@@ -404,6 +413,8 @@ public class Launcher extends CPlugin {
                     this.region = cRegion;
                     logger.info("Assigned regionid=" + this.region);
                     this.agentpath = this.region + "_" + this.agent;
+                    certificateManager = new CertificateManager(this,agentpath);
+
                     logger.debug("AgentPath=" + this.agentpath);
 
                 }
@@ -421,6 +432,8 @@ public class Launcher extends CPlugin {
                     logger.debug("Generated regionid=" + this.region);
                 }
                 this.agentpath = this.region + "_" + this.agent;
+                certificateManager = new CertificateManager(this,agentpath);
+
                 logger.debug("AgentPath=" + this.agentpath);
                 //Start controller services
 
@@ -461,7 +474,8 @@ public class Launcher extends CPlugin {
                 }
 
                 //consumer region
-                this.consumerRegionThread = new Thread(new ActiveRegionConsumer(this, this.region, "tcp://" + this.brokerAddressAgent + ":32010",brokerUserNameAgent,brokerPasswordAgent));
+                //this.consumerRegionThread = new Thread(new ActiveRegionConsumer(this, this.region, "tcp://" + this.brokerAddressAgent + ":32010",brokerUserNameAgent,brokerPasswordAgent));
+                this.consumerRegionThread = new Thread(new ActiveRegionConsumer(this, this.region, "ssl://" + this.brokerAddressAgent + ":32010",brokerUserNameAgent,brokerPasswordAgent));
                 this.consumerRegionThread.start();
                 while (!this.ConsumerThreadRegionActive) {
                     Thread.sleep(1000);
@@ -545,6 +559,9 @@ public class Launcher extends CPlugin {
                     this.region = cRegion;
                     logger.info("Assigned regionid=" + this.region);
                     this.agentpath = this.region + "_" + this.agent;
+                    //todo this is enabled too many places
+                    certificateManager = new CertificateManager(this,agentpath);
+
                     logger.debug("AgentPath=" + this.agentpath);
 
                     //create network perf monitor service
@@ -574,7 +591,8 @@ public class Launcher extends CPlugin {
                     //consumer agent
                     //this.consumerAgentThread = new Thread(new ActiveAgentConsumer(this, this.agentpath, "failover:tcp://" + this.brokerAddressAgent + ":32010?timeout=3000", brokerUserNameAgent, brokerPasswordAgent));
                     //this.consumerAgentThread = new Thread(new ActiveAgentConsumer(this, this.agentpath, "failover:(tcp://" + this.brokerAddressAgent + ":32010)?timeout=3000", brokerUserNameAgent, brokerPasswordAgent));
-                    this.consumerAgentThread = new Thread(new ActiveAgentConsumer(this, this.agentpath, "tcp://" + this.brokerAddressAgent + ":32010", brokerUserNameAgent, brokerPasswordAgent));
+                    //this.consumerAgentThread = new Thread(new ActiveAgentConsumer(this, this.agentpath, "tcp://" + this.brokerAddressAgent + ":32010", brokerUserNameAgent, brokerPasswordAgent));
+                    this.consumerAgentThread = new Thread(new ActiveAgentConsumer(this, this.agentpath, "ssl://" + this.brokerAddressAgent + ":32010", brokerUserNameAgent, brokerPasswordAgent));
                     this.consumerAgentThread.start();
                     while (!this.ConsumerThreadActive) {
                         Thread.sleep(1000);
@@ -591,7 +609,8 @@ public class Launcher extends CPlugin {
             }
             //this.ap = new ActiveProducer(this, "failover:tcp://" + this.brokerAddressAgent + ":32010?timeout=3000", brokerUserNameAgent, brokerPasswordAgent);
             //this.ap = new ActiveProducer(this, "failover:(tcp://" + this.brokerAddressAgent + ":32010)?timeout=3000", brokerUserNameAgent, brokerPasswordAgent);
-            this.ap = new ActiveProducer(this, "tcp://" + this.brokerAddressAgent + ":32010", brokerUserNameAgent, brokerPasswordAgent);
+            //this.ap = new ActiveProducer(this, "tcp://" + this.brokerAddressAgent + ":32010", brokerUserNameAgent, brokerPasswordAgent);
+            this.ap = new ActiveProducer(this, "ssl://" + this.brokerAddressAgent + ":32010", brokerUserNameAgent, brokerPasswordAgent);
 
             logger.debug("Agent ProducerThread Started..");
 

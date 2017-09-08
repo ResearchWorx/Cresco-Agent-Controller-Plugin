@@ -6,8 +6,10 @@ import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.ActiveMQSslConnectionFactory;
 
 import javax.jms.*;
+import java.security.SecureRandom;
 
 public class ActiveAgentConsumer implements Runnable {
 	private Launcher plugin;
@@ -15,6 +17,8 @@ public class ActiveAgentConsumer implements Runnable {
 	private Queue RXqueue;
 	private Session sess;
 	private ActiveMQConnection conn;
+	private ActiveMQSslConnectionFactory connf;
+
 
 	public ActiveAgentConsumer(Launcher plugin, String RXQueueName, String URI, String brokerUserNameAgent, String brokerPasswordAgent) throws JMSException {
 		//logger = new CLogger(ActiveAgentConsumer.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), Logger.INFO);
@@ -24,34 +28,13 @@ public class ActiveAgentConsumer implements Runnable {
 		this.plugin = plugin;
 		int retryCount = 10;
 
-		//while (((conn == null) || !conn.isStarted()) && retryCount-- > 0) {
-		//try {
-		conn = (ActiveMQConnection) new ActiveMQConnectionFactory(brokerUserNameAgent, brokerPasswordAgent, URI).createConnection();
+		connf = new ActiveMQSslConnectionFactory(URI);
+		connf.setKeyAndTrustManagers(plugin.getCertificateManager().getKeyManagers(),plugin.getCertificateManager().getTrustManagers(), new SecureRandom());
+		conn = (ActiveMQConnection) connf.createConnection();
 		conn.start();
 		sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
 		RXqueue = sess.createQueue(RXQueueName);
-		//break;
-		//}
-			/*
-			catch (JMSException je) {
-				try {
-				    logger.error("JMSException: {}", je.getMessage());
-					logger.debug("brokerUserNameAgent={}, brokerPasswordAgent={},URI={}", brokerUserNameAgent, brokerPasswordAgent, URI);
-                    logger.error("Retrying initialization");
-					Thread.sleep(500);
-				} catch (InterruptedException e) {
-					logger.trace("Initialization was interrupted");
-				}
-			}
 
-			catch (Exception ex) {
-				logger.error("Constructor: {}", ex.getMessage());
-				//break;
-
-			}
-			*/
-
-		//}
 	}
 
 	@Override

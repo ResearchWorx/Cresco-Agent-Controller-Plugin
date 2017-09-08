@@ -6,12 +6,14 @@ import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.ActiveMQSslConnectionFactory;
 import org.apache.activemq.command.ActiveMQTempDestination;
 import org.apache.activemq.command.BrokerId;
 import org.apache.activemq.command.BrokerInfo;
 import org.apache.activemq.command.ConnectionInfo;
 
 import javax.jms.*;
+import java.security.SecureRandom;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
@@ -21,6 +23,8 @@ public class ActiveProducerWorker {
 	private CLogger logger;
 	private Session sess;
 	private ActiveMQConnection  conn;
+	private ActiveMQSslConnectionFactory connf;
+
 	private MessageProducer producer;
 	private Gson gson;
 	public boolean isActive;
@@ -33,7 +37,10 @@ public class ActiveProducerWorker {
 		try {
 			queueName = TXQueueName;
 			gson = new Gson();
-			conn = (ActiveMQConnection)new ActiveMQConnectionFactory(brokerUserNameAgent, brokerPasswordAgent, URI).createConnection();
+			//conn = (ActiveMQConnection)new ActiveMQConnectionFactory(brokerUserNameAgent, brokerPasswordAgent, URI).createConnection();
+			connf = new ActiveMQSslConnectionFactory(URI);
+			connf.setKeyAndTrustManagers(plugin.getCertificateManager().getKeyManagers(),plugin.getCertificateManager().getTrustManagers(), new SecureRandom());
+			conn = (ActiveMQConnection) connf.createConnection();
 			conn.start();
 			sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
 			

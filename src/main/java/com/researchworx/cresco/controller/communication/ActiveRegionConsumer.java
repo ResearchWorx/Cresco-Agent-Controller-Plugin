@@ -6,6 +6,7 @@ import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.ActiveMQSslConnectionFactory;
 
 import javax.jms.MessageConsumer;
 import javax.jms.Queue;
@@ -13,6 +14,7 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.security.SecureRandom;
 
 public class ActiveRegionConsumer implements Runnable {
 	private Launcher plugin;
@@ -20,13 +22,18 @@ public class ActiveRegionConsumer implements Runnable {
 	private Queue RXqueue; 
 	private Session sess;
 	private ActiveMQConnection conn;
+	private ActiveMQSslConnectionFactory connf;
 	
 	public ActiveRegionConsumer(Launcher plugin, String RXQueueName, String URI, String brokerUserNameAgent, String brokerPasswordAgent) {
 		this.logger = new CLogger(ActiveRegionConsumer.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
 		logger.debug("Initializing");
 		this.plugin = plugin;
 		try {
-			conn = (ActiveMQConnection)new ActiveMQConnectionFactory(brokerUserNameAgent,brokerPasswordAgent,URI).createConnection();
+			//conn = (ActiveMQConnection)new ActiveMQConnectionFactory(brokerUserNameAgent,brokerPasswordAgent,URI).createConnection();
+			connf = new ActiveMQSslConnectionFactory(URI);
+			connf.setKeyAndTrustManagers(plugin.getCertificateManager().getKeyManagers(),plugin.getCertificateManager().getTrustManagers(), new SecureRandom());
+			conn = (ActiveMQConnection) connf.createConnection();
+
 			conn.start();
 			this.sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
