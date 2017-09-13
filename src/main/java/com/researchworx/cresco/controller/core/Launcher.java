@@ -160,9 +160,15 @@ public class Launcher extends CPlugin {
         setExec(new Executor(this));
     }
 
+    @Override
+    public void postStart() {
+        //this.watchDog.stop() = null;
+    }
+
     public void start() {
         this.config = new ControllerConfig(config.getConfig());
         System.setProperty("log.console.level", "SEVERE");
+        //this.setWatchDog(null);
     }
 
     @Override
@@ -244,7 +250,7 @@ public class Launcher extends CPlugin {
                 ce.setParam("src_plugin", this.pluginID);
                 ce.setParam("dst_region", this.region);
                 ce.setParam("dst_agent", this.agent);
-                commInit(); //reinit everything
+                while(!commInit()); //reinit everything
                 //notify agent of change
                 ce.setParam("set_region", this.region);
                 ce.setParam("set_agent", this.agent);
@@ -254,6 +260,7 @@ public class Launcher extends CPlugin {
                 this.sendMsgEvent(ce);
                 this.restartOnShutdown = false;
             }
+
         } catch (Exception ex) {
             logger.error("shutdown {}", ex.getMessage());
             StringWriter sw = new StringWriter();
@@ -280,76 +287,580 @@ public class Launcher extends CPlugin {
         this.ap.sendMessage(msg);
     }
 
-    public void commInit() {
+    private  List<MsgEvent> initAgentDiscovery() {
+        //continue regional discovery until regional controller is found
+        List<MsgEvent> discoveryList = null;
+        boolean isInit = false;
+        try {
+                discoveryList = new ArrayList<>();
+                    if (this.isIPv6) {
+                        DiscoveryClientIPv6 dc = new DiscoveryClientIPv6(this);
+                        logger.debug("Broker Search (IPv6)...");
+                        discoveryList.addAll(dc.getDiscoveryResponse(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_ipv6_agent_timeout", 2000)));
+                        logger.debug("IPv6 Broker count = {}" + discoveryList.size());
+                    }
+                    DiscoveryClientIPv4 dc = new DiscoveryClientIPv4(this);
+                    logger.debug("Broker Search (IPv4)...");
+                    discoveryList.addAll(dc.getDiscoveryResponse(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_ipv4_agent_timeout", 2000)));
+                    logger.debug("Broker count = {}" + discoveryList.size());
+                    if(discoveryList.isEmpty()) {
+                        discoveryList = null;
+                    }
+        } catch (Exception ex) {
+            logger.error("initAgentDiscovery() Error " + ex.getMessage());
+        }
+        return discoveryList;
+    }
+
+    private Boolean initAgent(List<MsgEvent> discoveryList) {
+        //connect to a specific regional controller
+        boolean isInit = false;
+        try {
+            if(getConfig().getStringParam("regional_controller_host") != null) {
+
+                while(!isInit) {
+                    String tmpRegion = discoveryList.get(0).getParam("dst_region");
+                    this.agent = getConfig().getStringParam("agentname", "agent-" + java.util.UUID.randomUUID().toString());
+                    this.agentpath = tmpRegion + "_" + this.agent;
+                    certificateManager = new CertificateManager(this, agentpath);
+
+                    DiscoveryStatic ds = new DiscoveryStatic(this);
+                    List<MsgEvent> certDiscovery = ds.discover(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_static_agent_timeout", 10000), getConfig().getStringParam("regional_controller_host"), true);
+
+                    String cbrokerAddress = certDiscovery.get(0).getParam("dst_ip");
+                    String cbrokerValidatedAuthenication = certDiscovery.get(0).getParam("validated_authenication");
+                    String cRegion = certDiscovery.get(0).getParam("dst_region");
+                    if ((cbrokerAddress != null) && (cbrokerValidatedAuthenication != null)) {
+                        if((tmpRegion.equals(cRegion)) && (getConfig().getStringParam("regional_controller_host").equals(cbrokerAddress))) {
+                            this.region = certDiscovery.get(0).getParam("dst_region");
+
+                            String[]tmpAuth = cbrokerValidatedAuthenication.split(",");
+                            this.brokerUserNameAgent = tmpAuth[0];
+                            this.brokerPasswordAgent = tmpAuth[1];
+
+                            //set broker ip
+                            InetAddress remoteAddress = InetAddress.getByName(cbrokerAddress);
+                            if (remoteAddress instanceof Inet6Address) {
+                                cbrokerAddress = "[" + cbrokerAddress + "]";
+                            }
+                            this.brokerAddressAgent = cbrokerAddress;
+
+                            isInit = true;
+                            logger.info("Broker IP: " + cbrokerAddress);
+                            logger.info("Region: " + this.region);
+                            logger.info("Agent: " + this.agent);
+
+                        }
+                    }
+                }
+            }
+            //do discovery
+            else {
+
+            while(!isInit || discoveryList.isEmpty()) {
+                //determine least loaded broker
+                //need to use additional metrics to determine best fit broker
+                String cbrokerAddress = null;
+                String cbrokerValidatedAuthenication = null;
 
 
+                String cRegion = null;
+                int brokerCount = -1;
+                for (MsgEvent bm : discoveryList) {
+
+                    int tmpBrokerCount = Integer.parseInt(bm.getParam("agent_count"));
+                    if (brokerCount < tmpBrokerCount) {
+                        logger.trace("commInit {}" + bm.getParams().toString());
+                        cbrokerAddress = bm.getParam("dst_ip");
+                        cbrokerValidatedAuthenication = bm.getParam("validated_authenication");
+                        cRegion = bm.getParam("dst_region");
+                    }
+                }
+                if ((cbrokerAddress != null) && (cbrokerValidatedAuthenication != null)) {
+
+                    //DiscoveryStatic ds = new DiscoveryStatic(this);
+                    //discoveryList.addAll(ds.discover(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_static_agent_timeout", 10000), getConfig().getStringParam("regional_controller_host")));
+
+                    //List<MsgEvent> certDiscovery =
+
+
+                    //set agent broker auth
+                    String[]tmpAuth = cbrokerValidatedAuthenication.split(",");
+                    this.brokerUserNameAgent = tmpAuth[0];
+                    this.brokerPasswordAgent = tmpAuth[1];
+
+                    //set broker ip
+                    InetAddress remoteAddress = InetAddress.getByName(cbrokerAddress);
+                    if (remoteAddress instanceof Inet6Address) {
+                        cbrokerAddress = "[" + cbrokerAddress + "]";
+                    }
+                    //if ((this.region.equals("init")) && (this.agent.equals("init"))) {
+                    //RandomString rs = new RandomString(4);
+                    this.agent = getConfig().getStringParam("agentname", "agent-" + java.util.UUID.randomUUID().toString());
+                    //this.agent = "agent-" + java.util.UUID.randomUUID().toString();//rs.nextString();
+                    //logger.warn("Agent region changed from :" + oldRegion + " to " + region);
+                    //}
+
+                    this.brokerAddressAgent = cbrokerAddress;
+
+                    this.region = cRegion;
+                    logger.info("Assigned regionid=" + this.region);
+                    this.agentpath = this.region + "_" + this.agent;
+                    //todo this is enabled too many places
+                    //certificateManager = new CertificateManager(this, agentpath);
+
+                    //here is where we need to exchange certs
+
+
+                    logger.debug("AgentPath=" + this.agentpath);
+
+                }
+
+                this.isRegionalController = false;
+                if (this.getConfig().getBooleanParam("enable_clientnetdiscovery", true)) {
+                    //discovery engine
+                    if (!startNetDiscoveryEngine()) {
+                        logger.error("Start Network Discovery Engine Failed!");
+                    }
+                }
+            }
+            }
+        } catch (Exception ex) {
+            logger.error("initAgent() Error " + ex.getMessage());
+        }
+        return isInit;
+    }
+
+    private List<MsgEvent> initAgentStatic() {
+        //connect to a specific regional controller
+        List<MsgEvent> discoveryList = null;
+        boolean isInit = false;
+        try {
+            discoveryList = new ArrayList<>();
+            logger.info("Static Agent Connection to Regional Controller : " + getConfig().getStringParam("regional_controller_host"));
+            DiscoveryStatic ds = new DiscoveryStatic(this);
+            discoveryList.addAll(ds.discover(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_static_agent_timeout",10000), getConfig().getStringParam("regional_controller_host")));
+            logger.debug("Static Agent Connection count = {}" + discoveryList.size());
+            if(discoveryList.size() == 0) {
+                logger.info("Static Agent Connection to Regional Controller : " + getConfig().getStringParam("regional_controller_host") + " failed! - Restarting Discovery!");
+            }
+            if(discoveryList.isEmpty()) {
+                discoveryList = null;
+            }
+        } catch (Exception ex) {
+            logger.error("initAgentStatic() Error " + ex.getMessage());
+        }
+        return discoveryList;
+    }
+
+    private  List<MsgEvent> initRegionDiscovery() {
+        //continue regional discovery until regional controller is found
+        List<MsgEvent> discoveryList = null;
+        boolean isInit = false;
+        try {
+            discoveryList = new ArrayList<>();
+            if (this.isIPv6) {
+                DiscoveryClientIPv6 dc = new DiscoveryClientIPv6(this);
+                logger.debug("Broker Search (IPv6)...");
+                discoveryList.addAll(dc.getDiscoveryResponse(DiscoveryType.REGION, getConfig().getIntegerParam("discovery_ipv6_region_timeout", 2000)));
+                logger.debug("IPv6 Broker count = {}" + discoveryList.size());
+            }
+            DiscoveryClientIPv4 dc = new DiscoveryClientIPv4(this);
+            logger.debug("Broker Search (IPv4)...");
+            discoveryList.addAll(dc.getDiscoveryResponse(DiscoveryType.REGION, getConfig().getIntegerParam("discovery_ipv4_region_timeout", 2000)));
+            logger.debug("Broker count = {}" + discoveryList.size());
+            if(discoveryList.isEmpty()) {
+                discoveryList = null;
+            }
+        } catch (Exception ex) {
+            logger.error("initRegionDiscovery() Error " + ex.getMessage());
+        }
+        return discoveryList;
+    }
+
+    private  Boolean initRegionToRegion() {
+        //continue regional discovery until regional controller is found
+        boolean isInit = false;
+        try {
+            List<MsgEvent> discoveryList = null;
+            if (this.isIPv6) {
+                DiscoveryClientIPv6 dc = new DiscoveryClientIPv6(this);
+                logger.debug("Broker Search (IPv6)...");
+                discoveryList.addAll(dc.getDiscoveryResponse(DiscoveryType.REGION, getConfig().getIntegerParam("discovery_ipv6_region_timeout", 2000)));
+                logger.debug("IPv6 Broker count = {}" + discoveryList.size());
+            }
+            DiscoveryClientIPv4 dc = new DiscoveryClientIPv4(this);
+            logger.debug("Broker Search (IPv4)...");
+            discoveryList.addAll(dc.getDiscoveryResponse(DiscoveryType.REGION, getConfig().getIntegerParam("discovery_ipv4_region_timeout", 2000)));
+            logger.debug("Broker count = {}" + discoveryList.size());
+
+            if (!discoveryList.isEmpty()) {
+                for (MsgEvent ime : discoveryList) {
+                    this.incomingCanidateBrokers.add(ime);
+                    logger.debug("Regional Controller Found: " + ime.getParams());
+                }
+            }
+
+        } catch (Exception ex) {
+            logger.error("initRegionDiscovery() Error " + ex.getMessage());
+        }
+        return isInit;
+    }
+
+    private  Boolean initIOChannels() {
+        boolean isInit = false;
+        try {
+            boolean consumerAgentConnected = false; //loop to catch expections on JMX connect of consumer
+            int consumerAgentConnectCount = 0;
+            while(!consumerAgentConnected && (consumerAgentConnectCount < 10)) {
+                try {
+                    //consumer agent
+                    //this.consumerAgentThread = new Thread(new ActiveAgentConsumer(this, this.agentpath, "failover:tcp://" + this.brokerAddressAgent + ":32010?timeout=3000", brokerUserNameAgent, brokerPasswordAgent));
+                    //this.consumerAgentThread = new Thread(new ActiveAgentConsumer(this, this.agentpath, "failover:(tcp://" + this.brokerAddressAgent + ":32010)?timeout=3000", brokerUserNameAgent, brokerPasswordAgent));
+                    //this.consumerAgentThread = new Thread(new ActiveAgentConsumer(this, this.agentpath, "tcp://" + this.brokerAddressAgent + ":32010", brokerUserNameAgent, brokerPasswordAgent));
+                    this.consumerAgentThread = new Thread(new ActiveAgentConsumer(this, this.agentpath, "ssl://" + this.brokerAddressAgent + ":32010", brokerUserNameAgent, brokerPasswordAgent));
+                    this.consumerAgentThread.start();
+                    while (!this.ConsumerThreadActive) {
+                        Thread.sleep(1000);
+                    }
+                    consumerAgentConnected = true;
+                    logger.debug("Agent ConsumerThread Started..");
+                } catch (JMSException jmx) {
+                    logger.error("Agent ConsumerThread " + jmx.getMessage());
+                }
+                catch (Exception ex) {
+                    logger.error("Agent ConsumerThread " + ex.getMessage());
+                }
+                consumerAgentConnectCount++;
+            }
+            //this.ap = new ActiveProducer(this, "failover:tcp://" + this.brokerAddressAgent + ":32010?timeout=3000", brokerUserNameAgent, brokerPasswordAgent);
+            //this.ap = new ActiveProducer(this, "failover:(tcp://" + this.brokerAddressAgent + ":32010)?timeout=3000", brokerUserNameAgent, brokerPasswordAgent);
+            //this.ap = new ActiveProducer(this, "tcp://" + this.brokerAddressAgent + ":32010", brokerUserNameAgent, brokerPasswordAgent);
+            this.ap = new ActiveProducer(this, "ssl://" + this.brokerAddressAgent + ":32010", brokerUserNameAgent, brokerPasswordAgent);
+
+            logger.debug("Agent ProducerThread Started..");
+            isInit = true;
+        } catch (Exception ex) {
+            logger.error("initIOChannels() Error " + ex.getMessage());
+        }
+        return isInit;
+    }
+
+    private List<MsgEvent> initRegionStatic() {
+        //connect to a specific regional controller
+        List<MsgEvent> discoveryList = null;
+        boolean isInit = false;
+        try {
+            discoveryList = new ArrayList<>();
+            logger.info("Static Region Connection to Regional Controller : " + getConfig().getStringParam("regional_controller_host"));
+            DiscoveryStatic ds = new DiscoveryStatic(this);
+            discoveryList.addAll(ds.discover(DiscoveryType.REGION, getConfig().getIntegerParam("discovery_static_agent_timeout",10000), getConfig().getStringParam("regional_controller_host")));
+            logger.debug("Static Agent Connection count = {}" + discoveryList.size());
+            if(discoveryList.size() == 0) {
+                logger.info("Static Region Connection to Regional Controller : " + getConfig().getStringParam("regional_controller_host") + " failed! - Restarting Discovery!");
+            }
+            if(discoveryList.isEmpty()) {
+                discoveryList = null;
+            }
+        } catch (Exception ex) {
+            logger.error("initRegionStatic() Error " + ex.getMessage());
+        }
+        return discoveryList;
+    }
+
+    private  List<MsgEvent> initGlobalDiscovery() {
+        //continue regional discovery until regional controller is found
+        List<MsgEvent> discoveryList = null;
+        boolean isInit = false;
+        try {
+            discoveryList = new ArrayList<>();
+            if (this.isIPv6) {
+                DiscoveryClientIPv6 dc = new DiscoveryClientIPv6(this);
+                logger.debug("Broker Search (IPv6)...");
+                discoveryList.addAll(dc.getDiscoveryResponse(DiscoveryType.GLOBAL, getConfig().getIntegerParam("discovery_ipv6_global_timeout", 2000)));
+                logger.debug("IPv6 Broker count = {}" + discoveryList.size());
+            }
+            DiscoveryClientIPv4 dc = new DiscoveryClientIPv4(this);
+            logger.debug("Broker Search (IPv4)...");
+            discoveryList.addAll(dc.getDiscoveryResponse(DiscoveryType.GLOBAL, getConfig().getIntegerParam("discovery_ipv4_global_timeout", 2000)));
+            logger.debug("Broker count = {}" + discoveryList.size());
+            if(discoveryList.isEmpty()) {
+                discoveryList = null;
+            }
+        } catch (Exception ex) {
+            logger.error("initGlobalDiscovery() Error " + ex.getMessage());
+        }
+        return discoveryList;
+    }
+
+    private List<MsgEvent> initGlobalStatic() {
+        //connect to a specific regional controller
+        List<MsgEvent> discoveryList = null;
+        boolean isInit = false;
+        try {
+            discoveryList = new ArrayList<>();
+            logger.info("Static Region Connection to Global Controller : " + getConfig().getStringParam("global_controller_host"));
+            DiscoveryStatic ds = new DiscoveryStatic(this);
+            discoveryList.addAll(ds.discover(DiscoveryType.GLOBAL, getConfig().getIntegerParam("discovery_static_global_timeout",10000), getConfig().getStringParam("global_controller_host")));
+            logger.debug("Static Agent Connection count = {}" + discoveryList.size());
+            if(discoveryList.size() == 0) {
+                logger.info("Static Region Connection to Global Controller : " + getConfig().getStringParam("global_controller_host") + " failed! - Restarting Discovery!");
+            }
+            if(discoveryList.isEmpty()) {
+                discoveryList = null;
+            }
+        } catch (Exception ex) {
+            logger.error("initGlobalStatic() Error " + ex.getMessage());
+        }
+        return discoveryList;
+    }
+
+    private Boolean initGlobal() {
+        //don't discover anything
+        boolean isInit = false;
+        try {
+            if(isRegionalController()) {
+                //do global discovery here
+                this.globalControllerManagerThread = new Thread(new GlobalHealthWatcher(this));
+                this.globalControllerManagerThread.start();
+                while (!this.GlobalControllerManagerActive) {
+                    Thread.sleep(1000);
+                    logger.trace("Wait loop for Global Controller");
+                }
+                isInit = true;
+            } else {
+                logger.error("initGlobal Error : Must be Regional Controller First!");
+            }
+
+        } catch (Exception ex) {
+            logger.error("initGlobal() Error " + ex.getMessage());
+        }
+        return isInit;
+    }
+
+    private Boolean initRegion() {
+        boolean isInit = false;
+        try {
+            //if ((this.region.equals("init")) && (this.agent.equals("init"))) {
+                region = getConfig().getStringParam("regionname", "region-" + java.util.UUID.randomUUID().toString());
+                agent = getConfig().getStringParam("agentname", "agent-" + java.util.UUID.randomUUID().toString());
+                //region = "region-" + java.util.UUID.randomUUID().toString();
+                //agent = "agent-" + java.util.UUID.randomUUID().toString();
+                logger.debug("Generated regionid=" + this.region);
+            //}
+            this.agentpath = this.region + "_" + this.agent;
+            certificateManager = new CertificateManager(this,agentpath);
+
+            logger.debug("AgentPath=" + this.agentpath);
+            //Start controller services
+
+            //discovery engine
+            if(!startNetDiscoveryEngine()) {
+                logger.error("Start Network Discovery Engine Failed!");
+            }
+
+            //logger.debug("IPv6 DiscoveryEngine Started..");
+
+            logger.debug("Broker starting");
+            if((getConfig().getStringParam("broker_username") != null) && (getConfig().getStringParam("broker_password") != null)) {
+                brokerUserNameAgent = getConfig().getStringParam("broker_username");
+                brokerPasswordAgent = getConfig().getStringParam("broker_password");
+            }
+            else {
+                brokerUserNameAgent = java.util.UUID.randomUUID().toString();
+                brokerPasswordAgent = java.util.UUID.randomUUID().toString();
+            }
+            this.broker = new ActiveBroker(this, this.agentpath,brokerUserNameAgent,brokerPasswordAgent);
+
+            //broker manager
+            logger.debug("Starting Broker Manager");
+            this.activeBrokerManagerThread = new Thread(new ActiveBrokerManager(this));
+            this.activeBrokerManagerThread.start();
+                /*synchronized (activeBrokerManagerThread) {
+					activeBrokerManagerThread.wait();
+				}*/
+            while (!this.ActiveBrokerManagerActive) {
+                Thread.sleep(1000);
+            }
+            //logger.debug("ActiveBrokerManager Started..");
+
+            if (this.isIPv6) { //set broker address for consumers and producers
+                this.brokerAddressAgent = "[::1]";
+            } else {
+                this.brokerAddressAgent = "localhost";
+            }
+
+            //consumer region
+            //this.consumerRegionThread = new Thread(new ActiveRegionConsumer(this, this.region, "tcp://" + this.brokerAddressAgent + ":32010",brokerUserNameAgent,brokerPasswordAgent));
+            this.consumerRegionThread = new Thread(new ActiveRegionConsumer(this, this.region, "ssl://" + this.brokerAddressAgent + ":32010",brokerUserNameAgent,brokerPasswordAgent));
+            this.consumerRegionThread.start();
+            while (!this.ConsumerThreadRegionActive) {
+                Thread.sleep(1000);
+            }
+
+            this.gdb = new DBInterface(this); //start com.researchworx.cresco.controller.db service
+            logger.debug("RegionalControllerDB Service Started");
+            this.discoveryMap = new ConcurrentHashMap<>(); //discovery map
+
+            //enable this regional controller in the DB
+            MsgEvent le = new MsgEvent(MsgEvent.Type.CONFIG, getRegion(), getAgent(), getPluginID(), "enabled");
+            le.setParam("src_region", getRegion());
+            le.setParam("dst_region", getRegion());
+            le.setParam("action", "enable");
+            le.setParam("watchdogtimer", String.valueOf(getConfig().getLongParam("watchdogtimer", 5000L)));
+            getGDB().addNode(le);
+
+            isInit = true;
+
+        } catch (Exception ex) {
+            logger.error("initRegion() Error " + ex.getMessage());
+        }
+        return isInit;
+    }
+
+    public Boolean commInit() {
+
+        boolean isCommInit = true;
         watchDog.stop();
-
 
         logger.info("Initializing services");
         setActive(true);
 
         try {
 
-            //create certificate store
-
-            /*
-            if(getConfig().getBooleanParam("enable_sshd",false)) {
-                SshServer sshd = SshServer.setUpDefaultServer();
-
-                sshd.setPasswordAuthenticator(new InAppPasswordAuthenticator(this));
-                sshd.setPort(config.getIntegerParam("sshd_port",5222));
-                String keypairPath = config.getStringParam("sshd_rsa_key_path");
-                if(keypairPath != null) {
-                    try {
-                        AbstractGeneratorHostKeyProvider hostKeyProvider =
-                                new SimpleGeneratorHostKeyProvider(new File(keypairPath));
-                        hostKeyProvider.setAlgorithm(KeyUtils.RSA_ALGORITHM);
-                        sshd.setKeyPairProvider(hostKeyProvider);
-
-                        //sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider(new File(keypairPath)));
-
-                    }
-                    catch (Exception ex) {
-                        logger.error("Invalid RSA Key File = " +  keypairPath + " Message=" + ex.getMessage());
-                        System.exit(0);
-                    }
-                }
-                else {
-                    AbstractGeneratorHostKeyProvider hostKeyProvider =
-                            new SimpleGeneratorHostKeyProvider();
-                    hostKeyProvider.setAlgorithm(KeyUtils.RSA_ALGORITHM);
-                    sshd.setKeyPairProvider(hostKeyProvider);
-                    //sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider());
-                }
-
-
-                AppShellFactory ssh_shell = new AppShellFactory(this);
-                sshd.setShellFactory(ssh_shell);
-                sshd.start();
-                logger.info("Enabled SSH Shell");
-
-            }
-            */
             this.brokeredAgents = new ConcurrentHashMap<>();
             this.incomingCanidateBrokers = new LinkedBlockingQueue<>();
             this.outgoingMessages = new LinkedBlockingQueue<>();
             this.brokerAddressAgent = null;
             this.isIPv6 = isIPv6();
 
-            /*
-            private DiscoveryClientIPv4 dcv4;
-            private DiscoveryClientIPv6 dcv6;
-
-            this.dcv4 = new DiscoveryClientIPv4(this);
-            this.dcv6 = new DiscoveryClientIPv6(this);
-            */
 
             DiscoveryClientIPv4 dcv4 = new DiscoveryClientIPv4(this);
             DiscoveryClientIPv6 dcv6 = new DiscoveryClientIPv6(this);
 
-            //List<MsgEvent> discoveryList = new ArrayList<>();
-            List<MsgEvent> discoveryList = new ArrayList<>();
+            List<MsgEvent> discoveryList = null;
+
+
+            if(getConfig().getBooleanParam("is_agent",false)) {
+                if(getConfig().getStringParam("regional_controller_host") == null) {
+                        discoveryList = initAgentDiscovery();
+                        while(discoveryList == null) {
+                            discoveryList = initAgentDiscovery();
+                        }
+                        isRegionalController = false;
+                        isGlobalController = false;
+                } else {
+                    //agent with static region
+                        discoveryList = initAgentStatic();
+                        while(discoveryList == null) {
+                            discoveryList = initAgentStatic();
+                        }
+                        isRegionalController = false;
+                        isGlobalController = false;
+                }
+            } else if(getConfig().getBooleanParam("is_region",false)) {
+                    isRegionalController = true;
+                    isGlobalController = false;
+
+            } else if(getConfig().getBooleanParam("is_global",false)) {
+                //by pass all discovery
+                    isRegionalController = true;
+                    isGlobalController = true;
+            } else {
+                //allow promotion of agent to region if agent connection fails
+                discoveryList = initAgentDiscovery();
+                if(discoveryList != null) {
+                    isRegionalController = false;
+                    isGlobalController = false;
+                } else {
+                    discoveryList = initGlobalDiscovery();
+                    if(discoveryList != null) {
+                        isRegionalController = true;
+                        isGlobalController = false;
+                    } else {
+                        isRegionalController = true;
+                        isGlobalController = true;
+                    }
+                }
+            }
+
+            //if a regional controller setup a broker and attach consumer and producer
+            if(isRegionalController) {
+
+                if(initRegion()) {
+                    //connect to other regions
+                    if(getConfig().getBooleanParam("regional_discovery",false)) {
+                        initRegionToRegion();
+                    }
+                } else {
+                    logger.error("Unable to init Region!");
+                    return false;
+                }
+            } else { //not a region, try and connect to one.
+                    if(!initAgent(discoveryList)) {
+                        logger.error("Unable to init agent!");
+                        return false;
+                    }
+            }
+
+            this.logger = new CLogger(msgOutQueue, region, agent, pluginID, CLogger.Level.Info);
+
+            //setup producer and consumers
+            if(!initIOChannels()) {
+                logger.error("initIOChallels Failed");
+                return false;
+            }
+
+            //watchDogProcess = new plugincore.WatchDog();
+            //stopWatchDog();
+            //setWatchDog(new WatchDog(region, agent, pluginID, logger, config));
+            //startWatchDog();
+            updateWatchDog();
+            logger.info("WatchDog configuration updated");
+            this.regionHealthWatcher = new RegionHealthWatcher(this);
+            logger.info("RegionHealthWatcher started");
+
+
+
+            //start network performance monitor if create
+            if(perfMonitorNet != null) {
+                logger.info("Starting perfMonNet...");
+                perfMonitorNet.start();
+            }
+
+            /*
+            logger.info("Starting Network Discovery Engine...");
+            if(!startNetDiscoveryEngine()) {
+                logger.error("Start Network Discovery Engine Failed!");
+            }
+            */
+
+            int i = 1;
+            if(i == 1) {
+                return true;
+            }
+
+
+
+            String cbrokerAddress2 = null;
+            String cbrokerValidatedAuthenication2 = null;
+
+
+            int brokerCount2 = -1;
+            for (MsgEvent bm : discoveryList) {
+
+                int tmpBrokerCount2 = Integer.parseInt(bm.getParam("agent_count"));
+                if (brokerCount2 < tmpBrokerCount2) {
+                    logger.error("commInit {}" + bm.getParams().toString());
+                    cbrokerAddress2 = bm.getParam("dst_ip");
+                    logger.error("Broker Address: " + cbrokerAddress2);
+                    cbrokerValidatedAuthenication2 = bm.getParam("validated_authenication");
+                    logger.error("cbrokerValidatedAuthenication: " + cbrokerValidatedAuthenication2);
+
+                }
+            }
+
+
 
             if(getConfig().getStringParam("regional_controller_host") != null) {
                 //do directed discovery
@@ -372,9 +883,10 @@ public class Launcher extends CPlugin {
                     logger.debug("IPv6 Broker count = {}" + discoveryList.size());
                 }
                 logger.debug("Broker Search (IPv4)...");
-                    discoveryList.addAll(dcv4.getDiscoveryResponse(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_ipv4_agent_timeout", 2000)));
-                    logger.debug("Broker count = {}" + discoveryList.size());
+                discoveryList.addAll(dcv4.getDiscoveryResponse(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_ipv4_agent_timeout", 2000)));
+                logger.debug("Broker count = {}" + discoveryList.size());
             }
+
             if(getConfig().getStringParam("regional_controller_host") != null) {
 
                 //determine least loaded broker
@@ -505,7 +1017,7 @@ public class Launcher extends CPlugin {
                 if (this.isIPv6) {
                     discoveryList = dcv6.getDiscoveryResponse(DiscoveryType.REGION, getConfig().getIntegerParam("discovery_ipv6_region_timeout", 2000));
                 }
-                    discoveryList.addAll(dcv4.getDiscoveryResponse(DiscoveryType.REGION, getConfig().getIntegerParam("discovery_ipv4_region_timeout", 2000)));
+                discoveryList.addAll(dcv4.getDiscoveryResponse(DiscoveryType.REGION, getConfig().getIntegerParam("discovery_ipv4_region_timeout", 2000)));
 
                 if (!discoveryList.isEmpty()) {
                     for (MsgEvent ime : discoveryList) {
@@ -582,79 +1094,13 @@ public class Launcher extends CPlugin {
 
             }
 
-            this.logger = new CLogger(msgOutQueue, region, agent, pluginID, CLogger.Level.Info);
 
-            boolean consumerAgentConnected = false; //loop to catch expections on JMX connect of consumer
-            int consumerAgentConnectCount = 0;
-            while(!consumerAgentConnected && (consumerAgentConnectCount < 10)) {
-                try {
-                    //consumer agent
-                    //this.consumerAgentThread = new Thread(new ActiveAgentConsumer(this, this.agentpath, "failover:tcp://" + this.brokerAddressAgent + ":32010?timeout=3000", brokerUserNameAgent, brokerPasswordAgent));
-                    //this.consumerAgentThread = new Thread(new ActiveAgentConsumer(this, this.agentpath, "failover:(tcp://" + this.brokerAddressAgent + ":32010)?timeout=3000", brokerUserNameAgent, brokerPasswordAgent));
-                    //this.consumerAgentThread = new Thread(new ActiveAgentConsumer(this, this.agentpath, "tcp://" + this.brokerAddressAgent + ":32010", brokerUserNameAgent, brokerPasswordAgent));
-                    this.consumerAgentThread = new Thread(new ActiveAgentConsumer(this, this.agentpath, "ssl://" + this.brokerAddressAgent + ":32010", brokerUserNameAgent, brokerPasswordAgent));
-                    this.consumerAgentThread.start();
-                    while (!this.ConsumerThreadActive) {
-                        Thread.sleep(1000);
-                    }
-                    consumerAgentConnected = true;
-                    logger.debug("Agent ConsumerThread Started..");
-                } catch (JMSException jmx) {
-                    logger.error("Agent ConsumerThread " + jmx.getMessage());
-                }
-                catch (Exception ex) {
-                    logger.error("Agent ConsumerThread " + ex.getMessage());
-                }
-                consumerAgentConnectCount++;
-            }
-            //this.ap = new ActiveProducer(this, "failover:tcp://" + this.brokerAddressAgent + ":32010?timeout=3000", brokerUserNameAgent, brokerPasswordAgent);
-            //this.ap = new ActiveProducer(this, "failover:(tcp://" + this.brokerAddressAgent + ":32010)?timeout=3000", brokerUserNameAgent, brokerPasswordAgent);
-            //this.ap = new ActiveProducer(this, "tcp://" + this.brokerAddressAgent + ":32010", brokerUserNameAgent, brokerPasswordAgent);
-            this.ap = new ActiveProducer(this, "ssl://" + this.brokerAddressAgent + ":32010", brokerUserNameAgent, brokerPasswordAgent);
-
-            logger.debug("Agent ProducerThread Started..");
-
-
-
-            //watchDogProcess = new plugincore.WatchDog();
-            //stopWatchDog();
-            //setWatchDog(new WatchDog(region, agent, pluginID, logger, config));
-            //startWatchDog();
-            updateWatchDog();
-            logger.info("WatchDog configuration updated");
-            this.regionHealthWatcher = new RegionHealthWatcher(this);
-            logger.info("RegionHealthWatcher started");
-
-            //Do GlobalDiscovery Last
-            if(isRegionalController()) {
-                //do global discovery here
-                this.globalControllerManagerThread = new Thread(new GlobalHealthWatcher(this, dcv4, dcv6));
-                this.globalControllerManagerThread.start();
-                while (!this.GlobalControllerManagerActive) {
-                    Thread.sleep(1000);
-                    logger.trace("Wait loop for Global Controller");
-                }
-
-            }
-
-            //start network performance monitor if create
-            if(perfMonitorNet != null) {
-                logger.info("Starting perfMonNet...");
-                perfMonitorNet.start();
-            }
-
-            /*
-            logger.info("Starting Network Discovery Engine...");
-            if(!startNetDiscoveryEngine()) {
-                logger.error("Start Network Discovery Engine Failed!");
-            }
-            */
 
         } catch (Exception e) {
             e.printStackTrace();
             logger.trace("commInit " + e.getMessage());
         }
-
+        return isCommInit;
     }
 
     public boolean isLocal(String checkAddress) {

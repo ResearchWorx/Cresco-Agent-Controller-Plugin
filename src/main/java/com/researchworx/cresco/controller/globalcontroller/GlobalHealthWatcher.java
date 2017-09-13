@@ -18,8 +18,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class GlobalHealthWatcher implements Runnable {
 	private Launcher plugin;
 	private CLogger logger;
-	private DiscoveryClientIPv4 dcv4;
-	private DiscoveryClientIPv6 dcv6;
 	private Map<String,String> global_host_map;
     private Timer regionalUpdateTimer;
     private Long gCheckInterval;
@@ -29,11 +27,9 @@ public class GlobalHealthWatcher implements Runnable {
     public Boolean AppSchedulerActive;
 
 
-    public GlobalHealthWatcher(Launcher plugin, DiscoveryClientIPv4 dcv4, DiscoveryClientIPv6 dcv6) {
+    public GlobalHealthWatcher(Launcher plugin) {
 		this.logger = new CLogger(GlobalHealthWatcher.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
 		this.plugin = plugin;
-        this.dcv4 = dcv4;
-        this.dcv6 = dcv6;
         global_host_map = new HashMap<>();
         regionalUpdateTimer = new Timer();
         regionalUpdateTimer.scheduleAtFixedRate(new GlobalHealthWatcher.GlobalNodeStatusWatchDog(plugin, logger), 500, 15000);//remote
@@ -137,7 +133,95 @@ public class GlobalHealthWatcher implements Runnable {
 
     }
 
-	private void gCheck() {
+    private void gCheck() {
+        logger.trace("gCheck Start");
+
+        try{
+
+            //Static Remote Global Controller
+            String static_global_controller_host = plugin.getConfig().getStringParam("gc_host",null);
+            if(static_global_controller_host != null) {
+                this.plugin.setGlobalController(false);
+                logger.trace("Starting Static Global Controller Check");
+                if(global_host_map.containsKey(static_global_controller_host)) {
+                    if(plugin.isReachableAgent(global_host_map.get(static_global_controller_host))) {
+                        return;
+                    }
+                    else {
+                        this.plugin.setGlobalControllerPath(null);
+                        global_host_map.remove(static_global_controller_host);
+                    }
+                }
+                String globalPath = connectToGlobal(staticGlobalDiscovery());
+                if(globalPath == null) {
+                    logger.error("Failed to connect to Global Controller Host :" + static_global_controller_host);
+                    this.plugin.setGlobalControllerPath(null);
+                }
+                else {
+                    global_host_map.put(static_global_controller_host, globalPath);
+                    plugin.setGlobalControllerPath(globalPath);
+                    //register with global controller
+                    sendGlobalWatchDogRegister();
+                    //todo is this correct?
+                    regionalDBexport();
+                }
+            }
+            else if(this.plugin.isGlobalController()) {
+                //Do nothing if already controller, will reinit on regional restart
+                logger.trace("Starting Local Global Controller Check");
+            }
+            else {
+                logger.trace("Starting Dynamic Global Controller Check");
+                //Check if the global controller path exist
+                if(plugin.isReachableAgent(this.plugin.getGlobalControllerPath())) {
+                    logger.debug("Global Path : " +  this.plugin.getGlobalControllerPath() + " reachable :" + plugin.isReachableAgent(this.plugin.getGlobalControllerPath()));
+                    return;
+                }
+                else {
+                    //global controller is not reachable, start dynamic discovery
+                    this.plugin.setGlobalController(false);
+                    this.plugin.setGlobalControllerPath(null);
+                    List<MsgEvent> discoveryList = dynamicGlobalDiscovery();
+
+                    if(!discoveryList.isEmpty()) {
+                        String globalPath = connectToGlobal(dynamicGlobalDiscovery());
+                        if(globalPath == null) {
+                            logger.error("Failed to connect to Global Controller Host :" + globalPath);
+                        }
+                        else {
+                            this.plugin.setGlobalControllerPath(globalPath);
+                            //register with global controller
+                            sendGlobalWatchDogRegister();
+                            //todo is this right to do
+                            regionalDBexport();
+                        }
+                    }
+                    else {
+                        //No global controller found, starting global services
+                        logger.info("No Global Controller Found: Starting Global Services");
+                        //start global stuff
+
+                        //create globalscheduler queue
+                        //plugin.setResourceScheduleQueue(new LinkedBlockingQueue<MsgEvent>());
+                        plugin.setAppScheduleQueue(new LinkedBlockingQueue<gPayload>());
+                        startGlobalSchedulers();
+                        //end global start
+                        this.plugin.setGlobalController(true);
+
+
+                    }
+                }
+            }
+
+        }
+        catch(Exception ex) {
+            logger.error("gCheck() " +ex.getMessage());
+        }
+        logger.trace("gCheck End");
+
+    }
+
+    private void gCheck2() {
         logger.trace("gCheck Start");
 
         try{
@@ -333,9 +417,12 @@ public class GlobalHealthWatcher implements Runnable {
         List<MsgEvent> discoveryList = null;
         try {
             discoveryList = new ArrayList<>();
+
             if (plugin.isIPv6()) {
+                DiscoveryClientIPv6 dcv6 = new DiscoveryClientIPv6(plugin);
                 discoveryList = dcv6.getDiscoveryResponse(DiscoveryType.GLOBAL, plugin.getConfig().getIntegerParam("discovery_ipv6_global_timeout", 2000));
             }
+            DiscoveryClientIPv4 dcv4 = new DiscoveryClientIPv4(plugin);
             discoveryList.addAll(dcv4.getDiscoveryResponse(DiscoveryType.GLOBAL, plugin.getConfig().getIntegerParam("discovery_ipv4_global_timeout", 2000)));
 
             if (!discoveryList.isEmpty()) {

@@ -7,6 +7,7 @@ import com.researchworx.cresco.library.utilities.CLogger;
 
 import java.io.IOException;
 import java.net.*;
+import java.security.cert.Certificate;
 import java.util.*;
 
 class DiscoveryClientWorkerIPv4 {
@@ -88,7 +89,8 @@ class DiscoveryClientWorkerIPv4 {
                     if (disType == DiscoveryType.AGENT || disType == DiscoveryType.REGION || disType == DiscoveryType.GLOBAL) {
                         me.setParam("validated_authenication", ValidatedAuthenication(me));
                     }
-                        discoveredList.add(me);
+
+                    discoveredList.add(me);
 
 
                 }

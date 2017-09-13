@@ -135,11 +135,13 @@ public class ActiveBroker {
 				if (plugin.isIPv6())
 					//connector.setUri(new URI("tcp://[::]:32010"));
 				    connector.setUri(new URI("ssl://[::]:32010?needClientAuth=true"));
+					//connector.setUri(new URI("ssl://[::]:32010"));
 
 				//connector.setUri(new URI("ssl://[::]:32010"));
 				else
 					//connector.setUri(new URI("tcp://0.0.0.0:32010"));
 					connector.setUri(new URI("ssl://0.0.0.0:32010?needClientAuth=true"));
+					//connector.setUri(new URI("ssl://0.0.0.0:32010"));
 
                 /*
                 connector.setUpdateClusterClients(true);

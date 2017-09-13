@@ -8,10 +8,7 @@ import sun.security.tools.keytool.CertAndKeyGen;
 import sun.security.x509.*;
 
 import javax.net.ssl.*;
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
@@ -541,6 +538,9 @@ public class CertificateManager {
 
         } catch(Exception ex) {
             logger.error("getCertsfromJson : error " + ex.getMessage());
+            StringWriter sw = new StringWriter();
+            ex.printStackTrace(new PrintWriter(sw));
+            logger.error(sw.toString());
         }
         return certs;
     }

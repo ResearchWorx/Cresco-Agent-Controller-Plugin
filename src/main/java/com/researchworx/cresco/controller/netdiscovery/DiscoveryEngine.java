@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.*;
+import java.security.cert.Certificate;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -381,7 +382,14 @@ public class DiscoveryEngine implements Runnable {
                             me.setParam("validated_authenication",validatedAuthenication);
                             me.setParam("broadcast_ts", rme.getParam("broadcast_ts"));
                             logger.debug("getAgentMsg = " + me.getParams().toString());
-                        //}
+                            //return message exist, if cert exist add it and include ours
+                            if(rme.getParam("public_cert") != null) {
+                                String remoteAgentPath = plugin.getRegion() + "_" + me.getParam("dst_agent");
+                                String localCertString = configureCertTrust(remoteAgentPath,rme.getParam("public_cert"));
+                                if(localCertString != null) {
+                                    me.setParam("public_cert",localCertString);
+                                }
+                            }
                     }
                     else {
                         if(rme.getParam("src_region") == null) {
@@ -433,6 +441,14 @@ public class DiscoveryEngine implements Runnable {
                         me.setParam("discovery_type", DiscoveryType.GLOBAL.name());
                         me.setParam("broadcast_ts", rme.getParam("broadcast_ts"));
                         me.setParam("validated_authenication", validatedAuthenication);
+                        //return message exist, if cert exist add it and include ours
+                        if(rme.getParam("public_cert") != null) {
+                            String remoteAgentPath = plugin.getRegion() + "_" + me.getParam("dst_agent");
+                            String localCertString = configureCertTrust(remoteAgentPath,rme.getParam("public_cert"));
+                            if(localCertString != null) {
+                                me.setParam("public_cert",localCertString);
+                            }
+                        }
                     }
                 }
 
@@ -462,6 +478,14 @@ public class DiscoveryEngine implements Runnable {
                         me.setParam("discovery_type", DiscoveryType.REGION.name());
                         me.setParam("broadcast_ts", rme.getParam("broadcast_ts"));
                         me.setParam("validated_authenication", validatedAuthenication);
+                        //return message exist, if cert exist add it and include ours
+                        if(rme.getParam("public_cert") != null) {
+                            String remoteAgentPath = plugin.getRegion() + "_" + me.getParam("dst_agent");
+                            String localCertString = configureCertTrust(remoteAgentPath,rme.getParam("public_cert"));
+                            if(localCertString != null) {
+                                me.setParam("public_cert",localCertString);
+                            }
+                        }
                     }
                 }
 
@@ -469,6 +493,19 @@ public class DiscoveryEngine implements Runnable {
                 logger.error("getRegionalMsg " + ex.getMessage());
             }
             return me;
+        }
+
+        private String configureCertTrust(String remoteAgentPath, String remoteCertString) {
+            String localCertString = null;
+                try {
+                    Certificate[] certs = plugin.getCertificateManager().getCertsfromJson(remoteCertString);
+                    plugin.getCertificateManager().addCertificatesToTrustStore(remoteAgentPath,certs);
+                    plugin.getBroker().updateTrustManager();
+                    localCertString = plugin.getCertificateManager().getJsonFromCerts(plugin.getCertificateManager().getPublicCertificate());
+                } catch(Exception ex) {
+                    logger.error("configureCertTrust Error " + ex.getMessage());
+                }
+            return localCertString;
         }
 
         private String validateMsgEvent(MsgEvent rme) {

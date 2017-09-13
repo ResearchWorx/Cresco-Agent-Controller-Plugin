@@ -201,13 +201,19 @@ class Executor extends CExecutor {
 
     MsgEvent commInit(MsgEvent msg) {
         logger.debug("comminit message type found");
-        mainPlugin.commInit();
+        String initAgent = msg.getParam("src_agent");
+        String initRegion = msg.getParam("src_region");
+
+        while(!mainPlugin.commInit());
+        msg.setParam("src_agent",initAgent);
+        msg.setParam("src_region",initRegion);
         msg.setParam("set_region", this.plugin.getRegion());
         msg.setParam("set_agent", this.plugin.getAgent());
         msg.setParam("is_regional_controller", Boolean.toString(this.mainPlugin.isRegionalController()));
         msg.setParam("is_global_controller", Boolean.toString(this.mainPlugin.isGlobalController()));
         msg.setParam("is_active", Boolean.toString(this.plugin.isActive()));
         logger.debug("Returning communication details to Cresco agent");
+
         return msg;
     }
 }

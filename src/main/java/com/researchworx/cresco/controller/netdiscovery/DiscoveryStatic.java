@@ -6,10 +6,13 @@ import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,6 +66,20 @@ public class DiscoveryStatic {
         }
     }
     */
+
+    private boolean setCertTrust(String remoteAgentPath, String remoteCertString) {
+        boolean isSet = false;
+        try {
+            Certificate[] certs = plugin.getCertificateManager().getCertsfromJson(remoteCertString);
+            plugin.getCertificateManager().addCertificatesToTrustStore(remoteAgentPath,certs);
+            isSet = true;
+
+        } catch(Exception ex) {
+            logger.error("configureCertTrust Error " + ex.getMessage());
+        }
+        return isSet;
+    }
+
     private synchronized void processIncoming(DatagramPacket packet) {
         synchronized (packet) {
             String json = new String(packet.getData()).trim();
@@ -81,10 +98,22 @@ public class DiscoveryStatic {
                     me.setParam("dst_region", me.getParam("src_region"));
                     me.setParam("dst_agent", me.getParam("src_agent"));
                     me.setParam("validated_authenication",ValidatedAuthenication(me));
-
+                    if(me.getParam("public_cert") != null) {
+                        logger.trace("public_cert Exists");
+                        String remoteAgentPath = me.getParam("src_region") + "_" + me.getParam("src_agent");
+                        if(setCertTrust(remoteAgentPath,me.getParam("public_cert"))) {
+                            logger.trace("Added Static discovered host to discoveredList.");
+                            logger.trace("discoveredList contains " + discoveredList.size() + " items.");
+                        } else {
+                            logger.trace("Could not set Trust");
+                        }
+                    } else {
+                        logger.trace("processIncoming() : no cert found");
+                    }
                     discoveredList.add(me);
-                    logger.trace("Added Static discovered host to discoveredList.");
-                    logger.trace("discoveredList contains " + discoveredList.size() + " items.");
+
+                    //sme.setParam("public_cert", plugin.getCertificateManager().getJsonFromCerts(plugin.getCertificateManager().getPublicCertificate()));
+
 
                 }
             } catch (Exception ex) {
@@ -94,9 +123,12 @@ public class DiscoveryStatic {
     }
 
     public List<MsgEvent> discover(DiscoveryType disType, int discoveryTimeout, String hostAddress) {
+        return discover(disType,discoveryTimeout,hostAddress,false);
+    }
 
+    public List<MsgEvent> discover(DiscoveryType disType, int discoveryTimeout, String hostAddress, Boolean sendCert) {
         // Find the server using UDP broadcast
-        logger.info("Discovery Static started");
+        logger.info("Discovery Static started : Enable Cert: " + sendCert);
 
             // Broadcast the message over all the network interfaces
                     try {
@@ -114,8 +146,9 @@ public class DiscoveryStatic {
                         sme.setParam("discover_ip", hostAddress);
                         sme.setParam("src_region", this.plugin.getRegion());
                         sme.setParam("src_agent", this.plugin.getAgent());
-
-
+                        if(sendCert) {
+                            sme.setParam("public_cert", plugin.getCertificateManager().getJsonFromCerts(plugin.getCertificateManager().getPublicCertificate()));
+                        }
                         if (disType == DiscoveryType.AGENT || disType == DiscoveryType.REGION || disType == DiscoveryType.GLOBAL) {
                             logger.trace("Discovery Type = {}", disType.name());
                             sme.setParam("discovery_type", disType.name());
@@ -170,6 +203,9 @@ public class DiscoveryStatic {
                         // Eat the exception, closing the port
                     } catch (Exception e) {
                         logger.error("getDiscoveryMap {}", e.getMessage());
+                        StringWriter errors = new StringWriter();
+                        e.printStackTrace(new PrintWriter(errors));
+                        logger.error(errors.toString());
                     }
 
         return discoveredList;
