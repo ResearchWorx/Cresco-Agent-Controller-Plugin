@@ -1,10 +1,13 @@
 package com.researchworx.cresco.controller.communication;
 
 import com.researchworx.cresco.controller.core.Launcher;
+import com.researchworx.cresco.controller.netdiscovery.DiscoveryStatic;
+import com.researchworx.cresco.controller.netdiscovery.DiscoveryType;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 import org.apache.activemq.network.NetworkConnector;
 
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -14,7 +17,7 @@ public class ActiveBrokerManager implements Runnable  {
 	private CLogger logger;
 	private Timer timer;
 	public ActiveBrokerManager(Launcher plugin) {
-		this.logger = new CLogger(ActiveBrokerManager.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+		this.logger = new CLogger(ActiveBrokerManager.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
 
 		logger.debug("Active Broker Manger initialized");
 		this.plugin = plugin;
@@ -48,8 +51,10 @@ public class ActiveBrokerManager implements Runnable  {
 			try {
 				MsgEvent cb = this.plugin.getIncomingCanidateBrokers().take();
 				if(cb != null) {
+
 					String agentIP = cb.getParam("dst_ip");
 					if(!this.plugin.isLocal(agentIP)) { //ignore local responses
+
 						boolean addBroker = false;
 						String agentPath = cb.getParam("dst_region") + "_" + cb.getParam("dst_agent");
 						logger.trace("Trying to connect to: " + agentPath);
@@ -78,13 +83,19 @@ public class ActiveBrokerManager implements Runnable  {
                             cbrokerValidatedAuthenication = cb.getParam("validated_authenication");
 
 							if(cbrokerValidatedAuthenication != null) {
-								//set agent broker auth
-								String[] tmpAuth = cbrokerValidatedAuthenication.split(",");
-								//end
-								ba = new BrokeredAgent(this.plugin, agentPath, cbrokerAddress, tmpAuth[0], tmpAuth[1]);
-								this.plugin.getBrokeredAgents().put(agentPath, ba);
-								addBroker = true;
-								logger.trace("BA NEW ADDING agentPath: " + agentPath + " remote_ip: " + agentIP);
+
+								DiscoveryStatic ds = new DiscoveryStatic(plugin);
+								List<MsgEvent> certDiscovery = ds.discover(DiscoveryType.REGION, plugin.getConfig().getIntegerParam("discovery_static_region_timeout", 10000), cbrokerAddress, true);
+                				for(MsgEvent cme : certDiscovery) {
+                					if(cbrokerAddress.equals(cme.getParam("dst_ip"))) {
+										String[] tmpAuth = cbrokerValidatedAuthenication.split(",");
+										ba = new BrokeredAgent(this.plugin, agentPath, cbrokerAddress, tmpAuth[0], tmpAuth[1]);
+										this.plugin.getBrokeredAgents().put(agentPath, ba);
+										addBroker = true;
+										logger.trace("BA NEW ADDING agentPath: " + agentPath + " remote_ip: " + agentIP);
+									}
+								}
+
 							}
 						}
 						//try and connect

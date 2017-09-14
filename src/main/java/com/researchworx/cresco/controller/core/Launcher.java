@@ -161,15 +161,6 @@ public class Launcher extends CPlugin {
         setExec(new Executor(this));
     }
 
-    /*
-    @Override
-    public void preShutdown() {
-        logger.error("PreShutdown!");
-        getWatchDog().stop();
-        watchDog.stop();
-    }
-    */
-
     public void start() {
         this.config = new ControllerConfig(config.getConfig());
         System.setProperty("log.console.level", "SEVERE");
@@ -487,7 +478,7 @@ public class Launcher extends CPlugin {
         //continue regional discovery until regional controller is found
         boolean isInit = false;
         try {
-            List<MsgEvent> discoveryList = null;
+            List<MsgEvent> discoveryList = new ArrayList<>();
             if (this.isIPv6) {
                 DiscoveryClientIPv6 dc = new DiscoveryClientIPv6(this);
                 logger.debug("Broker Search (IPv6)...");
@@ -499,15 +490,20 @@ public class Launcher extends CPlugin {
             discoveryList.addAll(dc.getDiscoveryResponse(DiscoveryType.REGION, getConfig().getIntegerParam("discovery_ipv4_region_timeout", 2000)));
             logger.debug("Broker count = {}" + discoveryList.size());
 
+
             if (!discoveryList.isEmpty()) {
-                for (MsgEvent ime : discoveryList) {
-                    this.incomingCanidateBrokers.add(ime);
-                    logger.debug("Regional Controller Found: " + ime.getParams());
+
+                    for (MsgEvent ime : discoveryList) {
+                        this.incomingCanidateBrokers.add(ime);
+                        logger.debug("Regional Controller Found: " + ime.getParams());
                 }
             }
 
         } catch (Exception ex) {
-            logger.error("initRegionDiscovery() Error " + ex.getMessage());
+            logger.error("initRegionToRegion() Error " + ex.getMessage());
+            StringWriter errors = new StringWriter();
+            ex.printStackTrace(new PrintWriter(errors));
+            logger.error(errors.toString());
         }
         return isInit;
     }
@@ -687,7 +683,7 @@ public class Launcher extends CPlugin {
             while (!this.ActiveBrokerManagerActive) {
                 Thread.sleep(1000);
             }
-            //logger.debug("ActiveBrokerManager Started..");
+            logger.debug("ActiveBrokerManager Started..");
 
             if (this.isIPv6) { //set broker address for consumers and producers
                 this.brokerAddressAgent = "[::1]";

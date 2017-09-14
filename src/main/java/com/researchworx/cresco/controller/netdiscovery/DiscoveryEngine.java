@@ -443,7 +443,7 @@ public class DiscoveryEngine implements Runnable {
                         me.setParam("validated_authenication", validatedAuthenication);
                         //return message exist, if cert exist add it and include ours
                         if(rme.getParam("public_cert") != null) {
-                            String remoteAgentPath = plugin.getRegion() + "_" + me.getParam("dst_agent");
+                            String remoteAgentPath = me.getParam("dst_region") + "-global";
                             String localCertString = configureCertTrust(remoteAgentPath,rme.getParam("public_cert"));
                             if(localCertString != null) {
                                 me.setParam("public_cert",localCertString);
@@ -480,7 +480,7 @@ public class DiscoveryEngine implements Runnable {
                         me.setParam("validated_authenication", validatedAuthenication);
                         //return message exist, if cert exist add it and include ours
                         if(rme.getParam("public_cert") != null) {
-                            String remoteAgentPath = plugin.getRegion() + "_" + me.getParam("dst_agent");
+                            String remoteAgentPath = me.getParam("dst_region");
                             String localCertString = configureCertTrust(remoteAgentPath,rme.getParam("public_cert"));
                             if(localCertString != null) {
                                 me.setParam("public_cert",localCertString);

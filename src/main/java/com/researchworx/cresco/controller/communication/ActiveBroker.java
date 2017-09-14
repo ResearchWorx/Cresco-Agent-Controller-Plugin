@@ -3,6 +3,7 @@ package com.researchworx.cresco.controller.communication;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.utilities.CLogger;
 import org.apache.activemq.broker.BrokerService;
+import org.apache.activemq.broker.SslBrokerService;
 import org.apache.activemq.broker.SslContext;
 import org.apache.activemq.broker.TransportConnector;
 import org.apache.activemq.broker.jmx.ManagementContext;
@@ -37,7 +38,7 @@ public class ActiveBroker {
 	private CrescoAuthorizationPlugin authorizationPlugin;
 	private Launcher plugin;
 
-	public BrokerService broker;
+	public SslBrokerService broker;
 
 	public ActiveBroker(Launcher plugin, String brokerName, String brokerUserNameAgent, String brokerPasswordAgent) {
 		this.logger = new CLogger(ActiveBroker.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
@@ -108,7 +109,7 @@ public class ActiveBroker {
 				PolicyMap map = new PolicyMap();
 		        map.setDefaultEntry(entry);
 
-				broker = new BrokerService();
+				broker = new SslBrokerService();
 				broker.setUseShutdownHook(false);
 				broker.setPersistent(false);
 				broker.setBrokerName(brokerName);
@@ -134,14 +135,14 @@ public class ActiveBroker {
 				connector = new TransportConnector();
 				if (plugin.isIPv6())
 					//connector.setUri(new URI("tcp://[::]:32010"));
-				    connector.setUri(new URI("ssl://[::]:32010?needClientAuth=true"));
-					//connector.setUri(new URI("ssl://[::]:32010"));
+				    //connector.setUri(new URI("ssl://[::]:32010?needClientAuth=true"));
+					connector.setUri(new URI("ssl://[::]:32010"));
 
 				//connector.setUri(new URI("ssl://[::]:32010"));
 				else
 					//connector.setUri(new URI("tcp://0.0.0.0:32010"));
-					connector.setUri(new URI("ssl://0.0.0.0:32010?needClientAuth=true"));
-					//connector.setUri(new URI("ssl://0.0.0.0:32010"));
+					//connector.setUri(new URI("ssl://0.0.0.0:32010?needClientAuth=true"));
+					connector.setUri(new URI("ssl://0.0.0.0:32010"));
 
                 /*
                 connector.setUpdateClusterClients(true);
@@ -173,16 +174,6 @@ public class ActiveBroker {
 	public void updateTrustManager() {
 		try {
 			broker.getSslContext().getSSLContext().init(plugin.getCertificateManager().getKeyManagers(), plugin.getCertificateManager().getTrustManagers(), new SecureRandom());
-
-	        /*
-	        org.apache.activemq.broker.SslContext sslContextBroker = new SslContext();
-            SSLContext sslContext = sslContextBroker.getSSLContext();
-            //SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
-            //SSLContext sslContext = SSLContext.getInstance("TLS");
-            //SSLContext sslContext = SSLContext.getInstance("Default");
-            sslContext.init(main.cg.getKeyManagers(), main.cg.getTrustManagers(), new SecureRandom());
-            sslContextBroker.setSSLContext(sslContext);
-            */
 
 		} catch(Exception ex) {
 			System.out.println("updateTrustManager() : Error " + ex.getMessage());
@@ -285,16 +276,21 @@ public class ActiveBroker {
 	public NetworkConnector AddNetworkConnector(String URI, String brokerUserName, String brokerPassword, String agentPath) {
 		NetworkConnector bridge = null;
 		try {
-		    logger.trace("URI: static:tcp://" + URI + ":32010" + " brokerUserName: " + brokerUserName + " brokerPassword: " + brokerPassword);
+			logger.info("Added Network Connector to Broker URI: static:ssl://" + URI + ":32010");
+			logger.trace("URI: static:ssl://" + URI + ":32010" + " brokerUserName: " + brokerUserName + " brokerPassword: " + brokerPassword);
 			//bridge = broker.addNetworkConnector(new URI("static:tcp://" + URI + ":32010?useKeepAlive=true&keepAlive=true"));
-			bridge = broker.addNetworkConnector(new URI("static:ssl://" + URI + ":32010?useKeepAlive=true&keepAlive=true"));
+			//logger.info("URI: static:ssl://" + URI + ":32010" + " brokerUserName: " + brokerUserName + " brokerPassword: " + brokerPassword);
+			//bridge = broker.addNetworkConnector(new URI("static:ssl://" + URI + ":32010?useKeepAlive=true&keepAlive=true"));
+			bridge = broker.addNetworkConnector(new URI("static:ssl://" + URI + ":32010"));
+			//bridge = broker.addSslConnector(URI,plugin.getCertificateManager().getKeyManagers(),plugin.getCertificateManager().getTrustManagers(), new SecureRandom());
+			//String bindAddress, KeyManager[] km, TrustManager[] tm, SecureRandom random
+			//sslContext.init(plugin.getCertificateManager().getKeyManagers(), plugin.getCertificateManager().getTrustManagers(), new SecureRandom());
 
-
-		    bridge.setUserName(brokerUserName);
+			bridge.setUserName(brokerUserName);
             bridge.setPassword(brokerPassword);
 			bridge.setName(java.util.UUID.randomUUID().toString());
 			bridge.setDuplex(true);
-
+			updateTrustManager();
 
 		} catch(Exception ex) {
 			logger.error("AddNetworkConnector {}", ex.getMessage());

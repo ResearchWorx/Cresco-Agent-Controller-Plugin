@@ -22,7 +22,7 @@ public class BrokeredAgent {
 	private CLogger logger;
 
 	public BrokeredAgent(Launcher plugin, String agentPath, String activeAddress, String brokerUsername, String brokerPassword) {
-		this.logger = new CLogger(BrokeredAgent.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
+		this.logger = new CLogger(BrokeredAgent.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Trace);
 		logger.debug("Initializing: " + agentPath + " address: " + activeAddress);
 		System.out.print("Name of Agent to message [q to quit]: ");
 		this.plugin = plugin;
