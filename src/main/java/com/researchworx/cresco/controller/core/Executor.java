@@ -201,12 +201,14 @@ class Executor extends CExecutor {
 
     MsgEvent commInit(MsgEvent msg) {
         logger.debug("comminit message type found");
-        String initAgent = msg.getParam("src_agent");
-        String initRegion = msg.getParam("src_region");
+        //String initAgent = msg.getParam("src_agent");
+        //String initRegion = msg.getParam("src_region");
 
         while(!mainPlugin.commInit());
-        msg.setParam("src_agent",initAgent);
-        msg.setParam("src_region",initRegion);
+        //msg.setParam("src_agent",initAgent);
+        //msg.setParam("src_region",initRegion);
+        //msg.setParam("dst_agent",initAgent);
+        //msg.setParam("dst_region",initRegion);
         msg.setParam("set_region", this.plugin.getRegion());
         msg.setParam("set_agent", this.plugin.getAgent());
         msg.setParam("is_regional_controller", Boolean.toString(this.mainPlugin.isRegionalController()));

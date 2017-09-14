@@ -7,6 +7,7 @@ import com.researchworx.cresco.controller.db.DBInterface;
 import com.researchworx.cresco.controller.globalcontroller.GlobalHealthWatcher;
 import com.researchworx.cresco.controller.netdiscovery.*;
 import com.researchworx.cresco.controller.regionalcontroller.RegionHealthWatcher;
+import com.researchworx.cresco.library.core.WatchDog;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.plugin.core.CPlugin;
 import com.researchworx.cresco.library.utilities.CLogger;
@@ -160,15 +161,19 @@ public class Launcher extends CPlugin {
         setExec(new Executor(this));
     }
 
+    /*
     @Override
-    public void postStart() {
-        //this.watchDog.stop() = null;
+    public void preShutdown() {
+        logger.error("PreShutdown!");
+        getWatchDog().stop();
+        watchDog.stop();
     }
+    */
 
     public void start() {
         this.config = new ControllerConfig(config.getConfig());
         System.setProperty("log.console.level", "SEVERE");
-        //this.setWatchDog(null);
+        this.setWatchDog(null);
     }
 
     @Override
@@ -721,7 +726,10 @@ public class Launcher extends CPlugin {
     public Boolean commInit() {
 
         boolean isCommInit = true;
-        watchDog.stop();
+        if(getWatchDog() != null) {
+            watchDog.stop();
+            logger.info("WatchDog Disabled");
+        }
 
         logger.info("Initializing services");
         setActive(true);
@@ -815,8 +823,13 @@ public class Launcher extends CPlugin {
             //stopWatchDog();
             //setWatchDog(new WatchDog(region, agent, pluginID, logger, config));
             //startWatchDog();
-            updateWatchDog();
-            logger.info("WatchDog configuration updated");
+
+            //set new watchdog
+            this.setWatchDog(new WatchDog(this.region, this.agent, this.pluginID, this.logger, this.config));
+            getWatchDog().start();
+            logger.info("WatchDog Started");
+
+            //updateWatchDog();
             this.regionHealthWatcher = new RegionHealthWatcher(this);
             logger.info("RegionHealthWatcher started");
 
