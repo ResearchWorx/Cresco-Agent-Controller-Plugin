@@ -78,21 +78,21 @@
 		<!-- Embedded: 1. core 2. graphdb -->
 		<!-- Stand Alone: 1. graphdb 2. core -->
 
-		<dependency>
-			<groupId>com.orientechnologies</groupId>
-			<artifactId>orientdb-graphdb</artifactId>
-			<version>${orientdb.version}</version>
-		</dependency>
-
         <dependency>
             <groupId>com.orientechnologies</groupId>
             <artifactId>orientdb-core</artifactId>
             <version>${orientdb.version}</version>
         </dependency>
 
+		<dependency>
+			<groupId>com.orientechnologies</groupId>
+			<artifactId>orientdb-graphdb</artifactId>
+			<version>${orientdb.version}</version>
+		</dependency>
 
 
-    </dependencies>
+
+	</dependencies>
 
 	<build>
 		<plugins>
