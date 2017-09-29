@@ -17,7 +17,7 @@ public class ActiveBrokerManager implements Runnable  {
 	private CLogger logger;
 	private Timer timer;
 	public ActiveBrokerManager(Launcher plugin) {
-		this.logger = new CLogger(ActiveBrokerManager.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
+		this.logger = new CLogger(ActiveBrokerManager.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
 
 		logger.debug("Active Broker Manger initialized");
 		this.plugin = plugin;
