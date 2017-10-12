@@ -40,6 +40,12 @@ public class RegionalCommandExec {
 
 	public MsgEvent execute(MsgEvent le) {
 
+        //send to region
+        if(le.getParam("dst_agent") != null) {
+            regionSend(le);
+            return null;
+        }
+
 	    //Add Region specific information for return information
         le.setParam("dst_agent",plugin.getAgent());
         le.setParam("dst_plugin",plugin.getPluginID());
@@ -149,6 +155,10 @@ public class RegionalCommandExec {
         msg.setParam("type", "agent_controller");
         logger.debug("Returning communication details to Cresco agent");
         return msg;
+    }
+
+    private void regionSend(MsgEvent rs) {
+        plugin.sendAPMessage(rs);
     }
 
     private void globalSend(MsgEvent ge) {
