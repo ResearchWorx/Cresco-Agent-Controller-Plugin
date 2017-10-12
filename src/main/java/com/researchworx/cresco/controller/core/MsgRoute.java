@@ -194,7 +194,10 @@ public class MsgRoute implements Runnable {
                     //plugin.sendMsgEvent(rm);
                     break;
                 case 112:
+                    //send to another agent
                     logger.debug("REGIONAL AGENT SENDING MESSAGE TO REGIONAL CONTROLLER 112");
+                    //logger.debug("REGIONAL AGENT SENDING MESSAGE TO REGIONAL AGENT 112");
+                    //externalSend();
                     logger.trace(rm.getParams().toString());
                     //regionalSend();
                     re = getRegionalCommandExec();
