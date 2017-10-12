@@ -22,8 +22,9 @@ public class MsgRoute implements Runnable {
 
             int routePath = getRoutePath();
 
-            if((routePath == 112) && (rm.getMsgType() == MsgEvent.Type.CONFIG)) {
-                logger.error("CASE=" + routePath + " GC=" + plugin.isGlobalController() + " RC=" + plugin.isRegionalController());
+            //if((routePath == 112) && (rm.getMsgType() == MsgEvent.Type.CONFIG)) {
+                if(rm.getMsgType() == MsgEvent.Type.CONFIG) {
+                    logger.error("CASE=" + routePath + " GC=" + plugin.isGlobalController() + " RC=" + plugin.isRegionalController());
                 logger.error(rm.getParams().toString());
                 logger.error(rm.getMsgType().toString());
             }
