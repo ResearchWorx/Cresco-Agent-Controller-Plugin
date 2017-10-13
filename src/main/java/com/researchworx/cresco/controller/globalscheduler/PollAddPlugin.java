@@ -36,6 +36,7 @@ public class PollAddPlugin implements Runnable {
 
 	        	while((edge_id == null) && (count < 300))
 	        	{
+	        		logger.trace("inode_id: " + inode_id + " edge_id:" + edge_id);
 	        	    edge_id = plugin.getGDB().dba.getResourceEdgeId(resource_id,inode_id);
                     Thread.sleep(1000);
                     count++;
