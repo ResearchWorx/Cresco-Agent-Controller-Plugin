@@ -463,11 +463,6 @@ public class Launcher extends CPlugin {
         } catch (Exception ex) {
             logger.error("initAgentStatic() Error " + ex.getMessage());
         }
-        if(discoveryList != null) {
-            logger.error("discover size=" + discoveryList.size());
-        } else {
-            logger.error("discoverylist = null");
-        }
 
         return discoveryList;
     }
