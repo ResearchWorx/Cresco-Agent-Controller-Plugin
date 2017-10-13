@@ -102,9 +102,6 @@ public class TCPDiscoveryStatic {
                 //message in
                 String message = (String) ois.readObject();
                 processIncoming(message,socket.getRemoteSocketAddress().toString());
-                System.out.println("Message: " + message);
-                logger.error("tcpdiscover message: " + message);
-                //message in
                 logger.error("5");
 
                 //close resources
@@ -121,19 +118,6 @@ public class TCPDiscoveryStatic {
 
         return discoveredList;
     }
-
-    private String buildDiscoverMessage() {
-        String discoverMessage = null;
-        try {
-
-
-
-        } catch(Exception ex) {
-            logger.error("TCPDiscoveryStatic buildDiscoverMessage() " + ex.getMessage());
-        }
-        return discoverMessage;
-    }
-
 
         public List<MsgEvent> discover2(DiscoveryType disType, int discoveryTimeout, String hostAddress, Boolean sendCert) {
         // Find the server using UDP broadcast
