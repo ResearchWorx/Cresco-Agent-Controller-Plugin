@@ -107,11 +107,11 @@ public class TCPDiscoveryStatic {
                 //message in
                 logger.error("5");
 
+                //close resources
+                ois.close();
 
             }
 
-            //close resources
-            ois.close();
             oos.close();
             socket.close();
 
@@ -252,6 +252,7 @@ public class TCPDiscoveryStatic {
                     me.setParam("dst_region", me.getParam("src_region"));
                     me.setParam("dst_agent", me.getParam("src_agent"));
                     me.setParam("validated_authenication",ValidatedAuthenication(me));
+                    discoveredList.add(me);
                     if(me.getParam("public_cert") != null) {
                         logger.trace("public_cert Exists");
                         String remoteAgentPath = me.getParam("src_region") + "_" + me.getParam("src_agent");
@@ -264,10 +265,7 @@ public class TCPDiscoveryStatic {
                     } else {
                         logger.trace("processIncoming() : no cert found");
                     }
-                    discoveredList.add(me);
-
                     //sme.setParam("public_cert", plugin.getCertificateManager().getJsonFromCerts(plugin.getCertificateManager().getPublicCertificate()));
-
 
                 }
             } catch (Exception ex) {
