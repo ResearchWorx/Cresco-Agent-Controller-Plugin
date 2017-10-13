@@ -5,23 +5,18 @@ import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
+import java.io.*;
+import java.net.*;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DiscoveryStatic {
-    //private static final Logger logger = LoggerFactory.getLogger(DiscoveryStatic.class);
+public class TCPDiscoveryStatic {
+    //private static final Logger logger = LoggerFactory.getLogger(UDPDiscoveryStatic.class);
 
     private Launcher plugin;
     private CLogger logger;
-    private DatagramSocket c;
+    private Socket c;
     private Gson gson;
     private int discoveryPort;
     //private Timer timer;
@@ -31,8 +26,8 @@ public class DiscoveryStatic {
     private List<MsgEvent> discoveredList;
     private DiscoveryCrypto discoveryCrypto;
 
-    public DiscoveryStatic(Launcher plugin) {
-        this.logger = new CLogger(DiscoveryStatic.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+    public TCPDiscoveryStatic(Launcher plugin) {
+        this.logger = new CLogger(TCPDiscoveryStatic.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
         this.plugin = plugin;
         gson = new Gson();
         //this.discoveryTimeout = discoveryTimeout;
@@ -41,8 +36,8 @@ public class DiscoveryStatic {
         this.discoveryPort = plugin.getConfig().getIntegerParam("netdiscoveryport",32005);
     }
 
-    public DiscoveryStatic(Launcher plugin, int discoveryPort) {
-        this.logger = new CLogger(DiscoveryStatic.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+    public TCPDiscoveryStatic(Launcher plugin, int discoveryPort) {
+        this.logger = new CLogger(TCPDiscoveryStatic.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
         this.plugin = plugin;
         gson = new Gson();
         //this.discoveryTimeout = discoveryTimeout;
@@ -51,21 +46,122 @@ public class DiscoveryStatic {
         this.discoveryPort = discoveryPort;
     }
 
-    /*
-    private class StopListenerTask extends TimerTask {
-        public void run() {
-            try {
-                logger.trace("Closing Listener...");
-                //user timer to close socket
-                c.close();
-                timer.cancel();
-                timerActive = false;
-            } catch (Exception ex) {
-                logger.error("StopListenerTask {}", ex.getMessage());
-            }
+    public List<MsgEvent> discover(DiscoveryType disType, int discoveryTimeout, String hostAddress, Boolean sendCert) {
+        discoveredList = new ArrayList<>();
+        try {
+            Socket socket = null;
+            ObjectOutputStream oos = null;
+            ObjectInputStream ois = null;
+            //establish socket connection to server
+            socket = new Socket(hostAddress, discoveryPort);
+            //write to socket using ObjectOutputStream
+            oos = new ObjectOutputStream(socket.getOutputStream());
+            System.out.println("Sending request to Socket Server");
+            oos.writeObject("Sup Dawg");
+            //if (i == 4) oos.writeObject("exit");
+            //else oos.writeObject("" + i);
+            //read the server response message
+            ois = new ObjectInputStream(socket.getInputStream());
+            String message = (String) ois.readObject();
+            System.out.println("Message: " + message);
+            //close resources
+            ois.close();
+            oos.close();
+        } catch (Exception ex) {
+            logger.error("TCPDiscoveryStatic discover Error: " + ex.getMessage());
         }
+
+        return discoveredList;
     }
-    */
+
+        public List<MsgEvent> discover2(DiscoveryType disType, int discoveryTimeout, String hostAddress, Boolean sendCert) {
+        // Find the server using UDP broadcast
+        logger.info("Discovery Static started : Enable Cert: " + sendCert);
+
+        // Broadcast the message over all the network interfaces
+        try {
+            discoveredList = new ArrayList<>();
+
+            logger.trace("Trying address {}", hostAddress);
+
+            c = new Socket();
+
+            //timer = new Timer();
+            //timer.schedule(new StopListenerTask(), discoveryTimeout);
+            //timerActive = true;
+
+            MsgEvent sme = new MsgEvent(MsgEvent.Type.DISCOVER, this.plugin.getRegion(), this.plugin.getAgent(), this.plugin.getPluginID(), "Discovery request.");
+            sme.setParam("discover_ip", hostAddress);
+            sme.setParam("src_region", this.plugin.getRegion());
+            sme.setParam("src_agent", this.plugin.getAgent());
+            if(sendCert) {
+                sme.setParam("public_cert", plugin.getCertificateManager().getJsonFromCerts(plugin.getCertificateManager().getPublicCertificate()));
+            }
+            if (disType == DiscoveryType.AGENT || disType == DiscoveryType.REGION || disType == DiscoveryType.GLOBAL) {
+                logger.trace("Discovery Type = {}", disType.name());
+                sme.setParam("discovery_type", disType.name());
+            } else {
+                logger.trace("Discovery type unknown");
+                sme = null;
+            }
+            //set for static discovery
+            sme.setParam("discovery_static_agent","true");
+
+            //set crypto message for discovery
+            sme.setParam("discovery_validator",generateValidateMessage(sme));
+
+            if (sme != null) {
+                //logger.trace("Building sendPacket for {}", inAddr.toString());
+                String sendJson = gson.toJson(sme);
+                byte[] sendData = sendJson.getBytes();
+
+
+                DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(hostAddress), discoveryPort);
+                synchronized (c) {
+                    //c.send(sendPacket);
+                    logger.trace("Sent sendPacket to {}", hostAddress);
+                }
+                if (!c.isClosed()) {
+                    try {
+                        byte[] recvBuf = new byte[15000];
+                        DatagramPacket receivePacket = new DatagramPacket(recvBuf, recvBuf.length);
+                        synchronized (c) {
+                            c.setSoTimeout(discoveryTimeout);
+                            logger.trace("Static Discovery Timeout=" + c.getSoTimeout());
+                            //c.receive(receivePacket);
+                            logger.trace("Received packet");
+                                        /*
+                                        if (timerActive) {
+                                            logger.trace("Restarting listening timer");
+                                            timer.schedule(new StopListenerTask(), discoveryTimeout);
+                                        }*/
+                        }
+                        synchronized (receivePacket) {
+                            processIncoming(receivePacket);
+                            c.close();
+                        }
+                    } catch (SocketException se) {
+                        // Eat the message, this is normal
+                    } catch (Exception e) {
+                        logger.error("discovery {}", e.getMessage());
+                    }
+                }
+            }
+        } //catch (SocketException se) {
+          //  logger.error("getDiscoveryMap : SocketException {}", se.getMessage());
+        //}
+        catch (IOException ie) {
+            // Eat the exception, closing the port
+        } catch (Exception e) {
+            logger.error("getDiscoveryMap {}", e.getMessage());
+            StringWriter errors = new StringWriter();
+            e.printStackTrace(new PrintWriter(errors));
+            logger.error(errors.toString());
+        }
+
+        return discoveredList;
+    }
+
 
     private boolean setCertTrust(String remoteAgentPath, String remoteCertString) {
         boolean isSet = false;
@@ -124,91 +220,6 @@ public class DiscoveryStatic {
 
     public List<MsgEvent> discover(DiscoveryType disType, int discoveryTimeout, String hostAddress) {
         return discover(disType,discoveryTimeout,hostAddress,false);
-    }
-
-    public List<MsgEvent> discover(DiscoveryType disType, int discoveryTimeout, String hostAddress, Boolean sendCert) {
-        // Find the server using UDP broadcast
-        logger.info("Discovery Static started : Enable Cert: " + sendCert);
-
-            // Broadcast the message over all the network interfaces
-                    try {
-                        discoveredList = new ArrayList<>();
-
-                         logger.trace("Trying address {}", hostAddress);
-
-                        c = new DatagramSocket();
-
-                        //timer = new Timer();
-                        //timer.schedule(new StopListenerTask(), discoveryTimeout);
-                        //timerActive = true;
-
-                        MsgEvent sme = new MsgEvent(MsgEvent.Type.DISCOVER, this.plugin.getRegion(), this.plugin.getAgent(), this.plugin.getPluginID(), "Discovery request.");
-                        sme.setParam("discover_ip", hostAddress);
-                        sme.setParam("src_region", this.plugin.getRegion());
-                        sme.setParam("src_agent", this.plugin.getAgent());
-                        if(sendCert) {
-                            sme.setParam("public_cert", plugin.getCertificateManager().getJsonFromCerts(plugin.getCertificateManager().getPublicCertificate()));
-                        }
-                        if (disType == DiscoveryType.AGENT || disType == DiscoveryType.REGION || disType == DiscoveryType.GLOBAL) {
-                            logger.trace("Discovery Type = {}", disType.name());
-                            sme.setParam("discovery_type", disType.name());
-                        } else {
-                            logger.trace("Discovery type unknown");
-                            sme = null;
-                        }
-                        //set for static discovery
-                        sme.setParam("discovery_static_agent","true");
-
-                        //set crypto message for discovery
-                        sme.setParam("discovery_validator",generateValidateMessage(sme));
-
-                        if (sme != null) {
-                            //logger.trace("Building sendPacket for {}", inAddr.toString());
-                            String sendJson = gson.toJson(sme);
-                            byte[] sendData = sendJson.getBytes();
-                            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(hostAddress), discoveryPort);
-                            synchronized (c) {
-                                c.send(sendPacket);
-                                logger.trace("Sent sendPacket to {}", hostAddress);
-                            }
-                            if (!c.isClosed()) {
-                                try {
-                                    byte[] recvBuf = new byte[15000];
-                                    DatagramPacket receivePacket = new DatagramPacket(recvBuf, recvBuf.length);
-                                    synchronized (c) {
-                                        c.setSoTimeout(discoveryTimeout);
-                                        logger.trace("Static Discovery Timeout=" + c.getSoTimeout());
-                                        c.receive(receivePacket);
-                                        logger.trace("Received packet");
-                                        /*
-                                        if (timerActive) {
-                                            logger.trace("Restarting listening timer");
-                                            timer.schedule(new StopListenerTask(), discoveryTimeout);
-                                        }*/
-                                    }
-                                    synchronized (receivePacket) {
-                                        processIncoming(receivePacket);
-                                        c.close();
-                                    }
-                                } catch (SocketException se) {
-                                    // Eat the message, this is normal
-                                } catch (Exception e) {
-                                    logger.error("discovery {}", e.getMessage());
-                                }
-                            }
-                        }
-                    } catch (SocketException se) {
-                        logger.error("getDiscoveryMap : SocketException {}", se.getMessage());
-                    } catch (IOException ie) {
-                        // Eat the exception, closing the port
-                    } catch (Exception e) {
-                        logger.error("getDiscoveryMap {}", e.getMessage());
-                        StringWriter errors = new StringWriter();
-                        e.printStackTrace(new PrintWriter(errors));
-                        logger.error(errors.toString());
-                    }
-
-        return discoveredList;
     }
 
     private String ValidatedAuthenication(MsgEvent rme) {

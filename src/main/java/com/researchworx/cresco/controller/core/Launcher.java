@@ -325,7 +325,7 @@ public class Launcher extends CPlugin {
                     this.agentpath = tmpRegion + "_" + this.agent;
                     certificateManager = new CertificateManager(this, agentpath);
 
-                    DiscoveryStatic ds = new DiscoveryStatic(this);
+                    UDPDiscoveryStatic ds = new UDPDiscoveryStatic(this);
                     List<MsgEvent> certDiscovery = ds.discover(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_static_agent_timeout", 10000), getConfig().getStringParam("regional_controller_host"), true);
 
                     String cbrokerAddress = certDiscovery.get(0).getParam("dst_ip");
@@ -379,7 +379,7 @@ public class Launcher extends CPlugin {
                 }
                 if ((cbrokerAddress != null) && (cbrokerValidatedAuthenication != null)) {
 
-                    //DiscoveryStatic ds = new DiscoveryStatic(this);
+                    //UDPDiscoveryStatic ds = new UDPDiscoveryStatic(this);
                     //discoveryList.addAll(ds.discover(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_static_agent_timeout", 10000), getConfig().getStringParam("regional_controller_host")));
 
                     //List<MsgEvent> certDiscovery =
@@ -439,7 +439,10 @@ public class Launcher extends CPlugin {
         try {
             discoveryList = new ArrayList<>();
             logger.info("Static Agent Connection to Regional Controller : " + getConfig().getStringParam("regional_controller_host"));
-            DiscoveryStatic ds = new DiscoveryStatic(this);
+
+            //UDPDiscoveryStatic ds = new UDPDiscoveryStatic(this);
+            TCPDiscoveryStatic ds = new TCPDiscoveryStatic(this);
+
             discoveryList.addAll(ds.discover(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_static_agent_timeout",10000), getConfig().getStringParam("regional_controller_host")));
             logger.debug("Static Agent Connection count = {}" + discoveryList.size());
             if(discoveryList.size() == 0) {
@@ -559,7 +562,7 @@ public class Launcher extends CPlugin {
         try {
             discoveryList = new ArrayList<>();
             logger.info("Static Region Connection to Regional Controller : " + getConfig().getStringParam("regional_controller_host"));
-            DiscoveryStatic ds = new DiscoveryStatic(this);
+            UDPDiscoveryStatic ds = new UDPDiscoveryStatic(this);
             discoveryList.addAll(ds.discover(DiscoveryType.REGION, getConfig().getIntegerParam("discovery_static_agent_timeout",10000), getConfig().getStringParam("regional_controller_host")));
             logger.debug("Static Agent Connection count = {}" + discoveryList.size());
             if(discoveryList.size() == 0) {
@@ -606,7 +609,7 @@ public class Launcher extends CPlugin {
         try {
             discoveryList = new ArrayList<>();
             logger.info("Static Region Connection to Global Controller : " + getConfig().getStringParam("global_controller_host"));
-            DiscoveryStatic ds = new DiscoveryStatic(this);
+            UDPDiscoveryStatic ds = new UDPDiscoveryStatic(this);
             discoveryList.addAll(ds.discover(DiscoveryType.GLOBAL, getConfig().getIntegerParam("discovery_static_global_timeout",10000), getConfig().getStringParam("global_controller_host")));
             logger.debug("Static Agent Connection count = {}" + discoveryList.size());
             if(discoveryList.size() == 0) {

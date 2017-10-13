@@ -1,11 +1,10 @@
 package com.researchworx.cresco.controller.communication;
 
 import com.researchworx.cresco.controller.core.Launcher;
-import com.researchworx.cresco.controller.netdiscovery.DiscoveryStatic;
+import com.researchworx.cresco.controller.netdiscovery.UDPDiscoveryStatic;
 import com.researchworx.cresco.controller.netdiscovery.DiscoveryType;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
-import org.apache.activemq.network.NetworkConnector;
 
 import java.util.List;
 import java.util.Map.Entry;
@@ -84,7 +83,7 @@ public class ActiveBrokerManager implements Runnable  {
 
 							if(cbrokerValidatedAuthenication != null) {
 
-								DiscoveryStatic ds = new DiscoveryStatic(plugin);
+								UDPDiscoveryStatic ds = new UDPDiscoveryStatic(plugin);
 								List<MsgEvent> certDiscovery = ds.discover(DiscoveryType.REGION, plugin.getConfig().getIntegerParam("discovery_static_region_timeout", 10000), cbrokerAddress, true);
                 				for(MsgEvent cme : certDiscovery) {
                 					if(cbrokerAddress.equals(cme.getParam("dst_ip"))) {

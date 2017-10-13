@@ -1,7 +1,5 @@
 package com.researchworx.cresco.controller.core;
 
-import com.researchworx.cresco.controller.netdiscovery.DiscoveryStatic;
-import com.researchworx.cresco.controller.netdiscovery.DiscoveryType;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.plugin.core.CExecutor;
 import com.researchworx.cresco.library.utilities.CLogger;

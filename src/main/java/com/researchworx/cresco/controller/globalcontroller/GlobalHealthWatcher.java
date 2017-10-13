@@ -7,7 +7,7 @@ import com.researchworx.cresco.controller.globalscheduler.AppSchedulerEngine;
 import com.researchworx.cresco.controller.globalscheduler.ResourceSchedulerEngine;
 import com.researchworx.cresco.controller.netdiscovery.DiscoveryClientIPv4;
 import com.researchworx.cresco.controller.netdiscovery.DiscoveryClientIPv6;
-import com.researchworx.cresco.controller.netdiscovery.DiscoveryStatic;
+import com.researchworx.cresco.controller.netdiscovery.UDPDiscoveryStatic;
 import com.researchworx.cresco.controller.netdiscovery.DiscoveryType;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
@@ -442,7 +442,7 @@ public class GlobalHealthWatcher implements Runnable {
         try {
             discoveryList = new ArrayList<>();
                 logger.info("Static Region Connection to Global Controller : " + plugin.getConfig().getStringParam("gc_host",null));
-                DiscoveryStatic ds = new DiscoveryStatic(plugin);
+                UDPDiscoveryStatic ds = new UDPDiscoveryStatic(plugin);
                 discoveryList.addAll(ds.discover(DiscoveryType.GLOBAL, plugin.getConfig().getIntegerParam("discovery_static_agent_timeout", 10000), plugin.getConfig().getStringParam("gc_host",null)));
                 logger.debug("Static Agent Connection count = {}" + discoveryList.size());
                 if (discoveryList.size() == 0) {

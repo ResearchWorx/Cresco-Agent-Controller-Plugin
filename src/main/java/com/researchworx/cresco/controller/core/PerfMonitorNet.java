@@ -3,7 +3,6 @@ package com.researchworx.cresco.controller.core;
 import com.google.gson.Gson;
 import com.researchworx.cresco.controller.netdiscovery.*;
 import com.researchworx.cresco.library.messaging.MsgEvent;
-import com.researchworx.cresco.library.plugin.core.CPlugin;
 import com.researchworx.cresco.library.utilities.CLogger;
 
 import java.util.ArrayList;
@@ -65,7 +64,7 @@ class PerfMonitorNet {
         String static_network_map = null;
         try {
             List<MsgEvent> discoveryList = new ArrayList<>();
-            DiscoveryStatic ds = new DiscoveryStatic(plugin);
+            UDPDiscoveryStatic ds = new UDPDiscoveryStatic(plugin);
 
             for(String ip : iplist) {
                 discoveryList.addAll(ds.discover(DiscoveryType.NETWORK, plugin.getConfig().getIntegerParam("discovery_static_agent_timeout",10000), ip));

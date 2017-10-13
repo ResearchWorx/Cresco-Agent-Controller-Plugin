@@ -59,7 +59,7 @@
     <logger name="com.researchworx.cresco.controller.netdiscovery.UDPDiscoveryEngine" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="com.researchworx.cresco.controller.netdiscovery.DiscoveryStatic" level="info" additivity="false">
+    <logger name="com.researchworx.cresco.controller.netdiscovery.UDPDiscoveryStatic" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
     <logger name="com.researchworx.cresco.controller.netdiscovery.DiscoveryEngineWorker" level="info" additivity="false">
