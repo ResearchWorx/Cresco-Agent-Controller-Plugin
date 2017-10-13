@@ -673,11 +673,6 @@ public class Launcher extends CPlugin {
             logger.debug("AgentPath=" + this.agentpath);
             //Start controller services
 
-            //discovery engine
-            if(!startNetDiscoveryEngine()) {
-                logger.error("Start Network Discovery Engine Failed!");
-            }
-
             //logger.debug("IPv6 UDPDiscoveryEngine Started..");
 
             logger.debug("Broker starting");
@@ -728,6 +723,11 @@ public class Launcher extends CPlugin {
             le.setParam("action", "enable");
             le.setParam("watchdogtimer", String.valueOf(getConfig().getLongParam("watchdogtimer", 5000L)));
             getGDB().addNode(le);
+
+            //discovery engine
+            if(!startNetDiscoveryEngine()) {
+                logger.error("Start Network Discovery Engine Failed!");
+            }
 
             isInit = true;
 
