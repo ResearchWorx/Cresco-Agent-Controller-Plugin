@@ -660,7 +660,7 @@ public class Launcher extends CPlugin {
                 logger.error("Start Network Discovery Engine Failed!");
             }
 
-            //logger.debug("IPv6 DiscoveryEngine Started..");
+            //logger.debug("IPv6 UDPDiscoveryEngine Started..");
 
             logger.debug("Broker starting");
             if((getConfig().getStringParam("broker_username") != null) && (getConfig().getStringParam("broker_password") != null)) {
@@ -1007,7 +1007,7 @@ public class Launcher extends CPlugin {
         try {
             if (this.discoveryEngineThread != null) {
                 logger.trace("Discovery Engine shutting down");
-                DiscoveryEngine.shutdown();
+                UDPDiscoveryEngine.shutdown();
                 this.discoveryEngineThread.join();
                 this.discoveryEngineThread = null;
                 this.DiscoveryActive = false;
@@ -1024,7 +1024,7 @@ public class Launcher extends CPlugin {
         try {
             if(!this.DiscoveryActive) {
                 //discovery engine
-                this.discoveryEngineThread = new Thread(new DiscoveryEngine(this));
+                this.discoveryEngineThread = new Thread(new UDPDiscoveryEngine(this));
                 this.discoveryEngineThread.start();
                 while (!this.DiscoveryActive) {
                     Thread.sleep(1000);

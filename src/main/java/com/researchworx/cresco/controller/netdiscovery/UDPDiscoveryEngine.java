@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class DiscoveryEngine implements Runnable {
+public class UDPDiscoveryEngine implements Runnable {
     private Launcher plugin;
     private static Map<NetworkInterface, MulticastSocket> workers = new ConcurrentHashMap<>();
     private DiscoveryCrypto discoveryCrypto;
@@ -23,8 +23,8 @@ public class DiscoveryEngine implements Runnable {
     private CLogger logger;
     private int discoveryPort;
 
-    public DiscoveryEngine(Launcher plugin) {
-        this.logger = new CLogger(DiscoveryEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
+    public UDPDiscoveryEngine(Launcher plugin) {
+        this.logger = new CLogger(UDPDiscoveryEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
         logger.trace("Initializing");
         this.plugin = plugin;
         discoveryCrypto = new DiscoveryCrypto(plugin);
@@ -32,8 +32,8 @@ public class DiscoveryEngine implements Runnable {
         this.discoveryPort = plugin.getConfig().getIntegerParam("netdiscoveryport",32005);
     }
 
-    public DiscoveryEngine(Launcher plugin, int discoveryPort) {
-        this.logger = new CLogger(DiscoveryEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
+    public UDPDiscoveryEngine(Launcher plugin, int discoveryPort) {
+        this.logger = new CLogger(UDPDiscoveryEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
         logger.trace("Initializing");
         this.plugin = plugin;
         discoveryCrypto = new DiscoveryCrypto(plugin);
