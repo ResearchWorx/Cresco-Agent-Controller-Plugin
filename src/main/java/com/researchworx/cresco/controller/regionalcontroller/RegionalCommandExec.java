@@ -141,7 +141,7 @@ public class RegionalCommandExec {
 
         //process agent configs
 
-
+        //whut
         //le.setParam("globalcmd", Boolean.TRUE.toString());
         //globalSend(le);
 
