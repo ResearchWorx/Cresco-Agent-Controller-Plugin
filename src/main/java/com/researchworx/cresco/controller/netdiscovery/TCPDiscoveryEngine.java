@@ -24,7 +24,7 @@ public class TCPDiscoveryEngine implements Runnable {
     protected static boolean      isStopped    = false;
 
     public TCPDiscoveryEngine(Launcher plugin) {
-        this.logger = new CLogger(TCPDiscoveryEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Trace);
+        this.logger = new CLogger(TCPDiscoveryEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
         logger.trace("Initializing");
         this.plugin = plugin;
         discoveryCrypto = new DiscoveryCrypto(plugin);
@@ -33,7 +33,7 @@ public class TCPDiscoveryEngine implements Runnable {
     }
 
     public TCPDiscoveryEngine(Launcher plugin, int discoveryPort) {
-        this.logger = new CLogger(TCPDiscoveryEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Trace);
+        this.logger = new CLogger(TCPDiscoveryEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
         logger.trace("Initializing");
         this.plugin = plugin;
         discoveryCrypto = new DiscoveryCrypto(plugin);

@@ -27,7 +27,7 @@ public class TCPDiscoveryStatic {
     private DiscoveryCrypto discoveryCrypto;
 
     public TCPDiscoveryStatic(Launcher plugin) {
-        this.logger = new CLogger(TCPDiscoveryStatic.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
+        this.logger = new CLogger(TCPDiscoveryStatic.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
         this.plugin = plugin;
         gson = new Gson();
         //this.discoveryTimeout = discoveryTimeout;
@@ -37,7 +37,7 @@ public class TCPDiscoveryStatic {
     }
 
     public TCPDiscoveryStatic(Launcher plugin, int discoveryPort) {
-        this.logger = new CLogger(TCPDiscoveryStatic.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
+        this.logger = new CLogger(TCPDiscoveryStatic.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
         this.plugin = plugin;
         gson = new Gson();
         //this.discoveryTimeout = discoveryTimeout;

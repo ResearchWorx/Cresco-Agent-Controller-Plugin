@@ -454,6 +454,9 @@ public class Launcher extends CPlugin {
         } catch (Exception ex) {
             logger.error("initAgentStatic() Error " + ex.getMessage());
         }
+
+        logger.error("size=" + discoveryList.size());
+
         return discoveryList;
     }
 
