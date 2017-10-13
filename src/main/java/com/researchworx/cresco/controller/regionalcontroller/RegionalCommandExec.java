@@ -40,10 +40,12 @@ public class RegionalCommandExec {
 
 	public MsgEvent execute(MsgEvent le) {
 
-        //send to region
-        if(le.getParam("dst_agent") != null) {
-            regionSend(le);
-            return null;
+        if(le.getParam("globalcmd") == null) {
+            //not for global controller, send to region
+            if (le.getParam("dst_agent") != null) {
+                regionSend(le);
+                return null;
+            }
         }
 
 	    //Add Region specific information for return information
