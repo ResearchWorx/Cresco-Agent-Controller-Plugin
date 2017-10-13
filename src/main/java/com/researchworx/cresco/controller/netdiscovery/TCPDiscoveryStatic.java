@@ -56,15 +56,15 @@ public class TCPDiscoveryStatic {
             socket = new Socket(hostAddress, discoveryPort);
             //write to socket using ObjectOutputStream
             oos = new ObjectOutputStream(socket.getOutputStream());
-            System.out.println("Sending request to Socket Server");
+            //message out
             oos.writeObject("Sup Dawg");
-            //if (i == 4) oos.writeObject("exit");
-            //else oos.writeObject("" + i);
-            //read the server response message
+            //message out
             ois = new ObjectInputStream(socket.getInputStream());
+            //message in
             String message = (String) ois.readObject();
             System.out.println("Message: " + message);
             logger.error("tcpdiscover message: " + message);
+            //message in
             //close resources
             ois.close();
             oos.close();

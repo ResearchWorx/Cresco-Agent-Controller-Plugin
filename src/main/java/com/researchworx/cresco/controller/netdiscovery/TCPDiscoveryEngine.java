@@ -56,15 +56,26 @@ public class TCPDiscoveryEngine implements Runnable {
             try {
                 InputStream input  = clientSocket.getInputStream();
                 OutputStream output = clientSocket.getOutputStream();
-                long time = System.currentTimeMillis();
-                output.write(("HTTP/1.1 200 OK\n\nWorkerRunnable: " +
-                        this.serverText + " - " +
-                        time +
-                        "").getBytes());
+
+                ObjectOutputStream oos = null;
+                ObjectInputStream ois = null;
+
+                ois = new ObjectInputStream(input);
+                String message = (String) ois.readObject();
+                logger.error("WorkerRunnable message: " + message);
+
+
+                oos = new ObjectOutputStream(output);
+                //message out
+                oos.writeObject("Sup Dawg");
+                
+                ois.close();
+                oos.close();
+
                 output.close();
                 input.close();
-                System.out.println("Request processed: " + time);
-            } catch (IOException e) {
+                //System.out.println("Request processed: " + time);
+            } catch (Exception e) {
                 //report exception somewhere.
                 e.printStackTrace();
             }
