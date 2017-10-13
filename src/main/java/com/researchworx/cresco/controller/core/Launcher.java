@@ -46,6 +46,9 @@ public class Launcher extends CPlugin {
     private boolean clientDiscoveryActiveIPv4 = false;
     private boolean clientDiscoveryActiveIPv6 = false;
     private boolean DiscoveryActive = false;
+    private boolean UDPDiscoveryActive = false;
+    private boolean TCPDiscoveryActive = false;
+
 
     private boolean ActiveBrokerManagerActive = false;
     private boolean ActiveDestManagerActive = false;
@@ -65,7 +68,9 @@ public class Launcher extends CPlugin {
 
     private boolean restartOnShutdown = false;
 
-    private Thread discoveryEngineThread;
+    private Thread discoveryUDPEngineThread;
+    private Thread discoveryTCPEngineThread;
+
 
     public PerfMonitorNet getPerfMonitorNet() {return perfMonitorNet; }
 
@@ -1024,11 +1029,17 @@ public class Launcher extends CPlugin {
         try {
             if(!this.DiscoveryActive) {
                 //discovery engine
-                this.discoveryEngineThread = new Thread(new UDPDiscoveryEngine(this));
-                this.discoveryEngineThread.start();
-                while (!this.DiscoveryActive) {
+                this.discoveryUDPEngineThread = new Thread(new UDPDiscoveryEngine(this));
+                this.discoveryUDPEngineThread.start();
+
+                this.discoveryTCPEngineThread = new Thread(new TCPDiscoveryEngine(this));
+                this.discoveryTCPEngineThread.start();
+
+
+                while (!this.UDPDiscoveryActive && !this.TCPDiscoveryActive) {
                     Thread.sleep(1000);
                 }
+                setDiscoveryActive(true);
             }
             isStarted = true;
         } catch(Exception ex) {
