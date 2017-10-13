@@ -339,18 +339,26 @@ public class Launcher extends CPlugin {
                     logger.error("initAgent cbroker:" + cbrokerAddress + " val:" + cbrokerValidatedAuthenication + " creg: " + cRegion);
 
                     if ((cbrokerAddress != null) && (cbrokerValidatedAuthenication != null)) {
+                        logger.error("initAgent 1.1");
+
                         if((tmpRegion.equals(cRegion)) && (getConfig().getStringParam("regional_controller_host").equals(cbrokerAddress))) {
+                            logger.error("initAgent 1.2");
+
                             this.region = certDiscovery.get(0).getParam("dst_region");
 
                             String[]tmpAuth = cbrokerValidatedAuthenication.split(",");
                             this.brokerUserNameAgent = tmpAuth[0];
                             this.brokerPasswordAgent = tmpAuth[1];
 
+                            logger.error("initAgent 1.3");
+
                             //set broker ip
                             InetAddress remoteAddress = InetAddress.getByName(cbrokerAddress);
                             if (remoteAddress instanceof Inet6Address) {
                                 cbrokerAddress = "[" + cbrokerAddress + "]";
                             }
+                            logger.error("initAgent 1.4");
+
                             this.brokerAddressAgent = cbrokerAddress;
 
                             isInit = true;
