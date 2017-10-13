@@ -318,10 +318,12 @@ public class Launcher extends CPlugin {
         boolean isInit = false;
         try {
 
-            logger.error("initAgent!");
+            logger.error("initAgent 0");
             if(getConfig().getStringParam("regional_controller_host") != null) {
 
                 while(!isInit) {
+                    logger.error("initAgent 1");
+
                     String tmpRegion = discoveryList.get(0).getParam("dst_region");
                     this.agent = getConfig().getStringParam("agentname", "agent-" + java.util.UUID.randomUUID().toString());
                     this.agentpath = tmpRegion + "_" + this.agent;
@@ -359,9 +361,12 @@ public class Launcher extends CPlugin {
             }
             //do discovery
             else {
+                logger.error("initAgent 2");
 
-            while(!isInit || discoveryList.isEmpty()) {
-                //determine least loaded broker
+                while(!isInit || discoveryList.isEmpty()) {
+                    logger.error("initAgent 3");
+
+                    //determine least loaded broker
                 //need to use additional metrics to determine best fit broker
                 String cbrokerAddress = null;
                 String cbrokerValidatedAuthenication = null;

@@ -99,8 +99,7 @@ public class TCPDiscoveryEngine implements Runnable {
 
                 ois = new ObjectInputStream(input);
                 String message = (String) ois.readObject();
-                logger.error("WorkerRunnable message: " + message);
-
+                
                 MsgEvent me = null;
 
                 try {
