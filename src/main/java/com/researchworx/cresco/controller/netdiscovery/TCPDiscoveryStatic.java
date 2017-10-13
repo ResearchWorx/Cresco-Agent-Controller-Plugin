@@ -61,7 +61,6 @@ public class TCPDiscoveryStatic {
 
             //write to socket using ObjectOutputStream
             oos = new ObjectOutputStream(socket.getOutputStream());
-            ois = new ObjectInputStream(socket.getInputStream());
             logger.error("3");
 
 
@@ -97,6 +96,8 @@ public class TCPDiscoveryStatic {
                 oos.writeObject(sendJson);
                 //message out
                 logger.trace("Waiting on return TCPDiscoveryStatic Message from " + hostAddress);
+
+                ois = new ObjectInputStream(socket.getInputStream());
 
                 //message in
                 String message = (String) ois.readObject();
