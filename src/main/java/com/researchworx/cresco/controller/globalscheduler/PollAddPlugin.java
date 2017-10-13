@@ -2,6 +2,7 @@ package com.researchworx.cresco.controller.globalscheduler;
 
 
 import com.researchworx.cresco.controller.core.Launcher;
+import com.researchworx.cresco.library.core.WatchDog;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 
@@ -28,7 +29,6 @@ public class PollAddPlugin implements Runnable {
     }
 	 public void run() {
          logger.debug("new thread for polladdplugin" );
-
          try
 	        {
                 int count = 0;
