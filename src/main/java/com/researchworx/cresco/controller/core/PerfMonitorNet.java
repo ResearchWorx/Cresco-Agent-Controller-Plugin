@@ -64,7 +64,7 @@ class PerfMonitorNet {
         String static_network_map = null;
         try {
             List<MsgEvent> discoveryList = new ArrayList<>();
-            UDPDiscoveryStatic ds = new UDPDiscoveryStatic(plugin);
+            TCPDiscoveryStatic ds = new TCPDiscoveryStatic(plugin);
 
             for(String ip : iplist) {
                 discoveryList.addAll(ds.discover(DiscoveryType.NETWORK, plugin.getConfig().getIntegerParam("discovery_static_agent_timeout",10000), ip));
