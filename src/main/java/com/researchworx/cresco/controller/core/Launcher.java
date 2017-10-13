@@ -317,6 +317,8 @@ public class Launcher extends CPlugin {
         //connect to a specific regional controller
         boolean isInit = false;
         try {
+
+            logger.error("initAgent!");
             if(getConfig().getStringParam("regional_controller_host") != null) {
 
                 while(!isInit) {
