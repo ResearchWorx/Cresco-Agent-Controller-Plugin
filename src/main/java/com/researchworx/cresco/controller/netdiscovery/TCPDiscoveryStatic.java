@@ -95,7 +95,8 @@ public class TCPDiscoveryStatic {
 
                 //message in
                 String message = (String) ois.readObject();
-                processIncoming(message,socket.getRemoteSocketAddress().toString());
+
+                processIncoming(message,socket.getInetAddress().getHostAddress());
 
                 //close resources
                 ois.close();
