@@ -96,7 +96,7 @@ public class PollRemovePlugin implements Runnable {
         me.setParam("src_plugin", plugin.getPluginID());
         me.setParam("dst_region", region);
 		me.setParam("dst_agent", agent);
-		me.setParam("configtype", "pluginremove");
+		me.setParam("action", "pluginremove");
 		me.setParam("plugin", pluginId);
 		return me;	
 	}
