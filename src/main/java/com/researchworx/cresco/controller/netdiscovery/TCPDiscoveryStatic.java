@@ -54,25 +54,54 @@ public class TCPDiscoveryStatic {
             ObjectInputStream ois = null;
             //establish socket connection to server
             socket = new Socket(hostAddress, discoveryPort);
-
             //write to socket using ObjectOutputStream
             oos = new ObjectOutputStream(socket.getOutputStream());
-            //message out
-            oos.writeObject("Sup Dawg");
-            //message out
-
-
             ois = new ObjectInputStream(socket.getInputStream());
-            //message in
-            String message = (String) ois.readObject();
-            System.out.println("Message: " + message);
-            logger.error("tcpdiscover message: " + message);
-            //message in
 
+
+            MsgEvent sme = new MsgEvent(MsgEvent.Type.DISCOVER, this.plugin.getRegion(), this.plugin.getAgent(), this.plugin.getPluginID(), "Discovery request.");
+            sme.setParam("discover_ip", hostAddress);
+            sme.setParam("src_region", this.plugin.getRegion());
+            sme.setParam("src_agent", this.plugin.getAgent());
+            if(sendCert) {
+                sme.setParam("public_cert", plugin.getCertificateManager().getJsonFromCerts(plugin.getCertificateManager().getPublicCertificate()));
+            }
+            if (disType == DiscoveryType.AGENT || disType == DiscoveryType.REGION || disType == DiscoveryType.GLOBAL) {
+                logger.trace("Discovery Type = {}", disType.name());
+                sme.setParam("discovery_type", disType.name());
+            } else {
+                logger.trace("Discovery type unknown");
+                sme = null;
+            }
+            //set for static discovery
+            sme.setParam("discovery_static_agent","true");
+
+            //set crypto message for discovery
+            sme.setParam("discovery_validator",generateValidateMessage(sme));
+
+            if (sme != null) {
+                //logger.trace("Building sendPacket for {}", inAddr.toString());
+                String sendJson = gson.toJson(sme);
+
+                //message out
+                oos.writeObject(sendJson);
+                //message out
+
+                //message in
+                String message = (String) ois.readObject();
+                processIncoming(message,socket.getRemoteSocketAddress().toString());
+                System.out.println("Message: " + message);
+                logger.error("tcpdiscover message: " + message);
+                //message in
+
+
+            }
 
             //close resources
             ois.close();
             oos.close();
+            socket.close();
+
         } catch (Exception ex) {
             logger.error("TCPDiscoveryStatic discover Error: " + ex.getMessage());
         }
@@ -80,7 +109,17 @@ public class TCPDiscoveryStatic {
         return discoveredList;
     }
 
+    private String buildDiscoverMessage() {
+        String discoverMessage = null;
+        try {
 
+
+
+        } catch(Exception ex) {
+            logger.error("TCPDiscoveryStatic buildDiscoverMessage() " + ex.getMessage());
+        }
+        return discoverMessage;
+    }
 
 
         public List<MsgEvent> discover2(DiscoveryType disType, int discoveryTimeout, String hostAddress, Boolean sendCert) {
@@ -146,7 +185,7 @@ public class TCPDiscoveryStatic {
                                         }*/
                         }
                         synchronized (receivePacket) {
-                            processIncoming(receivePacket);
+                            processIncoming2(receivePacket);
                             c.close();
                         }
                     } catch (SocketException se) {
@@ -185,7 +224,45 @@ public class TCPDiscoveryStatic {
         return isSet;
     }
 
-    private synchronized void processIncoming(DatagramPacket packet) {
+    private synchronized void processIncoming(String json, String remoteAddress) {
+            logger.trace(json);
+            try {
+                MsgEvent me = gson.fromJson(json, MsgEvent.class);
+                if (me != null) {
+
+                    if (remoteAddress.contains("%")) {
+                        String[] remoteScope = remoteAddress.split("%");
+                        remoteAddress = remoteScope[0];
+                    }
+                    logger.trace("Processing packet for {} {}_{}", remoteAddress, me.getParam("src_region"), me.getParam("src_agent"));
+                    me.setParam("dst_ip", remoteAddress);
+                    me.setParam("dst_region", me.getParam("src_region"));
+                    me.setParam("dst_agent", me.getParam("src_agent"));
+                    me.setParam("validated_authenication",ValidatedAuthenication(me));
+                    if(me.getParam("public_cert") != null) {
+                        logger.trace("public_cert Exists");
+                        String remoteAgentPath = me.getParam("src_region") + "_" + me.getParam("src_agent");
+                        if(setCertTrust(remoteAgentPath,me.getParam("public_cert"))) {
+                            logger.trace("Added Static discovered host to discoveredList.");
+                            logger.trace("discoveredList contains " + discoveredList.size() + " items.");
+                        } else {
+                            logger.trace("Could not set Trust");
+                        }
+                    } else {
+                        logger.trace("processIncoming() : no cert found");
+                    }
+                    discoveredList.add(me);
+
+                    //sme.setParam("public_cert", plugin.getCertificateManager().getJsonFromCerts(plugin.getCertificateManager().getPublicCertificate()));
+
+
+                }
+            } catch (Exception ex) {
+                logger.error("DiscoveryClientWorker in loop {}", ex.getMessage());
+            }
+
+    }
+    private synchronized void processIncoming2(DatagramPacket packet) {
         synchronized (packet) {
             String json = new String(packet.getData()).trim();
             logger.trace(json);

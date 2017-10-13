@@ -105,14 +105,16 @@ public class TCPDiscoveryEngine implements Runnable {
 
                 try {
                     MsgEvent rme = gson.fromJson(message, MsgEvent.class);
-                    rme.setParam("src_ip", clientSocket.getRemoteSocketAddress().toString());
-                    rme.setParam("src_port", String.valueOf(clientSocket.getPort()));
                     me = processMessage(rme);
                 } catch (Exception ex) {
                     logger.error(getClass().getName() + " failed to marshal discovery {}" + ex.getMessage());
                 }
 
                 if(me !=null) {
+                    //let the client know what IP has been used
+                    me.setParam("src_ip", clientSocket.getRemoteSocketAddress().toString());
+                    me.setParam("src_port", String.valueOf(clientSocket.getPort()));
+
                     oos = new ObjectOutputStream(output);
                     //message out
                     String json = gson.toJson(me);
