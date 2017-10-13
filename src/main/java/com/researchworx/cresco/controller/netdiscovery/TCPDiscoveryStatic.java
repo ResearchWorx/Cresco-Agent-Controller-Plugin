@@ -50,19 +50,14 @@ public class TCPDiscoveryStatic {
         discoveredList = new ArrayList<>();
         try {
 
-            logger.error("1");
             Socket socket = null;
             ObjectOutputStream oos = null;
             ObjectInputStream ois = null;
             //establish socket connection to server
             socket = new Socket(hostAddress, discoveryPort);
 
-            logger.error("2");
-
             //write to socket using ObjectOutputStream
             oos = new ObjectOutputStream(socket.getOutputStream());
-            logger.error("3");
-
 
             MsgEvent sme = new MsgEvent(MsgEvent.Type.DISCOVER, this.plugin.getRegion(), this.plugin.getAgent(), this.plugin.getPluginID(), "Discovery request.");
             sme.setParam("discover_ip", hostAddress);
@@ -84,7 +79,6 @@ public class TCPDiscoveryStatic {
             //set crypto message for discovery
             sme.setParam("discovery_validator",generateValidateMessage(sme));
 
-            logger.error("4");
 
             if (sme != null) {
                 //logger.trace("Building sendPacket for {}", inAddr.toString());
@@ -102,7 +96,6 @@ public class TCPDiscoveryStatic {
                 //message in
                 String message = (String) ois.readObject();
                 processIncoming(message,socket.getRemoteSocketAddress().toString());
-                logger.error("5");
 
                 //close resources
                 ois.close();
