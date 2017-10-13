@@ -54,17 +54,22 @@ public class TCPDiscoveryStatic {
             ObjectInputStream ois = null;
             //establish socket connection to server
             socket = new Socket(hostAddress, discoveryPort);
+
             //write to socket using ObjectOutputStream
             oos = new ObjectOutputStream(socket.getOutputStream());
             //message out
             oos.writeObject("Sup Dawg");
             //message out
+
+
             ois = new ObjectInputStream(socket.getInputStream());
             //message in
             String message = (String) ois.readObject();
             System.out.println("Message: " + message);
             logger.error("tcpdiscover message: " + message);
             //message in
+
+
             //close resources
             ois.close();
             oos.close();
@@ -74,6 +79,9 @@ public class TCPDiscoveryStatic {
 
         return discoveredList;
     }
+
+
+
 
         public List<MsgEvent> discover2(DiscoveryType disType, int discoveryTimeout, String hostAddress, Boolean sendCert) {
         // Find the server using UDP broadcast
