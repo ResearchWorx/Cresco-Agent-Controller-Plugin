@@ -27,7 +27,7 @@ public class TCPDiscoveryStatic {
     private DiscoveryCrypto discoveryCrypto;
 
     public TCPDiscoveryStatic(Launcher plugin) {
-        this.logger = new CLogger(TCPDiscoveryStatic.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+        this.logger = new CLogger(TCPDiscoveryStatic.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
         this.plugin = plugin;
         gson = new Gson();
         //this.discoveryTimeout = discoveryTimeout;
@@ -37,7 +37,7 @@ public class TCPDiscoveryStatic {
     }
 
     public TCPDiscoveryStatic(Launcher plugin, int discoveryPort) {
-        this.logger = new CLogger(TCPDiscoveryStatic.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+        this.logger = new CLogger(TCPDiscoveryStatic.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
         this.plugin = plugin;
         gson = new Gson();
         //this.discoveryTimeout = discoveryTimeout;
@@ -81,11 +81,14 @@ public class TCPDiscoveryStatic {
 
             if (sme != null) {
                 //logger.trace("Building sendPacket for {}", inAddr.toString());
+
+                logger.trace("Sending TCPDiscoveryStatic Message to " + hostAddress);
                 String sendJson = gson.toJson(sme);
 
                 //message out
                 oos.writeObject(sendJson);
                 //message out
+                logger.trace("Waiting on return TCPDiscoveryStatic Message from " + hostAddress);
 
                 //message in
                 String message = (String) ois.readObject();
