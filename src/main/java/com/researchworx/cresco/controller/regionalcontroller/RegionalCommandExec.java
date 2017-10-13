@@ -40,8 +40,9 @@ public class RegionalCommandExec {
 
 	public MsgEvent execute(MsgEvent le) {
 
-        logger.error("WTF: " + le.getParams());
-
+	    if(le.getMsgType().equals(MsgEvent.Type.CONFIG)) {
+            logger.error("WTF: " + le.getParams());
+        }
         if(le.getParam("globalcmd") == null) {
             //not for global controller, send to region
             if (le.getParam("dst_agent") != null) {
