@@ -166,8 +166,10 @@ public class GlobalHealthWatcher implements Runnable {
             else if(this.plugin.isGlobalController()) {
                 //Do nothing if already controller, will reinit on regional restart
                 logger.trace("Starting Local Global Controller Check");
-                plugin.setAppScheduleQueue(new LinkedBlockingQueue<gPayload>());
-                startGlobalSchedulers();
+                if(plugin.getAppScheduleQueue() == null) {
+                    plugin.setAppScheduleQueue(new LinkedBlockingQueue<gPayload>());
+                    startGlobalSchedulers();
+                }
             }
             else {
                 logger.trace("Starting Dynamic Global Controller Check");
