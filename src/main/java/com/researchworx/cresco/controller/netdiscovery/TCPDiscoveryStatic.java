@@ -64,6 +64,7 @@ public class TCPDiscoveryStatic {
             ois = new ObjectInputStream(socket.getInputStream());
             String message = (String) ois.readObject();
             System.out.println("Message: " + message);
+            logger.error("tcpdiscover message: " + message);
             //close resources
             ois.close();
             oos.close();
