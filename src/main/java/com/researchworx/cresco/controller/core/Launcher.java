@@ -454,8 +454,11 @@ public class Launcher extends CPlugin {
         } catch (Exception ex) {
             logger.error("initAgentStatic() Error " + ex.getMessage());
         }
-
-        logger.error("discover size=" + discoveryList.size());
+        if(discoveryList != null) {
+            logger.error("discover size=" + discoveryList.size());
+        } else {
+            logger.error("discoverylist = null");
+        }
 
         return discoveryList;
     }
@@ -769,6 +772,7 @@ public class Launcher extends CPlugin {
                         discoveryList = initAgentStatic();
                         while(discoveryList == null) {
                             discoveryList = initAgentStatic();
+                            Thread.sleep(1000);
                         }
                         isRegionalController = false;
                         isGlobalController = false;
