@@ -20,8 +20,8 @@ public class TCPDiscoveryEngine implements Runnable {
     private CLogger logger;
     private int discoveryPort;
     protected Thread       runningThread= null;
-    protected ServerSocket serverSocket = null;
-    protected boolean      isStopped    = false;
+    protected static ServerSocket serverSocket = null;
+    protected static boolean      isStopped    = false;
 
     public TCPDiscoveryEngine(Launcher plugin) {
         this.logger = new CLogger(TCPDiscoveryEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
@@ -76,6 +76,7 @@ public class TCPDiscoveryEngine implements Runnable {
             this.runningThread = Thread.currentThread();
         }
         openServerSocket();
+        plugin.setTCPDiscoveryActive(true);
         while(! isStopped()){
             Socket clientSocket = null;
             try {
@@ -96,6 +97,14 @@ public class TCPDiscoveryEngine implements Runnable {
         System.out.println("Server Stopped.") ;
     }
 
+    public static synchronized void shutdown(){
+        isStopped = true;
+        try {
+            serverSocket.close();
+        } catch (IOException e) {
+            throw new RuntimeException("Error closing server", e);
+        }
+    }
 
     private synchronized boolean isStopped() {
         return this.isStopped;

@@ -1010,11 +1010,18 @@ public class Launcher extends CPlugin {
     public boolean stopNetDiscoveryEngine() {
         boolean isStopped = false;
         try {
-            if (this.discoveryEngineThread != null) {
-                logger.trace("Discovery Engine shutting down");
+            if (this.discoveryUDPEngineThread != null) {
+                logger.trace("UDP Discovery Engine shutting down");
                 UDPDiscoveryEngine.shutdown();
-                this.discoveryEngineThread.join();
-                this.discoveryEngineThread = null;
+                this.discoveryUDPEngineThread.join();
+                this.discoveryUDPEngineThread = null;
+                this.DiscoveryActive = false;
+            }
+            if (this.discoveryTCPEngineThread != null) {
+                logger.trace("TCP Discovery Engine shutting down");
+                TCPDiscoveryEngine.shutdown();
+                this.discoveryTCPEngineThread.join();
+                this.discoveryTCPEngineThread = null;
                 this.DiscoveryActive = false;
             }
             isStopped = true;
@@ -1121,9 +1128,26 @@ public class Launcher extends CPlugin {
     public boolean isDiscoveryActive() {
         return DiscoveryActive;
     }
+
     public void setDiscoveryActive(boolean discoveryActive) {
         DiscoveryActive = discoveryActive;
     }
+
+    public void setUDPDiscoveryActive(boolean discoveryActive) {
+        UDPDiscoveryActive = discoveryActive;
+    }
+
+    public boolean isUDPDiscoveryActive() {
+        return UDPDiscoveryActive;
+    }
+    public void setTCPDiscoveryActive(boolean discoveryActive) {
+        TCPDiscoveryActive = discoveryActive;
+    }
+
+    public boolean isTCPDiscoveryActive() {
+        return TCPDiscoveryActive;
+    }
+
 
     public boolean isRegionalController() {
         return this.isRegionalController;

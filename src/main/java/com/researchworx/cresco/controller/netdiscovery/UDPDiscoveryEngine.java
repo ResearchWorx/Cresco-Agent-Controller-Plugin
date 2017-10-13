@@ -57,7 +57,7 @@ public class UDPDiscoveryEngine implements Runnable {
                 Thread thread = new Thread(new DiscoveryEngineWorker(networkInterface, plugin));
                 thread.start();
             }
-            this.plugin.setDiscoveryActive(true);
+            this.plugin.setUDPDiscoveryActive(true);
             logger.trace("Shutdown");
         } catch (Exception ex) {
             logger.error("Run {}", ex.getMessage());
