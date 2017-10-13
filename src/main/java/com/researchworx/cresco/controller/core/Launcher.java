@@ -335,6 +335,9 @@ public class Launcher extends CPlugin {
                     String cbrokerAddress = certDiscovery.get(0).getParam("dst_ip");
                     String cbrokerValidatedAuthenication = certDiscovery.get(0).getParam("validated_authenication");
                     String cRegion = certDiscovery.get(0).getParam("dst_region");
+
+                    logger.error("initAgent cbroker:" + cbrokerAddress + " val:" + cbrokerValidatedAuthenication + " creg: " + cRegion);
+
                     if ((cbrokerAddress != null) && (cbrokerValidatedAuthenication != null)) {
                         if((tmpRegion.equals(cRegion)) && (getConfig().getStringParam("regional_controller_host").equals(cbrokerAddress))) {
                             this.region = certDiscovery.get(0).getParam("dst_region");
