@@ -64,8 +64,7 @@ public class ResourceSchedulerEngine implements Runnable {
                 .build();
     }
 		
-	public void run() 
-	{
+	public void run() {
 		try
 		{
 			ghw.SchedulerActive = true;
@@ -137,7 +136,7 @@ public class ResourceSchedulerEngine implements Runnable {
                                     //MsgEvent re = plugin.getRPC().call(me);
                                     //logger.error("after send");
                                     //will send in thread
-                                    plugin.msgIn(me);
+                                    //plugin.msgIn(me);
 
 									new Thread(new PollAddPlugin(plugin,resource_id, inode_id,region,agent, me)).start();
 
@@ -286,8 +285,7 @@ public class ResourceSchedulerEngine implements Runnable {
 		return params;
 	}
 
-	public String getLowAgent()
-	{
+	public String getLowAgent() {
 		
 		Map<String,Integer> pMap = new HashMap<String,Integer>();
 		String agent_path = null;
@@ -336,8 +334,7 @@ public class ResourceSchedulerEngine implements Runnable {
 		return agent_path;
 	}
 
-	private static Map<String, Integer> sortByComparator(Map<String, Integer> unsortMap, final boolean order)
-    {
+	private static Map<String, Integer> sortByComparator(Map<String, Integer> unsortMap, final boolean order) {
 
         List<Entry<String, Integer>> list = new LinkedList<Entry<String, Integer>>(unsortMap.entrySet());
 
@@ -369,8 +366,7 @@ public class ResourceSchedulerEngine implements Runnable {
         return sortedMap;
     }
 	
-	public MsgEvent addPlugin(String region, String agent, String configParams)
-	{
+	public MsgEvent addPlugin(String region, String agent, String configParams) {
 
 	    //else if (ce.getParam("configtype").equals("pluginadd"))
 
@@ -385,8 +381,7 @@ public class ResourceSchedulerEngine implements Runnable {
 		return me;
 	}
 	
-	public MsgEvent downloadPlugin(String region, String agent, String pluginId, String pluginurl, boolean forceDownload)
-	{
+	public MsgEvent downloadPlugin(String region, String agent, String pluginId, String pluginurl, boolean forceDownload) {
 		MsgEvent me = new MsgEvent(MsgEvent.Type.CONFIG,region,null,null,"download plugin");
         me.setParam("src_region", plugin.getRegion());
         me.setParam("src_agent", plugin.getAgent());
@@ -404,8 +399,7 @@ public class ResourceSchedulerEngine implements Runnable {
 		return me;
 	}
 
-    public List<String> getPluginInventory()
-    {
+    public List<String> getPluginInventory() {
         List<String> pluginFiles = null;
         try
         {
@@ -454,8 +448,7 @@ public class ResourceSchedulerEngine implements Runnable {
         return pluginFiles;
     }
 
-    public String getPluginName(String jarFile) //This should pull the version information from jar Meta data
-    {
+    public String getPluginName(String jarFile) { //This should pull the version information from jar Meta data
         String version = null;
         try{
             //String jarFile = AgentEngine.class.getProtectionDomain().getCodeSource().getLocation().getPath();
@@ -538,8 +531,8 @@ public class ResourceSchedulerEngine implements Runnable {
     return netwokrAddressesString;
     }
 
-    public String getPluginVersion(String jarFile) //This should pull the version information from jar Meta data
-    {
+    public String getPluginVersion(String jarFile) { //This should pull the version information from jar Meta data
+
         String version;
         try{
             //String jarFile = AgentEngine.class.getProtectionDomain().getCodeSource().getLocation().getPath();
@@ -563,8 +556,7 @@ public class ResourceSchedulerEngine implements Runnable {
         return version;
     }
 
-	public Map<String,String> getPluginFileMap()
-	{
+	public Map<String,String> getPluginFileMap() {
 		Map<String,String> pluginList = new HashMap<String,String>();
 		
 		try

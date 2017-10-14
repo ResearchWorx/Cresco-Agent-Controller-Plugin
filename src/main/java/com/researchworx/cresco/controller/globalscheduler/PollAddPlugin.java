@@ -34,7 +34,14 @@ public class PollAddPlugin implements Runnable {
                 int count = 0;
 	        	String edge_id = null;
 
-	        	while((edge_id == null) && (count < 300))
+	        	//send message here
+				logger.info("PollAddPlugin: Sending message: " + me.getParams());
+
+				MsgEvent re = plugin.sendRPC(me);
+
+				logger.info("PollAddPlugin: Return message: " + re.getParams());
+
+				while((edge_id == null) && (count < 300))
 	        	{
 	        		logger.trace("inode_id: " + inode_id + " edge_id:" + edge_id);
 	        	    edge_id = plugin.getGDB().dba.getResourceEdgeId(resource_id,inode_id);
