@@ -203,7 +203,7 @@ public class MsgRoute implements Runnable {
                     logger.debug("CONTROLLER AGENT SENDING MESSAGE TO ITS CONTROLLER 116");
                     logger.trace(rm.getParams().toString());
                     //regionalSend();
-                    //re = getRegionalCommandExec();
+                    re = getRegionalCommandExec();
                     //plugin.sendMsgEvent(rm);
                     externalSend();
                     break;
@@ -211,7 +211,7 @@ public class MsgRoute implements Runnable {
                     logger.debug("CONTROLLER PLUGIN SENDING MESSAGE TO REGION PLUGIN 117");
                     logger.trace(rm.getParams().toString());
                     //regionalSend();
-                    //re = getRegionalCommandExec();
+                    re = getRegionalCommandExec();
                     //plugin.sendMsgEvent(rm);
                     externalSend();
                     break;
