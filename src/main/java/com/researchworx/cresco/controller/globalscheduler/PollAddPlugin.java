@@ -42,15 +42,33 @@ public class PollAddPlugin implements Runnable {
 				logger.info("PollAddPlugin: Sending message: " + me.getParams());
 
 				MsgEvent re = plugin.sendRPC(me);
-
+                //addIsAttachedEdge(String resource_id, String inode_id, String region, String agent, String plugin)
 				if(re != null) {
-                    re.removeParam("dst_plugin");
-                    re.removeParam("dst_agent");
-                    //force to region/global
-                    re.setParam("globalcmd", Boolean.TRUE.toString());
+                    String pluginId = re.getParam("plugin");
+                    //configparams
 
-                    //send message to global
-                    plugin.sendMsgEvent(re);
+                    String resource_node_id = plugin.getGDB().dba.getResourceNodeId(resource_id);
+                    String inode_node_id = plugin.getGDB().dba.getINodeNodeId(inode_id);
+                    String plugin_node_id = plugin.getGDB().gdb.getNodeId(region,agent,pluginId);
+
+                    //create node if not seen.. this needs to be changed.
+                    if(plugin_node_id == null) {
+                        plugin_node_id = plugin.getGDB().gdb.addNode(region,agent,pluginId);
+                        logger.debug("PollAddPlugin : Added Node" + region + " " + agent + " " + pluginId + " = " + plugin_node_id);
+                    }
+
+                    if((resource_node_id != null) && (inode_node_id != null) && (plugin_node_id != null)) {
+                        edge_id = plugin.getGDB().dba.getResourceEdgeId(resource_id, inode_id, region, agent, pluginId);
+                        if(edge_id == null)
+                        {
+
+                            edge_id = plugin.getGDB().dba.addIsAttachedEdge(resource_id, inode_id, region, agent, pluginId);
+                            logger.debug("PollAddPlugin edge addIsAttachedEdge resource_node_id " + resource_id + " inode_id " + inode_id + "  Node" + region + " " + agent + " " + plugin + " = " + plugin_node_id);
+                        }
+
+                    }
+
+
                 }
 				logger.info("PollAddPlugin: Return message: " + re.getParams());
 

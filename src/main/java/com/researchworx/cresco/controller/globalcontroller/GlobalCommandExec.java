@@ -104,10 +104,10 @@ public class GlobalCommandExec {
                         case "regionalimport":
                             return regionalImport(ce);
 
-                        case "pluginadd":
+                        case "addplugin":
                             return addPlugin(ce);
 
-                        case "pluginremove":
+                        case "removeplugin":
                             return removePlugin(ce);
 
                         case "gpipelinesubmit":
