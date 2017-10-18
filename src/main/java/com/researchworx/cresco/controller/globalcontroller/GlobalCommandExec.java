@@ -27,7 +27,7 @@ public class GlobalCommandExec {
 
 	public GlobalCommandExec(Launcher plugin)
 	{
-		this.logger = new CLogger(GlobalCommandExec.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
+		this.logger = new CLogger(GlobalCommandExec.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
 		this.plugin = plugin;
 		removePipelineExecutor = Executors.newFixedThreadPool(1);
     }
@@ -745,6 +745,8 @@ public class GlobalCommandExec {
 
 	private MsgEvent addPlugin(MsgEvent ce) {
 	    try {
+	        logger.error("g: add plugin!");
+
         if((ce.getParam("inode_id") != null) && (ce.getParam("resource_id") != null) && (ce.getParam("configparams") != null)) {
 
             if(plugin.getGDB().dba.getpNodeINode(ce.getParam("inode_id")) == null)

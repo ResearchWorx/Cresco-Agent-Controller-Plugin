@@ -48,6 +48,7 @@ public class PollAddPlugin implements Runnable {
                     re.removeParam("dst_agent");
                     re.removeParam("is_rpc");
                     re.setParam("globalcmd", Boolean.TRUE.toString());
+
                     //send message to global
                     plugin.sendMsgEvent(re);
                 }

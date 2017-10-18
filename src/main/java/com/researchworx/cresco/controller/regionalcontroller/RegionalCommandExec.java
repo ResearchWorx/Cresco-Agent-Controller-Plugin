@@ -32,7 +32,7 @@ public class RegionalCommandExec {
 
 	public RegionalCommandExec(Launcher plugin)
 	{
-		this.logger = new CLogger(RegionalCommandExec.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
+		this.logger = new CLogger(RegionalCommandExec.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
 		this.plugin = plugin;
 		regionalDiscovery = new AgentDiscovery(plugin);
 		gce = new GlobalCommandExec(plugin);
@@ -56,6 +56,7 @@ public class RegionalCommandExec {
         if(le.getParam("globalcmd") != null) {
                 //this is a global command
                 if(plugin.isGlobalController()) {
+                    logger.error("SEND GLOBAL: " + le.getParams());
                     return gce.execute(le);
                 }
                 else {
