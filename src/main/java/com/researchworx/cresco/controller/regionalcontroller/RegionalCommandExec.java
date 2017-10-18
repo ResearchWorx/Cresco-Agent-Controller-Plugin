@@ -32,7 +32,7 @@ public class RegionalCommandExec {
 
 	public RegionalCommandExec(Launcher plugin)
 	{
-		this.logger = new CLogger(RegionalCommandExec.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+		this.logger = new CLogger(RegionalCommandExec.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
 		this.plugin = plugin;
 		regionalDiscovery = new AgentDiscovery(plugin);
 		gce = new GlobalCommandExec(plugin);
