@@ -351,6 +351,10 @@ public class MsgRoute implements Runnable {
     private MsgEvent getRegionalCommandExecOutGoing() {
         //todo route should send directly there, local in commandexec will figure it out.
         try {
+            String callId = "callId-" + /*PluginEngine.region*/plugin.getRegion() + "-" + /*PluginEngine.agent*/plugin.getAgent() + "-" + /*PluginEngine.plugin*/plugin.getPluginID(); //calculate callID
+            if (rm.getParam(callId) != null) { //send message to RPC hash
+            logger.error("WTF: WHY IS THERE A CALLID!");
+            }
                 //return PluginEngine.commandExec.cmdExec(rm);
                 if(plugin.getRegionHealthWatcher() != null) {
                     if(plugin.getRegionHealthWatcher().rce != null) {
