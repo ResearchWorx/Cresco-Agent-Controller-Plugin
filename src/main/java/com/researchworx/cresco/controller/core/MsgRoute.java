@@ -26,11 +26,11 @@ public class MsgRoute implements Runnable {
                 logger.error("Controller msgType: [" + rm.getMsgType().toString() + "] routepath: " + routePath + "[" + rm.getParams().toString() + "]");
             }
 */
-/*
+
             if(rm.getMsgType() == MsgEvent.Type.CONFIG) {
                 logger.error("msgType: [" + rm.getMsgType().toString() + "] routepath: " + routePath + "[" + rm.getParams().toString() + "]");
            }
-*/
+
 
             rm.setParam("routepath",String.valueOf(routePath));
             MsgEvent re = null;
@@ -210,8 +210,8 @@ public class MsgRoute implements Runnable {
                     logger.debug("CONTROLLER PLUGIN SENDING MESSAGE TO REGION PLUGIN 117");
                     logger.trace(rm.getParams().toString());
                     //regionalSend();
-                    //re = getRegionalCommandExec();
-                    re = getRegionalCommandExecOutGoing();
+                    re = getRegionalCommandExec();
+                    //re = getRegionalCommandExecOutGoing();
                     //plugin.sendMsgEvent(rm);
                     //externalSend();
                     break;
@@ -348,13 +348,19 @@ public class MsgRoute implements Runnable {
     }
     */
 
+
     private MsgEvent getRegionalCommandExecOutGoing() {
         //todo route should send directly there, local in commandexec will figure it out.
         try {
+            boolean incoming = false;
+
             String callId = "callId-" + /*PluginEngine.region*/plugin.getRegion() + "-" + /*PluginEngine.agent*/plugin.getAgent() + "-" + /*PluginEngine.plugin*/plugin.getPluginID(); //calculate callID
             if (rm.getParam(callId) != null) { //send message to RPC hash
             logger.error("WTF: WHY IS THERE A CALLID!");
             }
+
+
+
                 //return PluginEngine.commandExec.cmdExec(rm);
                 if(plugin.getRegionHealthWatcher() != null) {
                     if(plugin.getRegionHealthWatcher().rce != null) {
