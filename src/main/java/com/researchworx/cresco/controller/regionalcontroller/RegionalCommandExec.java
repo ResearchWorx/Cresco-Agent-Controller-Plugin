@@ -135,9 +135,11 @@ public class RegionalCommandExec {
 
 	private MsgEvent enableAgent(MsgEvent le) {
 
+	    /*
         if(le.getMsgType().equals(MsgEvent.Type.CONFIG)) {
             logger.error("WTF: " + le.getParams());
         }
+        */
 
         logger.debug("CONFIG : AGENTDISCOVER ADD: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
         logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
