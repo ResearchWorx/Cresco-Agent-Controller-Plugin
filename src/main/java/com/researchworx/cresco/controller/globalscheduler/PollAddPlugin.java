@@ -42,6 +42,11 @@ public class PollAddPlugin implements Runnable {
 
 				MsgEvent re = plugin.sendRPC(me);
 
+				if(re != null) {
+                    logger.debug("CONFIG : AGENTDISCOVER ADD: Region:" + re.getParam("src_region") + " Agent:" + re.getParam("src_agent"));
+                    logger.trace("Message Body [" + re.getMsgBody() + "] [" + re.getParams().toString() + "]");
+                    plugin.getGDB().addNode(re);
+                }
 				logger.info("PollAddPlugin: Return message: " + re.getParams());
 
 				while((edge_id == null) && (count < 300))
@@ -70,6 +75,10 @@ public class PollAddPlugin implements Runnable {
 	        }
 		   catch(Exception ex)
 		   {
+               logger.debug("ResourceSchedulerEngine : pollAddPlugin : unable to verify iNode activation!  inode_id=" + inode_id);
+               plugin.getGDB().dba.setINodeParam(inode_id,"status_code","41");
+               plugin.getGDB().dba.setINodeParam(inode_id,"status_desc","iNode Failed Scheduling Exception.");
+
                logger.error("PollAddPlugin: Error " + ex.getMessage());
                StringWriter errors = new StringWriter();
                ex.printStackTrace(new PrintWriter(errors));
