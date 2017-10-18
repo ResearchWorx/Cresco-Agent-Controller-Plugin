@@ -5,6 +5,7 @@ import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.core.WatchDog;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -43,9 +44,12 @@ public class PollAddPlugin implements Runnable {
 				MsgEvent re = plugin.sendRPC(me);
 
 				if(re != null) {
-                    logger.debug("CONFIG : AGENTDISCOVER ADD: Region:" + re.getParam("src_region") + " Agent:" + re.getParam("src_agent"));
-                    logger.trace("Message Body [" + re.getMsgBody() + "] [" + re.getParams().toString() + "]");
-                    plugin.getGDB().addNode(re);
+                    re.removeParam("dst_plugin");
+                    re.removeParam("dst_agent");
+                    re.removeParam("is_rpc");
+                    re.setParam("globalcmd", Boolean.TRUE.toString());
+                    //send message to global
+                    plugin.sendMsgEvent(re);
                 }
 				logger.info("PollAddPlugin: Return message: " + re.getParams());
 

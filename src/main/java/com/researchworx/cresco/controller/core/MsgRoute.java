@@ -13,7 +13,6 @@ public class MsgRoute implements Runnable {
         this.logger = new CLogger(MsgRoute.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
         this.rm = rm;
     }
-
     public void run() {
         try {
             if (!getTTL()) { //check ttl
