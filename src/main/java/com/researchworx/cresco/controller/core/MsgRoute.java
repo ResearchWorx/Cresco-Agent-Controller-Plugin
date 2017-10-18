@@ -27,11 +27,11 @@ public class MsgRoute implements Runnable {
                 logger.error("Controller msgType: [" + rm.getMsgType().toString() + "] routepath: " + routePath + "[" + rm.getParams().toString() + "]");
             }
 */
-/*
+
             if(rm.getMsgType() == MsgEvent.Type.CONFIG) {
                 logger.error("msgType: [" + rm.getMsgType().toString() + "] routepath: " + routePath + "[" + rm.getParams().toString() + "]");
            }
-*/
+
 
             rm.setParam("routepath",String.valueOf(routePath));
             MsgEvent re = null;
