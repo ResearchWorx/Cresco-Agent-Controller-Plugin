@@ -353,7 +353,11 @@ public class MsgRoute implements Runnable {
             String callId = "callId-" + /*PluginEngine.region*/plugin.getRegion() + "-" + /*PluginEngine.agent*/plugin.getAgent() + "-" + /*PluginEngine.plugin*/plugin.getPluginID(); //calculate callID
             if (rm.getParam(callId) != null) { //send message to RPC hash
                 //PluginEngine.rpcMap.put(rm.getParam(callId), rm);
-                plugin.receiveRPC(rm.getParam(callId), rm);
+                //plugin.receiveRPC(rm.getParam(callId), rm);
+                String RPCkey = rm.getParam(callId);
+                rm.removeParam(callId);
+                rm.removeParam("is_rpc");
+                plugin.receiveRPC(RPCkey, rm);
             } else {
                 //return PluginEngine.commandExec.cmdExec(rm);
                 if(plugin.getRegionHealthWatcher() != null) {
@@ -381,7 +385,10 @@ public class MsgRoute implements Runnable {
             String callId = "callId-" + /*PluginEngine.region*/plugin.getRegion() + "-" + /*PluginEngine.agent*/plugin.getAgent() + "-" + /*PluginEngine.plugin*/plugin.getPluginID(); //calculate callID
             if (rm.getParam(callId) != null) { //send message to RPC hash
                 //PluginEngine.rpcMap.put(rm.getParam(callId), rm);
-                plugin.receiveRPC(rm.getParam(callId), rm);
+                String RPCkey = rm.getParam(callId);
+                rm.removeParam(callId);
+                rm.removeParam("is_rpc");
+                plugin.receiveRPC(RPCkey, rm);
             } else {
                 //return PluginEngine.commandExec.cmdExec(rm);
                 return plugin.execute(rm);

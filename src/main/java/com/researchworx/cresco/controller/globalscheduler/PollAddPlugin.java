@@ -46,7 +46,7 @@ public class PollAddPlugin implements Runnable {
 				if(re != null) {
                     re.removeParam("dst_plugin");
                     re.removeParam("dst_agent");
-                    re.removeParam("is_rpc");
+                    //force to region/global
                     re.setParam("globalcmd", Boolean.TRUE.toString());
 
                     //send message to global
