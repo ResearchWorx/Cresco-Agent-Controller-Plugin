@@ -351,7 +351,7 @@ public class MsgRoute implements Runnable {
 
     private MsgEvent getRegionalCommandExec() {
         try {
-            String callId = "callId-" + /*PluginEngine.region*/plugin.getRegion() + "_" + /*PluginEngine.agent*/plugin.getAgent() + "_" + /*PluginEngine.plugin*/plugin.getPluginID(); //calculate callID
+            String callId = "callId-" + /*PluginEngine.region*/plugin.getRegion() + "-" + /*PluginEngine.agent*/plugin.getAgent() + "-" + /*PluginEngine.plugin*/plugin.getPluginID(); //calculate callID
             if (rm.getParam(callId) != null) { //send message to RPC hash
                 //PluginEngine.rpcMap.put(rm.getParam(callId), rm);
                 plugin.receiveRPC(rm.getParam(callId), rm);
@@ -379,7 +379,7 @@ public class MsgRoute implements Runnable {
 
     private MsgEvent getCommandExec() {
         try {
-            String callId = "callId-" + /*PluginEngine.region*/plugin.getRegion() + "_" + /*PluginEngine.agent*/plugin.getAgent() + "_" + /*PluginEngine.plugin*/plugin.getPluginID(); //calculate callID
+            String callId = "callId-" + /*PluginEngine.region*/plugin.getRegion() + "-" + /*PluginEngine.agent*/plugin.getAgent() + "-" + /*PluginEngine.plugin*/plugin.getPluginID(); //calculate callID
             logger.error("callid:" + callId + " message_callid: " + rm.getParam(callId));
             if (rm.getParam(callId) != null) { //send message to RPC hash
                 //PluginEngine.rpcMap.put(rm.getParam(callId), rm);
