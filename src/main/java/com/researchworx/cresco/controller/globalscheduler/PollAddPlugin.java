@@ -6,6 +6,9 @@ import com.researchworx.cresco.library.core.WatchDog;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 public class PollAddPlugin implements Runnable {
 
 	private String resource_id  = null;
@@ -67,7 +70,11 @@ public class PollAddPlugin implements Runnable {
 	        }
 		   catch(Exception ex)
 		   {
-	            logger.error("PollAddPlugin: " + ex.getMessage());
-	       }
+               logger.error("PollAddPlugin: Error " + ex.getMessage());
+               StringWriter errors = new StringWriter();
+               ex.printStackTrace(new PrintWriter(errors));
+               logger.error("PollAddPlugin: Trace " + errors.toString());
+
+           }
 	    }  
 }
