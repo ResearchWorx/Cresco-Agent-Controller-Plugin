@@ -27,11 +27,11 @@ public class MsgRoute implements Runnable {
                 logger.error("Controller msgType: [" + rm.getMsgType().toString() + "] routepath: " + routePath + "[" + rm.getParams().toString() + "]");
             }
 */
-
+/*
             if(rm.getMsgType() == MsgEvent.Type.CONFIG) {
                 logger.error("msgType: [" + rm.getMsgType().toString() + "] routepath: " + routePath + "[" + rm.getParams().toString() + "]");
            }
-
+*/
 
             rm.setParam("routepath",String.valueOf(routePath));
             MsgEvent re = null;
@@ -382,9 +382,11 @@ public class MsgRoute implements Runnable {
             String callId = "callId-" + /*PluginEngine.region*/plugin.getRegion() + "_" + /*PluginEngine.agent*/plugin.getAgent() + "_" + /*PluginEngine.plugin*/plugin.getPluginID(); //calculate callID
             if (rm.getParam(callId) != null) { //send message to RPC hash
                 //PluginEngine.rpcMap.put(rm.getParam(callId), rm);
+                logger.error("CONTROLLER rpc RPC: " + rm.getParams());
                 plugin.receiveRPC(rm.getParam(callId), rm);
             } else {
                 //return PluginEngine.commandExec.cmdExec(rm);
+                logger.error("CONTROLLER execute: " + rm.getParams());
                 return plugin.execute(rm);
             }
         } catch (Exception ex) {
