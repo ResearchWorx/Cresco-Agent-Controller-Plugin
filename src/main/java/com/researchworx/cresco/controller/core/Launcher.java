@@ -9,6 +9,7 @@ import com.researchworx.cresco.controller.netdiscovery.*;
 import com.researchworx.cresco.controller.regionalcontroller.RegionHealthWatcher;
 import com.researchworx.cresco.library.core.WatchDog;
 import com.researchworx.cresco.library.messaging.MsgEvent;
+import com.researchworx.cresco.library.messaging.RPC;
 import com.researchworx.cresco.library.plugin.core.CPlugin;
 import com.researchworx.cresco.library.utilities.CLogger;
 import org.apache.activemq.command.ActiveMQDestination;
@@ -170,6 +171,7 @@ public class Launcher extends CPlugin {
         this.config = new ControllerConfig(config.getConfig());
         System.setProperty("log.console.level", "SEVERE");
         this.setWatchDog(null);
+        this.setRPC(null);
     }
 
     @Override
@@ -834,7 +836,10 @@ public class Launcher extends CPlugin {
                 return false;
             }
 
-            //set new watchdog
+            //setRPC to reflect new values
+            this.setRPC(new RPC(this.msgOutQueue, this.region, this.agent, this.pluginID, this.logger));
+
+            //set new watchdog to reflect discovered values
             this.setWatchDog(new WatchDog(this.region, this.agent, this.pluginID, this.logger, this.config));
             getWatchDog().start();
             logger.info("WatchDog Started");
