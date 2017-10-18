@@ -27,7 +27,7 @@ public class AppSchedulerEngine implements Runnable {
 		this.logger = new CLogger(AppSchedulerEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
 		this.plugin = plugin;
 		this.ghw = ghw;
-        addPipelineExecutor = Executors.newFixedThreadPool(1);
+        addPipelineExecutor = Executors.newFixedThreadPool(100);
 	}
 
     public void run() {
