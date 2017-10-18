@@ -836,6 +836,11 @@ public class Launcher extends CPlugin {
                 return false;
             }
 
+            //set values
+            this.setRegion(this.region);
+            this.setAgent(this.agent);
+            this.setPluginID(this.pluginID);
+
             //setRPC to reflect new values
             this.setRPC(new RPC(this.msgOutQueue, this.region, this.agent, this.pluginID, this.logger));
 

@@ -380,6 +380,7 @@ public class MsgRoute implements Runnable {
     private MsgEvent getCommandExec() {
         try {
             String callId = "callId-" + /*PluginEngine.region*/plugin.getRegion() + "_" + /*PluginEngine.agent*/plugin.getAgent() + "_" + /*PluginEngine.plugin*/plugin.getPluginID(); //calculate callID
+            logger.error("callid:" + callId + " message_callid: " + rm.getParam(callId));
             if (rm.getParam(callId) != null) { //send message to RPC hash
                 //PluginEngine.rpcMap.put(rm.getParam(callId), rm);
                 logger.error("CONTROLLER rpc RPC: " + rm.getParams());
