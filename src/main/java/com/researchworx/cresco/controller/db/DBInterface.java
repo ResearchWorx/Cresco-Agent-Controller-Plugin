@@ -307,7 +307,7 @@ public class DBInterface {
         {
             String nodeId = gdb.getNodeId(actionRegion, actionAgent,actionPlugin);
             Map<String,String> nodeParams = gdb.getNodeParams(nodeId);
-            queryReturn = nodeParams.get("config");
+            queryReturn = nodeParams.get("configparams");
 
         }
         catch(Exception ex)
