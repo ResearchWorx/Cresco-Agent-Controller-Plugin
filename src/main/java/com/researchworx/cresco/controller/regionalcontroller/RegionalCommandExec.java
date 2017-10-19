@@ -56,7 +56,6 @@ public class RegionalCommandExec {
         if(le.getParam("globalcmd") != null) {
                 //this is a global command
                 if(plugin.isGlobalController()) {
-                    logger.error("SEND GLOBAL: " + le.getMsgType() + " params: " + le.getParams());
                     return gce.execute(le);
                 }
                 else {
