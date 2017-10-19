@@ -686,7 +686,7 @@ public class DBApplicationFunctions {
         }
         catch(Exception ex)
         {
-            logger.debug("setPipelineStatus Error: " + ex.toString());
+            logger.error("setPipelineStatus Error: " + ex.toString());
         }
         finally
         {
