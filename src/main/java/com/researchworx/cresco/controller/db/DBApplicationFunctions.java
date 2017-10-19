@@ -662,7 +662,8 @@ public class DBApplicationFunctions {
         return nodeRemoved;
     }
     private boolean IsetPipelineStatus(String pipelineId, String status_code, String status_desc) {
-        TransactionalGraph graph = null;
+        //TransactionalGraph graph = null;
+        OrientGraph graph = null;
         try
         {
             graph = factory.getTx();
