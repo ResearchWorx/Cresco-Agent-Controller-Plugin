@@ -29,27 +29,35 @@ public class PollRemovePipeline implements Runnable {
 	 public void run() {
 	        try {
 
-	            logger.error("PollRemovePipeline : run()");
+	            logger.error("PollRemovePipeline : run() 0");
 
 	            int pipelineStatus = plugin.getGDB().dba.getPipelineStatusCode(pipelineId);
 
+                logger.error("PollRemovePipeline : run() 1");
 
                 //logger.error("PIPELINE ID " + pipelineId + " SCHEDILER FOR REMOVAL!!! STATUS " + pipelineStatus);
 
                 //if((pipelineStatus >= 10) && (pipelineStatus < 19)) {
                 if((pipelineStatus >= 10) && (pipelineStatus < 19)) {
+                    logger.error("PollRemovePipeline : run() 2");
+
                     plugin.getGDB().dba.setPipelineStatus(pipelineId, "9", "Pipeline Scheduled for Removal");
 
 					gpay = plugin.getGDB().dba.getPipelineObj(pipelineId);
                     //logger.error("pluginsid : " + pipelineId + " status_code " + plugin.getGDB().dba.getPipelineStatus(pipelineId) + " pipleinId payload:" + gpay.pipeline_id);
+                    logger.error("PollRemovePipeline : run() 3");
 
                     if (pipelineId.equals(gpay.pipeline_id)) {
+                        logger.error("PollRemovePipeline : run() 4");
 
 						pipelineNodes = new ArrayList<>(gpay.nodes);
 						for (gNode gnode : pipelineNodes) {
+                            logger.error("PollRemovePipeline : run() 5");
 
 						    int statusCode = plugin.getGDB().dba.getINodeStatus(gnode.node_id);
 						    if((statusCode >= 10) && (statusCode < 19))  { //running somewhere
+                                logger.error("PollRemovePipeline : run() 6");
+
                                 MsgEvent me = new MsgEvent(MsgEvent.Type.CONFIG, null, null, null, "add application node");
                                 me.setParam("globalcmd", "removeplugin");
                                 me.setParam("inode_id", gnode.node_id);
