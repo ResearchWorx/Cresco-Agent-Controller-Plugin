@@ -773,7 +773,7 @@ public class DBApplicationFunctions {
                 {
                     //logger.debug("REMOVENODE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
                     long delay = (long)(Math.random() * 1000);
-                    logger.error("delay: " + delay);
+                    //logger.error("delay: " + delay);
                     Thread.sleep(delay); //random wait to prevent sync error
                 }
                 nodeRemoved = IsetPipelineStatus(pipelineId,status_code,status_desc);
