@@ -144,7 +144,7 @@ public class GlobalCommandExec {
 
 	private MsgEvent pluginInfo(MsgEvent ce) {
 	    try {
-            ce.setParam("plugininfo", plugin.getGDB().getPluginInfo(ce.getParam("action_region"), ce.getParam("action_agent"), ce.getParam("action_plugin")));
+            ce.setCompressedParam("plugininfo", plugin.getGDB().getPluginInfo(ce.getParam("action_region"), ce.getParam("action_agent"), ce.getParam("action_plugin")));
             logger.trace("plugins info return : " + ce.getParams().toString());
         }
         catch(Exception ex) {
