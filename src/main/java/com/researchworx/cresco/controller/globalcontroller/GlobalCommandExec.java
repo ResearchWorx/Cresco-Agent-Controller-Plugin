@@ -27,7 +27,7 @@ public class GlobalCommandExec {
 
 	public GlobalCommandExec(Launcher plugin)
 	{
-		this.logger = new CLogger(GlobalCommandExec.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+		this.logger = new CLogger(GlobalCommandExec.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
 		this.plugin = plugin;
 		removePipelineExecutor = Executors.newFixedThreadPool(100);
     }
