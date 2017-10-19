@@ -726,6 +726,10 @@ public class DBApplicationFunctions {
         {
             //eat exception
             logger.error("IsetPipelineStatus concurrent " + exc.getMessage());
+            StringWriter errors = new StringWriter();
+            exc.printStackTrace(new PrintWriter(errors));
+            logger.error("IsetPipelineStatus concurrent " + errors.toString());
+
         }
         catch(Exception ex)
         {
