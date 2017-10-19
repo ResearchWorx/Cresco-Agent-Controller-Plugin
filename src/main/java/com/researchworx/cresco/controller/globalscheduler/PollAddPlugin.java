@@ -40,7 +40,8 @@ public class PollAddPlugin implements Runnable {
 
 	        	//send message here
 				logger.info("PollAddPlugin: Sending message: " + me.getParams());
-
+                String configParams = me.getParam("configparams");
+				me.setCompressedParam("configparams",configParams);
 				MsgEvent re = plugin.sendRPC(me);
                 //addIsAttachedEdge(String resource_id, String inode_id, String region, String agent, String plugin)
 				if(re != null) {

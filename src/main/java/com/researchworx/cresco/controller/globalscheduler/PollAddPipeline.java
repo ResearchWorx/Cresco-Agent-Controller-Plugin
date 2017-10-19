@@ -50,7 +50,7 @@ public class PollAddPipeline implements Runnable {
                     if(configparms.length() > 0) {
                         configparms.deleteCharAt(configparms.length() -1);
                     }
-                    me.setCompressedParam("configparams", configparms.toString());
+                    me.setParam("configparams", configparms.toString());
                     //me.setParam("configparams", configparms.toString());
                     logger.debug("Message [" + me.getParams().toString() + "]");
                     plugin.getGDB().dba.setINodeParam(gnode.node_id,"status_code","4");
