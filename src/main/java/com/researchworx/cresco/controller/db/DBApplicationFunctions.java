@@ -751,6 +751,20 @@ public class DBApplicationFunctions {
         int count = 0;
         try
         {
+            /*
+            while((node_id == null) && (count != retryCount))
+            {
+                if(count > 0)
+                {
+                    //logger.debug("ADDNODE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
+                    Thread.sleep((long)(Math.random() * 1000)); //random wait to prevent sync error
+                }
+                node_id = IaddNode(region, agent, plugin);
+                count++;
+
+            }
+            */
+
             while((!nodeRemoved) && (count != retryCount))
             {
                 logger.error("setPipelineStatus : count:" + count);
@@ -782,6 +796,7 @@ public class DBApplicationFunctions {
 
     private boolean IsetPipelineStatus(String pipelineId, String status_code, String status_desc) {
         //TransactionalGraph graph = null;
+        boolean isCommited = false;
         OrientGraph graph = null;
         try
         {
@@ -797,6 +812,7 @@ public class DBApplicationFunctions {
                 graph.commit();
                 //odb.commit();
                 //return true;
+                isCommited = true;
             }
         }
         catch(com.orientechnologies.orient.core.exception.OConcurrentModificationException exc)
@@ -818,8 +834,8 @@ public class DBApplicationFunctions {
                     graph.shutdown();
             }
         }
-        return false;
-
+        //return false;
+        return isCommited;
     }
 
     public int getINodeStatus(String INodeId) {
