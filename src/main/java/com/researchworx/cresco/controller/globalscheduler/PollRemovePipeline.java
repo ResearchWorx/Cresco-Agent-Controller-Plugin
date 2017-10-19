@@ -29,6 +29,8 @@ public class PollRemovePipeline implements Runnable {
 	 public void run() {
 	        try {
 
+	            logger.error("PollRemovePipeline : run()");
+
 	            int pipelineStatus = plugin.getGDB().dba.getPipelineStatusCode(pipelineId);
 
 
@@ -55,6 +57,8 @@ public class PollRemovePipeline implements Runnable {
                                 //ghw.resourceScheduleQueue.add(me);
                                 plugin.getGDB().dba.setINodeParam(gnode.node_id,"status_code","9");
                                 plugin.getGDB().dba.setINodeParam(gnode.node_id,"status_desc","iNode Pipeline Scheduled for Removal");
+                                logger.error("PollRemovePipeline : plugin.getResourceScheduleQueue().add(me);");
+
                                 plugin.getResourceScheduleQueue().add(me);
                             }
                             else if(statusCode > 19) {
@@ -63,7 +67,7 @@ public class PollRemovePipeline implements Runnable {
                             }
 						}
                     //start watch loop
-
+                        logger.error("PollRemovePipeline : Start Listen loop");
                         List<gNode> errorList = new ArrayList<>();
                         boolean isScheduling = true;
                         while(isScheduling)
