@@ -50,6 +50,11 @@ public class PollRemovePlugin implements Runnable {
 
                         if(re != null) {
                             logger.error("RETURN REMOVE EVENT: " + re.getParams());
+                            int statusCode = Integer.parseInt(re.getParam("status_code"));
+                            if(statusCode == 7) {
+                                plugin.getGDB().gdb.removeNode(re.getParam("region"), re.getParam("agent"), re.getParam("plugin"));
+                            }
+
                         } else {
                             logger.error("Return remove = null");
                         }

@@ -29,7 +29,7 @@ public class GlobalCommandExec {
 	{
 		this.logger = new CLogger(GlobalCommandExec.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
 		this.plugin = plugin;
-		removePipelineExecutor = Executors.newFixedThreadPool(1);
+		removePipelineExecutor = Executors.newFixedThreadPool(100);
     }
 
 	public MsgEvent execute(MsgEvent ce) {
