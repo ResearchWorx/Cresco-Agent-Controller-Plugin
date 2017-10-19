@@ -666,9 +666,10 @@ public class DBApplicationFunctions {
         OrientGraph graph = null;
         try
         {
+            String pipelineNodeId = getPipelineNodeId(pipelineId);
             graph = factory.getTx();
             //Vertex vPipeline = odb.getVertexByKey("Pipeline.pipelineid", pipeline_id);
-            Vertex vPipeline = graph.getVertex(getPipelineNodeId(pipelineId));
+            Vertex vPipeline = graph.getVertex(pipelineNodeId);
 
             if(vPipeline != null)
             {
