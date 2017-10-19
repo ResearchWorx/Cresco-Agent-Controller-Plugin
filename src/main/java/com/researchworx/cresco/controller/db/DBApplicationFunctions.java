@@ -681,7 +681,7 @@ public class DBApplicationFunctions {
         catch(com.orientechnologies.orient.core.exception.OConcurrentModificationException exc)
         {
             //eat exception
-            //logger.error("IsetPipelineStatus concurrent " + exc.getMessage());
+            logger.error("IsetPipelineStatus concurrent " + exc.getMessage());
         }
         catch(Exception ex)
         {

@@ -42,6 +42,7 @@ public class PollRemovePipeline implements Runnable {
                     logger.error("PollRemovePipeline : run() 2");
 
                     plugin.getGDB().dba.setPipelineStatus(pipelineId, "9", "Pipeline Scheduled for Removal");
+                    logger.error("PollRemovePipeline : run() 2.1");
 
 					gpay = plugin.getGDB().dba.getPipelineObj(pipelineId);
                     //logger.error("pluginsid : " + pipelineId + " status_code " + plugin.getGDB().dba.getPipelineStatus(pipelineId) + " pipleinId payload:" + gpay.pipeline_id);
