@@ -115,7 +115,7 @@ public class RegionalCommandExec {
             }
 			else if (le.getMsgType() == MsgEvent.Type.KPI) {
 				logger.debug("KPI: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
-				logger.info("Send GLOBAL KPI: MsgType=" + le.getMsgType() + " Params=" + le.getParams());
+				//logger.info("Send GLOBAL KPI: MsgType=" + le.getMsgType() + " Params=" + le.getParams());
                 if(plugin.isGlobalController()) {
                     return gce.execute(le);
                 }

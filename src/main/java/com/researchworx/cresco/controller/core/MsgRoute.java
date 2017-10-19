@@ -211,9 +211,9 @@ public class MsgRoute implements Runnable {
                     logger.trace(rm.getParams().toString());
                     //regionalSend();
                     //re = getRegionalCommandExec();
-                    re = getRegionalCommandExecOutGoing();
+                    //re = getRegionalCommandExecOutGoing();
                     //plugin.sendMsgEvent(rm);
-                    //externalSend();
+                    externalSend();
                     break;
                 case 120:
                     logger.debug("CONTROLLER PLUGIN SENDING MESSAGE TO ITS AGENT 120");
