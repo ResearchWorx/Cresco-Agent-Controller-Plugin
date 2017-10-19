@@ -204,6 +204,45 @@ public class DBApplicationFunctions {
         return node_id;
     }
 
+    public String getPipelineNodeIdNoTx(String pipelineId) {
+        String node_id = null;
+        //OrientGraph graph = null;
+        OrientGraphNoTx graph = null;
+        try
+        {
+
+            //OrientGraphNoTx graph = factory.getNoTx();
+            //graph = factory.getTx();
+            graph = factory.getNoTx();
+            Iterable<Vertex> resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:Pipeline.pipeline_id WHERE key = '" + pipelineId + "'")).execute();
+
+            Iterator<Vertex> iter = resultIterator.iterator();
+            if(iter.hasNext())
+            {
+                Vertex v = iter.next();
+                node_id = v.getProperty("rid").toString();
+            }
+            if(node_id != null)
+            {
+                node_id = node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
+            }
+
+
+        }
+        catch(Exception ex)
+        {
+            logger.error("getPipelineNodeID : Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return node_id;
+    }
+
     public String getPipelineNodeId(String pipelineId) {
         String node_id = null;
         OrientGraph graph = null;
@@ -231,7 +270,7 @@ public class DBApplicationFunctions {
         }
         catch(Exception ex)
         {
-            logger.trace("getPipelineNodeID : Error " + ex.toString());
+            logger.error("getPipelineNodeID : Error " + ex.toString());
         }
         finally
         {
@@ -631,6 +670,78 @@ public class DBApplicationFunctions {
 
     }
 
+    public boolean setPipelineStatusNoTx(String pipelineId, String status_code, String status_desc) {
+        boolean nodeRemoved = false;
+        int count = 0;
+        try
+        {
+
+            while((!nodeRemoved) && (count != retryCount))
+            {
+                if(count > 0)
+                {
+                    //logger.debug("REMOVENODE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
+                    Thread.sleep((long)(Math.random() * 1000)); //random wait to prevent sync error
+                }
+                nodeRemoved = IsetPipelineStatusNoTx(pipelineId,status_code,status_desc);
+                count++;
+
+            }
+
+            if((!nodeRemoved) && (count == retryCount))
+            {
+                logger.debug("removeNode : Failed to add node in " + count + " retrys");
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.debug("removeNode : Error " + ex.toString());
+        }
+
+        return nodeRemoved;
+    }
+
+    private boolean IsetPipelineStatusNoTx(String pipelineId, String status_code, String status_desc) {
+        //TransactionalGraph graph = null;
+        //OrientGraph graph = null;
+        OrientGraphNoTx graph = null;
+        try
+        {
+            String pipelineNodeId = getPipelineNodeId(pipelineId);
+            //graph = factory.getTx();
+            graph = factory.getNoTx();
+            //Vertex vPipeline = odb.getVertexByKey("Pipeline.pipelineid", pipeline_id);
+            Vertex vPipeline = graph.getVertex(pipelineNodeId);
+
+            if(vPipeline != null)
+            {
+                vPipeline.setProperty("status_code", status_code);
+                vPipeline.setProperty("status_desc", status_desc);
+                //graph.commit();
+                //odb.commit();
+                //return true;
+            }
+        }
+        catch(com.orientechnologies.orient.core.exception.OConcurrentModificationException exc)
+        {
+            //eat exception
+            logger.error("IsetPipelineStatus concurrent " + exc.getMessage());
+        }
+        catch(Exception ex)
+        {
+            logger.error("setPipelineStatus Error: " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return false;
+
+    }
+
     public boolean setPipelineStatus(String pipelineId, String status_code, String status_desc) {
         boolean nodeRemoved = false;
         int count = 0;
@@ -661,6 +772,7 @@ public class DBApplicationFunctions {
 
         return nodeRemoved;
     }
+
     private boolean IsetPipelineStatus(String pipelineId, String status_code, String status_desc) {
         //TransactionalGraph graph = null;
         OrientGraph graph = null;

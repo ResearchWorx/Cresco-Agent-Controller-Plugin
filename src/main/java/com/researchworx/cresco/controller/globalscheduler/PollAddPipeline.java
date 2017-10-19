@@ -73,7 +73,7 @@ public class PollAddPipeline implements Runnable {
                     for(gNode gnode : checkList) {
                         int statusCode = Integer.parseInt(plugin.getGDB().dba.getINodeParam(gnode.node_id, "status_code"));
                         if (statusCode != 4) {
-                            logger.debug("PollAddPipeline thread " + Thread.currentThread().getId() + " : " + gnode.node_id + " status_code :" + plugin.getGDB().dba.getINodeParam(gnode.node_id, "status_code"));
+                            //logger.debug("PollAddPipeline thread " + Thread.currentThread().getId() + " : " + gnode.node_id + " status_code :" + plugin.getGDB().dba.getINodeParam(gnode.node_id, "status_code"));
                             pipelineNodes.remove(gnode);
                             if(statusCode == 40) {
                                 errorList.add(gnode);
