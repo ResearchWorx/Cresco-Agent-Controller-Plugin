@@ -56,7 +56,7 @@ public class RegionalCommandExec {
         if(le.getParam("globalcmd") != null) {
                 //this is a global command
                 if(plugin.isGlobalController()) {
-                    logger.error("SEND GLOBAL: " + le.getParams());
+                    logger.error("SEND GLOBAL: " + le.getMsgType() + " params: " + le.getParams());
                     return gce.execute(le);
                 }
                 else {
@@ -115,7 +115,7 @@ public class RegionalCommandExec {
             }
 			else if (le.getMsgType() == MsgEvent.Type.KPI) {
 				logger.debug("KPI: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
-				//logger.info("MsgType=" + le.getMsgType() + " Params=" + le.getParams());
+				logger.info("Send GLOBAL KPI: MsgType=" + le.getMsgType() + " Params=" + le.getParams());
                 if(plugin.isGlobalController()) {
                     return gce.execute(le);
                 }
