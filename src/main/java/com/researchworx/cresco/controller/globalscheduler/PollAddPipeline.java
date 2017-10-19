@@ -19,7 +19,7 @@ public class PollAddPipeline implements Runnable {
 
 	public PollAddPipeline(Launcher plugin, List<gNode> assignedNodes, String pipelineId)
 	{
-		this.logger = new CLogger(PollAddPipeline.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
+		this.logger = new CLogger(PollAddPipeline.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
 		this.plugin = plugin;
 		//this.assignedNodes = assignedNodes;
 		this.pipelineId = pipelineId;
