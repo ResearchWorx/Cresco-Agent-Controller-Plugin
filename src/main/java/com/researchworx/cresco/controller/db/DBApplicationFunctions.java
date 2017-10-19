@@ -767,7 +767,6 @@ public class DBApplicationFunctions {
 
             while((!nodeRemoved) && (count != retryCount))
             {
-                logger.error("setPipelineStatus : count:" + count);
 
                 if(count > 0)
                 {
