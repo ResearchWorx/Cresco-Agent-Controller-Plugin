@@ -2862,15 +2862,16 @@ public class DBApplicationFunctions {
     {
         String iNode_param = null;
         String node_id = null;
-        OrientGraph graph = null;
-
+        //OrientGraph graph = null;
+        OrientGraphNoTx graph = null;
         try
         {
             //node_id = getINodeId(inode_id);
             node_id = getINodeNodeId(inode_id);
             if(node_id != null)
             {
-                graph = factory.getTx();
+                //graph = factory.getTx();
+                graph = factory.getNoTx();
                 Vertex iNode = graph.getVertex(node_id);
                 iNode_param = iNode.getProperty(param).toString();
             }
