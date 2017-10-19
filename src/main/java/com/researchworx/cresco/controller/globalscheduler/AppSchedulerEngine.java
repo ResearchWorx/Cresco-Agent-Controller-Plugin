@@ -58,7 +58,8 @@ public class AppSchedulerEngine implements Runnable {
                                 case 1: plugin.getGDB().dba.setPipelineStatus(gpay.pipeline_id,"40","Failed to schedule pipeline resources.");
                                     break;
                                 case 2: logger.error("Learn to schedule resources!");
-                                case 4: plugin.getGDB().dba.setPipelineStatus(gpay.pipeline_id,"4","Pipeline resources scheduled.");
+                                case 4: //plugin.getGDB().dba.setPipelineStatus(gpay.pipeline_id,"4","Pipeline resources scheduled.");
+                                        //moved into schedulePipeline to prevent race condition
                                     break;
 
                                 default:
@@ -140,6 +141,8 @@ public class AppSchedulerEngine implements Runnable {
                 logger.debug("Scheduling is ready!");
 
                 logger.debug("Submitting Resource Pipeline for Scheduling " + gpay.pipeline_id);
+                //set DB as scheduled
+                plugin.getGDB().dba.setPipelineStatus(gpay.pipeline_id,"4","Pipeline resources scheduled.");
                 addPipelineExecutor.execute(new PollAddPipeline(plugin,schedulemaps.get("assigned"), gpay.pipeline_id));
                 logger.debug("Submitted Resource Pipeline for Scheduling");
 
@@ -169,13 +172,10 @@ public class AppSchedulerEngine implements Runnable {
                     plugin.getResourceScheduleQueue().add(me);
                 }
                 */
-
                 return 4;
             } else {
                 logger.error("SOMETHING IS BAD WRONG WITH SCHEDULING!");
             }
-
-
         }
         catch (Exception ex) {
             logger.error("schedulePipeline " + ex.getMessage());
