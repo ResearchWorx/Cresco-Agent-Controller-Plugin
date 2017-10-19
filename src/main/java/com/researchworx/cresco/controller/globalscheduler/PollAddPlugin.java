@@ -9,6 +9,9 @@ import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URLDecoder;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PollAddPlugin implements Runnable {
 
@@ -57,8 +60,9 @@ public class PollAddPlugin implements Runnable {
                         plugin_node_id = plugin.getGDB().gdb.addNode(region,agent,pluginId);
                         logger.debug("PollAddPlugin : Added Node" + region + " " + agent + " " + pluginId + " = " + plugin_node_id);
                     }
+
                     //provide record of submitted plugin
-                    plugin.getGDB().gdb.setNodeParam(plugin_node_id,"configparams",configParams);
+                    plugin.getGDB().gdb.setNodeParams(region,agent,pluginId,getMapFromString(configParams,false));
 
                     if((resource_node_id != null) && (inode_node_id != null) && (plugin_node_id != null)) {
                         edge_id = plugin.getGDB().dba.getResourceEdgeId(resource_id, inode_id, region, agent, pluginId);
@@ -110,5 +114,46 @@ public class PollAddPlugin implements Runnable {
                logger.error("PollAddPlugin: Trace " + errors.toString());
 
            }
-	    }  
+	    }
+
+    public Map<String,String> getMapFromString(String param, boolean isRestricted) {
+        Map<String,String> paramMap = null;
+
+        logger.debug("PARAM: " + param);
+
+        try{
+            String[] sparam = param.split(",");
+            logger.debug("PARAM LENGTH: " + sparam.length);
+
+            paramMap = new HashMap<String,String>();
+
+            for(String str : sparam)
+            {
+                String[] sstr = str.split("=");
+
+                if(isRestricted)
+                {
+                    paramMap.put(URLDecoder.decode(sstr[0], "UTF-8"), "");
+                }
+                else
+                {
+                    if(sstr.length > 1)
+                    {
+                        paramMap.put(URLDecoder.decode(sstr[0], "UTF-8"), URLDecoder.decode(sstr[1], "UTF-8"));
+                    }
+                    else
+                    {
+                        paramMap.put(URLDecoder.decode(sstr[0], "UTF-8"), "");
+                    }
+                }
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.error("getMapFromString Error: " + ex.toString());
+        }
+
+        return paramMap;
+    }
+
 }
