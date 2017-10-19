@@ -60,7 +60,6 @@ public class PollAddPipeline implements Runnable {
 
                 }
 
-
                 List<gNode> errorList = new ArrayList<>();
                 boolean isScheduling = true;
                 while(isScheduling)

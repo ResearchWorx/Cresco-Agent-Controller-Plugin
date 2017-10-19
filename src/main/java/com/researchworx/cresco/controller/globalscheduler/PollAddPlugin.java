@@ -57,12 +57,9 @@ public class PollAddPlugin implements Runnable {
 
                     //create node if not seen.. this needs to be changed.
                     if(plugin_node_id == null) {
-                        //plugin_node_id = plugin.getGDB().gdb.addNode(region,agent,pluginId);
+                        plugin_node_id = plugin.getGDB().gdb.addNode(region,agent,pluginId);
                         logger.debug("PollAddPlugin : Added Node" + region + " " + agent + " " + pluginId + " = " + plugin_node_id);
                     }
-
-                    //provide record of submitted plugin
-                    //plugin.getGDB().gdb.setNodeParams(region,agent,pluginId,getMapFromString(configParams,false));
 
                     if((resource_node_id != null) && (inode_node_id != null) && (plugin_node_id != null)) {
                         edge_id = plugin.getGDB().dba.getResourceEdgeId(resource_id, inode_id, region, agent, pluginId);
