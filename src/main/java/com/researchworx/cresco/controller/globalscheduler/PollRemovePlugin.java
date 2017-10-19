@@ -51,10 +51,12 @@ public class PollRemovePlugin implements Runnable {
                         if(re != null) {
                             logger.error("RETURN REMOVE EVENT: " + re.getParams());
                             int statusCode = Integer.parseInt(re.getParam("status_code"));
+                            logger.error("Status Code: " + statusCode);
                             if(statusCode == 7) {
-                                plugin.getGDB().gdb.removeNode(re.getParam("region"), re.getParam("agent"), re.getParam("plugin"));
+                                logger.error("Remove Node: region:" + region + " agent:" + agent + " plugin:" + pluginId);
+                                boolean isRemovedPlugin = plugin.getGDB().gdb.removeNode(region,agent,pluginId);
+                                logger.error("isRemovedPlugin: " + isRemovedPlugin);
                             }
-
                         } else {
                             logger.error("Return remove = null");
                         }
@@ -65,6 +67,7 @@ public class PollRemovePlugin implements Runnable {
                         while ((!isRemoved) && (count < 60)) {
                             if (plugin.getGDB().gdb.getNodeId(region, agent, pluginId) == null) {
                                 isRemoved = true;
+                                logger.error("isRemoved: " + isRemoved);
                             }
                             Thread.sleep(1000);
                             count++;
