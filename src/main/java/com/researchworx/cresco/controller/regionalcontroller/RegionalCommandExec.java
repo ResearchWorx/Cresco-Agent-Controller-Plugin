@@ -106,11 +106,8 @@ public class RegionalCommandExec {
                 }
 			}
 			else if(le.getMsgType() == MsgEvent.Type.WATCHDOG) {
-				regionalDiscovery.discover(le);
-				if(le.getParam("pluginconfigs") != null) {
-                    logger.error("Headed to regional discovery.");
-                }
-
+				//regionalDiscovery.discover(le);
+				watchDogAgent(le);
         }
             else if (le.getMsgType() == MsgEvent.Type.INFO) {
                 //logger.debug("INFO: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
@@ -137,6 +134,22 @@ public class RegionalCommandExec {
 		return null;
 	}
 
+    private void watchDogAgent(MsgEvent le) {
+        try {
+
+                logger.debug("WATCHDOG : Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
+                logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
+                plugin.getGDB().watchDogUpdate(le);
+                if((le.getParam("pluginconfigs") != null) && (!plugin.isGlobalController())) {
+                    globalSend(le);
+                }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            logger.debug("watchDogAgent : " + ex.toString());
+        }
+    }
+
 	private MsgEvent enableAgent(MsgEvent le) {
 
 	    /*
@@ -148,7 +161,9 @@ public class RegionalCommandExec {
         logger.debug("CONFIG : AGENTDISCOVER ADD: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
         logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
         plugin.getGDB().addNode(le);
-
+        if(!plugin.isGlobalController()) {
+            globalSend(le);
+        }
         //gdb.addNode(region, agent,plugin);
         //gdb.setNodeParams(region,agent,plugin, de.getParams());
 
