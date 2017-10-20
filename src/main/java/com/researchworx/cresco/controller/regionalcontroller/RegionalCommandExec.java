@@ -107,7 +107,9 @@ public class RegionalCommandExec {
 			}
 			else if(le.getMsgType() == MsgEvent.Type.WATCHDOG) {
 				regionalDiscovery.discover(le);
-				logger.error("Headed to regional discovery.");
+				if(le.getParam("pluginconfigs") != null) {
+                    logger.error("Headed to regional discovery.");
+                }
 
         }
             else if (le.getMsgType() == MsgEvent.Type.INFO) {
