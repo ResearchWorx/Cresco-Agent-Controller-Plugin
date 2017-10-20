@@ -958,8 +958,6 @@ public class DBInterface {
 
             gdb.setNodeParams(region,agent,plugin, de.getParams());
 
-            logger.info("Adding Node: " + de.getParams().toString());
-
                 logger.debug("Adding Node: " + de.getParams().toString());
                 //gdb.setNodeParams(region,agent,plugin, de.getParams());
                 //gdb.setNodeParam(region,agent,plugin, "watchdog_ts", String.valueOf(System.currentTimeMillis()));
@@ -975,7 +973,6 @@ public class DBInterface {
 
                         for (Map<String, String> configMap : configMapList) {
                             String pluginId = configMap.get("pluginid");
-                            logger.info("Plugin: " + pluginId);
                             gdb.addNode(region, agent, pluginId);
                             gdb.setNodeParams(region, agent, pluginId, configMap);
 
