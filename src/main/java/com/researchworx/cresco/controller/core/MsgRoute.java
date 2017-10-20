@@ -1,5 +1,6 @@
 package com.researchworx.cresco.controller.core;
 
+import com.researchworx.cresco.library.core.WatchDog;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 
@@ -31,6 +32,12 @@ public class MsgRoute implements Runnable {
                 logger.error("msgType: [" + rm.getMsgType().toString() + "] routepath: " + routePath + "[" + rm.getParams().toString() + "]");
            }
 */
+
+
+            if(rm.getMsgType() == MsgEvent.Type.WATCHDOG) {
+                logger.error("msgType: [" + rm.getMsgType().toString() + "] routepath: " + routePath + "[" + rm.getParams().toString() + "]");
+           }
+
 
             rm.setParam("routepath",String.valueOf(routePath));
             MsgEvent re = null;
