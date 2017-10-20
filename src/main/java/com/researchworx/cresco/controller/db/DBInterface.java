@@ -952,6 +952,78 @@ public class DBInterface {
 
 
             String nodeId = gdb.getNodeId(region,agent,plugin);
+            if(nodeId == null) {
+                nodeId = gdb.addNode(region, agent,plugin);
+            }
+
+            gdb.setNodeParams(region,agent,plugin, de.getParams());
+
+            logger.info("Adding Node: " + de.getParams().toString());
+
+                logger.debug("Adding Node: " + de.getParams().toString());
+                //gdb.setNodeParams(region,agent,plugin, de.getParams());
+                //gdb.setNodeParam(region,agent,plugin, "watchdog_ts", String.valueOf(System.currentTimeMillis()));
+                //gdb.setNodeParam(region,agent,plugin, "watchdog_ts", String.valueOf(System.currentTimeMillis()));
+
+                if((region != null) && (agent != null) && (plugin == null)) {
+                    logger.info("is Agent: Process Plugins");
+                    //add plugin configs for agent
+                    if (de.getParam("pluginconfigs") != null) {
+                        List<Map<String, String>> configMapList = new Gson().fromJson(de.getCompressedParam("pluginconfigs"),
+                                new com.google.common.reflect.TypeToken<List<Map<String, String>>>() {
+                                }.getType());
+
+                        for (Map<String, String> configMap : configMapList) {
+                            String pluginId = configMap.get("pluginid");
+                            logger.info("Plugin: " + pluginId);
+                            gdb.addNode(region, agent, pluginId);
+                            gdb.setNodeParams(region, agent, pluginId, configMap);
+
+                            logger.error("Register Update: region:" + region + " agent:" + agent + " plugin:" + pluginId);
+
+                            for (Map.Entry<String, String> entry : configMap.entrySet())
+                            {
+                                logger.error("Register Update Key/Value " + entry.getKey() + "/" + entry.getValue());
+                                //System.out.println(entry.getKey() + "/" + entry.getValue());
+                                //gdb.addNode(region, agent,plugin);
+                                //gdb.setNodeParams(region,agent,plugin, de.getParams());
+                            }
+
+                            /*
+                            for (Map.Entry<String, String> entry : configMap.entrySet())
+                            {
+                                System.out.println(entry.getKey() + "/" + entry.getValue());
+                                //gdb.addNode(region, agent,plugin);
+                                //gdb.setNodeParams(region,agent,plugin, de.getParams());
+                            }
+                            */
+
+                        }
+                    }
+
+
+                wasAdded = true;
+            }
+
+        } catch (Exception ex) {
+            logger.error("GraphDBUpdater : addNode ERROR : " + ex.toString());
+        }
+        return wasAdded;
+    }
+
+    public Boolean addNode2(MsgEvent de) {
+        Boolean wasAdded = false;
+
+        try {
+
+            String region = de.getParam("src_region");
+            String agent = de.getParam("src_agent");
+            String plugin = de.getParam("src_plugin");
+            de.setParam("is_active",Boolean.TRUE.toString());
+            de.setParam("watchdog_ts", String.valueOf(System.currentTimeMillis()));
+
+
+            String nodeId = gdb.getNodeId(region,agent,plugin);
             if(nodeId != null) {
 
                 Map<String,String> paramMap = gdb.getNodeParams(nodeId);
