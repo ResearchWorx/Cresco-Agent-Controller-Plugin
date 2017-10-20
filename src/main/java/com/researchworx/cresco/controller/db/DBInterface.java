@@ -1120,7 +1120,6 @@ public class DBInterface {
             logger.trace("watchdog() region=" + region + " agent=" + agent + " plugin=" + pluginId);
 
             if(nodeId != null) {
-                logger.info("Updating WatchDog Node 0: " + de.getParams().toString());
                 //update watchdog_ts for local db
 
                 String interval = de.getParam("watchdogtimer");
@@ -1136,16 +1135,11 @@ public class DBInterface {
 
                 gdb.setNodeParamsNoTx(region, agent, pluginId, updateMap);
 
-                logger.info("Updating WatchDog Node 1: " + de.getParams().toString());
 
                 if((region != null) && (agent != null) && (pluginId == null)) {
 
-                    logger.info("Updating WatchDog Node 2: " + de.getParams().toString());
-
                     //add plugin configs for agent
                     if (de.getParam("pluginconfigs") != null) {
-
-                        logger.info("Updating WatchDog Node 3: " + de.getParams().toString());
 
                         List<Map<String, String>> configMapList = new Gson().fromJson(de.getCompressedParam("pluginconfigs"),
                                 new com.google.common.reflect.TypeToken<List<Map<String, String>>>() {
@@ -1153,20 +1147,9 @@ public class DBInterface {
 
                         for (Map<String, String> configMap : configMapList) {
                             String subpluginId = configMap.get("pluginid");
-                            logger.info("Updating WatchDog Node Plugins: " + subpluginId);
 
                             gdb.addNode(region, agent, subpluginId);
                             gdb.setNodeParams(region, agent, subpluginId, configMap);
-
-                            logger.error("WatchDog Update: region:" + region + " agent:" + agent + " plugin:" + subpluginId);
-
-                            for (Map.Entry<String, String> entry : configMap.entrySet())
-                            {
-                                logger.error("WatchDog Update Key/Value " + entry.getKey() + "/" + entry.getValue());
-                                //System.out.println(entry.getKey() + "/" + entry.getValue());
-                                //gdb.addNode(region, agent,plugin);
-                                //gdb.setNodeParams(region,agent,plugin, de.getParams());
-                            }
 
                             /*
                             for (Map.Entry<String, String> entry : configMap.entrySet())
