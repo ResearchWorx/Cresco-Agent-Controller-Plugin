@@ -1124,10 +1124,10 @@ public class DBInterface {
 
             String nodeId = gdb.getNodeId(region,agent,pluginId);
 
-            logger.trace("watchdog() region=" + region + " agent=" + agent + " plugin=" + pluginId);
+            logger.info("watchdog() region=" + region + " agent=" + agent + " plugin=" + pluginId);
 
             if(nodeId != null) {
-                logger.debug("Updating WatchDog Node: " + de.getParams().toString());
+                logger.info("Updating WatchDog Node: " + de.getParams().toString());
                 //update watchdog_ts for local db
 
                 String interval = de.getParam("watchdogtimer");
@@ -1144,6 +1144,8 @@ public class DBInterface {
                 gdb.setNodeParamsNoTx(region, agent, pluginId, updateMap);
 
                 if((region != null) && (agent != null) && (plugin == null)) {
+                    logger.info("Updating WatchDog Node Plugins: ");
+
                     //add plugin configs for agent
                     if (de.getParam("pluginconfigs") != null) {
                         List<Map<String, String>> configMapList = new Gson().fromJson(de.getCompressedParam("pluginconfigs"),
@@ -1152,6 +1154,8 @@ public class DBInterface {
 
                         for (Map<String, String> configMap : configMapList) {
                             String subpluginId = configMap.get("pluginid");
+                            logger.info("Updating WatchDog Node Plugins: " + subpluginId);
+
                             gdb.addNode(region, agent, subpluginId);
                             gdb.setNodeParams(region, agent, subpluginId, configMap);
 
