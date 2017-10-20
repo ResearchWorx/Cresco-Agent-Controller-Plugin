@@ -92,8 +92,7 @@ public class RegionalCommandExec {
                             globalSend(le);
                             break;
                         case "enable":
-                            enableAgent(le);
-                            break;
+                            return enableAgent(le);
                         default:
                             logger.debug("RegionalCommandExec Unknown configtype found: {}", le.getParam("action"));
                             return null;
