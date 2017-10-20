@@ -1138,7 +1138,7 @@ public class DBInterface {
 
                 logger.info("Updating WatchDog Node 1: " + de.getParams().toString());
 
-                if((region != null) && (agent != null) && (plugin == null)) {
+                if((region != null) && (agent != null) && (pluginId == null)) {
 
                     logger.info("Updating WatchDog Node 2: " + de.getParams().toString());
 
