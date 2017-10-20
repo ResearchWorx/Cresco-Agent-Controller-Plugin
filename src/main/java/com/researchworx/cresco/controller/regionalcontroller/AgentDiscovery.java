@@ -14,20 +14,23 @@ public class AgentDiscovery {
 
     public AgentDiscovery(Launcher plugin) {
         this.plugin = plugin;
-        logger = new CLogger(AgentDiscovery.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+        logger = new CLogger(AgentDiscovery.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Debug);
         gce = new GlobalCommandExec(plugin);
         //rpc = new RPC(plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), null);
     }
 
-    //function to send to global controller
     private void globalSend(MsgEvent ge) {
         try {
             if(!this.plugin.isGlobalController()) {
                 if(this.plugin.getGlobalControllerPath() != null) {
                     String[] tmpStr = this.plugin.getGlobalControllerPath().split("_");
                     ge.setParam("dst_region", tmpStr[0]);
-                    ge.setParam("dst_plugin", plugin.getPluginID());
-                    plugin.msgIn(ge);
+                    ge.removeParam("dst_agent");
+                    ge.removeParam("dst_plugin");
+                    //ge.setParam("dst_agent", tmpStr[1]);
+                    //ge.setParam("dst_plugin", plugin.getPluginID());
+                    //plugin.msgIn(ge);
+                    plugin.sendAPMessage(ge);
                 }
             }
         }
@@ -57,6 +60,7 @@ public class AgentDiscovery {
                 }
 
             }
+
         } catch (Exception ex) {
             ex.printStackTrace();
             logger.debug("Controller : AgentDiscovery run() : " + ex.toString());

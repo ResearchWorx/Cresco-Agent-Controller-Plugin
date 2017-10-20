@@ -33,11 +33,11 @@ public class MsgRoute implements Runnable {
            }
 */
 
-
+/*
             if(rm.getMsgType() == MsgEvent.Type.WATCHDOG) {
                 logger.error("msgType: [" + rm.getMsgType().toString() + "] routepath: " + routePath + "[" + rm.getParams().toString() + "]");
            }
-
+*/
 
             rm.setParam("routepath",String.valueOf(routePath));
             MsgEvent re = null;
@@ -200,7 +200,7 @@ public class MsgRoute implements Runnable {
                     logger.debug("REGIONAL AGENT SENDING MESSAGE TO REGIONAL CONTROLLER 112");
                     //logger.debug("REGIONAL AGENT SENDING MESSAGE TO REGIONAL AGENT 112");
                     //externalSend();
-                    logger.trace(rm.getParams().toString());
+                    //logger.trace(rm.getParams().toString());
                     //regionalSend();
                     re = getRegionalCommandExec();
                     //plugin.sendMsgEvent(rm);
