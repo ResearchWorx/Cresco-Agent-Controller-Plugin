@@ -1124,7 +1124,7 @@ public class DBInterface {
 
             String nodeId = gdb.getNodeId(region,agent,pluginId);
 
-            logger.info("watchdog() region=" + region + " agent=" + agent + " plugin=" + pluginId);
+            logger.trace("watchdog() region=" + region + " agent=" + agent + " plugin=" + pluginId);
 
             if(nodeId != null) {
                 logger.info("Updating WatchDog Node: " + de.getParams().toString());

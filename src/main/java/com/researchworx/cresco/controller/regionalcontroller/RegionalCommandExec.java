@@ -136,7 +136,7 @@ public class RegionalCommandExec {
     private void watchDogAgent(MsgEvent le) {
         try {
 
-                logger.info("WATCHDOG : Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
+                logger.debug("WATCHDOG : Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
                 logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
                 plugin.getGDB().watchDogUpdate(le);
                 if((le.getParam("pluginconfigs") != null) && (!plugin.isGlobalController())) {
