@@ -1002,6 +1002,16 @@ public class DBInterface {
                             gdb.addNode(region, agent, pluginId);
                             gdb.setNodeParams(region, agent, pluginId, configMap);
 
+                            logger.error("Register Update: region:" + region + " agent:" + agent + " plugin:" + pluginId);
+
+                            for (Map.Entry<String, String> entry : configMap.entrySet())
+                            {
+                                logger.error("Register Update Key/Value " + entry.getKey() + "/" + entry.getValue());
+                                //System.out.println(entry.getKey() + "/" + entry.getValue());
+                                //gdb.addNode(region, agent,plugin);
+                                //gdb.setNodeParams(region,agent,plugin, de.getParams());
+                            }
+
                             /*
                             for (Map.Entry<String, String> entry : configMap.entrySet())
                             {
@@ -1065,6 +1075,16 @@ public class DBInterface {
                             String subpluginId = configMap.get("pluginid");
                             gdb.addNode(region, agent, subpluginId);
                             gdb.setNodeParams(region, agent, subpluginId, configMap);
+
+                            logger.error("WatchDog Update: region:" + region + " agent:" + agent + " plugin:" + subpluginId);
+
+                            for (Map.Entry<String, String> entry : configMap.entrySet())
+                            {
+                                logger.error("WatchDog Update Key/Value " + entry.getKey() + "/" + entry.getValue());
+                                //System.out.println(entry.getKey() + "/" + entry.getValue());
+                                //gdb.addNode(region, agent,plugin);
+                                //gdb.setNodeParams(region,agent,plugin, de.getParams());
+                            }
 
                             /*
                             for (Map.Entry<String, String> entry : configMap.entrySet())
