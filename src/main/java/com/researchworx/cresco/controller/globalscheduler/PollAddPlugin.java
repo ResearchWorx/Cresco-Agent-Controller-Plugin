@@ -48,9 +48,32 @@ public class PollAddPlugin implements Runnable {
 				MsgEvent re = plugin.sendRPC(me);
                 //addIsAttachedEdge(String resource_id, String inode_id, String region, String agent, String plugin)
 				if(re != null) {
+
                     String pluginId = re.getParam("plugin");
                     //configparams
+                    String status_code_plugin = re.getParam("status_code");
+                    logger.error("status_code: " + status_code_plugin);
 
+                    String status_code = plugin.getGDB().gdb.getNodeParam(region,agent,pluginId,"status_code");
+                    if(status_code != null) {
+                        logger.error("status_code_db = " +status_code);
+                    }
+
+                    String resource_node_id = plugin.getGDB().dba.getResourceNodeId(resource_id);
+                    String inode_node_id = plugin.getGDB().dba.getINodeNodeId(inode_id);
+                    String plugin_node_id = plugin.getGDB().gdb.getNodeId(region,agent,pluginId);
+
+                    if((resource_node_id != null) && (inode_node_id != null) && (plugin_node_id != null)) {
+                        edge_id = plugin.getGDB().dba.getResourceEdgeId(resource_id, inode_id, region, agent, pluginId);
+                        if(edge_id == null)
+                        {
+                            edge_id = plugin.getGDB().dba.addIsAttachedEdge(resource_id, inode_id, region, agent, pluginId);
+                            logger.debug("PollAddPlugin edge addIsAttachedEdge resource_node_id " + resource_id + " inode_id " + inode_id + "  Node" + region + " " + agent + " " + plugin + " = " + plugin_node_id);
+                        }
+
+                    }
+
+                    /*
                     String resource_node_id = plugin.getGDB().dba.getResourceNodeId(resource_id);
                     String inode_node_id = plugin.getGDB().dba.getINodeNodeId(inode_id);
                     String plugin_node_id = plugin.getGDB().gdb.getNodeId(region,agent,pluginId);
@@ -70,7 +93,7 @@ public class PollAddPlugin implements Runnable {
                         }
 
                     }
-
+                    */
                 }
 				logger.info("PollAddPlugin: Return message: " + re.getParams());
 
