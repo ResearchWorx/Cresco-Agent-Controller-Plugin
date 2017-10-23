@@ -953,6 +953,8 @@ public class DBInterface {
             String nodeId = gdb.getNodeId(region,agent,plugin);
             if(nodeId == null) {
                 nodeId = gdb.addNode(region, agent,plugin);
+                //todo remove
+                logger.info("ADDNODE : " + de.getParams());
             }
 
             gdb.setNodeParams(region,agent,plugin, de.getParams());
@@ -972,6 +974,8 @@ public class DBInterface {
 
                         for (Map<String, String> configMap : configMapList) {
                             String pluginId = configMap.get("pluginid");
+                            //todo remove
+                            logger.info("ADDNODE PLUGIN: " + de.getParams());
                             gdb.addNode(region, agent, pluginId);
                             gdb.setNodeParams(region, agent, pluginId, configMap);
 
@@ -1143,7 +1147,8 @@ public class DBInterface {
 
                         for (Map<String, String> configMap : configMapList) {
                             String subpluginId = configMap.get("pluginid");
-
+                            //todo watchdog remove
+                            logger.info("ADDNODE WATCHDOG PLUGIN: " + de.getParams());
                             gdb.addNode(region, agent, subpluginId);
                             gdb.setNodeParams(region, agent, subpluginId, configMap);
 
