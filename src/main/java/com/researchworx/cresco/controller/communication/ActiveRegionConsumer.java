@@ -55,8 +55,6 @@ public class ActiveRegionConsumer implements Runnable {
 			this.plugin.setConsumerThreadRegionActive(true);
 			MessageConsumer consumer = sess.createConsumer(RXqueue);
 			while (this.plugin.isConsumerThreadRegionActive()) {
-				//todo remove delay
-				//TextMessage msg = (TextMessage) consumer.receive(100);
 				TextMessage msg = (TextMessage) consumer.receive();
 				if (msg != null) {
 

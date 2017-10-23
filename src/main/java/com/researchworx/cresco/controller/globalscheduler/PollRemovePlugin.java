@@ -44,8 +44,7 @@ public class PollRemovePlugin implements Runnable {
 
                     if (pnode_node_id.equals(pnode_node_id_match)) {
                         MsgEvent me = removePlugin(region, agent, pluginId);
-                        //todo made this change
-                        //plugin.msgIn(me);
+
                         MsgEvent re = plugin.sendRPC(me);
 
                         if(re != null) {

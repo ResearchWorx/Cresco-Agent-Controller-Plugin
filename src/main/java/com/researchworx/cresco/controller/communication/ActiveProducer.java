@@ -106,8 +106,6 @@ public class ActiveProducer {
                     if (isInProcess) {
                         while (isInProcess) {
                             logger.debug("ActiveProducerWorker waiting for " + dstPath);
-                            //todo remove delay?
-                            //Thread.sleep(100);
                             synchronized (producerWorkersInProcess) {
                                 isInProcess = producerWorkersInProcess.containsKey(dstPath);
                             }

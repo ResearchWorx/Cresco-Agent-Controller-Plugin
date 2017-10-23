@@ -418,12 +418,6 @@ public class Launcher extends CPlugin {
                     this.region = cRegion;
                     logger.info("Assigned regionid=" + this.region);
                     this.agentpath = this.region + "_" + this.agent;
-                    //todo this is enabled too many places
-                    //certificateManager = new CertificateManager(this, agentpath);
-
-                    //here is where we need to exchange certs
-
-
                     logger.debug("AgentPath=" + this.agentpath);
 
                 }

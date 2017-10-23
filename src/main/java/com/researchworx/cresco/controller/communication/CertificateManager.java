@@ -148,15 +148,6 @@ public class CertificateManager {
 
             storeKeyAndCertificateChain(alias, keyStorePassword, topPrivateKey, certChain);
 
-            //todo remove
-            //keyStore.setCertificateEntry(alias,cert);
-            //trustStore.setCertificateEntry(alias,cert);
-
-            //keyStore.setKeyEntry(alias, topPrivateKey, keyStorePassword, certs);
-            //trustStore.setKeyEntry(alias, topPrivateKey, keyStorePassword, certs);
-
-
-
 
         } catch(Exception ex) {
             logger.error("getCertificate : error " + ex.getMessage());

@@ -3889,9 +3889,7 @@ public class DBApplicationFunctions {
             //create node if not seen.. this needs to be changed.
             if(plugin_node_id != null) {
                 //plugin_node_id = plugin.getGDB().gdb.addNode(region,agent,pluginId);
-                //todo remove
-                logger.info("updateKPI : Added Node" + region + " " + agent + " " + pluginId + " = " + plugin_node_id);
-                logger.debug("updateKPI : Added Node" + region + " " + agent + " " + pluginId + " = " + plugin_node_id);
+                //logger.debug("updateKPI : Added Node" + region + " " + agent + " " + pluginId + " = " + plugin_node_id);
 
 
                 if ((resource_node_id != null) && (inode_node_id != null) && (plugin_node_id != null)) {

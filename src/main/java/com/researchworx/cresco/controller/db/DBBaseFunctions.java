@@ -614,8 +614,6 @@ public class DBBaseFunctions {
         return paramsVal;
     }
 
-    //todo put is reachable code here
-
     //WRITES
 
     private String IaddNode(String region, String agent, String plugin) {
@@ -1598,7 +1596,6 @@ public class DBBaseFunctions {
                 createdDb = true;
             }
 
-            //todo FIX IMPORT
             DBImport dbImport = new DBImport(plugin, is, this,db);
             isImported = dbImport.importDump();
             if(createdDb) {

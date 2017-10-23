@@ -138,8 +138,8 @@ public class RegionalCommandExec {
 
                 logger.debug("WATCHDOG : Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
                 logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
-                //plugin.getGDB().watchDogUpdate(le);
-                regionalDiscovery.discover(le);
+                plugin.getGDB().watchDogUpdate(le);
+                //regionalDiscovery.discover(le);
                 if((le.getParam("pluginconfigs") != null) && (!plugin.isGlobalController())) {
                     globalSend(le);
                 }
