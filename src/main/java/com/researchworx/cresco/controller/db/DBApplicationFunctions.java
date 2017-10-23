@@ -3887,55 +3887,47 @@ public class DBApplicationFunctions {
             String plugin_node_id = plugin.getGDB().gdb.getNodeId(region,agent,pluginId);
 
             //create node if not seen.. this needs to be changed.
-            if(plugin_node_id == null) {
-                plugin_node_id = plugin.getGDB().gdb.addNode(region,agent,pluginId);
+            if(plugin_node_id != null) {
+                //plugin_node_id = plugin.getGDB().gdb.addNode(region,agent,pluginId);
                 //todo remove
                 logger.info("updateKPI : Added Node" + region + " " + agent + " " + pluginId + " = " + plugin_node_id);
                 logger.debug("updateKPI : Added Node" + region + " " + agent + " " + pluginId + " = " + plugin_node_id);
-            }
 
-            if((resource_node_id != null) && (inode_node_id != null) && (plugin_node_id != null))
-            {
-                //logger.debug("updateKPI resource_node_id " + resource_id + " inode_id " + inode_id + "  Node" + region + " " + agent + " " + plugin + " = " + plugin_node_id);
-                //check if edge is found, if not create it
-                edge_id = getResourceEdgeId(resource_id, inode_id, region, agent, pluginId);
-                if(edge_id == null)
-                {
 
-                    edge_id = addIsAttachedEdge(resource_id, inode_id, region, agent, pluginId);
-                    logger.debug("updateKPI edge addIsAttachedEdge resource_node_id " + resource_id + " inode_id " + inode_id + "  Node" + region + " " + agent + " " + plugin + " = " + plugin_node_id);
-
-                }
-                //edge_id = getResourceEdgeId(resource_id, inode_id, region, agent);
-
-                //check again if edge is found
-                if(edge_id != null)
-                {
-                    logger.debug("updateKPI edge found resource_node_id " + resource_id + " inode_id " + inode_id + "  Node" + region + " " + agent + " " + plugin + " = " + plugin_node_id);
-
+                if ((resource_node_id != null) && (inode_node_id != null) && (plugin_node_id != null)) {
+                    //logger.debug("updateKPI resource_node_id " + resource_id + " inode_id " + inode_id + "  Node" + region + " " + agent + " " + plugin + " = " + plugin_node_id);
+                    //check if edge is found, if not create it
                     edge_id = getResourceEdgeId(resource_id, inode_id, region, agent, pluginId);
+                    if (edge_id == null) {
 
-                    //if(updateEdge(edge_id, params))
-                    if(updateEdgeNoTx(edge_id, params))
-                    {
-                        isUpdated = true;
-                    }
-                    else
-                    {
-                        logger.error("Failed to updatePerf : Failed to update Edge params!");
-                    }
-                }
-                else
-                {
-                    logger.error("Failed to updatePerf : edge_id not found!");
-                }
-            }
-            else
-            {
-                logger.debug("Can't update missing nodes : " + resource_id + "," + inode_id + "," + pluginId);
-                logger.debug("Can't update missing nodes : " + resource_node_id + "," + inode_node_id + "," + plugin_node_id);
-            }
+                        edge_id = addIsAttachedEdge(resource_id, inode_id, region, agent, pluginId);
+                        logger.debug("updateKPI edge addIsAttachedEdge resource_node_id " + resource_id + " inode_id " + inode_id + "  Node" + region + " " + agent + " " + plugin + " = " + plugin_node_id);
 
+                    }
+                    //edge_id = getResourceEdgeId(resource_id, inode_id, region, agent);
+
+                    //check again if edge is found
+                    if (edge_id != null) {
+                        logger.debug("updateKPI edge found resource_node_id " + resource_id + " inode_id " + inode_id + "  Node" + region + " " + agent + " " + plugin + " = " + plugin_node_id);
+
+                        edge_id = getResourceEdgeId(resource_id, inode_id, region, agent, pluginId);
+
+                        //if(updateEdge(edge_id, params))
+                        if (updateEdgeNoTx(edge_id, params)) {
+                            isUpdated = true;
+                        } else {
+                            logger.error("Failed to updatePerf : Failed to update Edge params!");
+                        }
+                    } else {
+                        logger.error("Failed to updatePerf : edge_id not found!");
+                    }
+                } else {
+                    logger.debug("Can't update missing nodes : " + resource_id + "," + inode_id + "," + pluginId);
+                    logger.debug("Can't update missing nodes : " + resource_node_id + "," + inode_node_id + "," + plugin_node_id);
+                }
+            } else {
+                logger.debug("Can't update plugin with no agent : " + resource_id + "," + inode_id + "," + region + "," + agent);
+            }
         }
         catch(Exception ex)
         {
