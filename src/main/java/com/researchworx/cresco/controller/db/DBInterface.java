@@ -1141,9 +1141,20 @@ public class DBInterface {
                                 new com.google.common.reflect.TypeToken<List<Map<String, String>>>() {
                                 }.getType());
 
+                        //build a list of plugins on record for an agent
+                        List<String> pluginRemoveList = gdb.getNodeList(region,agent,null);
+
                         for (Map<String, String> configMap : configMapList) {
                             String subpluginId = configMap.get("pluginid");
-                            gdb.addNode(region, agent, subpluginId);
+
+                            //remove plugin from remove list of new config exist
+                            if(pluginRemoveList.contains(subpluginId)) {
+                                pluginRemoveList.remove(subpluginId);
+                            }
+
+                            if(gdb.getNodeId(region,agent,subpluginId) == null) {
+                                gdb.addNode(region, agent, subpluginId);
+                            }
                             gdb.setNodeParams(region, agent, subpluginId, configMap);
 
                             /*
@@ -1155,6 +1166,13 @@ public class DBInterface {
                             }
                             */
 
+                        }
+
+                        //remove nodes on the pluginRemoveList, they are no longer on the agent
+                        for(String removePlugin : pluginRemoveList) {
+                            if(!gdb.removeNode(region,agent, removePlugin)) {
+                                logger.error("watchDogUpdate Error : Could not remove plugin region:" + region + " agent:" + agent + " plugin:" + removePlugin);
+                            }
                         }
                     }
                 }
