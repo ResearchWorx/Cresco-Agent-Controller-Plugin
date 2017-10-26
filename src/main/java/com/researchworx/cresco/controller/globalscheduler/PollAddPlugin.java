@@ -52,7 +52,7 @@ public class PollAddPlugin implements Runnable {
                     String pluginId = re.getParam("plugin");
                     //configparams
                     String status_code_plugin = re.getParam("status_code");
-                    logger.error("status_code: " + status_code_plugin);
+                    //logger.error("status_code: " + status_code_plugin);
 
                     String status_code = plugin.getGDB().gdb.getNodeParam(region,agent,pluginId,"status_code");
                     if(status_code != null) {
