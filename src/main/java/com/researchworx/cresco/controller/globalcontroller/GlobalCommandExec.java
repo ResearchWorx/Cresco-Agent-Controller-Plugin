@@ -675,7 +675,7 @@ public class GlobalCommandExec {
                 if(pipelineId != null) {
                     String pipelinString = plugin.getGDB().dba.getPipeline(pipelineId);
                     if(pipelinString != null) {
-                        logger.error("removePipelineExecutor.execute(new PollRemovePipeline(plugin, pipelineId));");
+                        logger.trace("removePipelineExecutor.execute(new PollRemovePipeline(plugin, pipelineId));");
                         removePipelineExecutor.execute(new PollRemovePipeline(plugin, pipelineId));
                                 /*
                                 List<String> iNodeList = plugin.getGDB().dba.getresourceNodeList(pipelineId,null);
