@@ -65,7 +65,7 @@ public class PollRemovePipeline implements Runnable {
                             }
 						}
                     //start watch loop
-                        logger.error("PollRemovePipeline : Start Listen loop");
+                        //logger.error("PollRemovePipeline : Start Listen loop");
                         List<gNode> errorList = new ArrayList<>();
                         boolean isScheduling = true;
                         while(isScheduling)
