@@ -359,6 +359,7 @@ public class GlobalCommandExec {
                     Gson gson = new Gson();
                     String pNodeMapString = gson.toJson(nodeMap);
                     ce.setCompressedParam("pnode",pNodeMapString);
+
                 }
                 else
                 {
