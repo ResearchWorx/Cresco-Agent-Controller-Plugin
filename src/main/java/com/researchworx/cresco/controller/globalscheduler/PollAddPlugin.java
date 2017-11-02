@@ -60,9 +60,10 @@ public class PollAddPlugin implements Runnable {
                     }
 //public boolean updateKPI(String region, String agent, String pluginId, String resource_id, String inode_id, Map<String,String> params) {
                     Map<String,String> params = new HashMap<>();
-                    params.put("region",region);
-                    params.put("agent", agent);
-                    params.put("plugin", pluginId);
+                    //params.put("region",region);
+                    //params.put("agent", agent);
+                    //params.put("plugin", pluginId);
+                    params.put("init", String.valueOf(System.currentTimeMillis()));
                     plugin.getGDB().dba.updateKPI(region,agent,pluginId,resource_id,inode_id,params);
 
                     /*
