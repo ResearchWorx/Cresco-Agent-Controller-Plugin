@@ -1,6 +1,7 @@
 package com.researchworx.cresco.controller.globalcontroller;
 
 
+import com.google.gson.Gson;
 import com.researchworx.cresco.controller.app.gPayload;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.controller.globalscheduler.PollRemovePipeline;
@@ -353,6 +354,11 @@ public class GlobalCommandExec {
                 {
                     ce.setParam("status_code",status_code);
                     ce.setParam("status_desc",status_desc);
+
+                    Map<String,String> nodeMap = plugin.getGDB().dba.getpNodeINode(ce.getParam("inode_id"));
+                    Gson gson = new Gson();
+                    String pNodeMapString = gson.toJson(nodeMap);
+                    ce.setCompressedParam("pnode",pNodeMapString);
                 }
                 else
                 {
