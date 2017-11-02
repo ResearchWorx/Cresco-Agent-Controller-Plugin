@@ -58,6 +58,14 @@ public class PollAddPlugin implements Runnable {
                     if(status_code != null) {
                         logger.error("status_code_db = " +status_code);
                     }
+//public boolean updateKPI(String region, String agent, String pluginId, String resource_id, String inode_id, Map<String,String> params) {
+                    Map<String,String> params = new HashMap<>();
+                    params.put("region",region);
+                    params.put("agent", agent);
+                    params.put("plugin", pluginId);
+                    plugin.getGDB().dba.updateKPI(region,agent,pluginId,resource_id,inode_id,params);
+
+                    /*
 
                     String resource_node_id = plugin.getGDB().dba.getResourceNodeId(resource_id);
                     String inode_node_id = plugin.getGDB().dba.getINodeNodeId(inode_id);
@@ -73,6 +81,10 @@ public class PollAddPlugin implements Runnable {
                         {
                             logger.info("Adding Edge ID");
                             edge_id = plugin.getGDB().dba.addIsAttachedEdge(resource_id, inode_id, region, agent, pluginId);
+                            Map<String,String> params = new HashMap<>();
+                            plugin.getGDB().dba.updateEdgeNoTx(edge_id, params);
+
+
                             logger.info("Edge ID ADD: " + edge_id);
                             logger.debug("PollAddPlugin edge addIsAttachedEdge resource_node_id " + resource_id + " inode_id " + inode_id + "  Node" + region + " " + agent + " " + plugin + " = " + plugin_node_id);
                         } else {
@@ -80,7 +92,7 @@ public class PollAddPlugin implements Runnable {
                         }
 
                     }
-
+                    */
                     /*
                     String resource_node_id = plugin.getGDB().dba.getResourceNodeId(resource_id);
                     String inode_node_id = plugin.getGDB().dba.getINodeNodeId(inode_id);
