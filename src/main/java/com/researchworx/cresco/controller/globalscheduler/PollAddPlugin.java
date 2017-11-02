@@ -63,12 +63,20 @@ public class PollAddPlugin implements Runnable {
                     String inode_node_id = plugin.getGDB().dba.getINodeNodeId(inode_id);
                     String plugin_node_id = plugin.getGDB().gdb.getNodeId(region,agent,pluginId);
 
+                    logger.info("RESOURCE: resource_node_id:" + resource_node_id + " resource_id:" + resource_id);
+                    logger.info("INODE: inode_node_id:" + inode_node_id + " inode_id:" + inode_id);
+                    logger.info("AGENT: region:" + region + " agent:" + agent + " pluginId:" + pluginId + " pnodeid:" + plugin_node_id);
+
                     if((resource_node_id != null) && (inode_node_id != null) && (plugin_node_id != null)) {
                         edge_id = plugin.getGDB().dba.getResourceEdgeId(resource_id, inode_id, region, agent, pluginId);
                         if(edge_id == null)
                         {
+                            logger.info("Adding Edge ID");
                             edge_id = plugin.getGDB().dba.addIsAttachedEdge(resource_id, inode_id, region, agent, pluginId);
+                            logger.info("Edge ID ADD: " + edge_id);
                             logger.debug("PollAddPlugin edge addIsAttachedEdge resource_node_id " + resource_id + " inode_id " + inode_id + "  Node" + region + " " + agent + " " + plugin + " = " + plugin_node_id);
+                        } else {
+                            logger.info("Edge ID ELSE: " + edge_id);
                         }
 
                     }
