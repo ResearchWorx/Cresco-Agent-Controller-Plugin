@@ -743,6 +743,8 @@ public class GlobalCommandExec {
                 gPayload gpay = plugin.getGDB().dba.createPipelineRecord(tenantID, pipelineJSON);
                 //String returnGpipeline = plugin.getGDB().dba.JsonFromgPayLoad(gpay);
                 ce.setParam("gpipeline_id",gpay.pipeline_id);
+            } else {
+                ce.setParam("error","missing data in submission");
             }
         }
         catch(Exception ex) {

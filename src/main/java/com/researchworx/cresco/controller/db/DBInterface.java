@@ -615,7 +615,7 @@ public class DBInterface {
                     //String status_code = plugin.getGDB().dba.getINodeParam(inodeid,"status_code");
                     //String status_desc = plugin.getGDB().dba.getINodeParam(inodeid,"status_desc");
                     //gpay.nodes.get(i).params.put("inode_id",inodeid);
-                    logger.error("iNODE: " + gpay.nodes.get(i).node_id);
+                    //logger.error("iNODE: " + gpay.nodes.get(i).node_id);
                     String inodeNodeid = dba.getINodeNodeId(gpay.nodes.get(i).node_id);
                     Map<String,String> inodeParams = plugin.getGDB().gdb.getNodeParamsNoTx(inodeNodeid);
 
