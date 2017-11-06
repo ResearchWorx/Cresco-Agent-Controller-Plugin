@@ -488,7 +488,9 @@ public class DBBaseFunctions {
         }
         catch(Exception ex)
         {
-            logger.debug("IgetNodeParam: Error " + ex.toString());
+            //todo change back to debug
+            //logger.debug("IgetNodeParam: Error " + ex.toString());
+            logger.error("IgetNodeParam: Error " + ex.toString());
         }
         finally
         {
