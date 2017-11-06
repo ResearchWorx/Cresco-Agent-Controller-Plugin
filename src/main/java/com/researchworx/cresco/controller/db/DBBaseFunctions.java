@@ -486,6 +486,11 @@ public class DBBaseFunctions {
             node_param = iNode.getProperty(param).toString();
 
         }
+        catch(java.lang.IllegalArgumentException eai) {
+            //Vertex id can not be null
+            //there is no node
+            node_param = "-1";
+        }
         catch(Exception ex)
         {
             //todo change back to debug
