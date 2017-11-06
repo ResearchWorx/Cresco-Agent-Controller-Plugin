@@ -49,13 +49,26 @@ public class PollAddPlugin implements Runnable {
 				MsgEvent re = plugin.sendRPC(me);
 				logger.info("PollAddPlugin: Return message: " + re.getParams());
 
-				//configparams
-				String status_code_plugin = re.getParam("status_code");
-				//logger.error("status_code: " + status_code_plugin);
-
-				logger.info("PollAddPlugin: 1");
-
+				//info returned from agent
 				String pluginId = re.getParam("plugin");
+				String status_code_plugin = re.getParam("status_code");
+				String status_desc_plugin = re.getParam("status_desc");
+
+				while((edge_id == null) && (count < 300))
+				{
+					logger.info("inode_id: " + inode_id + " edge_id:" + edge_id);
+					edge_id = plugin.getGDB().dba.getResourceEdgeId(resource_id,inode_id);
+					Thread.sleep(1000);
+					count++;
+
+					Map<String,String> ihm = plugin.getGDB().gdb.getNodeParams(inode_id);
+					logger.error("inode params: " + ihm.toString());
+
+				}
+
+
+				/*
+
 
 				Map<String,String> ihm = plugin.getGDB().gdb.getNodeParams(inode_id);
 				logger.error("inode params: " + ihm.toString());
@@ -68,6 +81,8 @@ public class PollAddPlugin implements Runnable {
 				String edge_id2 = plugin.getGDB().dba.getResourceEdgeId(resource_id,inode_id);
 				logger.info("Edgeid: " + edge_id2);
 
+				*/
+
 				/*
 				if(status_code.equals("-1")) {
 					logger.error("status_code_db = " +status_code);
@@ -75,7 +90,9 @@ public class PollAddPlugin implements Runnable {
 				*/
 
 				//addIsAttachedEdge(String resource_id, String inode_id, String region, String agent, String plugin)
+				/*
 				if(re != null) {
+
 
 
 					logger.info("PollAddPlugin: Pre-inode: " + inode_id + " update");
@@ -88,57 +105,12 @@ public class PollAddPlugin implements Runnable {
                     plugin.getGDB().dba.updateKPI(region,agent,pluginId,resource_id,inode_id,params);
 					logger.info("PollAddPlugin: Post-inode: " + inode_id + " update");
 
-					/*
 
-                    String resource_node_id = plugin.getGDB().dba.getResourceNodeId(resource_id);
-                    String inode_node_id = plugin.getGDB().dba.getINodeNodeId(inode_id);
-                    String plugin_node_id = plugin.getGDB().gdb.getNodeId(region,agent,pluginId);
-
-                    logger.info("RESOURCE: resource_node_id:" + resource_node_id + " resource_id:" + resource_id);
-                    logger.info("INODE: inode_node_id:" + inode_node_id + " inode_id:" + inode_id);
-                    logger.info("AGENT: region:" + region + " agent:" + agent + " pluginId:" + pluginId + " pnodeid:" + plugin_node_id);
-
-                    if((resource_node_id != null) && (inode_node_id != null) && (plugin_node_id != null)) {
-                        edge_id = plugin.getGDB().dba.getResourceEdgeId(resource_id, inode_id, region, agent, pluginId);
-                        if(edge_id == null)
-                        {
-                            logger.info("Adding Edge ID");
-                            edge_id = plugin.getGDB().dba.addIsAttachedEdge(resource_id, inode_id, region, agent, pluginId);
-                            Map<String,String> params = new HashMap<>();
-                            plugin.getGDB().dba.updateEdgeNoTx(edge_id, params);
-
-
-                            logger.info("Edge ID ADD: " + edge_id);
-                            logger.debug("PollAddPlugin edge addIsAttachedEdge resource_node_id " + resource_id + " inode_id " + inode_id + "  Node" + region + " " + agent + " " + plugin + " = " + plugin_node_id);
-                        } else {
-                            logger.info("Edge ID ELSE: " + edge_id);
-                        }
-
-                    }
-                    */
-                    /*
-                    String resource_node_id = plugin.getGDB().dba.getResourceNodeId(resource_id);
-                    String inode_node_id = plugin.getGDB().dba.getINodeNodeId(inode_id);
-                    String plugin_node_id = plugin.getGDB().gdb.getNodeId(region,agent,pluginId);
-
-                    //create node if not seen.. this needs to be changed.
-                    if(plugin_node_id == null) {
-                        plugin_node_id = plugin.getGDB().gdb.addNode(region,agent,pluginId);
-                        logger.debug("PollAddPlugin : Added Node" + region + " " + agent + " " + pluginId + " = " + plugin_node_id);
-                    }
-
-                    if((resource_node_id != null) && (inode_node_id != null) && (plugin_node_id != null)) {
-                        edge_id = plugin.getGDB().dba.getResourceEdgeId(resource_id, inode_id, region, agent, pluginId);
-                        if(edge_id == null)
-                        {
-                            edge_id = plugin.getGDB().dba.addIsAttachedEdge(resource_id, inode_id, region, agent, pluginId);
-                            logger.debug("PollAddPlugin edge addIsAttachedEdge resource_node_id " + resource_id + " inode_id " + inode_id + "  Node" + region + " " + agent + " " + plugin + " = " + plugin_node_id);
-                        }
-
-                    }
-                    */
                 }
 
+                */
+
+                /*
 				while((edge_id == null) && (count < 300))
 	        	{
 	        		logger.info("inode_id: " + inode_id + " edge_id:" + edge_id);
@@ -161,6 +133,7 @@ public class PollAddPlugin implements Runnable {
                     plugin.getGDB().dba.setINodeParam(inode_id,"status_desc","iNode Failed Scheduling.");
 
                 }
+                */
 
 	        }
 		   catch(Exception ex)
