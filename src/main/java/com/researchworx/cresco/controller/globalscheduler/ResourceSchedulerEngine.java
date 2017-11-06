@@ -2,6 +2,8 @@ package com.researchworx.cresco.controller.globalscheduler;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.controller.globalcontroller.GlobalHealthWatcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
@@ -12,6 +14,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Type;
 import java.math.BigInteger;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
@@ -37,9 +40,10 @@ public class ResourceSchedulerEngine implements Runnable {
     public Cache<String, String> jarStringCache;
     public Cache<String, String> jarHashCache;
     public Cache<String, String> jarTimeCache;
-
+    private Gson gson;
 
     public ResourceSchedulerEngine(Launcher plugin, GlobalHealthWatcher ghw) {
+        gson = new Gson();
 		this.plugin = plugin;
 		this.ghw = ghw;
         logger = new CLogger(ResourceSchedulerEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
@@ -219,10 +223,14 @@ public class ResourceSchedulerEngine implements Runnable {
 	    String returnPluginfile = null;
 	    //boolean isVerified = false;
 		//pre-schedule check
-		String configparams = ce.getParam("configparams");
-		logger.debug("verifyPlugin params " + configparams);
+		//String configparams = ce.getParam("configparams");
 
-        Map<String,String> params = getMapFromString(configparams, false);
+
+		//logger.debug("verifyPlugin params " + configparams);
+        Type type = new TypeToken<Map<String, String>>(){}.getType();
+        Map<String, String> params = gson.fromJson(ce.getCompressedParam("configparams"), type);
+
+        //Map<String,String> params = getMapFromString(configparams, false);
 
         logger.debug("config params: " + params.toString());
 
