@@ -25,7 +25,7 @@ public class PollAddPlugin implements Runnable {
 
 	public PollAddPlugin(Launcher plugin, String resource_id, String inode_id, String region, String agent, MsgEvent me)
 	{
-        this.logger = new CLogger(PollAddPlugin.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+        this.logger = new CLogger(PollAddPlugin.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
 		this.plugin = plugin;
 		this.resource_id = resource_id;
 		this.inode_id = inode_id;
@@ -46,10 +46,13 @@ public class PollAddPlugin implements Runnable {
                 String configParams = me.getParam("configparams");
 				me.setCompressedParam("configparams",configParams);
 				MsgEvent re = plugin.sendRPC(me);
-                //addIsAttachedEdge(String resource_id, String inode_id, String region, String agent, String plugin)
-				if(re != null) {
+				logger.info("PollAddPlugin: Return message: " + re.getParams());
 
-                    String pluginId = re.getParam("plugin");
+				//addIsAttachedEdge(String resource_id, String inode_id, String region, String agent, String plugin)
+				if(re != null) {
+					logger.info("PollAddPlugin: RE != null");
+
+					String pluginId = re.getParam("plugin");
                     //configparams
                     String status_code_plugin = re.getParam("status_code");
                     //logger.error("status_code: " + status_code_plugin);
@@ -58,6 +61,8 @@ public class PollAddPlugin implements Runnable {
                     if(status_code != null) {
                         logger.error("status_code_db = " +status_code);
                     }
+
+					logger.info("PollAddPlugin: Pre-inode: " + inode_id + " update");
 //public boolean updateKPI(String region, String agent, String pluginId, String resource_id, String inode_id, Map<String,String> params) {
                     Map<String,String> params = new HashMap<>();
                     //params.put("region",region);
@@ -65,7 +70,7 @@ public class PollAddPlugin implements Runnable {
                     //params.put("plugin", pluginId);
                     params.put("init", String.valueOf(System.currentTimeMillis()));
                     plugin.getGDB().dba.updateKPI(region,agent,pluginId,resource_id,inode_id,params);
-
+					logger.info("PollAddPlugin: Post-inode: " + inode_id + " update");
                     /*
 
                     String resource_node_id = plugin.getGDB().dba.getResourceNodeId(resource_id);
@@ -116,11 +121,10 @@ public class PollAddPlugin implements Runnable {
                     }
                     */
                 }
-				logger.info("PollAddPlugin: Return message: " + re.getParams());
 
 				while((edge_id == null) && (count < 300))
 	        	{
-	        		logger.trace("inode_id: " + inode_id + " edge_id:" + edge_id);
+	        		logger.info("inode_id: " + inode_id + " edge_id:" + edge_id);
 	        	    edge_id = plugin.getGDB().dba.getResourceEdgeId(resource_id,inode_id);
                     Thread.sleep(1000);
                     count++;
