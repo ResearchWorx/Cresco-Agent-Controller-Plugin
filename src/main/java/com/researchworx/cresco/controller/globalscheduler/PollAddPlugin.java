@@ -65,6 +65,9 @@ public class PollAddPlugin implements Runnable {
 				//logger.info();
 				logger.info("PollAddPlugin: Agent-Code: " + status_code_plugin + " DB-code:" + status_code);
 
+				String edge_id2 = plugin.getGDB().dba.getResourceEdgeId(resource_id,inode_id);
+				logger.info("Edgeid: " + edge_id2);
+
 				/*
 				if(status_code.equals("-1")) {
 					logger.error("status_code_db = " +status_code);
