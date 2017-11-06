@@ -1,6 +1,7 @@
 package com.researchworx.cresco.controller.globalscheduler;
 
 
+import com.google.gson.Gson;
 import com.researchworx.cresco.controller.app.gNode;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
@@ -16,6 +17,7 @@ public class PollAddPipeline implements Runnable {
 	private CLogger logger;
     List<gNode> pipelineNodes;
     String pipelineId;
+    private Gson gson;
 
 	public PollAddPipeline(Launcher plugin, List<gNode> assignedNodes, String pipelineId)
 	{
@@ -24,6 +26,7 @@ public class PollAddPipeline implements Runnable {
 		//this.assignedNodes = assignedNodes;
 		this.pipelineId = pipelineId;
         pipelineNodes = new ArrayList<>(assignedNodes);
+        gson = new Gson();
 	}
 	 public void run() {
 	        try 
@@ -41,6 +44,8 @@ public class PollAddPipeline implements Runnable {
                     gnode.params.remove("location_region");
                     gnode.params.remove("location_agent");
 
+
+                    /*
                     StringBuilder configparms = new StringBuilder();
                     for (Map.Entry<String, String> entry : gnode.params.entrySet())
                     {
@@ -50,7 +55,9 @@ public class PollAddPipeline implements Runnable {
                     if(configparms.length() > 0) {
                         configparms.deleteCharAt(configparms.length() -1);
                     }
-                    me.setParam("configparams", configparms.toString());
+                    */
+
+                    me.setCompressedParam("configparams",gson.toJson(gnode.params));
                     //me.setParam("configparams", configparms.toString());
                     logger.debug("Message [" + me.getParams().toString() + "]");
                     plugin.getGDB().dba.setINodeParam(gnode.node_id,"status_code","4");

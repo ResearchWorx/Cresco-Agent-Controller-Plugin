@@ -1,6 +1,7 @@
 package com.researchworx.cresco.controller.globalscheduler;
 
 
+import com.google.gson.reflect.TypeToken;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.core.WatchDog;
 import com.researchworx.cresco.library.messaging.MsgEvent;
@@ -9,6 +10,7 @@ import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Type;
 import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,18 +42,32 @@ public class PollAddPlugin implements Runnable {
 	        {
                 int count = 0;
 	        	String edge_id = null;
-
-	        	//send message here
+				//send message here
 				logger.info("PollAddPlugin: Sending message: " + me.getParams());
-                String configParams = me.getParam("configparams");
-				me.setCompressedParam("configparams",configParams);
+                //String configParams = me.getParam("configparams");
+				//me.setCompressedParam("configparams",configParams);
 				MsgEvent re = plugin.sendRPC(me);
 				logger.info("PollAddPlugin: Return message: " + re.getParams());
+
+				//configparams
+				String status_code_plugin = re.getParam("status_code");
+				//logger.error("status_code: " + status_code_plugin);
+
+				logger.info("PollAddPlugin: 1");
+
+				String pluginId = re.getParam("plugin");
+
+				String status_code = plugin.getGDB().gdb.getNodeParam(region,agent,pluginId,"status_code");
+				//logger.info();
+				logger.info("PollAddPlugin: Agent-Code: " + status_code_plugin + " DB-code:" + status_code);
+
+				if(status_code.equals("-1")) {
+					logger.error("status_code_db = " +status_code);
+				}
 
 				//addIsAttachedEdge(String resource_id, String inode_id, String region, String agent, String plugin)
 				if(re != null) {
 
-					String pluginId = re.getParam("plugin");
 
 					logger.info("PollAddPlugin: Pre-inode: " + inode_id + " update");
 //public boolean updateKPI(String region, String agent, String pluginId, String resource_id, String inode_id, Map<String,String> params) {
@@ -62,21 +78,6 @@ public class PollAddPlugin implements Runnable {
                     params.put("init", String.valueOf(System.currentTimeMillis()));
                     plugin.getGDB().dba.updateKPI(region,agent,pluginId,resource_id,inode_id,params);
 					logger.info("PollAddPlugin: Post-inode: " + inode_id + " update");
-
-					//configparams
-					String status_code_plugin = re.getParam("status_code");
-					//logger.error("status_code: " + status_code_plugin);
-
-					logger.info("PollAddPlugin: 1");
-
-					String status_code = plugin.getGDB().gdb.getNodeParam(region,agent,pluginId,"status_code");
-					//logger.info();
-					logger.info("PollAddPlugin: Agent-Code: " + status_code_plugin + " DB-code:" + status_code);
-
-					if(status_code.equals("-1")) {
-						logger.error("status_code_db = " +status_code);
-					}
-
 
 					/*
 

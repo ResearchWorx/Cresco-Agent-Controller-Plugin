@@ -3911,6 +3911,9 @@ public class DBApplicationFunctions {
                         edge_id = getResourceEdgeId(resource_id, inode_id, region, agent, pluginId);
 
                         //if(updateEdge(edge_id, params))
+
+                        logger.error("KPI UPDATE PARAMS: " + params);
+
                         if (updateEdgeNoTx(edge_id, params)) {
                             isUpdated = true;
                         } else {
