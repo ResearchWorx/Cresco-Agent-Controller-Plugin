@@ -37,49 +37,31 @@ public class PollAddPlugin implements Runnable {
 
     }
 	 public void run() {
-         logger.debug("new thread for polladdplugin" );
+         //logger.debug("new thread for polladdplugin" );
          try
 	        {
                 int count = 0;
 	        	String edge_id = null;
 				//send message here
-				logger.info("PollAddPlugin: Sending message: " + me.getParams());
+				//logger.info("PollAddPlugin: Sending message: " + me.getParams());
                 //String configParams = me.getParam("configparams");
 				//me.setCompressedParam("configparams",configParams);
 				MsgEvent re = plugin.sendRPC(me);
-				logger.info("PollAddPlugin: Return message: " + re.getParams());
+				//logger.info("PollAddPlugin: Return message: " + re.getParams());
 
-				//info returned from agent
-				String pluginId = re.getParam("plugin");
-				String status_code_plugin = re.getParam("status_code");
-				String status_desc_plugin = re.getParam("status_desc");
+				if(re != null) {
+					//info returned from agent
+					String pluginId = re.getParam("plugin");
+					plugin.getGDB().dba.addIsAttachedEdge(resource_id, inode_id, region, agent, pluginId);
 
-				logger.info("PollAddPlugin: Pre-inode: " + inode_id + " update");
-				/*
-				Map<String,String> params = new HashMap<>();
-				params.put("init", String.valueOf(System.currentTimeMillis()));
-				plugin.getGDB().dba.updateKPI(region,agent,pluginId,resource_id,inode_id,params);
-				logger.info("PollAddPlugin: Post-inode: " + inode_id + " update");
-				*/
+					String status_code_plugin = re.getParam("status_code");
+					String status_desc_plugin = re.getParam("status_desc");
 
-				plugin.getGDB().dba.setINodeParam(inode_id,"status_code", status_code_plugin);
-				plugin.getGDB().dba.setINodeParam(inode_id,"status_desc", status_desc_plugin);
+					plugin.getGDB().dba.setINodeParam(inode_id, "status_code", status_code_plugin);
+					plugin.getGDB().dba.setINodeParam(inode_id, "status_desc", status_desc_plugin);
 
-				edge_id = plugin.getGDB().dba.addIsAttachedEdge(resource_id,inode_id,region,agent,pluginId);
-
-
-				while((edge_id == null) && (count < 300))
-				{
-					logger.info("inode_id: " + inode_id + " edge_id:" + edge_id);
-					edge_id = plugin.getGDB().dba.getResourceEdgeId(resource_id,inode_id);
-					Thread.sleep(1000);
-					count++;
-
-					Map<String,String> ihm = plugin.getGDB().gdb.getNodeParams(inode_id);
-					logger.error("inode params: " + ihm.toString());
 
 				}
-
 
 				/*
 
