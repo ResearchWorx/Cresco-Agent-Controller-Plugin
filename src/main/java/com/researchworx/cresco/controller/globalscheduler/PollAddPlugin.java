@@ -57,13 +57,19 @@ public class PollAddPlugin implements Runnable {
 
 				String pluginId = re.getParam("plugin");
 
+				Map<String,String> ihm = plugin.getGDB().gdb.getNodeParams(inode_id);
+				logger.error("inode params: " + ihm.toString());
+
+
 				String status_code = plugin.getGDB().gdb.getNodeParam(region,agent,pluginId,"status_code");
 				//logger.info();
 				logger.info("PollAddPlugin: Agent-Code: " + status_code_plugin + " DB-code:" + status_code);
 
+				/*
 				if(status_code.equals("-1")) {
 					logger.error("status_code_db = " +status_code);
 				}
+				*/
 
 				//addIsAttachedEdge(String resource_id, String inode_id, String region, String agent, String plugin)
 				if(re != null) {
