@@ -167,7 +167,7 @@ public class ResourceSchedulerEngine implements Runnable {
                     ex.printStackTrace(pw);
                     logger.error(sw.toString());
 
-                    logger.error("ResourceSchedulerEngine Error: " + ex.toString());
+                    logger.error("ResourceSchedulerEngine run() inner Error: " + ex.toString());
 				}
 			}
 		}
@@ -178,7 +178,7 @@ public class ResourceSchedulerEngine implements Runnable {
             ex.printStackTrace(pw);
             logger.error(sw.toString());
 
-            logger.error("ResourceSchedulerEngine Error: " + ex.toString());
+            logger.error("ResourceSchedulerEngine run () outer Error: " + ex.toString());
 		}
 	}
 
@@ -280,7 +280,12 @@ public class ResourceSchedulerEngine implements Runnable {
 		}
 		catch(Exception ex)
 		{
-			logger.error("ResourceSchedulerEngine : Error " + ex.toString());
+			logger.error("ResourceSchedulerEngine paramStringToMap : Error " + ex.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString());
+
 		}
 		return params;
 	}
@@ -329,6 +334,10 @@ public class ResourceSchedulerEngine implements Runnable {
 		catch(Exception ex)
 		{
 			logger.error("DBEngine : getLowAgent : Error " + ex.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString());
 		}
 		
 		return agent_path;
@@ -636,6 +645,10 @@ public class ResourceSchedulerEngine implements Runnable {
         catch(Exception ex)
         {
             logger.error("getMapFromString Error: " + ex.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString());
         }
 
         return paramMap;
