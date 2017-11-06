@@ -55,10 +55,18 @@ public class PollAddPlugin implements Runnable {
 				String status_desc_plugin = re.getParam("status_desc");
 
 				logger.info("PollAddPlugin: Pre-inode: " + inode_id + " update");
+				/*
 				Map<String,String> params = new HashMap<>();
 				params.put("init", String.valueOf(System.currentTimeMillis()));
 				plugin.getGDB().dba.updateKPI(region,agent,pluginId,resource_id,inode_id,params);
 				logger.info("PollAddPlugin: Post-inode: " + inode_id + " update");
+				*/
+
+				plugin.getGDB().dba.setINodeParam(inode_id,"status_code", status_code_plugin);
+				plugin.getGDB().dba.setINodeParam(inode_id,"status_desc", status_desc_plugin);
+
+				edge_id = plugin.getGDB().dba.addIsAttachedEdge(resource_id,inode_id,region,agent,pluginId);
+
 
 				while((edge_id == null) && (count < 300))
 				{
