@@ -88,7 +88,7 @@ public class PollAddPipeline implements Runnable {
                         }
                     }
 
-                    Thread.sleep(500);
+                    Thread.sleep(1000);
 
 	        	}
                 if(errorList.isEmpty()) {
