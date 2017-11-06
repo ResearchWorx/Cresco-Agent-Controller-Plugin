@@ -50,17 +50,22 @@ public class PollAddPlugin implements Runnable {
 
 				//addIsAttachedEdge(String resource_id, String inode_id, String region, String agent, String plugin)
 				if(re != null) {
-					logger.info("PollAddPlugin: RE != null");
+					logger.info("PollAddPlugin: 0");
 
 					String pluginId = re.getParam("plugin");
                     //configparams
                     String status_code_plugin = re.getParam("status_code");
                     //logger.error("status_code: " + status_code_plugin);
 
-                    String status_code = plugin.getGDB().gdb.getNodeParam(region,agent,pluginId,"status_code");
-                    if(status_code != null) {
+					logger.info("PollAddPlugin: 1");
+
+					String status_code = plugin.getGDB().gdb.getNodeParam(region,agent,pluginId,"status_code");
+					logger.info("PollAddPlugin: 2");
+
+					if(status_code != null) {
                         logger.error("status_code_db = " +status_code);
                     }
+					logger.info("PollAddPlugin: 3");
 
 					logger.info("PollAddPlugin: Pre-inode: " + inode_id + " update");
 //public boolean updateKPI(String region, String agent, String pluginId, String resource_id, String inode_id, Map<String,String> params) {
