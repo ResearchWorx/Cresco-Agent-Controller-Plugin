@@ -123,9 +123,12 @@ public class Launcher extends CPlugin {
 
     private ActiveProducer ap;
 
+    private KPIProducer kpip;
+
     private String brokerAddressAgent;
     public String brokerUserNameAgent;
     public String brokerPasswordAgent;
+
 
 
     private boolean isRegionalController = false;
@@ -151,6 +154,8 @@ public class Launcher extends CPlugin {
     private BlockingQueue<gPayload> appScheduleQueue;
 
     private ActiveBroker broker;
+    private KPIBroker kpiBroker;
+
 
     private RegionHealthWatcher regionHealthWatcher;
 
@@ -634,6 +639,11 @@ public class Launcher extends CPlugin {
         //don't discover anything
         boolean isInit = false;
         try {
+            //init KPIBroker
+            this.kpiBroker = new KPIBroker(this, this.agentpath + "_KPI",brokerUserNameAgent,brokerPasswordAgent);
+            //init KPIProducer
+            this.kpip = new KPIProducer(this, "KPI", "tcp://" + this.brokerAddressAgent + ":32011", "bname", "bpass");
+
             if(isRegionalController()) {
                 //do global discovery here
                 this.globalControllerManagerThread = new Thread(new GlobalHealthWatcher(this));
@@ -1146,6 +1156,8 @@ public class Launcher extends CPlugin {
     public boolean isDiscoveryActive() {
         return DiscoveryActive;
     }
+
+    public KPIProducer getKPIProducer() { return this.kpip; }
 
     public void setDiscoveryActive(boolean discoveryActive) {
         DiscoveryActive = discoveryActive;

@@ -3881,6 +3881,18 @@ public class DBApplicationFunctions {
         String edge_id = null;
         try
         {
+            //distribute to KPI Broker
+            /*
+            Map<String,String> perfMap = new HashMap<>();
+            perfMap.putAll(params);
+            perfMap.put("region", region);
+            perfMap.put("agent", agent);
+            perfMap.put("plugin", pluginId);
+            perfMap.put("resourceid", resource_id);
+            perfMap.put("inodeid", inode_id);
+            */
+            plugin.getKPIProducer().sendMessage(region,agent,pluginId,resource_id,inode_id,params);
+
             //make sure nodes exist
             String resource_node_id = getResourceNodeId(resource_id);
             String inode_node_id = getINodeNodeId(inode_id);
