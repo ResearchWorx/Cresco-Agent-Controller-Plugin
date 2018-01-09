@@ -75,9 +75,9 @@ public class KPIProducer {
 
 
 	}
+
 	public boolean sendMessage(String region, String agent, String pluginId, String resource_id, String inode_id, Map<String,String> params) {
 		try {
-
 			//producer.send(sess.createTextMessage(gson.toJson(params)));
 
 			TextMessage outgoingMessage = sess.createTextMessage(gson.toJson(params));

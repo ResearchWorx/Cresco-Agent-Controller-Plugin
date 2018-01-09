@@ -74,9 +74,40 @@ public class ActiveProducerWorker {
 
 
 	}
+
 	public boolean sendMessage(MsgEvent se) {
 		try {
+			int pri = 0;
 
+			/*
+			CONFIG,
+        	DISCOVER,
+        	ERROR,
+        	EXEC,
+        	GC,
+        	INFO,
+        	KPI,
+        	LOG,
+        	WATCHDOG;
+			 */
+
+			String type = se.getMsgType().toString();
+
+			switch (type) {
+				case "CONFIG":  pri = 10;
+					break;
+				case "EXEC":  pri = 10;
+					break;
+				case "WATCHDOG":  pri = 7;
+					break;
+				case "KPI":  pri = 0;
+					break;
+				default: pri = 4;
+					break;
+			}
+
+			//producer.send(message, DeliveryMode.NON_PERSISTENT, 3, 0);
+			producer.send(sess.createTextMessage(gson.toJson(se)), DeliveryMode.NON_PERSISTENT, pri, 0);
 			producer.send(sess.createTextMessage(gson.toJson(se)));
 			logger.trace("sendMessage to : {} : from : {}", queueName, producerWorkerName);
 			return true;
