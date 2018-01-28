@@ -27,6 +27,11 @@ Cresco-Agent-Controller-Plugin
 
 ### <a name="controller-config-section"></a>Controller Configuration
 
+Controller configurations can be explicitly configured in the plugin file, or they can be system varables.  In the case of system varables, the base name must be prepended with "CRESCO_".  
+For example, the system varable for "regional_controller_host" should be set as "CRESCO_REGIONAL_CONTROLLER_HOST".
+
+System variables override both default and configuration file varables.
+
 #### General Section
 
 |  agentname |   |
