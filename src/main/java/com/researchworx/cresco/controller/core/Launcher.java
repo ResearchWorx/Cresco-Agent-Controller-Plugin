@@ -435,7 +435,12 @@ public class Launcher extends CPlugin {
                     }
                 }
                 //hold no loop
-                Thread.sleep(1000);
+                    if(!isInit || discoveryList.isEmpty()) {
+
+                        logger.error("isInit Status: " + isInit + " discoveryList.isEmpty() == true");
+                        Thread.sleep(1000);
+                    }
+
             }
             }
         } catch (Exception ex) {
