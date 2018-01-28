@@ -442,18 +442,18 @@ public class Launcher extends CPlugin {
         return isInit;
     }
 
-    private List<MsgEvent> initAgentStatic() {
+    private List<MsgEvent> initAgentStatic(String regionalHost) {
         //connect to a specific regional controller
         List<MsgEvent> discoveryList = null;
         boolean isInit = false;
         try {
             discoveryList = new ArrayList<>();
-            logger.info("Static Agent Connection to Regional Controller : " + getConfig().getStringParam("regional_controller_host"));
+            logger.info("Static Agent Connection to Regional Controller : " + regionalHost);
 
             //UDPDiscoveryStatic ds = new UDPDiscoveryStatic(this);
             TCPDiscoveryStatic ds = new TCPDiscoveryStatic(this);
 
-            discoveryList.addAll(ds.discover(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_static_agent_timeout",10000), getConfig().getStringParam("regional_controller_host")));
+            discoveryList.addAll(ds.discover(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_static_agent_timeout",10000), regionalHost));
             logger.debug("Static Agent Connection count = {}" + discoveryList.size());
             if(discoveryList.size() == 0) {
                 logger.info("Static Agent Connection to Regional Controller : " + getConfig().getStringParam("regional_controller_host") + " failed! - Restarting Discovery!");
@@ -770,8 +770,16 @@ public class Launcher extends CPlugin {
 
 
             if(getConfig().getBooleanParam("is_agent",false)) {
-                if(getConfig().getStringParam("regional_controller_host") == null) {
-                        discoveryList = initAgentDiscovery();
+                String regionalHost = null;
+                if (System.getenv("CRESCO_REGIONAL_HOST") != null) {
+                    regionalHost = System.getenv("CRESCO_REGIONAL_HOST");
+                }
+                else if (getConfig().getStringParam("regional_controller_host") == null) {
+                    regionalHost = getConfig().getStringParam("regional_controller_host");
+                }
+                if(regionalHost == null) {
+
+                    discoveryList = initAgentDiscovery();
                         while(discoveryList == null) {
                             discoveryList = initAgentDiscovery();
                         }
@@ -779,9 +787,9 @@ public class Launcher extends CPlugin {
                         isGlobalController = false;
                 } else {
                     //agent with static region
-                        discoveryList = initAgentStatic();
+                        discoveryList = initAgentStatic(regionalHost);
                         while(discoveryList == null) {
-                            discoveryList = initAgentStatic();
+                            discoveryList = initAgentStatic(regionalHost);
                             Thread.sleep(1000);
                         }
                         isRegionalController = false;
