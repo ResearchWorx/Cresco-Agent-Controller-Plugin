@@ -352,7 +352,6 @@ public class Launcher extends CPlugin {
                             this.brokerUserNameAgent = tmpAuth[0];
                             this.brokerPasswordAgent = tmpAuth[1];
 
-
                             //set broker ip
                             InetAddress remoteAddress = InetAddress.getByName(cbrokerAddress);
                             if (remoteAddress instanceof Inet6Address) {
