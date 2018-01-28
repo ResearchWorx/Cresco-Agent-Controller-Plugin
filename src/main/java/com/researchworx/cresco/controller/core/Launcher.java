@@ -434,6 +434,8 @@ public class Launcher extends CPlugin {
                         logger.error("Start Network Discovery Engine Failed!");
                     }
                 }
+                //hold no loop
+                Thread.sleep(1000);
             }
             }
         } catch (Exception ex) {
