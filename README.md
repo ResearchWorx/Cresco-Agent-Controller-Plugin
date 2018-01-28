@@ -4,6 +4,11 @@ Cresco-Agent-Controller-Plugin
 ### Status
 [![Build Status](http://128.163.188.129:9998/buildStatus/icon?job=Cresco-Agent-Controller-Plugin)](http://128.163.188.129:9998/job/Cresco-Agent-Controller-Plugin/)
 
+### Try
+
+1. Launch Regional/Global Controller *coming soon*
+1. Launch agent: ```docker run -t -e CRESCO_is_agent='true' -e CRESCO_regional_controller_host='[your host]' -e CRESCO_discovery_secret_agent='[your agent secret]' gitlab.rc.uky.edu:4567/cresco/cresco-container```
+
 ---
 ### Install
 
