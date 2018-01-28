@@ -43,6 +43,26 @@ Cresco-Agent-Controller-Plugin
 | default  | [random UUID]  |
 | desc  |  Name of the region |
 
+|  is_agent |   |
+|---|---|
+| required  | False  |
+| type  | Boolean  |
+| default  | False  |
+| desc  |  Force agent mode, requires [regional_controller_host] != null |
+
+|  is_region |   |
+|---|---|
+| required  | False  |
+| type  | Boolean  |
+| default  | False  |
+| desc  |  Force region mode, no agent discovery |
+
+|  is_global |   |
+|---|---|
+| required  | False  |
+| type  | Boolean  |
+| default  | False  |
+| desc  |  Force global mode, not agent or global discovery |
 
 | perftimer  |   |
 |---|---|
