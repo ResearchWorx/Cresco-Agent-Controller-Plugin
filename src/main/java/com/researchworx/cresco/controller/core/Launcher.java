@@ -399,7 +399,6 @@ public class Launcher extends CPlugin {
 
                     //List<MsgEvent> certDiscovery =
 
-
                     //set agent broker auth
                     String[]tmpAuth = cbrokerValidatedAuthenication.split(",");
                     this.brokerUserNameAgent = tmpAuth[0];

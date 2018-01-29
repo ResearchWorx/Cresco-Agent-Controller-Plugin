@@ -33,9 +33,57 @@ public class GlobalCommandExec {
 		removePipelineExecutor = Executors.newFixedThreadPool(100);
     }
 
-	public MsgEvent execute(MsgEvent ce) {
 
-	    //logger.error("GLOBAL MESSAGE : " + ce.getParams().toString());
+
+    /**
+         * <p>!!! THIS IS HOW WE SHOULD DOCUMENT.
+         *
+         * <p>This class consists exclusively of static methods that operate on or return
+         * collections.  It contains polymorphic algorithms that operate on
+         * collections, "wrappers", which return a new collection backed by a
+         * specified collection, and a few other odds and ends.
+         *
+         * <p>The methods of this class all throw a <tt>NullPointerException</tt>
+         * if the collections or class objects provided to them are null.
+         *
+         * <p>The documentation for the polymorphic algorithms contained in this class
+         * generally includes a brief description of the <i>implementation</i>.  Such
+         * descriptions should be regarded as <i>implementation notes</i>, rather than
+         * parts of the <i>specification</i>.  Implementors should feel free to
+         * substitute other algorithms, so long as the specification itself is adhered
+         * to.  (For example, the algorithm used by <tt>sort</tt> does not have to be
+         * a mergesort, but it does have to be <i>stable</i>.)
+         *
+         * <p>The "destructive" algorithms contained in this class, that is, the
+         * algorithms that modify the collection on which they operate, are specified
+         * to throw <tt>UnsupportedOperationException</tt> if the collection does not
+         * support the appropriate mutation primitive(s), such as the <tt>set</tt>
+         * method.  These algorithms may, but are not required to, throw this
+         * exception if an invocation would have no effect on the collection.  For
+         * example, invoking the <tt>sort</tt> method on an unmodifiable list that is
+         * already sorted may or may not throw <tt>UnsupportedOperationException</tt>.
+         *
+         * <pre>
+         * {@code
+         * //Get Region only
+         * ce.setParam("action","listregions");
+         * ce.setParam("action_region",[region name]);
+         * }
+         * </pre>
+         *
+         * <p>This class is a member of the
+         * <a href="{@docRoot}/../technotes/guides/collections/index.html">
+         * Java Collections Framework</a>.
+         *
+         * @param ce
+         * @return MsgEvent with EXEC payload
+         * @see     MsgEvent
+         * @since   0.5
+         */
+
+    public MsgEvent execute(MsgEvent ce) {
+
+        //logger.error("GLOBAL MESSAGE : " + ce.getParams().toString());
 
 		//make sure message does not return
 		ce.removeParam("globalcmd");
@@ -143,21 +191,16 @@ public class GlobalCommandExec {
 
 	//EXEC
 
-	private MsgEvent pluginInfo(MsgEvent ce) {
-	    try {
-            ce.setCompressedParam("plugininfo", plugin.getGDB().getPluginInfo(ce.getParam("action_region"), ce.getParam("action_agent"), ce.getParam("action_plugin")));
-            logger.trace("plugins info return : " + ce.getParams().toString());
-        }
-        catch(Exception ex) {
-	        ce.setParam("error", ex.getMessage());
-        }
-
-        return ce;
-    }
-
+    /**
+     * Query to list all regions
+     * @param ce MsgEvent.Type.EXEC, action=listregions
+     * @return creates "regionslist", in compressed json format
+     * @see GlobalCommandExec#execute(MsgEvent)
+     */
     private MsgEvent listRegions(MsgEvent ce) {
         try {
-            ce.setParam("regionslist", plugin.getGDB().getRegionList());
+            //ce.setParam("regionslist", plugin.getGDB().getRegionList());
+            ce.setCompressedParam("regionslist", plugin.getGDB().getRegionList());
             logger.trace("list regions return : " + ce.getParams().toString());
         }
         catch(Exception ex) {
@@ -166,7 +209,13 @@ public class GlobalCommandExec {
 
         return ce;
     }
-
+    /**
+     * Query to list all agents (action_region=null) or agents in a specific region (action_region=[region]
+     * @param ce MsgEvent.Type.EXEC, action=listagents, action_region=[optional region]
+     *           if action_region=null all agents are listed
+     * @return creates "agentslist", in compressed json format
+     * @see GlobalCommandExec#execute(MsgEvent)
+     */
     private MsgEvent listAgents(MsgEvent ce) {
 
 	    try {
@@ -175,7 +224,8 @@ public class GlobalCommandExec {
         if(ce.getParam("action_region") != null) {
             actionRegionAgents = ce.getParam("action_region");
         }
-        ce.setParam("agentslist",plugin.getGDB().getAgentList(actionRegionAgents));
+        //ce.setParam("agentslist",plugin.getGDB().getAgentList(actionRegionAgents));
+        ce.setCompressedParam("agentslist",plugin.getGDB().getAgentList(actionRegionAgents));
         logger.trace("list agents return : " + ce.getParams().toString());
         }
         catch(Exception ex) {
@@ -185,19 +235,56 @@ public class GlobalCommandExec {
         return ce;
     }
 
-    private MsgEvent listPlugins(MsgEvent ce) {
-	    try {
-        String actionRegionPlugins = null;
-        String actionAgentPlugins = null;
+    /**
+     * Query to list plugins on an agent:<br>
+     * (action_region=[region] action_agent=[agent])
+     * in a region: (action_region=[region] action_agent=null, or all know plugins: (action_region=null action_agent=null)
+     * @param ce MsgEvent.Type.EXEC, action=listplugins, action_region=[optional region] action_agent=[optional agent]
+     *           if action_region=null all agents are listed
+     * @return creates "plugin list", in compressed json format
+     *
+     * <ul>
+     * <li>Coffee</li>
+     * <li>Tea</li>
+     * <li>Milk</li>
+     * </ul>
+     *
+     * @see GlobalCommandExec#execute(MsgEvent)
+     */
 
-        if((ce.getParam("action_region") != null) && (ce.getParam("action_agent") != null)) {
-            actionRegionPlugins = ce.getParam("action_region");
-            actionAgentPlugins = ce.getParam("action_agent");
-        } else if((ce.getParam("action_region") != null) && (ce.getParam("action_agent") == null)) {
-            actionRegionPlugins = ce.getParam("action_region");
+    private MsgEvent listPlugins(MsgEvent ce) {
+        try {
+            String actionRegionPlugins = null;
+            String actionAgentPlugins = null;
+
+            if((ce.getParam("action_region") != null) && (ce.getParam("action_agent") != null)) {
+                actionRegionPlugins = ce.getParam("action_region");
+                actionAgentPlugins = ce.getParam("action_agent");
+            } else if((ce.getParam("action_region") != null) && (ce.getParam("action_agent") == null)) {
+                actionRegionPlugins = ce.getParam("action_region");
+            }
+            //ce.setParam("pluginslist",plugin.getGDB().getPluginList(actionRegionPlugins, actionAgentPlugins));
+            ce.setCompressedParam("pluginslist",plugin.getGDB().getPluginList(actionRegionPlugins, actionAgentPlugins));
+            logger.trace("list plugins return : " + ce.getParams().toString());
         }
-        ce.setParam("pluginslist",plugin.getGDB().getPluginList(actionRegionPlugins, actionAgentPlugins));
-        logger.trace("list plugins return : " + ce.getParams().toString());
+        catch(Exception ex) {
+            ce.setParam("error", ex.getMessage());
+        }
+
+        return ce;
+    }
+
+    /**
+     * Query to list a specific plugin configuration
+     * @param ce regionlist action, MsgEvent.Type.EXEC, action=plugininfo, action_region=[region] action_agent=[agent] action_plugin=[plugin_id]
+     * @return creates "plugin info", in compressed json format
+     * @see GlobalCommandExec#execute(MsgEvent)
+     */
+
+    private MsgEvent pluginInfo(MsgEvent ce) {
+        try {
+            ce.setCompressedParam("plugininfo", plugin.getGDB().getPluginInfo(ce.getParam("action_region"), ce.getParam("action_agent"), ce.getParam("action_plugin")));
+            logger.trace("plugins info return : " + ce.getParams().toString());
         }
         catch(Exception ex) {
             ce.setParam("error", ex.getMessage());

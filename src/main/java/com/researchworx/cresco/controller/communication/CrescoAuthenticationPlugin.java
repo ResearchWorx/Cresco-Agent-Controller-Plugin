@@ -49,11 +49,6 @@ public class CrescoAuthenticationPlugin implements BrokerPlugin {
         return userGroups;
     }
 
-    /**
-     * Sets individual users for authentication
-     *
-     * @org.apache.xbean.ElementType class="org.apache.activemq.security.AuthenticationUser"
-     */
     public void setUsers(List<?> users) {
         userPasswords.clear();
         userGroups.clear();

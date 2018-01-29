@@ -168,7 +168,8 @@ public class DBInterface {
             }
             queryMap.put("regions",regionArray);
 
-            queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(queryMap))));
+            //queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(queryMap))));
+            queryReturn = gson.toJson(queryMap);
 
         }
         catch(Exception ex)
@@ -228,7 +229,8 @@ public class DBInterface {
                 }
                 queryMap.put("agents", regionArray);
             }
-            queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(queryMap))));
+            //queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(queryMap))));
+            queryReturn = gson.toJson(queryMap);
 
         }
         catch(Exception ex)
@@ -285,7 +287,8 @@ public class DBInterface {
                 }
                 queryMap.put("plugins", regionArray);
             }
-            queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(queryMap))));
+            //queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(queryMap))));
+            queryReturn = gson.toJson(queryMap);
 
         }
         catch(Exception ex)

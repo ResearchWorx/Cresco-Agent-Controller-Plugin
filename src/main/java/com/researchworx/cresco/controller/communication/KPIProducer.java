@@ -27,7 +27,7 @@ public class KPIProducer {
 	private Destination destination;
 
 	public KPIProducer(Launcher plugin, String TXQueueName, String URI, String brokerUserNameAgent, String brokerPasswordAgent)  {
-		this.logger = new CLogger(KPIProducer.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
+		this.logger = new CLogger(KPIProducer.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
 		this.producerWorkerName = UUID.randomUUID().toString();
 		try {
 			queueName = TXQueueName;
