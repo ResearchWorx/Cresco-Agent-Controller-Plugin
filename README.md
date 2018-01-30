@@ -177,15 +177,7 @@ System variables override both default and configuration file varables.
 | mode | Agent |
 | desc  |  Hostname or IP of regional controller |
 
-|  gc_host | need to merge with *global_controller_host* |
-|---|---|
-| required  | False  |
-| type  | String  |
-| default  | [some host/ip]  |
-| mode | Region |
-| desc  |  Hostname or IP of global controller |
-
-|  global_controller_host | need to merge with *gc_host*  |
+|  global_controller_host |  |
 |---|---|
 | required  | False  |
 | type  | String  |

@@ -136,7 +136,7 @@ public class GlobalHealthWatcher implements Runnable {
         try{
 
             //Static Remote Global Controller
-            String static_global_controller_host = plugin.getConfig().getStringParam("gc_host",null);
+            String static_global_controller_host = plugin.getConfig().getStringParam("global_controller_host",null);
             if(static_global_controller_host != null) {
                 this.plugin.setGlobalController(false);
                 logger.trace("Starting Static Global Controller Check");
@@ -228,7 +228,7 @@ public class GlobalHealthWatcher implements Runnable {
         try{
 
             //Static Remote Global Controller
-	        String static_global_controller_host = plugin.getConfig().getStringParam("gc_host",null);
+	        String static_global_controller_host = plugin.getConfig().getStringParam("global_controller_host",null);
             if(static_global_controller_host != null) {
                 this.plugin.setGlobalController(false);
                 logger.trace("Starting Static Global Controller Check");
@@ -443,12 +443,12 @@ public class GlobalHealthWatcher implements Runnable {
         List<MsgEvent> discoveryList = null;
         try {
             discoveryList = new ArrayList<>();
-                logger.info("Static Region Connection to Global Controller : " + plugin.getConfig().getStringParam("gc_host",null));
+                logger.info("Static Region Connection to Global Controller : " + plugin.getConfig().getStringParam("global_controller_host",null));
                 TCPDiscoveryStatic ds = new TCPDiscoveryStatic(plugin);
-                discoveryList.addAll(ds.discover(DiscoveryType.GLOBAL, plugin.getConfig().getIntegerParam("discovery_static_agent_timeout", 10000), plugin.getConfig().getStringParam("gc_host",null)));
+                discoveryList.addAll(ds.discover(DiscoveryType.GLOBAL, plugin.getConfig().getIntegerParam("discovery_static_agent_timeout", 10000), plugin.getConfig().getStringParam("global_controller_host",null)));
                 logger.debug("Static Agent Connection count = {}" + discoveryList.size());
                 if (discoveryList.size() == 0) {
-                    logger.info("Static Region Connection to Global Controller : " + plugin.getConfig().getStringParam("gc_host",null) + " failed! - Restarting Global Discovery");
+                    logger.info("Static Region Connection to Global Controller : " + plugin.getConfig().getStringParam("global_controller_host",null) + " failed! - Restarting Global Discovery");
                 } else {
                     //plugin.getIncomingCanidateBrokers().add(discoveryList.get(0)); //perhaps better way to do this
                     logger.info("Global Controller Found: " + discoveryList.get(0).getParams());
