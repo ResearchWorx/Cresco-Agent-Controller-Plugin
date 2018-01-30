@@ -862,8 +862,6 @@ public class Launcher extends CPlugin {
             //Setup Regional Watcher
             this.regionHealthWatcher = new RegionHealthWatcher(this);
 
-            logger.info("RegionHealthWatcher started");
-
             //Setup Global is Needed
             if(isRegionalController){
                 initGlobal();

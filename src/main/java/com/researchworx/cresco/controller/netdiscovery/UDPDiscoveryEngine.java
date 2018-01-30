@@ -48,7 +48,7 @@ public class UDPDiscoveryEngine implements Runnable {
     }
 
     public void run() {
-        logger.info("Starting");
+        logger.info("Initialized");
         try {
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             while (interfaces.hasMoreElements()) {
