@@ -404,6 +404,7 @@ public class GlobalHealthWatcher implements Runnable {
                     //le.setParam("globalcmd", Boolean.TRUE.toString());
                     le.setParam("watchdogtimer", String.valueOf(plugin.getConfig().getLongParam("watchdogtimer", 5000L)));
                     //this should be RPC, but routing needs to be fixed route 16 -> 32 -> regionsend -> 16 -> 32 -> regionsend (goes to region, not rpc)
+                    le.setParam("source","sendGlobalWatchDogRegister()");
                     plugin.msgIn(le);
                 }
             }

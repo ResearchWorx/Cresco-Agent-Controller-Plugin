@@ -3,6 +3,7 @@ package com.researchworx.cresco.controller.core;
 import com.researchworx.cresco.library.core.WatchDog;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
+import com.sun.jna.platform.win32.WinUser;
 
 public class MsgRoute implements Runnable {
     private MsgEvent rm;
@@ -21,23 +22,6 @@ public class MsgRoute implements Runnable {
             }
 
             int routePath = getRoutePath();
-
-/*
-            if(rm.getMsgType() == MsgEvent.Type.EXEC) {
-                logger.error("Controller msgType: [" + rm.getMsgType().toString() + "] routepath: " + routePath + "[" + rm.getParams().toString() + "]");
-            }
-*/
-/*
-            if(rm.getMsgType() == MsgEvent.Type.CONFIG) {
-                logger.error("msgType: [" + rm.getMsgType().toString() + "] routepath: " + routePath + "[" + rm.getParams().toString() + "]");
-           }
-*/
-
-/*
-            if(rm.getMsgType() == MsgEvent.Type.WATCHDOG) {
-                logger.error("msgType: [" + rm.getMsgType().toString() + "] routepath: " + routePath + "[" + rm.getParams().toString() + "]");
-           }
-*/
 
             rm.setParam("routepath",String.valueOf(routePath));
             MsgEvent re = null;
@@ -115,16 +99,14 @@ public class MsgRoute implements Runnable {
                     break;
                     */
                 case 52:  //System.out.println("CONTROLLER ROUTE TO REGIONAL AGENT : 52 " + rm.getParams()); //also where regional messages go
-                        logger.debug("CONTROLLER SENDING REGIONAL MESSAGE 52");
-                        logger.trace(rm.getParams().toString());
-                        externalSend();
-
+                    logger.debug("CONTROLLER SENDING REGIONAL MESSAGE 52");
+                    logger.trace(rm.getParams().toString());
+                    externalSend();
                     break;
                 case 53:  //System.out.println("CONTROLLER ROUTE TO REGIONAL AGENT : 53 " + rm.getParams());
-                        logger.debug("CONTROLLER SENDING REGIONAL MESSAGE 53");
-                        logger.trace(rm.getParams().toString());
-                        externalSend();
-
+                    logger.debug("CONTROLLER SENDING REGIONAL MESSAGE 53");
+                    logger.trace(rm.getParams().toString());
+                    externalSend();
                     break;
                 case 56:  //System.out.println("CONTROLLER ROUTE TO LOCAL AGENT : 56 "  + rm.getParams());
                     //PluginEngine.msgInQueue.add(rm);
@@ -203,7 +185,11 @@ public class MsgRoute implements Runnable {
                     //externalSend();
                     //logger.trace(rm.getParams().toString());
                     //regionalSend();
+                    //if(rm.getMsgType() == MsgEvent.Type.CONFIG) {
+                    //    System.out.println("PRE Regional Exec 112: " + rm.getParams().toString());
+                   //}
                     re = getRegionalCommandExec();
+
                     //plugin.sendMsgEvent(rm);
                     break;
                 case 116:
@@ -329,12 +315,25 @@ public class MsgRoute implements Runnable {
                     break;
             }
 
+
             if (re != null) {
+
                 re.setReturn(); //reverse to-from for return
                 //PluginEngine.msgInQueue.add(re);
+
+                /*
+                if(re != null) {
+                    if (re.getMsgType() == MsgEvent.Type.CONFIG) {
+                        System.out.println("Return CONFIG: " + re.getParams().toString());
+                    }
+                }
+                */
+
                 plugin.sendMsgEvent(re);
+
                 //PluginEngine.msgIn(re);
             }
+
             //	AgentEngine.commandExec.cmdExec(me);
 
         } catch (Exception ex) {
@@ -356,6 +355,10 @@ public class MsgRoute implements Runnable {
     }
     */
 
+
+    private MsgEvent getNull() {
+        return null;
+    }
 
     private MsgEvent getRegionalCommandExecOutGoing() {
         //todo route should send directly there, local in commandexec will figure it out.
@@ -592,6 +595,7 @@ public class MsgRoute implements Runnable {
     }
 
     private boolean getTTL() {
+
         boolean isValid = true;
         try {
             if (rm.getParam("ttl") != null) {

@@ -108,7 +108,7 @@ public class ActiveProducerWorker {
 
 			//producer.send(message, DeliveryMode.NON_PERSISTENT, 3, 0);
 			producer.send(sess.createTextMessage(gson.toJson(se)), DeliveryMode.NON_PERSISTENT, pri, 0);
-			producer.send(sess.createTextMessage(gson.toJson(se)));
+			//producer.send(sess.createTextMessage(gson.toJson(se)));
 			logger.trace("sendMessage to : {} : from : {}", queueName, producerWorkerName);
 			return true;
 		} catch (JMSException jmse) {

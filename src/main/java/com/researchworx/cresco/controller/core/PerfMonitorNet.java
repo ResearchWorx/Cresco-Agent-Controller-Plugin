@@ -37,7 +37,7 @@ class PerfMonitorNet {
         if (this.running) return this;
         Long interval = plugin.getConfig().getLongParam("perftimer", 10000L);
 
-        MsgEvent initial = new MsgEvent(MsgEvent.Type.INFO, plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), "Performance Monitoring timer set to " + interval + " milliseconds.");
+        MsgEvent initial = new MsgEvent(MsgEvent.Type.KPI, plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), "Performance Monitoring timer set to " + interval + " milliseconds.");
         initial.setParam("src_region", plugin.getRegion());
         initial.setParam("src_agent", plugin.getAgent());
         initial.setParam("src_plugin", plugin.getPluginID());

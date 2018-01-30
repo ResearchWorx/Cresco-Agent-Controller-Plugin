@@ -733,6 +733,7 @@ public class Launcher extends CPlugin {
             le.setParam("dst_region", getRegion());
             le.setParam("action", "enable");
             le.setParam("watchdogtimer", String.valueOf(getConfig().getLongParam("watchdogtimer", 5000L)));
+            le.setParam("source", "initRegion()");
             getGDB().addNode(le);
 
             //discovery engine
@@ -856,7 +857,7 @@ public class Launcher extends CPlugin {
             //set new watchdog to reflect discovered values
             this.setWatchDog(new WatchDog(this.region, this.agent, this.pluginID, this.logger, this.config));
             getWatchDog().start();
-            logger.info("WatchDog Started");
+            //logger.info("WatchDog Started");
 
             //Setup Regional Watcher
             this.regionHealthWatcher = new RegionHealthWatcher(this);
@@ -869,11 +870,14 @@ public class Launcher extends CPlugin {
             }
 
 
+            //todo enable on post-start
+            /*
             //start network performance monitor if create
             if(perfMonitorNet != null) {
                 logger.info("Starting perfMonNet...");
                 perfMonitorNet.start();
             }
+            */
 
             /*
             logger.info("Starting Network Discovery Engine...");

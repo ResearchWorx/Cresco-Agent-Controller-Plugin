@@ -956,6 +956,14 @@ public class DBInterface {
             String nodeId = gdb.getNodeId(region,agent,plugin);
             if(nodeId == null) {
                 nodeId = gdb.addNode(region, agent,plugin);
+
+                /*
+                logger.info("\nDB Message: Type={}\nSrc={}-{}:{}\nDst={}-{}:{}\nParams={}\n",
+                        de.getMsgType().name(),
+                        de.getParam("src_region"), de.getParam("src_agent"), de.getParam("src_plugin"),
+                        de.getParam("dst_region"), de.getParam("dst_agent"), de.getParam("dst_plugin"),
+                        de.getParams());
+*/
             }
 
             gdb.setNodeParams(region,agent,plugin, de.getParams());
@@ -993,108 +1001,6 @@ public class DBInterface {
                         }
                     }
 
-
-                wasAdded = true;
-            }
-
-        } catch (Exception ex) {
-            logger.error("GraphDBUpdater : addNode ERROR : " + ex.toString());
-        }
-        return wasAdded;
-    }
-
-    public Boolean addNode2(MsgEvent de) {
-        Boolean wasAdded = false;
-
-        try {
-
-            String region = de.getParam("src_region");
-            String agent = de.getParam("src_agent");
-            String plugin = de.getParam("src_plugin");
-            de.setParam("is_active",Boolean.TRUE.toString());
-            de.setParam("watchdog_ts", String.valueOf(System.currentTimeMillis()));
-
-
-            String nodeId = gdb.getNodeId(region,agent,plugin);
-            if(nodeId != null) {
-
-                Map<String,String> paramMap = gdb.getNodeParams(nodeId);
-                if(paramMap.containsKey("enable_pending")) {
-                    logger.info("enable pending 0");
-                    if(Boolean.parseBoolean(paramMap.get("enable_pending"))) {
-                        logger.info("enable pending 1");
-
-                        gdb.setNodeParams(region, agent, plugin, de.getParams());
-                        gdb.setNodeParam(region, agent, plugin, "enable_pending", Boolean.FALSE.toString());
-                    }
-
-                } else {
-                    logger.info("enable pending error");
-
-                    logger.error("Tried to add existing node!");
-                    logger.error("region: " + region + " agent:" + agent + " plugin:" + plugin + " id:" + nodeId);
-                    logger.error("params: " + gdb.getNodeParams(nodeId).toString());
-                /*
-                logger.trace("region: " + region + " agent:" + agent + " plugin:" + plugin + " id:" + nodeId);
-                logger.trace("params: " + gdb.getNodeParams(nodeId).toString());
-                if(plugin != null) {
-                    String nodeAgentId = gdb.getNodeId(region,agent,null);
-                    logger.trace("region: " + region + " agent:" + agent + " plugin:" + " null id:" + nodeAgentId);
-                    logger.trace("params: " + gdb.getNodeParams(nodeAgentId).toString());
-                    gdb.setNodeParams(region,agent,plugin, de.getParams());
-
-                } else {
-                    gdb.setNodeParams(region,agent,null, de.getParams());
-                }
-                */
-                }
-            }
-            else {
-
-                logger.info("Adding Node: " + de.getParams().toString());
-
-                logger.debug("Adding Node: " + de.getParams().toString());
-                gdb.addNode(region, agent,plugin);
-                gdb.setNodeParams(region,agent,plugin, de.getParams());
-                //gdb.setNodeParam(region,agent,plugin, "watchdog_ts", String.valueOf(System.currentTimeMillis()));
-                //gdb.setNodeParam(region,agent,plugin, "watchdog_ts", String.valueOf(System.currentTimeMillis()));
-
-                if((region != null) && (agent != null) && (plugin == null)) {
-                    logger.info("is Agent: Process Plugins");
-                    //add plugin configs for agent
-                    if (de.getParam("pluginconfigs") != null) {
-                        List<Map<String, String>> configMapList = new Gson().fromJson(de.getCompressedParam("pluginconfigs"),
-                                new com.google.common.reflect.TypeToken<List<Map<String, String>>>() {
-                                }.getType());
-
-                        for (Map<String, String> configMap : configMapList) {
-                            String pluginId = configMap.get("pluginid");
-                            logger.info("Plugin: " + pluginId);
-                            gdb.addNode(region, agent, pluginId);
-                            gdb.setNodeParams(region, agent, pluginId, configMap);
-
-                            logger.error("Register Update: region:" + region + " agent:" + agent + " plugin:" + pluginId);
-
-                            for (Map.Entry<String, String> entry : configMap.entrySet())
-                            {
-                                logger.error("Register Update Key/Value " + entry.getKey() + "/" + entry.getValue());
-                                //System.out.println(entry.getKey() + "/" + entry.getValue());
-                                //gdb.addNode(region, agent,plugin);
-                                //gdb.setNodeParams(region,agent,plugin, de.getParams());
-                            }
-
-                            /*
-                            for (Map.Entry<String, String> entry : configMap.entrySet())
-                            {
-                                System.out.println(entry.getKey() + "/" + entry.getValue());
-                                //gdb.addNode(region, agent,plugin);
-                                //gdb.setNodeParams(region,agent,plugin, de.getParams());
-                            }
-                            */
-
-                        }
-                    }
-                }
 
                 wasAdded = true;
             }
@@ -1157,6 +1063,8 @@ public class DBInterface {
 
                             if(gdb.getNodeId(region,agent,subpluginId) == null) {
                                 gdb.addNode(region, agent, subpluginId);
+                                //todo remove this and or fix the reason it is here
+                                System.exit(0);
                             }
                             gdb.setNodeParams(region, agent, subpluginId, configMap);
 

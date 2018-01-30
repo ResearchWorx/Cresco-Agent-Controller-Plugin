@@ -49,6 +49,7 @@ public class ActiveAgentConsumer implements Runnable {
 				if (msg != null) {
 					logger.debug("Incoming Queue: {}", RXqueue);
 					MsgEvent me = gson.fromJson(msg.getText(), MsgEvent.class);
+
 					plugin.msgIn(me);
 					logger.debug("Message: {}", me.getParams().toString());
 				}

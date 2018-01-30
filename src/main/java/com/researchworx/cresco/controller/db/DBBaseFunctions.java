@@ -634,6 +634,7 @@ public class DBBaseFunctions {
             if(node_id != null)
             {
                 logger.error("Node already Exist: region=" + region + " agent=" + agent + " plugin=" + plugin);
+                //Thread.dumpStack();
             }
             else
             {

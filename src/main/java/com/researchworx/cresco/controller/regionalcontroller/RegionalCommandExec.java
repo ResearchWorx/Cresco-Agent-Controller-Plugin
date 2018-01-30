@@ -40,10 +40,13 @@ public class RegionalCommandExec {
 
 	public MsgEvent execute(MsgEvent le) {
 
+
         if(le.getParam("globalcmd") == null) {
             //not for global controller, send to region
             if (le.getParam("dst_agent") != null) {
                 regionSend(le);
+                //todo fix 0
+                System.exit(0);
                 return null;
             }
         }
@@ -54,6 +57,8 @@ public class RegionalCommandExec {
 
 
         if(le.getParam("globalcmd") != null) {
+            //todo fix 1
+            System.exit(0);
                 //this is a global command
                 if(plugin.isGlobalController()) {
                     return gce.execute(le);
@@ -152,18 +157,15 @@ public class RegionalCommandExec {
 
 	private MsgEvent enableAgent(MsgEvent le) {
 
-	    /*
-        if(le.getMsgType().equals(MsgEvent.Type.CONFIG)) {
-            logger.error("WTF: " + le.getParams());
-        }
-        */
-
         logger.debug("CONFIG : AGENTDISCOVER ADD: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
         logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
+
+
         plugin.getGDB().addNode(le);
-        if(!plugin.isGlobalController()) {
+            if(!plugin.isGlobalController()) {
             globalSend(le);
         }
+
         //gdb.addNode(region, agent,plugin);
         //gdb.setNodeParams(region,agent,plugin, de.getParams());
 
