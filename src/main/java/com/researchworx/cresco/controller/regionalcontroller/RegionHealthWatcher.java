@@ -33,6 +33,8 @@ public class RegionHealthWatcher {
         timer.scheduleAtFixedRate(new CommunicationHealthWatcherTask(), 1000, wdTimer);
         regionalUpdateTimer = new Timer();
         regionalUpdateTimer.scheduleAtFixedRate(new RegionHealthWatcher.RegionalNodeStatusWatchDog(plugin, logger), 15000, 15000);//remote
+        logger.info("Initialized");
+
     }
 
     public void shutdown() {

@@ -53,7 +53,7 @@ public class UDPDiscoveryEngine implements Runnable {
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             while (interfaces.hasMoreElements()) {
                 NetworkInterface networkInterface = interfaces.nextElement();
-                logger.info("Found: " + networkInterface.getDisplayName());
+                logger.debug("Found: " + networkInterface.getDisplayName());
                 Thread thread = new Thread(new DiscoveryEngineWorker(networkInterface, plugin));
                 thread.start();
             }

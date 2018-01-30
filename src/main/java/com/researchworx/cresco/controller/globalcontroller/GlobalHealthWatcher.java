@@ -314,7 +314,7 @@ public class GlobalHealthWatcher implements Runnable {
         boolean isStarted = false;
         try {
             //Start Global Controller Services
-            logger.info("Starting Global Scheduler Service");
+            logger.info("Initialized");
             ResourceSchedulerEngine se = new ResourceSchedulerEngine(plugin,this);
             Thread schedulerEngineThread = new Thread(se);
             schedulerEngineThread.start();

@@ -49,7 +49,7 @@ public class ActiveRegionConsumer implements Runnable {
 
 	@Override
 	public void run() {
-		logger.info("Starting");
+		logger.info("Initialized");
 		Gson gson = new Gson();
 		try {
 			this.plugin.setConsumerThreadRegionActive(true);

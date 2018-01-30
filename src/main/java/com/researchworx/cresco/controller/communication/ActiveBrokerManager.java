@@ -45,7 +45,7 @@ public class ActiveBrokerManager implements Runnable  {
 		*/
 	}
 	public void run() {
-		logger.info("Active Broker Manager started");
+		logger.info("Initialized");
 		this.plugin.setActiveBrokerManagerActive(true);
 		while(this.plugin.isActiveBrokerManagerActive()) {
 			try {
