@@ -857,8 +857,8 @@ public class Launcher extends CPlugin {
 
             //set new watchdog to reflect discovered values
             this.setWatchDog(new WatchDog(this.region, this.agent, this.pluginID, this.logger, this.config));
-            //getWatchDog().start();
-            //logger.info("WatchDog Started");
+            getWatchDog().start();
+            logger.info("WatchDog Started");
 
             //Setup Regional Watcher
             this.regionHealthWatcher = new RegionHealthWatcher(this);
