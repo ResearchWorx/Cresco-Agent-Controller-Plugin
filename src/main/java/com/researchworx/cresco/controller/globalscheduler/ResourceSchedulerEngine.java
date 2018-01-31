@@ -329,7 +329,7 @@ public class ResourceSchedulerEngine implements Runnable {
 			{
 				Map<String, Integer> sortedMapAsc = sortByComparator(pMap, true);
 				Entry<String, Integer> entry = sortedMapAsc.entrySet().iterator().next();
-				agent_path = entry.getKey().toString();
+				agent_path = entry.getKey();
 				/*
 				for (Entry<String, Integer> entry : sortedMapAsc.entrySet())
 				{
@@ -443,7 +443,7 @@ public class ResourceSchedulerEngine implements Runnable {
                     if (listOfFiles[i].isFile())
                     {
                         pluginFiles.add(listOfFiles[i].getAbsolutePath());
-                        logger.debug(listOfFiles[i].getAbsolutePath().toString());
+                        logger.debug(listOfFiles[i].getAbsolutePath());
                     }
 
                 }

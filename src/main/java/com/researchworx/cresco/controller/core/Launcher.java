@@ -134,7 +134,8 @@ public class Launcher extends CPlugin {
     private boolean isRegionalController = false;
 
     private boolean isGlobalController = false;
-    private String globalControllerPath;
+    private String[] globalController;
+    private String[] regionalController;
     private boolean GlobalControllerManagerActive = false;
 
     private Map<String, Long> discoveryMap;
@@ -868,7 +869,7 @@ public class Launcher extends CPlugin {
             }
 
 
-            //todo enable on post-start
+            //TODO enable on post-start
             /*
             //start network performance monitor if create
             if(perfMonitorNet != null) {
@@ -1193,17 +1194,45 @@ public class Launcher extends CPlugin {
         isRegionalController = regionalController;
     }
 
+    public String[] getRegionalController() {
+        return this.regionalController;
+    }
+    public void setRegionalController(String controllerRegion, String controllerAgent) {
+
+        logger.trace("SETTING REGIONAL CONTROLLER PATH : OLD : " + this.regionalController);
+        this.regionalController = new String[2];
+        this.regionalController[0] = controllerRegion;
+        this.regionalController[1] = controllerAgent;
+        logger.trace("SETTING REGIONAL CONTROLLER PATH : NEW : " + this.regionalController);
+
+    }
+
+    public String[] getGlobalController() {
+        return this.globalController;
+    }
+    public void setGlobalController(String controllerRegion, String controllerAgent) {
+
+        logger.trace("SETTING GLOBAL CONTROLLER PATH : OLD : " + this.globalController);
+        this.globalController = new String[2];
+        this.globalController[0] = controllerRegion;
+        this.globalController[1] = controllerAgent;
+        logger.trace("SETTING GLOBAL CONTROLLER PATH : NEW : " + this.globalController);
+
+
+    }
+
+    public String getControllerId() {
+        return "plugin/0";
+    }
+
     public String getGlobalControllerPath() {
-        return this.globalControllerPath;
+        if(getGlobalController() != null) {
+            return getGlobalController()[0] + "_" + getGlobalController()[1];
+        } else {
+            return null;
+        }
     }
-    public void setGlobalControllerPath(String controllerPath) {
 
-        logger.trace("SETTING GLOBAL CONTROLLER PATH : OLD : " + globalControllerPath);
-        globalControllerPath = controllerPath;
-        logger.trace("SETTING GLOBAL CONTROLLER PATH : NEW : " + globalControllerPath);
-
-
-    }
 
     public boolean isGlobalController() {
         return this.isGlobalController;
@@ -1226,10 +1255,6 @@ public class Launcher extends CPlugin {
     }
 
     public RegionHealthWatcher getRegionHealthWatcher() {return this.regionHealthWatcher;}
-
-    public boolean hasGlobalController() {
-        return this.globalControllerPath != null;
-    }
 
     public Map<String, Long> getDiscoveryMap() {
         return discoveryMap;

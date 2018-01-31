@@ -366,7 +366,7 @@ public class TCPDiscoveryEngine implements Runnable {
         while(! isStopped()){
             Socket clientSocket = null;
             try {
-                clientSocket = this.serverSocket.accept();
+                clientSocket = serverSocket.accept();
             } catch (IOException e) {
                 if(isStopped()) {
                     System.out.println("Server Stopped.") ;
@@ -393,13 +393,13 @@ public class TCPDiscoveryEngine implements Runnable {
     }
 
     private synchronized boolean isStopped() {
-        return this.isStopped;
+        return isStopped;
     }
 
     public synchronized void stop(){
-        this.isStopped = true;
+        isStopped = true;
         try {
-            this.serverSocket.close();
+            serverSocket.close();
         } catch (IOException e) {
             throw new RuntimeException("Error closing server", e);
         }
@@ -407,7 +407,7 @@ public class TCPDiscoveryEngine implements Runnable {
 
     private void openServerSocket() {
         try {
-            this.serverSocket = new ServerSocket(this.discoveryPort);
+            serverSocket = new ServerSocket(this.discoveryPort);
         } catch (IOException e) {
             throw new RuntimeException("Cannot open port 8080", e);
         }

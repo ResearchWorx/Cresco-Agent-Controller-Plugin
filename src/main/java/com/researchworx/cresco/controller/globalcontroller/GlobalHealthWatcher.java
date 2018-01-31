@@ -38,11 +38,15 @@ public class GlobalHealthWatcher implements Runnable {
 
 	public void shutdown() {
 
-        if(plugin.getGlobalControllerPath() != null) {
-            String[] globalPath = plugin.getGlobalControllerPath().split("_");
-            MsgEvent le = new MsgEvent(MsgEvent.Type.CONFIG, globalPath[0], globalPath[1], null, "disabled");
+        if(plugin.getGlobalController() != null) {
+            MsgEvent le = new MsgEvent(MsgEvent.Type.CONFIG, plugin.getGlobalController()[0], plugin.getGlobalController()[1], null, "disabled");
             le.setParam("src_region", plugin.getRegion());
-            le.setParam("dst_region", globalPath[0]);
+            le.setParam("dst_region",plugin.getGlobalController()[0]);
+            le.setParam("dst_agent",plugin.getGlobalController()[1]);
+            le.setParam("dst_plugin",plugin.getControllerId());
+
+            //le.setParam("dst_region", globalPath[0]);
+
             le.setParam("globalcmd", Boolean.TRUE.toString());
             le.setParam("action", "disable");
 
@@ -83,16 +87,17 @@ public class GlobalHealthWatcher implements Runnable {
         logger.trace("gNotify End");
         try {
             //if there is a remote global controller and it is reachable
-            String globalPath = plugin.getGlobalControllerPath();
-            if((globalPath != null) && (!plugin.isGlobalController())) {
+            if((plugin.getGlobalController() != null) && (!plugin.isGlobalController())) {
                 logger.debug("gNotify !Global Controller Message");
                 //is the global controller reachable
                 if(plugin.isReachableAgent(plugin.getGlobalControllerPath())) {
-                    String[] gPath = globalPath.split("_");
                     MsgEvent tick = new MsgEvent(MsgEvent.Type.WATCHDOG, plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), "WatchDog timer tick.");
-                    tick.setParam("globalcmd", Boolean.TRUE.toString());
                     tick.setParam("src_region", plugin.getRegion());
-                    tick.setParam("dst_region", gPath[0]);
+                    tick.setParam("dst_region",plugin.getGlobalController()[0]);
+                    tick.setParam("dst_agent",plugin.getGlobalController()[1]);
+                    tick.setParam("dst_plugin",plugin.getControllerId());
+                    tick.setParam("globalcmd", Boolean.TRUE.toString());
+
                     tick.setParam("watchdog_ts", String.valueOf(System.currentTimeMillis()));
                     tick.setParam("watchdogtimer", String.valueOf(gCheckInterval));
 
@@ -145,21 +150,21 @@ public class GlobalHealthWatcher implements Runnable {
                         return;
                     }
                     else {
-                        this.plugin.setGlobalControllerPath(null);
+                        this.plugin.setGlobalController(null,null);
                         global_host_map.remove(static_global_controller_host);
                     }
                 }
-                String globalPath = connectToGlobal(staticGlobalDiscovery());
-                if(globalPath == null) {
+                String[] globalController = connectToGlobal(staticGlobalDiscovery());
+                if(globalController == null) {
                     logger.error("Failed to connect to Global Controller Host :" + static_global_controller_host);
-                    this.plugin.setGlobalControllerPath(null);
+                    this.plugin.setGlobalController(null,null);
                 }
                 else {
-                    global_host_map.put(static_global_controller_host, globalPath);
-                    plugin.setGlobalControllerPath(globalPath);
+                    plugin.setGlobalController(globalController[0],globalController[1]);
+                    global_host_map.put(static_global_controller_host, plugin.getGlobalControllerPath());
                     //register with global controller
                     sendGlobalWatchDogRegister();
-                    //todo is this correct?
+                    //TODO is this correct?
                     regionalDBexport();
                 }
             }
@@ -181,19 +186,19 @@ public class GlobalHealthWatcher implements Runnable {
                 else {
                     //global controller is not reachable, start dynamic discovery
                     this.plugin.setGlobalController(false);
-                    this.plugin.setGlobalControllerPath(null);
+                    this.plugin.setGlobalController(null,null);
                     List<MsgEvent> discoveryList = dynamicGlobalDiscovery();
 
                     if(!discoveryList.isEmpty()) {
-                        String globalPath = connectToGlobal(dynamicGlobalDiscovery());
-                        if(globalPath == null) {
-                            logger.error("Failed to connect to Global Controller Host :" + globalPath);
+                        String[] globalController = connectToGlobal(dynamicGlobalDiscovery());
+                        if(globalController == null) {
+                            logger.error("Failed to connect to Global Controller Host :" + globalController[0] + " " + globalController[1]);
                         }
                         else {
-                            this.plugin.setGlobalControllerPath(globalPath);
+                            this.plugin.setGlobalController(globalController[0],globalController[1]);
                             //register with global controller
                             sendGlobalWatchDogRegister();
-                            //todo is this right to do
+                            //TODO is this right to do
                             regionalDBexport();
                         }
                     }
@@ -222,94 +227,6 @@ public class GlobalHealthWatcher implements Runnable {
 
     }
 
-    private void gCheck2() {
-        logger.trace("gCheck Start");
-
-        try{
-
-            //Static Remote Global Controller
-	        String static_global_controller_host = plugin.getConfig().getStringParam("global_controller_host",null);
-            if(static_global_controller_host != null) {
-                this.plugin.setGlobalController(false);
-                logger.trace("Starting Static Global Controller Check");
-	            if(global_host_map.containsKey(static_global_controller_host)) {
-                    if(plugin.isReachableAgent(global_host_map.get(static_global_controller_host))) {
-                        return;
-                    }
-                    else {
-                        this.plugin.setGlobalControllerPath(null);
-                        global_host_map.remove(static_global_controller_host);
-                    }
-                }
-                String globalPath = connectToGlobal(staticGlobalDiscovery());
-                if(globalPath == null) {
-                    logger.error("Failed to connect to Global Controller Host :" + static_global_controller_host);
-                    this.plugin.setGlobalControllerPath(null);
-                }
-                else {
-                    global_host_map.put(static_global_controller_host, globalPath);
-                    plugin.setGlobalControllerPath(globalPath);
-                    //register with global controller
-                    sendGlobalWatchDogRegister();
-                    //todo is this correct?
-                    regionalDBexport();
-                }
-            }
-            else if(this.plugin.isGlobalController()) {
-                //Do nothing if already controller, will reinit on regional restart
-                logger.trace("Starting Local Global Controller Check");
-            }
-            else {
-                logger.trace("Starting Dynamic Global Controller Check");
-                //Check if the global controller path exist
-                if(plugin.isReachableAgent(this.plugin.getGlobalControllerPath())) {
-                    logger.debug("Global Path : " +  this.plugin.getGlobalControllerPath() + " reachable :" + plugin.isReachableAgent(this.plugin.getGlobalControllerPath()));
-                   return;
-                }
-                else {
-                    //global controller is not reachable, start dynamic discovery
-                    this.plugin.setGlobalController(false);
-                    this.plugin.setGlobalControllerPath(null);
-                    List<MsgEvent> discoveryList = dynamicGlobalDiscovery();
-
-                    if(!discoveryList.isEmpty()) {
-                        String globalPath = connectToGlobal(dynamicGlobalDiscovery());
-                        if(globalPath == null) {
-                            logger.error("Failed to connect to Global Controller Host :" + globalPath);
-                        }
-                        else {
-                            this.plugin.setGlobalControllerPath(globalPath);
-                            //register with global controller
-                            sendGlobalWatchDogRegister();
-                            //todo is this right to do
-                            regionalDBexport();
-                        }
-                    }
-                    else {
-                        //No global controller found, starting global services
-                        logger.info("No Global Controller Found: Starting Global Services");
-                        //start global stuff
-
-                        //create globalscheduler queue
-                        //plugin.setResourceScheduleQueue(new LinkedBlockingQueue<MsgEvent>());
-                        plugin.setAppScheduleQueue(new LinkedBlockingQueue<gPayload>());
-                        startGlobalSchedulers();
-                        //end global start
-                        this.plugin.setGlobalController(true);
-
-
-                    }
-                }
-            }
-
-        }
-        catch(Exception ex) {
-	        logger.error("gCheck() " +ex.getMessage());
-        }
-        logger.trace("gCheck End");
-
-    }
-
     private Boolean startGlobalSchedulers() {
         boolean isStarted = false;
         try {
@@ -331,8 +248,8 @@ public class GlobalHealthWatcher implements Runnable {
         return isStarted;
     }
 
-    private String connectToGlobal(List<MsgEvent> discoveryList) {
-        String globalPath = null;
+    private String[] connectToGlobal(List<MsgEvent> discoveryList) {
+        String[] globalController = null;
         MsgEvent cme = null;
         int cme_count = 0;
 
@@ -370,11 +287,15 @@ public class GlobalHealthWatcher implements Runnable {
                             Thread.sleep(1000);
                         }
                         if(this.plugin.isReachableAgent(cGlobalPath)) {
-                            globalPath = cGlobalPath;
+                            globalController = new String[2];
+                            globalController[0] = cme.getParam("dst_region");
+                            globalController[1] = cme.getParam("dst_agent");
                         }
                     }
                     else {
-                        globalPath = cGlobalPath;
+                        globalController = new String[2];
+                        globalController[0] = cme.getParam("dst_region");
+                        globalController[1] = cme.getParam("dst_agent");
                     }
                 }
 
@@ -385,26 +306,30 @@ public class GlobalHealthWatcher implements Runnable {
             logger.error("connectToGlobal()" + ex.getMessage());
         }
 
-        return globalPath;
+        return globalController;
     }
 
     private void sendGlobalWatchDogRegister() {
 
 	    try {
-            String globalPath = plugin.getGlobalControllerPath();
-            if((globalPath != null) && (!plugin.isGlobalController())) {
+            if((plugin.getGlobalController() != null) && (!plugin.isGlobalController())) {
                 //is the global controller reachable
                 if(plugin.isReachableAgent(plugin.getGlobalControllerPath())) {
-                    String[] gPath = globalPath.split("_");
                     MsgEvent le = new MsgEvent(MsgEvent.Type.CONFIG, plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), "enabled");
                     le.setParam("src_region", plugin.getRegion());
-                    le.setParam("dst_region", gPath[0]);
+                    le.setParam("dst_region",plugin.getGlobalController()[0]);
+                    le.setParam("dst_agent",plugin.getGlobalController()[1]);
+                    le.setParam("dst_plugin",plugin.getControllerId());
+                    le.setParam("globalcmd", Boolean.TRUE.toString());
+
+                    //le.setParam("dst_region", gPath[0]);
                     //le.setParam("is_active", Boolean.TRUE.toString());
                     le.setParam("action", "enable");
                     //le.setParam("globalcmd", Boolean.TRUE.toString());
                     le.setParam("watchdogtimer", String.valueOf(plugin.getConfig().getLongParam("watchdogtimer", 5000L)));
                     //this should be RPC, but routing needs to be fixed route 16 -> 32 -> regionsend -> 16 -> 32 -> regionsend (goes to region, not rpc)
                     le.setParam("source","sendGlobalWatchDogRegister()");
+                    logger.error("SENDING GLOBAL REGISTER: " + le.getParams());
                     plugin.msgIn(le);
                 }
             }
@@ -464,20 +389,18 @@ public class GlobalHealthWatcher implements Runnable {
         MsgEvent me = null;
 	    try {
             if(!this.plugin.isGlobalController()) {
-                if(this.plugin.getGlobalControllerPath() != null) {
-                    //todo Enable Export
+                if(this.plugin.getGlobalController() != null) {
+                    //TODO Enable Export
                     String dbexport = plugin.getGDB().gdb.getDBExport();
                     logger.trace("EXPORT" + dbexport + "EXPORT");
 
-                    //we have somewhere to send information
-                    String[] tmpStr = this.plugin.getGlobalControllerPath().split("_");
-
                     me = new MsgEvent(MsgEvent.Type.CONFIG, this.plugin.getRegion(), this.plugin.getAgent(), this.plugin.getPluginID(), "regionalimport");
                     me.setParam("action", "regionalimport");
-                    me.setParam("globalcmd", Boolean.TRUE.toString());
                     me.setParam("src_region", this.plugin.getRegion());
-                    me.setParam("dst_region", tmpStr[0]);
-                    me.setParam("dst_agent", tmpStr[1]);
+                    me.setParam("dst_region",plugin.getGlobalController()[0]);
+                    me.setParam("dst_agent",plugin.getGlobalController()[1]);
+                    me.setParam("dst_plugin",plugin.getControllerId());
+                    me.setParam("globalcmd", Boolean.TRUE.toString());
                     me.setParam("dst_plugin", plugin.getPluginID());
                     me.setParam("exportdata",dbexport);
                     this.plugin.msgIn(me);
@@ -537,7 +460,7 @@ public class GlobalHealthWatcher implements Runnable {
                 //send full export of region to global controller
                 //Need to develop a better inconsistency method
                 //logger.info("Regional Export");
-                //todo enable global export
+                //TODO enable global export
                 //regionalDBexport();
 
             }

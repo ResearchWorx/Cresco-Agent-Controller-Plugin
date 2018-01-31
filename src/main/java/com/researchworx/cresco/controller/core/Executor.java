@@ -1,5 +1,6 @@
 package com.researchworx.cresco.controller.core;
 
+import com.researchworx.cresco.controller.regionalcontroller.RegionHealthWatcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.plugin.core.CExecutor;
 import com.researchworx.cresco.library.utilities.CLogger;
@@ -10,6 +11,8 @@ import java.util.List;
 class Executor extends CExecutor {
     private Launcher mainPlugin;
     private CLogger logger;
+    public RegionHealthWatcher regionHealthWatcher;
+
 
     private long messageCount = 0;
 
@@ -22,6 +25,21 @@ class Executor extends CExecutor {
     @Override
     public MsgEvent processExec(MsgEvent ce) {
         logger.trace("Processing Exec message");
+
+
+        if(ce.getParam("is_regional") != null) {
+            //this is a global command
+            if(mainPlugin.isRegionalController()) {
+                //return gce.execute(le);
+                mainPlugin.getRegionHealthWatcher().rce.execute(ce);
+            }
+            else {
+                //
+                //globalSend(le);
+                return null;
+            }
+        }
+
 
             switch (ce.getParam("action")) {
 

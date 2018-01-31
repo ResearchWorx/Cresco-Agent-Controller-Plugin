@@ -56,7 +56,7 @@ public class BrokeredAgent {
 		addressMap.put(activeAddress, BrokerStatusType.STARTING);
 		if(bm.MonitorActive) {
 			bm.shutdown();
-            logger.error("bm.MonitorActive : shutting down.. activeAddress: " + activeAddress.toString());
+            logger.error("bm.MonitorActive : shutting down.. activeAddress: " + activeAddress);
 		}
 		bm = new BrokerMonitor(plugin, agentPath);
 		new Thread(bm).start();

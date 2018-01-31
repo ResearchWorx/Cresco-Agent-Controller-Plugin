@@ -214,7 +214,7 @@ public class DBInterface {
                         regionMap.put("name", agent);
                         regionMap.put("region", region);
                         regionMap.put("plugins", String.valueOf(pluginList.size()));
-                        //todo there must be a better way to do this
+                        //TODO there must be a better way to do this
                         try {
                             String nodeId = gdb.getNodeId(region, agent, null);
                             Map<String, String> params = gdb.getNodeParams(nodeId);
@@ -1063,8 +1063,6 @@ public class DBInterface {
 
                             if(gdb.getNodeId(region,agent,subpluginId) == null) {
                                 gdb.addNode(region, agent, subpluginId);
-                                //todo remove this and or fix the reason it is here
-                                System.exit(0);
                             }
                             gdb.setNodeParams(region, agent, subpluginId, configMap);
 

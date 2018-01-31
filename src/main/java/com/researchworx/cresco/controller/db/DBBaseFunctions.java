@@ -486,7 +486,7 @@ public class DBBaseFunctions {
             node_param = iNode.getProperty(param).toString();
 
         }
-        //todo put this back
+        //TODO put this back
         /*
         catch(java.lang.IllegalArgumentException eai) {
             //Vertex id can not be null

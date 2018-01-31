@@ -27,14 +27,14 @@ public class RegionalCommandExec {
 
 	private Launcher plugin;
 	private CLogger logger;
-	private AgentDiscovery regionalDiscovery;
+	//private AgentDiscovery regionalDiscovery;
 	private GlobalCommandExec gce;
 
 	public RegionalCommandExec(Launcher plugin)
 	{
 		this.logger = new CLogger(RegionalCommandExec.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
 		this.plugin = plugin;
-		regionalDiscovery = new AgentDiscovery(plugin);
+		//regionalDiscovery = new AgentDiscovery(plugin);
 		gce = new GlobalCommandExec(plugin);
 	}
 
@@ -45,11 +45,10 @@ public class RegionalCommandExec {
             //not for global controller, send to region
             if (le.getParam("dst_agent") != null) {
                 regionSend(le);
-                //todo fix 0
-                System.exit(0);
                 return null;
             }
         }
+
 
 	    //Add Region specific information for return information
         le.setParam("dst_agent",plugin.getAgent());
@@ -57,8 +56,6 @@ public class RegionalCommandExec {
 
 
         if(le.getParam("globalcmd") != null) {
-            //todo fix 1
-            System.exit(0);
                 //this is a global command
                 if(plugin.isGlobalController()) {
                     return gce.execute(le);
@@ -194,14 +191,11 @@ public class RegionalCommandExec {
     private void globalSend(MsgEvent ge) {
         try {
             if(!this.plugin.isGlobalController()) {
-                if(this.plugin.getGlobalControllerPath() != null) {
-                    String[] tmpStr = this.plugin.getGlobalControllerPath().split("_");
-                    ge.setParam("dst_region", tmpStr[0]);
-                    ge.removeParam("dst_agent");
-                    ge.removeParam("dst_plugin");
-                    //ge.setParam("dst_agent", tmpStr[1]);
-                    //ge.setParam("dst_plugin", plugin.getPluginID());
-                    //plugin.msgIn(ge);
+                if(this.plugin.getGlobalController() != null) {
+                    ge.setParam("dst_region",plugin.getGlobalController()[0]);
+                    ge.setParam("dst_agent",plugin.getGlobalController()[1]);
+                    ge.setParam("globalcmd", Boolean.TRUE.toString());
+                    ge.setParam("dst_plugin",plugin.getControllerId());
                     plugin.sendAPMessage(ge);
                 }
             }
@@ -210,26 +204,5 @@ public class RegionalCommandExec {
             logger.error("globalSend : " + ex.getMessage());
         }
     }
-
-	/*
-    //function to send to global controller
-    private void globalSend(MsgEvent ge) {
-        try {
-            if(!this.plugin.isGlobalController()) {
-                if(this.plugin.getGlobalControllerPath() != null) {
-                    logger.error("PLUGIN PATH" + this.plugin.getGlobalControllerPath());
-                    String[] tmpStr = this.plugin.getGlobalControllerPath().split("_");
-                    ge.setParam("dst_region", tmpStr[0]);
-                    //ge.setParam("dst_plugin", plugin.getPluginID());
-                    logger.error("FORWARDING TO GC : " + ge.getParams().toString());
-                    plugin.sendMsgEvent(ge);
-                }
-            }
-        }
-        catch (Exception ex) {
-            logger.error("globalSend : " + ex.getMessage());
-        }
-    }
-    */
 
 }

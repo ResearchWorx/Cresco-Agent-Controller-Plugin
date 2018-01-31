@@ -361,7 +361,7 @@ public class MsgRoute implements Runnable {
     }
 
     private MsgEvent getRegionalCommandExecOutGoing() {
-        //todo route should send directly there, local in commandexec will figure it out.
+        //TODO route should send directly there, local in commandexec will figure it out.
         try {
             boolean incoming = false;
 
@@ -391,7 +391,7 @@ public class MsgRoute implements Runnable {
     }
 
     private MsgEvent getRegionalCommandExec() {
-        //todo route should send directly there, local in commandexec will figure it out.
+        //TODO route should send directly there, local in commandexec will figure it out.
         try {
             String callId = "callId-" + /*PluginEngine.region*/plugin.getRegion() + "-" + /*PluginEngine.agent*/plugin.getAgent() + "-" + /*PluginEngine.plugin*/plugin.getPluginID(); //calculate callID
             if (rm.getParam(callId) != null) { //send message to RPC hash

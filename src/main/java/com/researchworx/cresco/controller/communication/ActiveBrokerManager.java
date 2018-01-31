@@ -154,7 +154,7 @@ public class ActiveBrokerManager implements Runnable  {
 
 		    		if((plugin.getGlobalControllerPath()) != null && (plugin.getGlobalControllerPath().equals(ba.agentPath))) {
                         logger.info("Clearing Global Controller Path " +ba.agentPath);
-                        plugin.setGlobalControllerPath(null);
+                        plugin.setGlobalController(null,null);
                     }
 
                     plugin.getBrokeredAgents().remove(entry.getKey());//remove agent

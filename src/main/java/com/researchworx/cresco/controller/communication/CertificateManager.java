@@ -305,7 +305,7 @@ public class CertificateManager {
         //trustStore.setKeyEntry(alias, key, password, chain);
 
         //trustStore = keyStore;
-        //todo trying to to save
+        //TODO trying to to save
         //keyStore.store(new FileOutputStream(keystore),password);
 
     }

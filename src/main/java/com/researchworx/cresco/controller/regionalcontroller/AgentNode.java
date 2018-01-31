@@ -89,7 +89,7 @@ public class AgentNode {
   	    while (it.hasNext()) 
   	    {
   	        Entry<String, Map<String, String>> pairs = it.next();
-  	        ar.add(pairs.getKey().toString());      
+  	        ar.add(pairs.getKey());
   	    }
   	    return ar;
 	}

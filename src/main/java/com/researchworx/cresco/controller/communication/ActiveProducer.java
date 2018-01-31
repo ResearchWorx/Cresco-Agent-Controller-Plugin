@@ -28,7 +28,7 @@ public class ActiveProducer {
 
             for (Entry<String, ActiveProducerWorker> entry : producerWorkers.entrySet()) {
                 ActiveProducerWorker apw = entry.getValue();
-                logger.trace("ActiveProducerWorker = " + entry.getKey().toString());
+                logger.trace("ActiveProducerWorker = " + entry.getKey());
 
                 if (apw.isActive) {
                     apw.isActive = false;
