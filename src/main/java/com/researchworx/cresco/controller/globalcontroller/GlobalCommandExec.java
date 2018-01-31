@@ -145,10 +145,10 @@ public class GlobalCommandExec {
 
                     switch (ce.getParam("action")) {
                         case "disable":
-                            return globalEnable(ce);
+                            return globalDisable(ce);
 
                         case "enable":
-                            return globalDisable(ce);
+                            return globalEnable(ce);
 
                         case "regionalimport":
                             return regionalImport(ce);
@@ -632,7 +632,7 @@ public class GlobalCommandExec {
         return null;
     }
 
-    private MsgEvent globalDisable(MsgEvent ce) {
+    private MsgEvent globalEnable(MsgEvent ce) {
 	    try {
         logger.debug("CONFIG : AGENTDISCOVER ADD: Region:" + ce.getParam("src_region") + " Agent:" + ce.getParam("src_agent"));
         logger.trace("Message Body [" + ce.getMsgBody() + "] [" + ce.getParams().toString() + "]");
@@ -645,7 +645,8 @@ public class GlobalCommandExec {
         return null;
     }
 
-    private MsgEvent globalEnable(MsgEvent ce) {
+
+    private MsgEvent globalDisable(MsgEvent ce) {
 	    try {
         logger.debug("CONFIG : AGENTDISCOVER REMOVE: Region:" + ce.getParam("src_region") + " Agent:" + ce.getParam("src_agent"));
         logger.trace("Message Body [" + ce.getMsgBody() + "] [" + ce.getParams().toString() + "]");
@@ -657,6 +658,7 @@ public class GlobalCommandExec {
 
         return null;
     }
+
 
 	private MsgEvent removePlugin(MsgEvent ce) {
 	    try {

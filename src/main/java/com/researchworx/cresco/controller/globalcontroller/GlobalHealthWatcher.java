@@ -44,11 +44,10 @@ public class GlobalHealthWatcher implements Runnable {
             le.setParam("dst_region",plugin.getGlobalController()[0]);
             le.setParam("dst_agent",plugin.getGlobalController()[1]);
             le.setParam("dst_plugin",plugin.getControllerId());
-
-            //le.setParam("dst_region", globalPath[0]);
-
-            le.setParam("globalcmd", Boolean.TRUE.toString());
             le.setParam("action", "disable");
+
+            //TODO does this need to be added?
+            //le.setParam("globalcmd", Boolean.TRUE.toString());
 
             le.setParam("watchdogtimer", String.valueOf(plugin.getConfig().getLongParam("watchdogtimer",5000L)));
             //MsgEvent re = new RPCCall().call(le);
