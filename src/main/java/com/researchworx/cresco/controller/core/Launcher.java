@@ -31,6 +31,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 @AutoService(CPlugin.class)
 public class Launcher extends CPlugin {
 
+    public ControllerState cstate;
+
     private String agentpath;
 
     //manager for all certificates
@@ -131,11 +133,13 @@ public class Launcher extends CPlugin {
 
 
 
+    /*
     private boolean isRegionalController = false;
-
     private boolean isGlobalController = false;
     private String[] globalController;
     private String[] regionalController;
+    */
+
     private boolean GlobalControllerManagerActive = false;
 
     private Map<String, Long> discoveryMap;
@@ -176,8 +180,12 @@ public class Launcher extends CPlugin {
     public void start() {
         this.config = new ControllerConfig(config.getConfig());
         System.setProperty("log.console.level", "SEVERE");
+
         this.setWatchDog(null);
         this.setRPC(null);
+
+        cstate = new ControllerState(this);
+
     }
 
     @Override
@@ -263,7 +271,7 @@ public class Launcher extends CPlugin {
                 //notify agent of change
                 ce.setParam("set_region", this.region);
                 ce.setParam("set_agent", this.agent);
-                ce.setParam("is_regional_controller", Boolean.toString(this.isRegionalController));
+                ce.setParam("is_regional_controller", Boolean.toString(this.cstate.isRegionalController()));
                 ce.setParam("is_active", Boolean.toString(this.isActive));
                 //PluginEngine.msgInQueue.add(ce);
                 this.sendMsgEvent(ce);
@@ -325,9 +333,8 @@ public class Launcher extends CPlugin {
         //connect to a specific regional controller
         boolean isInit = false;
         try {
-
             if(getConfig().getStringParam("regional_controller_host") != null) {
-
+                this.cstate.setAgentInit("initAgent() Static Regional Host: " + getConfig().getStringParam("regional_controller_host"));
                 while(!isInit) {
 
                     String tmpRegion = discoveryList.get(0).getParam("dst_region");
@@ -341,7 +348,7 @@ public class Launcher extends CPlugin {
                     String cbrokerAddress = certDiscovery.get(0).getParam("dst_ip");
                     String cbrokerValidatedAuthenication = certDiscovery.get(0).getParam("validated_authenication");
                     String cRegion = certDiscovery.get(0).getParam("dst_region");
-
+                    String cAgent = certDiscovery.get(0).getParam("dst_agent");
 
                     if ((cbrokerAddress != null) && (cbrokerValidatedAuthenication != null)) {
 
@@ -361,6 +368,8 @@ public class Launcher extends CPlugin {
 
                             this.brokerAddressAgent = cbrokerAddress;
 
+                            //TODO SET AGENT INFORMATOIN HERE
+                            this.cstate.setAgentSuccess(cRegion,cAgent,"initAgent() Static Regional Host: " + getConfig().getStringParam("regional_controller_host") + " connected.");
                             isInit = true;
                             logger.info("Broker IP: " + cbrokerAddress);
                             logger.info("Region: " + this.region);
@@ -372,6 +381,7 @@ public class Launcher extends CPlugin {
             }
             //do discovery
             else {
+                this.cstate.setAgentInit("initAgent() : Dynamic Discovery");
 
                 while(!isInit || discoveryList.isEmpty()) {
 
@@ -380,9 +390,10 @@ public class Launcher extends CPlugin {
                 String cbrokerAddress = null;
                 String cbrokerValidatedAuthenication = null;
 
-
                 String cRegion = null;
-                int brokerCount = -1;
+                String cAgent = null;
+
+                    int brokerCount = -1;
                 for (MsgEvent bm : discoveryList) {
 
                     int tmpBrokerCount = Integer.parseInt(bm.getParam("agent_count"));
@@ -391,6 +402,7 @@ public class Launcher extends CPlugin {
                         cbrokerAddress = bm.getParam("dst_ip");
                         cbrokerValidatedAuthenication = bm.getParam("validated_authenication");
                         cRegion = bm.getParam("dst_region");
+                        cAgent = bm.getParam("dst_agent");
                     }
                 }
                 if ((cbrokerAddress != null) && (cbrokerValidatedAuthenication != null)) {
@@ -420,13 +432,14 @@ public class Launcher extends CPlugin {
                     this.brokerAddressAgent = cbrokerAddress;
 
                     this.region = cRegion;
+
                     logger.info("Assigned regionid=" + this.region);
                     this.agentpath = this.region + "_" + this.agent;
                     logger.debug("AgentPath=" + this.agentpath);
-
+                    this.cstate.setAgentSuccess(cRegion,cAgent,"initAgent() Dynamic Regional Host: " + cbrokerAddress + " connected.");
+                    isInit = true;
                 }
 
-                this.isRegionalController = false;
                 if (this.getConfig().getBooleanParam("enable_clientnetdiscovery", true)) {
                     //discovery engine
                     if (!startNetDiscoveryEngine()) {
@@ -445,6 +458,7 @@ public class Launcher extends CPlugin {
         } catch (Exception ex) {
             logger.error("initAgent() Error " + ex.getMessage());
         }
+
         return isInit;
     }
 
@@ -650,10 +664,12 @@ public class Launcher extends CPlugin {
             //init KPIProducer
             this.kpip = new KPIProducer(this, "KPI", "tcp://" + this.brokerAddressAgent + ":32011", "bname", "bpass");
 
-            if(isRegionalController()) {
+            if(cstate.isRegionalController()) {
+
                 //do global discovery here
                 this.globalControllerManagerThread = new Thread(new GlobalHealthWatcher(this));
                 this.globalControllerManagerThread.start();
+
                 while (!this.GlobalControllerManagerActive) {
                     Thread.sleep(1000);
                     logger.trace("Wait loop for Global Controller");
@@ -672,13 +688,12 @@ public class Launcher extends CPlugin {
     private Boolean initRegion() {
         boolean isInit = false;
         try {
-            //if ((this.region.equals("init")) && (this.agent.equals("init"))) {
-                region = getConfig().getStringParam("regionname", "region-" + java.util.UUID.randomUUID().toString());
-                agent = getConfig().getStringParam("agentname", "agent-" + java.util.UUID.randomUUID().toString());
-                //region = "region-" + java.util.UUID.randomUUID().toString();
-                //agent = "agent-" + java.util.UUID.randomUUID().toString();
-                logger.debug("Generated regionid=" + this.region);
-            //}
+            region = getConfig().getStringParam("regionname", "region-" + java.util.UUID.randomUUID().toString());
+            agent = getConfig().getStringParam("agentname", "agent-" + java.util.UUID.randomUUID().toString());
+            logger.debug("Generated regionid=" + this.region);
+
+            this.cstate.setRegionInit("initRegion() Region:" + region + " agent:" + agent);
+
             this.agentpath = this.region + "_" + this.agent;
             certificateManager = new CertificateManager(this,agentpath);
 
@@ -742,15 +757,20 @@ public class Launcher extends CPlugin {
                 logger.error("Start Network Discovery Engine Failed!");
             }
 
+            cstate.setRegionGlobalInit("initRegion() : Success");
             isInit = true;
 
         } catch (Exception ex) {
             logger.error("initRegion() Error " + ex.getMessage());
+            this.cstate.setRegionFailed("initRegion() Error " + ex.getMessage());
         }
         return isInit;
     }
 
     public Boolean commInit() {
+
+        boolean isRegionalController = false;
+        boolean isGlobalController = false;
 
         boolean isCommInit = true;
         if(getWatchDog() != null) {
@@ -868,7 +888,6 @@ public class Launcher extends CPlugin {
                 initGlobal();
             }
 
-
             //TODO enable on post-start
             /*
             //start network performance monitor if create
@@ -964,7 +983,7 @@ public class Launcher extends CPlugin {
         List<String> rAgents = null;
         try {
             rAgents = new ArrayList<>();
-            if (this.isRegionalController) {
+            if (this.cstate.isRegionalController()) {
                 ActiveMQDestination[] er = this.broker.broker.getBroker().getDestinations();
                 for (ActiveMQDestination des : er) {
                     if (des.isQueue()) {
@@ -982,7 +1001,7 @@ public class Launcher extends CPlugin {
 
     public boolean isReachableAgent(String remoteAgentPath) {
         boolean isReachableAgent = false;
-        if (this.isRegionalController) {
+        if (this.cstate.isRegionalController()) {
             try {
                 ActiveMQDestination[] er = this.broker.broker.getBroker().getDestinations();
                 for (ActiveMQDestination des : er) {
@@ -1126,13 +1145,6 @@ public class Launcher extends CPlugin {
         ActiveBrokerManagerActive = activeBrokerManagerActive;
     }
 
-    public boolean isGlobalControllerManagerActive() {
-        return GlobalControllerManagerActive;
-    }
-    public void setGlobalControllerManagerActive(boolean activeBrokerManagerActive) {
-        GlobalControllerManagerActive = activeBrokerManagerActive;
-    }
-
     public boolean isConsumerThreadRegionActive() {
         return ConsumerThreadRegionActive;
     }
@@ -1161,6 +1173,13 @@ public class Launcher extends CPlugin {
         this.clientDiscoveryActiveIPv6 = clientDiscoveryActiveIPv6;
     }
 
+    public boolean isGlobalControllerManagerActive() {
+        return GlobalControllerManagerActive;
+    }
+    public void setGlobalControllerManagerActive(boolean activeBrokerManagerActive) {
+        GlobalControllerManagerActive = activeBrokerManagerActive;
+    }
+
     public boolean isDiscoveryActive() {
         return DiscoveryActive;
     }
@@ -1184,61 +1203,6 @@ public class Launcher extends CPlugin {
 
     public boolean isTCPDiscoveryActive() {
         return TCPDiscoveryActive;
-    }
-
-
-    public boolean isRegionalController() {
-        return this.isRegionalController;
-    }
-    public void setRegionalController(boolean regionalController) {
-        isRegionalController = regionalController;
-    }
-
-    public String[] getRegionalController() {
-        return this.regionalController;
-    }
-    public void setRegionalController(String controllerRegion, String controllerAgent) {
-
-        logger.trace("SETTING REGIONAL CONTROLLER PATH : OLD : " + this.regionalController);
-        this.regionalController = new String[2];
-        this.regionalController[0] = controllerRegion;
-        this.regionalController[1] = controllerAgent;
-        logger.trace("SETTING REGIONAL CONTROLLER PATH : NEW : " + this.regionalController);
-
-    }
-
-    public String[] getGlobalController() {
-        return this.globalController;
-    }
-    public void setGlobalController(String controllerRegion, String controllerAgent) {
-
-        logger.trace("SETTING GLOBAL CONTROLLER PATH : OLD : " + this.globalController);
-        this.globalController = new String[2];
-        this.globalController[0] = controllerRegion;
-        this.globalController[1] = controllerAgent;
-        logger.trace("SETTING GLOBAL CONTROLLER PATH : NEW : " + this.globalController);
-
-
-    }
-
-    public String getControllerId() {
-        return "plugin/0";
-    }
-
-    public String getGlobalControllerPath() {
-        if(getGlobalController() != null) {
-            return getGlobalController()[0] + "_" + getGlobalController()[1];
-        } else {
-            return null;
-        }
-    }
-
-
-    public boolean isGlobalController() {
-        return this.isGlobalController;
-    }
-    public void setGlobalController(boolean globalController) {
-        isGlobalController = globalController;
     }
 
     public boolean hasActiveProducter() {

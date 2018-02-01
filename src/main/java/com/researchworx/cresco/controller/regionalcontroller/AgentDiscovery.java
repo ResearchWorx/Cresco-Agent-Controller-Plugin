@@ -21,15 +21,13 @@ public class AgentDiscovery {
 
     private void globalSend(MsgEvent ge) {
         try {
-            if(!this.plugin.isGlobalController()) {
-                if(this.plugin.getGlobalController() != null) {
-                    ge.setParam("dst_region",plugin.getGlobalController()[0]);
-                    ge.setParam("dst_agent",plugin.getGlobalController()[1]);
-                    ge.setParam("dst_plugin",plugin.getControllerId());
+            if(!this.plugin.cstate.isGlobalController()) {
+                    ge.setParam("dst_region",plugin.cstate.getGlobalRegion());
+                    ge.setParam("dst_agent",plugin.cstate.getGlobalAgent());
+                    ge.setParam("dst_plugin",plugin.cstate.getControllerId());
                     ge.setParam("globalcmd", Boolean.TRUE.toString());
-
                     plugin.sendAPMessage(ge);
-                }
+
             }
         }
         catch (Exception ex) {

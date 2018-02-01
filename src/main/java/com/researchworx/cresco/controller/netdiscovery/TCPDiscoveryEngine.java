@@ -65,7 +65,7 @@ public class TCPDiscoveryEngine implements Runnable {
                         logger.debug("{}", "network discovery");
                         me = getNetworkMsg(rme); //generate payload
                     }
-                    if(this.plugin.isRegionalController()) {
+                    if(this.plugin.cstate.isRegionalController()) {
                         if (rme.getParam("discovery_type").equals(DiscoveryType.AGENT.name())) {
                             logger.debug("{}", "agent discovery");
                             me = getAgentMsg(rme); //generate payload
@@ -74,7 +74,7 @@ public class TCPDiscoveryEngine implements Runnable {
                             me = getRegionMsg(rme);
                         } else if (rme.getParam("discovery_type").equals(DiscoveryType.GLOBAL.name())) {
                             //if this is not a global controller, don't respond
-                            if(this.plugin.isGlobalController()) {
+                            if(this.plugin.cstate.isGlobalController()) {
                                 logger.debug("{}", "global discovery");
                                 me = getGlobalMsg(rme);
                             }
@@ -213,7 +213,7 @@ public class TCPDiscoveryEngine implements Runnable {
                     else {
 
                         logger.error("src_region=" + rme.getParam("src_region") + " validatedAuthenication=" + validatedAuthenication);
-                        if ((rme.getParam("src_region").equals(plugin.getRegion())) && plugin.isRegionalController()) {
+                        if ((rme.getParam("src_region").equals(plugin.getRegion())) && plugin.cstate.isRegionalController()()) {
                             logger.error("{}", "!reconnect attempt!");
                         }
 
@@ -233,7 +233,7 @@ public class TCPDiscoveryEngine implements Runnable {
         private MsgEvent getGlobalMsg(MsgEvent rme) {
             MsgEvent me = null;
             try {
-                if (plugin.isRegionalController()) {
+                if (plugin.cstate.isRegionalController()) {
 
                     String validatedAuthenication = validateMsgEvent(rme); //create auth string
                     if (validatedAuthenication != null) {
@@ -271,7 +271,7 @@ public class TCPDiscoveryEngine implements Runnable {
         private MsgEvent getRegionMsg(MsgEvent rme) {
             MsgEvent me = null;
             try {
-                if (plugin.isRegionalController()) {
+                if (plugin.cstate.isRegionalController()) {
 
                     String validatedAuthenication = validateMsgEvent(rme); //create auth string
                     if (validatedAuthenication != null) {

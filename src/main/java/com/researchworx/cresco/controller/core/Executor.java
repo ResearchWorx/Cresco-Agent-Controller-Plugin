@@ -19,33 +19,17 @@ class Executor extends CExecutor {
     Executor(Launcher plugin) {
         super(plugin);
         this.mainPlugin = plugin;
-        this.logger = new CLogger(Executor.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
+        this.logger = new CLogger(Executor.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
     }
 
     @Override
     public MsgEvent processExec(MsgEvent ce) {
         logger.trace("Processing Exec message");
 
-
-        if(ce.getParam("is_regional") != null) {
-            //this is a global command
-            if(mainPlugin.isRegionalController()) {
-                //return gce.execute(le);
-                mainPlugin.getRegionHealthWatcher().rce.execute(ce);
-            }
-            else {
-                //
-                //globalSend(le);
-                return null;
-            }
-        }
-
-
             switch (ce.getParam("action")) {
 
                 case "ping":
                     return pingReply(ce);
-
                 case "noop":
                     noop();
                     break;
@@ -59,18 +43,25 @@ class Executor extends CExecutor {
     }
 
     @Override
+    public MsgEvent processWatchDog(MsgEvent ce) {
+        return forwardToRegion(ce);
+    }
+
+    @Override
     public MsgEvent processConfig(MsgEvent ce) {
         logger.trace("Processing Config message");
 
             switch (ce.getParam("action")) {
                 case "comminit":
                     return commInit(ce);
+                case "agent_enable":
+                    return forwardToRegion(ce);
+                case "agent_disable":
+                    return forwardToRegion(ce);
 
                 default:
                     logger.error("Unknown configtype found {} for {}:", ce.getParam("action"), ce.getMsgType().toString());
-
             }
-
         return null;
     }
 
@@ -126,6 +117,18 @@ class Executor extends CExecutor {
         msg.setParam("type", "agent_controller");
         logger.debug("Returning communication details to Cresco agent");
         return msg;
+
+    }
+
+    private MsgEvent forwardToRegion(MsgEvent le) {
+
+        le.setParam("dst_region", mainPlugin.cstate.getRegionalRegion());
+        le.setParam("dst_agent", mainPlugin.cstate.getRegionalAgent());
+        le.setParam("dst_plugin",mainPlugin.cstate.getControllerId());
+        le.setParam("is_regional", Boolean.TRUE.toString());
+        plugin.sendMsgEvent(le);
+        //set it and forget it!
+        return null;
 
     }
 
@@ -227,8 +230,8 @@ class Executor extends CExecutor {
         //msg.setParam("dst_region",initRegion);
         msg.setParam("set_region", this.plugin.getRegion());
         msg.setParam("set_agent", this.plugin.getAgent());
-        msg.setParam("is_regional_controller", Boolean.toString(this.mainPlugin.isRegionalController()));
-        msg.setParam("is_global_controller", Boolean.toString(this.mainPlugin.isGlobalController()));
+        msg.setParam("is_regional_controller", Boolean.toString(this.mainPlugin.cstate.isRegionalController()));
+        msg.setParam("is_global_controller", Boolean.toString(this.mainPlugin.cstate.isGlobalController()));
         msg.setParam("is_active", Boolean.toString(this.plugin.isActive()));
         logger.debug("Returning communication details to Cresco agent");
 

@@ -152,9 +152,10 @@ public class ActiveBrokerManager implements Runnable  {
 		    		ba.setStop();
 		    		logger.info("Cleared agentPath: " + ba.agentPath);
 
-		    		if((plugin.getGlobalControllerPath()) != null && (plugin.getGlobalControllerPath().equals(ba.agentPath))) {
+		    		if((plugin.cstate.getGlobalControllerPath()) != null && (plugin.cstate.getGlobalControllerPath().equals(ba.agentPath))) {
                         logger.info("Clearing Global Controller Path " +ba.agentPath);
-                        plugin.setGlobalController(null,null);
+                        //plugin.setGlobalController(null,null);
+						plugin.cstate.setRegionalGlobalFailed("BrokerWatchDog: BrokerStatusType.FAILED : BrokerPath: " +ba.agentPath);
                     }
 
                     plugin.getBrokeredAgents().remove(entry.getKey());//remove agent

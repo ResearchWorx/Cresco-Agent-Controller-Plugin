@@ -51,7 +51,7 @@ public class RegionHealthWatcher {
                     logger.info("Agent Consumer shutdown detected");
                 }
 
-                if (plugin.isRegionalController()) {
+                if (plugin.cstate.isRegionalController()) {
                     if (!plugin.isDiscoveryActive()) {
                         isHealthy = false;
                         logger.info("Discovery shutdown detected");
@@ -93,7 +93,7 @@ public class RegionHealthWatcher {
             this.logger = logger;
         }
         public void run() {
-            if(plugin.isRegionalController()) { //only run if node is regional controller
+            if(plugin.cstate.isRegionalController()) { //only run if node is regional controller
                 logger.debug("RegionalNodeStatusWatchDog");
                 Map<String, NodeStatusType> nodeStatus = plugin.getGDB().getNodeStatus(plugin.getRegion(), null, null);
                 for (Map.Entry<String, NodeStatusType> entry : nodeStatus.entrySet()) {

@@ -144,10 +144,10 @@ public class GlobalCommandExec {
                 if(ce.getParam("action") != null) {
 
                     switch (ce.getParam("action")) {
-                        case "disable":
+                        case "region_disable":
                             return globalDisable(ce);
 
-                        case "enable":
+                        case "region_enable":
                             return globalEnable(ce);
 
                         case "regionalimport":

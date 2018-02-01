@@ -946,9 +946,17 @@ public class DBInterface {
 
         try {
 
+            /*
             String region = de.getParam("src_region");
             String agent = de.getParam("src_agent");
             String plugin = de.getParam("src_plugin");
+            */
+
+            String region = de.getParam("region_name");
+            String agent = de.getParam("agent_name");
+            String plugin = de.getParam("plugin_id");
+
+
             de.setParam("is_active",Boolean.TRUE.toString());
             de.setParam("watchdog_ts", String.valueOf(System.currentTimeMillis()));
 
@@ -1015,10 +1023,15 @@ public class DBInterface {
         Boolean wasUpdated = false;
 
         try {
-
+            /*
             String region = de.getParam("src_region");
             String agent = de.getParam("src_agent");
             String pluginId = de.getParam("src_plugin");
+            */
+            String region = de.getParam("region_name");
+            String agent = de.getParam("agent_name");
+            String pluginId = de.getParam("plugin_id");
+
 
             String nodeId = gdb.getNodeId(region,agent,pluginId);
 

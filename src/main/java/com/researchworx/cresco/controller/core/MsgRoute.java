@@ -56,7 +56,7 @@ public class MsgRoute implements Runnable {
                     */
                     /*
                 case 21:
-                    if ((plugin.isRegionalController()) && (rm.getParam("dst_agent") == null)) {
+                    if ((plugin.cstate.isRegionalController()()) && (rm.getParam("dst_agent") == null)) {
                         logger.debug("CONTROLLER SENDING INTER-REGIONAL MESSAGE 21");
                         logger.trace(rm.getParams().toString());
                         regionalSend();
@@ -65,7 +65,7 @@ public class MsgRoute implements Runnable {
                     }
                     break;
                 case 32:
-                    if ((plugin.isRegionalController()) && (rm.getParam("dst_agent") == null)) {
+                    if ((plugin.cstate.isRegionalController()()) && (rm.getParam("dst_agent") == null)) {
                         logger.debug("INTER-REGIONAL MESSAGE REGION-to-REGION INCOMING 32");
                         logger.trace(rm.getParams().toString());
                         regionalSend();
@@ -89,7 +89,7 @@ public class MsgRoute implements Runnable {
                     break;
                     /*
                 case 48:
-                    if (( plugin.isRegionalController()) && (rm.getParam("dst_agent") == null)) {
+                    if (( plugin.cstate.isRegionalController()()) && (rm.getParam("dst_agent") == null)) {
                         logger.debug("CONTROLLER SENDING REGIONAL MESSAGE 48");
                         logger.trace(rm.getParams().toString());
                         regionalSend();
@@ -432,10 +432,30 @@ public class MsgRoute implements Runnable {
                 rm.removeParam(callId);
                 rm.removeParam("is_rpc");
                 plugin.receiveRPC(RPCkey, rm);
-            } else {
-                //return PluginEngine.commandExec.cmdExec(rm);
-                return plugin.execute(rm);
             }
+            //check header for propper exec location
+            else {
+                if((rm.getParam("is_regional") != null) &&(rm.getParam("is_global") != null)) {
+                    //this is a global command
+                    if(plugin.cstate.isGlobalController()) {
+                        return plugin.getRegionHealthWatcher().rce.gce.execute(rm);
+                    } else {
+                        logger.error("Global command sent, but controller is not global");
+                        return null;
+                    }
+                } else if((rm.getParam("is_regional") != null) &&(rm.getParam("is_global") == null)) {
+                    //this is a regional command
+                    if(plugin.cstate.isRegionalController()) {
+                        return plugin.getRegionHealthWatcher().rce.execute(rm);
+                    } else {
+                        logger.error("Regional command sent, but controller is not regional");
+                        return null;
+                    }
+                } else {
+                    return plugin.execute(rm);
+                }
+            }
+
         } catch (Exception ex) {
             logger.error("getCommandExec - " + ex.getMessage());
             ex.printStackTrace();
@@ -483,7 +503,7 @@ public class MsgRoute implements Runnable {
             String TXp = "0";
 
 
-            if(plugin.isRegionalController()) {
+            if(plugin.cstate.isRegionalController()) {
                 RC = "1";
             }
 
