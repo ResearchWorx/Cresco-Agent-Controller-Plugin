@@ -25,8 +25,8 @@ public class ActiveRegionConsumer implements Runnable {
 	private ActiveMQSslConnectionFactory connf;
 	
 	public ActiveRegionConsumer(Launcher plugin, String RXQueueName, String URI, String brokerUserNameAgent, String brokerPasswordAgent) {
-		this.logger = new CLogger(ActiveRegionConsumer.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
-		logger.debug("Initializing");
+		this.logger = new CLogger(ActiveRegionConsumer.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
+		logger.debug("Initializing Pre");
 		this.plugin = plugin;
 		try {
 			//conn = (ActiveMQConnection)new ActiveMQConnectionFactory(brokerUserNameAgent,brokerPasswordAgent,URI).createConnection();
@@ -42,6 +42,9 @@ public class ActiveRegionConsumer implements Runnable {
 			//this.RXqueue = sess.createQueue(RXQueueName + "?consumer.prefetchSize=1");
 			//this.RXqueue = sess.createQueue(RXQueueName);
 
+			logger.debug("Initializing Post");
+
+
 		} catch(Exception ex) {
 			logger.error("Init {}", ex.getMessage());
 		}
@@ -52,9 +55,19 @@ public class ActiveRegionConsumer implements Runnable {
 		logger.info("Initialized");
 		Gson gson = new Gson();
 		try {
+			logger.info("Initialized 0");
+
 			this.plugin.setConsumerThreadRegionActive(true);
+
+			logger.info("Initialized 1");
+
 			MessageConsumer consumer = sess.createConsumer(RXqueue);
+
+			logger.info("Initialized 2");
+
 			while (this.plugin.isConsumerThreadRegionActive()) {
+				logger.info("Initialized 3");
+
 				TextMessage msg = (TextMessage) consumer.receive();
 				if (msg != null) {
 
@@ -65,35 +78,11 @@ public class ActiveRegionConsumer implements Runnable {
 						logger.error("Invalid MsgEvent Format : " + msg.getText());
 					}
 					if(me != null) {
-					//me.setParam("dst_agent",plugin.getAgent());
-                    //me.setParam("dst_plugin",plugin.getPluginID());
 
-                    if(me.getParam("src_agent") == null) {
-						//logger.error("src_agent = null: " + me.getParams().toString());
-					}
-                    else if(!me.getParam("src_agent").equals(plugin.getAgent())) {
-						//logger.info("region message: " + me.getParams().toString());
-					}
-
-					logger.debug("Incoming Message Region: " + me.getParams().toString());
+					//logger.debug("Incoming Message Region: " + me.getParams().toString());
 
 					this.plugin.msgIn(me);
-
-					/*
-					if (me.getMsgBody().toLowerCase().equals("ping")) {
-						String pingAgent = me.getParam("src_region") + "_" + me.getParam("src_agent");
-						logger.info("Sending to Agent [{}]", pingAgent);
-						MsgEvent sme = new MsgEvent(me.getMsgType(), PluginEngine.region, PluginEngine.agent, PluginEngine.plugin, "pong");
-						sme.setParam("src_region", me.getParam("dst_region"));
-						sme.setParam("src_agent", me.getParam("dst_agent"));
-						sme.setParam("dst_region", me.getParam("src_region"));
-						sme.setParam("dst_agent", me.getParam("src_agent"));
-						PluginEngine.ap.sendMessage(sme);
-					} else {
-						logger.trace("[{}] {}_{} sent a message.", new Timestamp(new Date().getTime()), me.getParam("src_region"), me.getParam("src_agent"));
-						System.out.print("Name of Agent to message [q to quit]: ");
 					}
-					*/ }
 				}
 			}
 			logger.debug("Cleaning up");
@@ -109,5 +98,6 @@ public class ActiveRegionConsumer implements Runnable {
 			logger.error(sw.toString()); //
 			this.plugin.setConsumerThreadRegionActive(false);
 		}
+		logger.error("ActiveResion Comsumer Finished");
 	}
 }

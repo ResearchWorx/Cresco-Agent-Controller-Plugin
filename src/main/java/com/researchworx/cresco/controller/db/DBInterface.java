@@ -1,15 +1,14 @@
 package com.researchworx.cresco.controller.db;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.researchworx.cresco.controller.app.gPayload;
+import com.researchworx.cresco.controller.communication.ActiveBrokerManager;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.controller.netdiscovery.DiscoveryNode;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 
-import javax.sound.sampled.Line;
 import javax.xml.bind.DatatypeConverter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -18,6 +17,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class DBInterface {
 
@@ -26,17 +27,37 @@ public class DBInterface {
     private DBEngine gde;
     public DBBaseFunctions gdb;
     public DBApplicationFunctions dba;
+
     private Gson gson;
+    private Thread DBManagerThread;
+    private BlockingQueue<String> importQueue;
 
 
     public DBInterface(Launcher plugin) {
         this.logger = new CLogger(DBInterface.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
         this.plugin = plugin;
+        this.importQueue = new LinkedBlockingQueue<>();
         this.gde = new DBEngine(plugin);
         this.gdb = new DBBaseFunctions(plugin,gde);
         this.dba = new DBApplicationFunctions(plugin,gde);
         this.gson = new Gson();
+
+        //DB manager
+        logger.debug("Starting DB Manager");
+        logger.debug("Starting Broker Manager");
+        this.DBManagerThread = new Thread(new DBManager(plugin, importQueue));
+        this.DBManagerThread.start();
     }
+
+    /*
+    public Thread getDBManagerThread() {
+        return DBManagerThread;
+    }
+
+    public void setDBManagerThread(Thread activeDBManagerThread) {
+        this.DBManagerThread = activeDBManagerThread;
+    }
+    */
 
     public Map<String,String> paramStringToMap(String param) {
         Map<String,String> params = null;
@@ -182,6 +203,10 @@ public class DBInterface {
         }
 
         return queryReturn;
+    }
+
+    public void submitDBImport(String exportData) {
+        importQueue.offer(exportData);
     }
 
     public String getAgentList(String actionRegion) {

@@ -264,7 +264,6 @@ public class DBImport {
         while (!value.isEmpty() && value.charAt(0) != '{') {
             value = value.substring(1);
         }
-
         record = null;
         try {
 

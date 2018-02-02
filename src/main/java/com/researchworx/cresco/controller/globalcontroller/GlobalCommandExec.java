@@ -618,11 +618,17 @@ public class GlobalCommandExec {
         try {
             logger.debug("CONFIG : regionalimport message type found");
             logger.debug(ce.getParam("exportdata"));
-            if(plugin.getGDB().gdb.setDBImport(ce.getParam("exportdata"))) {
-                logger.debug("Database Imported.");
-            }
-            else {
-                logger.debug("Database Import Failed!");
+            if(ce.getParam("exportdata") != null) {
+                plugin.getGDB().submitDBImport(ce.getParam("exportdata"));
+                /*
+                if (plugin.getGDB().gdb.setDBImport(ce.getParam("exportdata"))) {
+                    logger.debug("Database Imported.");
+                } else {
+                    logger.debug("Database Import Failed!");
+                }
+                */
+            } else {
+                logger.error("regionalImport Failed : exportdata == null");
             }
         }
         catch(Exception ex) {

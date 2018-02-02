@@ -415,7 +415,7 @@ public class GlobalHealthWatcher implements Runnable {
                     logger.info("Static Region Connection to Global Controller : " + plugin.getConfig().getStringParam("global_controller_host",null) + " failed! - Restarting Global Discovery");
                 } else {
                     //plugin.getIncomingCanidateBrokers().add(discoveryList.get(0)); //perhaps better way to do this
-                    logger.info("Global Controller Found: " + discoveryList.get(0).getParams());
+                    logger.info("Global Controller Found: Region: " + discoveryList.get(0).getParam("src_region") + " agent:" + discoveryList.get(0).getParam("src_agent"));
                 }
         }
         catch(Exception ex) {
@@ -428,11 +428,15 @@ public class GlobalHealthWatcher implements Runnable {
         MsgEvent me = null;
 	    try {
             if(!this.plugin.cstate.isGlobalController()) {
-                    //TODO Enable Export
-                    String dbexport = plugin.getGDB().gdb.getDBExport();
-                    logger.trace("EXPORT" + dbexport + "EXPORT");
+                //TODO Enable Export
+                String dbexport = plugin.getGDB().gdb.getDBExport();
 
-                    me = new MsgEvent(MsgEvent.Type.CONFIG, this.plugin.getRegion(), this.plugin.getAgent(), this.plugin.getPluginID(), "regionalimport");
+                logger.error("DBEXPORT SIZE: " + dbexport.length());
+
+                //logger.trace("EXPORT" + dbexport + "EXPORT");
+
+
+                me = new MsgEvent(MsgEvent.Type.CONFIG, this.plugin.getRegion(), this.plugin.getAgent(), this.plugin.getPluginID(), "regionalimport");
                     me.setParam("action", "regionalimport");
                     me.setParam("src_region", this.plugin.getRegion());
                     me.setParam("src_agent", this.plugin.getAgent());
@@ -446,6 +450,9 @@ public class GlobalHealthWatcher implements Runnable {
                     me.setParam("is_global", Boolean.TRUE.toString());
 
                     me.setParam("exportdata",dbexport);
+
+                    logger.error("*" + me.getCompressedParam("exportdata")  + "*");
+
                     this.plugin.msgIn(me);
                 }
 

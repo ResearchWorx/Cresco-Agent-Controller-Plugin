@@ -1583,21 +1583,10 @@ public class DBBaseFunctions {
         boolean isImported = false;
         try {
 
-            //regionalImportActive
-
-            //logger.info("Import Raw : " + exportData);
-
-            //decode base64
             byte[] exportDataRawCompressed = DatatypeConverter.parseBase64Binary(exportData);
             InputStream iss = new ByteArrayInputStream(exportDataRawCompressed);
             //uncompress
             InputStream is = new GZIPInputStream(iss);
-
-            //Scanner s = new Scanner(is).useDelimiter("\\A");
-            //String result = s.hasNext() ? s.next() : "";
-            //logger.info("Uncompressed Import :" + result);
-
-            //InputStream is = new ByteArrayInputStream(exportData.getBytes(StandardCharsets.UTF_8));
 
             boolean createdDb = false;
             if(db == null) {

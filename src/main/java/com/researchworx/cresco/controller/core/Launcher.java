@@ -4,6 +4,7 @@ import com.google.auto.service.AutoService;
 import com.researchworx.cresco.controller.app.gPayload;
 import com.researchworx.cresco.controller.communication.*;
 import com.researchworx.cresco.controller.db.DBInterface;
+import com.researchworx.cresco.controller.db.DBManager;
 import com.researchworx.cresco.controller.globalcontroller.GlobalHealthWatcher;
 import com.researchworx.cresco.controller.netdiscovery.*;
 import com.researchworx.cresco.controller.regionalcontroller.RegionHealthWatcher;
@@ -33,6 +34,9 @@ public class Launcher extends CPlugin {
 
     public ControllerState cstate;
 
+    private boolean DBManagerActive = false;
+
+
     private String agentpath;
 
     //manager for all certificates
@@ -55,6 +59,7 @@ public class Launcher extends CPlugin {
 
     private boolean ActiveBrokerManagerActive = false;
     private boolean ActiveDestManagerActive = false;
+
 
     //public LinkedBlockingQueue<MsgEvent> resourceScheduleQueue;
 
@@ -81,10 +86,10 @@ public class Launcher extends CPlugin {
         return certificateManager;
     }
 
+
     public Thread getActiveBrokerManagerThread() {
         return activeBrokerManagerThread;
     }
-
     public void setActiveBrokerManagerThread(Thread activeBrokerManagerThread) {
         this.activeBrokerManagerThread = activeBrokerManagerThread;
     }
@@ -209,6 +214,7 @@ public class Launcher extends CPlugin {
             this.ConsumerThreadRegionActive = false;
             this.ConsumerThreadActive = false;
             this.ActiveBrokerManagerActive = false;
+            this.DBManagerActive = false;
             this.GlobalControllerManagerActive = false;
 
             if (this.perfMonitorNet != null) {
@@ -741,6 +747,11 @@ public class Launcher extends CPlugin {
 
             this.gdb = new DBInterface(this); //start com.researchworx.cresco.controller.db service
             logger.debug("RegionalControllerDB Service Started");
+            //started by DBInterface
+            while (!this.DBManagerActive) {
+                Thread.sleep(1000);
+            }
+
             this.discoveryMap = new ConcurrentHashMap<>(); //discovery map
 
             //enable this regional controller in the DB
@@ -1136,6 +1147,13 @@ public class Launcher extends CPlugin {
     }
     public void setBrokeredAgents(ConcurrentHashMap<String, BrokeredAgent> brokeredAgents) {
         this.brokeredAgents = brokeredAgents;
+    }
+
+    public boolean isDBManagerActive() {
+        return DBManagerActive;
+    }
+    public void setDBManagerActive(boolean DBManagerActive) {
+        this.DBManagerActive = DBManagerActive;
     }
 
     public boolean isActiveBrokerManagerActive() {
