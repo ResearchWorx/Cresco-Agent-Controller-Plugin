@@ -175,7 +175,9 @@ public class MsgRoute implements Runnable {
                     logger.debug("GLOBAL/REGIONAL CONTROLLER PLUGIN RECIEVING MESSAGE FROM REGIONAL CONTROLLER 106");
                     logger.trace(rm.getParams().toString());
                     //regionalSend();
-                    re = getRegionalCommandExec();
+                    //re = getRegionalCommandExec();
+                    re = getCommandExec();
+
                     //plugin.sendMsgEvent(rm);
                     break;
                 case 112:

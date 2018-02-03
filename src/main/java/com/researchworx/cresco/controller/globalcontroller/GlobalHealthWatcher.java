@@ -100,7 +100,7 @@ public class GlobalHealthWatcher implements Runnable {
                 logger.debug("gNotify !Global Controller Message");
                 //is the global controller reachable
                 if(plugin.isReachableAgent(plugin.cstate.getGlobalControllerPath())) {
-                    MsgEvent tick = new MsgEvent(MsgEvent.Type.WATCHDOG, plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), "WatchDog timer tick.");
+                    MsgEvent tick = new MsgEvent(MsgEvent.Type.WATCHDOG, plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), "WatchDog timer tick. 0");
                     tick.setParam("src_region", this.plugin.getRegion());
                     tick.setParam("src_region", this.plugin.getAgent());
                     tick.setParam("src_region", this.plugin.cstate.getControllerId());
@@ -131,7 +131,7 @@ public class GlobalHealthWatcher implements Runnable {
                 //plugin.getGDB().watchDogUpdate()
                 logger.trace("gNotify Global Controller Message");
 
-                MsgEvent tick = new MsgEvent(MsgEvent.Type.WATCHDOG, plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), "WatchDog timer tick.");
+                MsgEvent tick = new MsgEvent(MsgEvent.Type.WATCHDOG, plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), "WatchDog timer tick. 1");
                 tick.setParam("src_region", this.plugin.getRegion());
                 tick.setParam("src_region", this.plugin.getAgent());
                 tick.setParam("src_region", this.plugin.cstate.getControllerId());
