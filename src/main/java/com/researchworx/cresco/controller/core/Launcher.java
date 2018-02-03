@@ -754,6 +754,8 @@ public class Launcher extends CPlugin {
 
             this.discoveryMap = new ConcurrentHashMap<>(); //discovery map
 
+            //TODO Does this still need to be done, this was causing a delay?
+            /*
             //enable this regional controller in the DB
             MsgEvent le = new MsgEvent(MsgEvent.Type.CONFIG, getRegion(), getAgent(), getPluginID(), "enabled");
             le.setParam("src_region", getRegion());
@@ -762,6 +764,9 @@ public class Launcher extends CPlugin {
             le.setParam("watchdogtimer", String.valueOf(getConfig().getLongParam("watchdogtimer", 5000L)));
             le.setParam("source", "initRegion()");
             getGDB().addNode(le);
+            */
+
+            logger.info("Discovery Engine ");
 
             //discovery engine
             if(!startNetDiscoveryEngine()) {
@@ -775,6 +780,8 @@ public class Launcher extends CPlugin {
             logger.error("initRegion() Error " + ex.getMessage());
             this.cstate.setRegionFailed("initRegion() Error " + ex.getMessage());
         }
+        logger.info("return isinit");
+
         return isInit;
     }
 
