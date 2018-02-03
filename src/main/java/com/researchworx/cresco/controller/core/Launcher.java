@@ -780,7 +780,6 @@ public class Launcher extends CPlugin {
             logger.error("initRegion() Error " + ex.getMessage());
             this.cstate.setRegionFailed("initRegion() Error " + ex.getMessage());
         }
-        logger.info("return isinit");
 
         return isInit;
     }

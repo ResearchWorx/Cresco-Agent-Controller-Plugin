@@ -69,7 +69,7 @@ public class ControllerState {
 	}
 
 	public String getGlobalControllerPath() {
-		if(isGlobalController()) {
+		if(isRegionalController()) {
 			return globalRegion + "_" + globalAgent;
 		} else {
 			return null;

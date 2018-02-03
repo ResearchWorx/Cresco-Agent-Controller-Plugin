@@ -25,7 +25,7 @@ public class ActiveRegionConsumer implements Runnable {
 	private ActiveMQSslConnectionFactory connf;
 	
 	public ActiveRegionConsumer(Launcher plugin, String RXQueueName, String URI, String brokerUserNameAgent, String brokerPasswordAgent) {
-		this.logger = new CLogger(ActiveRegionConsumer.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Trace);
+		this.logger = new CLogger(ActiveRegionConsumer.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
 		logger.debug("Initializing Pre");
 		this.plugin = plugin;
 		try {
@@ -55,18 +55,13 @@ public class ActiveRegionConsumer implements Runnable {
 		logger.info("Initialized");
 		Gson gson = new Gson();
 		try {
-			logger.info("Initialized 0");
 
 			this.plugin.setConsumerThreadRegionActive(true);
 
-			logger.info("Initialized 1");
-
 			MessageConsumer consumer = sess.createConsumer(RXqueue);
 
-			logger.info("Initialized 2");
 
 			while (this.plugin.isConsumerThreadRegionActive()) {
-				logger.info("Initialized 3");
 
 				TextMessage msg = (TextMessage) consumer.receive();
 				if (msg != null) {

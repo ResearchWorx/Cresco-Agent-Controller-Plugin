@@ -23,7 +23,6 @@ public class GlobalHealthWatcher implements Runnable {
     public Boolean SchedulerActive;
     public Boolean AppSchedulerActive;
 
-
     public GlobalHealthWatcher(Launcher plugin) {
 		this.logger = new CLogger(GlobalHealthWatcher.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
 		this.plugin = plugin;
@@ -176,12 +175,14 @@ public class GlobalHealthWatcher implements Runnable {
             //Static Remote Global Controller
             String static_global_controller_host = plugin.getConfig().getStringParam("global_controller_host",null);
             if(static_global_controller_host != null) {
-                logger.trace("Starting Static Global Controller Check");
+                logger.trace("Starting Static Global Controller Check on " + static_global_controller_host);
                 if(global_host_map.containsKey(static_global_controller_host)) {
                     if(plugin.isReachableAgent(global_host_map.get(static_global_controller_host))) {
+                        logger.trace("Static Global Controller Check " + static_global_controller_host + " Ok.");
                         return;
                     }
                     else {
+                        logger.trace("Static Global Controller Check " + static_global_controller_host + " Failed.");
                         plugin.cstate.setRegionalGlobalFailed("gCheck : Static Global Host :" + static_global_controller_host + " not reachable.");
                         global_host_map.remove(static_global_controller_host);
                     }
@@ -193,11 +194,13 @@ public class GlobalHealthWatcher implements Runnable {
                 }
                 else {
                     plugin.cstate.setRegionalGlobalSuccess(globalController[0],globalController[1], "gCheck : Static Global Host :" + static_global_controller_host + " connected." );
+                    logger.trace("Static Global Controller " + static_global_controller_host + " Connect with path: " + plugin.cstate.getGlobalControllerPath());
                     global_host_map.put(static_global_controller_host, plugin.cstate.getGlobalControllerPath());
                     //register with global controller
                     sendGlobalWatchDogRegister();
                     //TODO is this correct?
-                    regionalDBexport();
+                    //Don't bother sending on registration, DB is not yet populated, send on second update check
+                    //regionalDBexport();
                 }
             }
             else if(this.plugin.cstate.isGlobalController()) {
@@ -368,7 +371,6 @@ public class GlobalHealthWatcher implements Runnable {
                     le.setParam("watchdogtimer", String.valueOf(plugin.getConfig().getLongParam("watchdogtimer", 5000L)));
                     //this should be RPC, but routing needs to be fixed route 16 -> 32 -> regionsend -> 16 -> 32 -> regionsend (goes to region, not rpc)
                     le.setParam("source","sendGlobalWatchDogRegister()");
-                    logger.error("SENDING GLOBAL REGISTER: " + le.getParams());
                     plugin.msgIn(le);
                 }
             }
@@ -451,7 +453,8 @@ public class GlobalHealthWatcher implements Runnable {
 
                     me.setParam("exportdata",dbexport);
 
-                    logger.error("*" + me.getCompressedParam("exportdata")  + "*");
+                    Thread.dumpStack();
+                    //logger.error("*" + me.getCompressedParam("exportdata")  + "*");
 
                     this.plugin.msgIn(me);
                 }
