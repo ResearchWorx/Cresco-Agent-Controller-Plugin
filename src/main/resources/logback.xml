@@ -35,9 +35,6 @@
     <logger name="com.researchworx.cresco.controller.communication.ActiveBrokerManager" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="com.researchworx.cresco.controller.communication.ActiveRegionConsumer" level="info" additivity="false">
-        <appender-ref ref="STDOUT" />
-    </logger>
     <logger name="com.researchworx.cresco.controller.communication.BrokeredAgent" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>

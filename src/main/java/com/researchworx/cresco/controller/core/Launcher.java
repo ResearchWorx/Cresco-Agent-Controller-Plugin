@@ -737,13 +737,7 @@ public class Launcher extends CPlugin {
                 this.brokerAddressAgent = "localhost";
             }
 
-            //consumer region
-            //this.consumerRegionThread = new Thread(new ActiveRegionConsumer(this, this.region, "tcp://" + this.brokerAddressAgent + ":32010",brokerUserNameAgent,brokerPasswordAgent));
-            this.consumerRegionThread = new Thread(new ActiveRegionConsumer(this, this.region, "ssl://" + this.brokerAddressAgent + ":32010",brokerUserNameAgent,brokerPasswordAgent));
-            this.consumerRegionThread.start();
-            while (!this.ConsumerThreadRegionActive) {
-                Thread.sleep(1000);
-            }
+            //removed region consumer, no longer needed things to go agents
 
             this.gdb = new DBInterface(this); //start com.researchworx.cresco.controller.db service
             logger.debug("RegionalControllerDB Service Started");
