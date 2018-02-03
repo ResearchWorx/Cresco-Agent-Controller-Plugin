@@ -107,16 +107,6 @@ public class Launcher extends CPlugin {
     private Thread globalControllerManagerThread;
 
 
-    public Thread getConsumerRegionThread() {
-        return consumerRegionThread;
-    }
-
-    public void setConsumerRegionThread(Thread consumerRegionThread) {
-        this.consumerRegionThread = consumerRegionThread;
-    }
-
-    private Thread consumerRegionThread;
-
     public Thread getConsumerAgentThread() {
         return consumerAgentThread;
     }
@@ -239,11 +229,6 @@ public class Launcher extends CPlugin {
                 logger.trace("Region Consumer shutting down");
                 this.globalControllerManagerThread.join();
                 this.globalControllerManagerThread = null;
-            }
-            if (this.consumerRegionThread != null) {
-                logger.trace("Region Consumer shutting down");
-                this.consumerRegionThread.join();
-                this.consumerRegionThread = null;
             }
             if (this.consumerAgentThread != null) {
                 logger.trace("Agent Consumer shutting down");

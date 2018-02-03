@@ -57,10 +57,6 @@ public class RegionHealthWatcher {
                         logger.info("Discovery shutdown detected");
 
                     }
-                    if (!(plugin.isConsumerThreadRegionActive()) || !(plugin.getConsumerRegionThread().isAlive())) {
-                        isHealthy = false;
-                        logger.info("Region Consumer shutdown detected");
-                    }
                     if (!(plugin.isActiveBrokerManagerActive()) || !(plugin.getActiveBrokerManagerThread().isAlive())) {
                         isHealthy = false;
                         logger.info("Active Broker Manager shutdown detected");

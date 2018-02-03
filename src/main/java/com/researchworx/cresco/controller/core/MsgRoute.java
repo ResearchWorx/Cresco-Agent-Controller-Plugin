@@ -391,6 +391,12 @@ public class MsgRoute implements Runnable {
     }
 
     private MsgEvent getRegionalCommandExec() {
+        System.out.println("should not call getRegionalCommandExec() : " + rm.getParams());
+        Thread.dumpStack();
+        System.exit(0);
+        return null;
+    }
+        private MsgEvent getRegionalCommandExec2() {
         //TODO route should send directly there, local in commandexec will figure it out.
         try {
             String callId = "callId-" + /*PluginEngine.region*/plugin.getRegion() + "-" + /*PluginEngine.agent*/plugin.getAgent() + "-" + /*PluginEngine.plugin*/plugin.getPluginID(); //calculate callID
