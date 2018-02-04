@@ -126,6 +126,7 @@ class Executor extends CExecutor {
         le.setParam("dst_agent", mainPlugin.cstate.getRegionalAgent());
         le.setParam("dst_plugin",mainPlugin.cstate.getControllerId());
         le.setParam("is_regional", Boolean.TRUE.toString());
+
         plugin.sendMsgEvent(le);
         //set it and forget it!
         return null;

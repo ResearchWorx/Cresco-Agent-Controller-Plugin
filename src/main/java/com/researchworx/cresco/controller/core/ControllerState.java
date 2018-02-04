@@ -138,8 +138,8 @@ public class ControllerState {
 		currentDesc = desc;
 		this.globalAgent = null;
 		this.globalRegion = null;
-		this.regionalAgent = regionalRegion;
-		this.regionalRegion = regionalAgent;
+		this.regionalRegion = regionalRegion;
+		this.regionalAgent = regionalAgent;
 	}
 
 	public void setAgentInit(String desc) {

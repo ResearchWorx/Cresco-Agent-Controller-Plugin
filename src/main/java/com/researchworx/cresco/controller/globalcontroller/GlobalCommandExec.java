@@ -180,6 +180,19 @@ public class GlobalCommandExec {
 			}
 			else if(ce.getMsgType() == MsgEvent.Type.WATCHDOG)
 			{
+			    /*
+			    try {
+                    if (!ce.getParam("src_agent").equals(ce.getParam("dst_agent"))) {
+                        logger.info("!EXEC WATCHDOG\nRegion SRC:" + ce.getParam("src_region") + " Agent SRC:" + ce.getParam("src_agent") + "\nRegion DST:" + ce.getParam("dst_region") + " Agent DST:" + ce.getParam("dst_agent"));
+                        //logger.info("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
+                    } else {
+                        logger.info("EXEC WATCHDOG\nRegion SRC:" + ce.getParam("src_region") + " Agent SRC:" + ce.getParam("src_agent") + "\nRegion DST:" + ce.getParam("dst_region") + " Agent DST:" + ce.getParam("dst_agent"));
+                    }
+                } catch(Exception ex) {
+			        logger.error("GLOBAL ERROR: \n" + ce.getParams());
+                }
+                */
+
 				globalWatchdog(ce);
 			}
             else if(ce.getMsgType() == MsgEvent.Type.KPI)
