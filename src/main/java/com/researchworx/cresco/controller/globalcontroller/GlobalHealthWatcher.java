@@ -365,7 +365,7 @@ public class GlobalHealthWatcher implements Runnable {
                     le.setParam("region_name",plugin.cstate.getRegionalRegion());
 
                     //le.setParam("dst_region", gPath[0]);
-                    //le.setParam("is_active", Boolean.TRUE.toString());
+                    le.setParam("is_active", Boolean.TRUE.toString());
                     le.setParam("action", "region_enable");
                     //le.setParam("globalcmd", Boolean.TRUE.toString());
                     le.setParam("watchdogtimer", String.valueOf(plugin.getConfig().getLongParam("watchdogtimer", 5000L)));
@@ -505,7 +505,12 @@ public class GlobalHealthWatcher implements Runnable {
                     else if(entry.getValue() == NodeStatusType.ERROR) { //will include more items once nodes update correctly
                         logger.error("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());
 
+                    } /*else {
+                        logger.info("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());
+                        Map<String,String> nodeMap = plugin.getGDB().gdb.getNodeParams(entry.getKey());
+                        logger.info("Region : " + nodeMap.get("region_name") + " Agent : " + nodeMap.get("agent_name"));
                     }
+                    */
 
                 }
             }

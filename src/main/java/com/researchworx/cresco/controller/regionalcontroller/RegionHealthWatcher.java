@@ -126,7 +126,11 @@ public class RegionHealthWatcher {
                         //String pluginId = nodeParams.get("plugin");
                         //logger.error("Error " + region + " " + agent + " " + pluginId);
 
-                    }
+                    } /* else {
+                        logger.info("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());
+                        Map<String,String> nodeMap = plugin.getGDB().gdb.getNodeParams(entry.getKey());
+                        logger.info("Region : " + nodeMap.get("region_name") + " Agent : " + nodeMap.get("agent_name"));
+                    } */
 
                 }
             }
