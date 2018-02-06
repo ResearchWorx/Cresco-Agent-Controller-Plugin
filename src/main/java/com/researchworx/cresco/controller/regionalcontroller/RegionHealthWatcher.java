@@ -91,8 +91,21 @@ public class RegionHealthWatcher {
         public void run() {
             if(plugin.cstate.isRegionalController()) { //only run if node is regional controller
                 logger.debug("RegionalNodeStatusWatchDog");
-                Map<String, NodeStatusType> nodeStatus = plugin.getGDB().getNodeStatus(plugin.getRegion(), null, null);
-                for (Map.Entry<String, NodeStatusType> entry : nodeStatus.entrySet()) {
+
+
+                /*
+                Map<String, NodeStatusType> edgeStatus = plugin.getGDB().getEdgeHealthStatus(plugin.getRegion(), null, null);
+                logger.info("RegionalNodeStatusWatchDog");
+                for (Map.Entry<String, NodeStatusType> entry : edgeStatus.entrySet()) {
+                    logger.info("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());
+                }
+                */
+
+                ///Map<String, NodeStatusType> nodeStatus = plugin.getGDB().getNodeStatus(plugin.getRegion(), null, null);
+                //Change to use edge health
+                Map<String, NodeStatusType> edgeStatus = plugin.getGDB().getEdgeHealthStatus(plugin.getRegion(), null, null);
+
+                for (Map.Entry<String, NodeStatusType> entry : edgeStatus.entrySet()) {
                     logger.debug("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());
 
                     if(entry.getValue() == NodeStatusType.STALE) { //will include more items once nodes update correctly
@@ -120,11 +133,6 @@ public class RegionHealthWatcher {
                         String pluginId = nodeParams.get("plugin");
                         logger.error("Problem with " + region + " " + agent + " " + pluginId);
                         logger.error("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());
-
-                        //String region = nodeParams.get("region");
-                        //String agent = nodeParams.get("agent");
-                        //String pluginId = nodeParams.get("plugin");
-                        //logger.error("Error " + region + " " + agent + " " + pluginId);
 
                     } /* else {
                         logger.info("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());

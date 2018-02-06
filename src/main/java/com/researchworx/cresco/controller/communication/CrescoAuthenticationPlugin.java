@@ -52,8 +52,8 @@ public class CrescoAuthenticationPlugin implements BrokerPlugin {
     public void setUsers(List<?> users) {
         userPasswords.clear();
         userGroups.clear();
-        for (Iterator<?> it = users.iterator(); it.hasNext();) {
-            AuthenticationUser user = (AuthenticationUser)it.next();
+        for (Object user1 : users) {
+            AuthenticationUser user = (AuthenticationUser) user1;
             userPasswords.put(user.getUsername(), user.getPassword());
             Set<Principal> groups = new HashSet<Principal>();
             StringTokenizer iter = new StringTokenizer(user.getGroups(), ",");

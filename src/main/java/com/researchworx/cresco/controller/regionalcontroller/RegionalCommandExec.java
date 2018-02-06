@@ -150,6 +150,7 @@ public class RegionalCommandExec {
 
 
         plugin.getGDB().addNode(le);
+
             if(!plugin.cstate.isGlobalController()) {
             //TODO Fix Global Send
                 //globalSend(le);

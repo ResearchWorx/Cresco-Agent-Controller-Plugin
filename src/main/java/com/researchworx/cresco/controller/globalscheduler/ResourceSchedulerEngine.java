@@ -438,12 +438,10 @@ public class ResourceSchedulerEngine implements Runnable {
                 pluginFiles = new ArrayList<String>();
                 File[] listOfFiles = folder.listFiles();
 
-                for (int i = 0; i < listOfFiles.length; i++)
-                {
-                    if (listOfFiles[i].isFile())
-                    {
-                        pluginFiles.add(listOfFiles[i].getAbsolutePath());
-                        logger.debug(listOfFiles[i].getAbsolutePath());
+                for (File listOfFile : listOfFiles) {
+                    if (listOfFile.isFile()) {
+                        pluginFiles.add(listOfFile.getAbsolutePath());
+                        logger.debug(listOfFile.getAbsolutePath());
                     }
 
                 }
@@ -586,22 +584,20 @@ public class ResourceSchedulerEngine implements Runnable {
 		{
 		File[] listOfFiles = folder.listFiles();
 
-		    for (int i = 0; i < listOfFiles.length; i++) 
-		    {
-		      if (listOfFiles[i].isFile()) 
-		      {
-		        //logger.debug("Found Plugin: " + listOfFiles[i].getName());
-		        //<pluginName>=<pluginVersion>,
-		        String pluginPath = listOfFiles[i].getAbsolutePath();
-		        //pluginList.add(ControllerEngine.commandExec.getPluginName(pluginPath) + "=" + ControllerEngine.commandExec.getPluginVersion(pluginPath));
-		        String pluginKey = getPluginName(pluginPath) + "=" + getPluginVersion(pluginPath);
-		        String pluginValue = listOfFiles[i].getName();
-		        pluginList.put(pluginKey, pluginValue);
-		        //pluginList = pluginList + getPluginName(pluginPath) + "=" + getPluginVersion(pluginPath) + ",";
-		        //pluginList = pluginList + listOfFiles[i].getName() + ",";
-		      } 
-		      
-		    }
+            for (File listOfFile : listOfFiles) {
+                if (listOfFile.isFile()) {
+                    //logger.debug("Found Plugin: " + listOfFiles[i].getName());
+                    //<pluginName>=<pluginVersion>,
+                    String pluginPath = listOfFile.getAbsolutePath();
+                    //pluginList.add(ControllerEngine.commandExec.getPluginName(pluginPath) + "=" + ControllerEngine.commandExec.getPluginVersion(pluginPath));
+                    String pluginKey = getPluginName(pluginPath) + "=" + getPluginVersion(pluginPath);
+                    String pluginValue = listOfFile.getName();
+                    pluginList.put(pluginKey, pluginValue);
+                    //pluginList = pluginList + getPluginName(pluginPath) + "=" + getPluginVersion(pluginPath) + ",";
+                    //pluginList = pluginList + listOfFiles[i].getName() + ",";
+                }
+
+            }
 		    if(pluginList.size() > 0)
 		    {
 		    	return pluginList;

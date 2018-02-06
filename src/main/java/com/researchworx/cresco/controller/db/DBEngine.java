@@ -3,6 +3,9 @@ package com.researchworx.cresco.controller.db;
 import com.orientechnologies.orient.client.remote.OServerAdmin;
 import com.orientechnologies.orient.core.db.OPartitionedDatabasePool;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
+import com.orientechnologies.orient.core.hook.ORecordHook;
+import com.orientechnologies.orient.core.record.ORecord;
+import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.utilities.CLogger;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
@@ -51,7 +54,15 @@ public class DBEngine {
 
                 //pool = new OPartitionedDatabasePool(iURI, username,password).setAutoCreate(true);
                 pool = new OPartitionedDatabasePool(iURI, username,password, 1, 1).setAutoCreate(true);
+                //db = new ODatabaseDocumentTx(iURI).create();
+                //TODO.. is this needed?
+                db = new ODatabaseDocumentTx(iURI).open(username, password);
+
                 factory = new OrientGraphFactory(iURI, username, password, true);
+
+                //ODatabaseObjectTx database = new ODatabaseObjectTx("remote:localhost/demo");
+                //database.open("writer", "writer");
+
             }
             else {
                 //iURI = "memory:internalDb/" + dbname;
@@ -59,12 +70,14 @@ public class DBEngine {
                 //pool = new OPartitionedDatabasePool(iURI, username,password).setAutoCreate(true);
                 //factory = new OrientGraphFactory(iURI, username, password, true);
 
-
                 db = new ODatabaseDocumentTx("memory:internalDb").create();
+
                 factory = new OrientGraphFactory("memory:internalDb");
 
 
             }
+
+            //try and do something with db
 
             //pool = new OPartitionedDatabasePool(iURI, username,password).setAutoCreate(true);
             //factory = new OrientGraphFactory(iURI, username, password, pool);
@@ -76,6 +89,8 @@ public class DBEngine {
         }
 
     }
+
+
 
     private boolean dbExist(String iURI, String username, String password) {
         boolean exist = false;

@@ -427,6 +427,7 @@ public class GlobalHealthWatcher implements Runnable {
     }
 
     public MsgEvent regionalDBexport() {
+        Thread.dumpStack();
         MsgEvent me = null;
 	    try {
             if(!this.plugin.cstate.isGlobalController()) {

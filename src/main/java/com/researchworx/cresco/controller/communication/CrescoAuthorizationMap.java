@@ -78,8 +78,7 @@ public class CrescoAuthorizationMap extends DestinationMap implements Authorizat
         Set<Object> answer = new CrescoAuthorizationMap.WildcardAwareSet<Object>();
 
         // now lets go through each entry adding individual
-        for (Iterator<AuthorizationEntry> iter = entries.iterator(); iter.hasNext();) {
-            AuthorizationEntry entry = iter.next();
+        for (AuthorizationEntry entry : entries) {
             answer.addAll(entry.getAdminACLs());
         }
         return answer;
@@ -91,8 +90,7 @@ public class CrescoAuthorizationMap extends DestinationMap implements Authorizat
         Set<Object> answer = new CrescoAuthorizationMap.WildcardAwareSet<Object>();
 
         // now lets go through each entry adding individual
-        for (Iterator<AuthorizationEntry> iter = entries.iterator(); iter.hasNext();) {
-            AuthorizationEntry entry = iter.next();
+        for (AuthorizationEntry entry : entries) {
             answer.addAll(entry.getReadACLs());
         }
         return answer;
@@ -104,8 +102,7 @@ public class CrescoAuthorizationMap extends DestinationMap implements Authorizat
         Set<Object> answer = new CrescoAuthorizationMap.WildcardAwareSet<Object>();
 
         // now lets go through each entry adding individual
-        for (Iterator<AuthorizationEntry> iter = entries.iterator(); iter.hasNext();) {
-            AuthorizationEntry entry = iter.next();
+        for (AuthorizationEntry entry : entries) {
             answer.addAll(entry.getWriteACLs());
         }
         return answer;
@@ -136,10 +133,9 @@ public class CrescoAuthorizationMap extends DestinationMap implements Authorizat
         if (key.isComposite()) {
             ActiveMQDestination[] destinations = key.getCompositeDestinations();
             Set answer = null;
-            for (int i = 0; i < destinations.length; i++) {
-                ActiveMQDestination childDestination = destinations[i];
+            for (ActiveMQDestination childDestination : destinations) {
                 answer = union(answer, get(childDestination));
-                if (answer == null  || answer.isEmpty()) {
+                if (answer == null || answer.isEmpty()) {
                     break;
                 }
             }

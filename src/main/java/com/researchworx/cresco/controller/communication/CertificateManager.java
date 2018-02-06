@@ -66,8 +66,7 @@ public class CertificateManager {
 
             TrustManager[] trustmanagers = getTrustManagers();
             if (trustmanagers != null) {
-                for (int i = 0; i < trustmanagers.length; i++) {
-                    TrustManager tm = trustmanagers[i];
+                for (TrustManager tm : trustmanagers) {
                     if (tm instanceof X509TrustManager) {
                         //((X509TrustManager) tm).checkClientTrusted(cert, alias);
                         //((X509TrustManager) tm).checkServerTrusted(cert, alias);

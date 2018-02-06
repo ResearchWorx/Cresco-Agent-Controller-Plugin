@@ -13,6 +13,7 @@ import com.orientechnologies.orient.core.sql.OCommandSQL;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.controller.netdiscovery.DiscoveryNode;
 import com.researchworx.cresco.library.utilities.CLogger;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.orient.OrientGraph;
@@ -128,6 +129,105 @@ public class DBBaseFunctions {
         return nodeList;
     }
 
+    public String getEdgeHealthId(String region, String agent, String plugin) {
+        String node_id = null;
+        OrientGraph graph = null;
+
+        try
+        {
+
+            if((region != null) && (agent == null) && (plugin == null))
+            {
+                graph = factory.getTx();
+
+                Iterable<Vertex> resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:isRegionHealth.edgeProp WHERE key = '" + region + "'")).execute();
+
+                Iterator<Vertex> iter = resultIterator.iterator();
+                if(iter.hasNext())
+                {
+                    Vertex v = iter.next();
+                    node_id = v.getProperty("rid").toString();
+                }
+                if(node_id != null)
+                {
+                    node_id = node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
+                }
+                //return isFound;
+            }
+            else if((region != null) && (agent != null) && (plugin == null))
+            {
+                //OrientGraph graph = factory.getTx();
+                //OrientGraphNoTx graph = factory.getNoTx();
+                graph = factory.getTx();
+                Iterable<Vertex> resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:isAgentHealth.edgeProp WHERE key = [\"" + region + "\",\"" + agent + "\"]")).execute();
+                Iterator<Vertex> iter = resultIterator.iterator();
+                if(iter.hasNext())
+                {
+                    Vertex v = iter.next();
+                    node_id = v.getProperty("rid").toString();
+                }
+                //graph.shutdown();
+                //return node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
+                //node_id = node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
+                if(node_id != null)
+                {
+                    node_id = node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
+                }
+            }
+            else if((region != null) && (agent != null) && (plugin != null))
+            {
+                /*
+                //TransactionalGraph tgraph = factory.getTx();
+                OIndex<?> idx = factory.getDatabase().getMetadata().getIndexManager().getIndex("pNode.nodePath");
+                String key = "[\"" + region + "\",\"" + agent + "\",\"" + plugin +"\"]";
+                //OIdentifiable rec = idx.get(key);
+                Object luke = (Object)idx.get(key);
+                logger.error(luke.toString());
+                */
+                //OIndex<OIdentifiable> idx = factory.getDatabase().getMetadata().getIndexManager().getIndex("pNode.nodePath");
+                //OIdentifiable rec = idx.get(id);
+
+                //OrientGraph graph = factory.getTx();
+                //OrientGraphNoTx graph = factory.getNoTx();
+                //graph = factory.getTx();
+                //OrientGraphNoTx g = null;
+                //g = factory.getNoTx();
+                graph = factory.getTx();
+
+                String query = "SELECT rid FROM INDEX:isPluginHealth.edgeProp WHERE key = [\"" + region + "\",\"" + agent + "\",\"" + plugin +"\"]";
+                Iterable<Vertex> resultIterator = graph.command(new OCommandSQL(query)).execute();
+                Iterator<Vertex> iter = resultIterator.iterator();
+                if(iter.hasNext())
+                {
+                    Vertex v = iter.next();
+                    node_id = v.getProperty("rid").toString();
+                }
+                //graph.shutdown();
+                //return node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
+                //node_id = node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
+                if(node_id != null)
+                {
+                    node_id = node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
+                }
+
+            }
+
+        }
+        catch(Exception ex)
+        {
+            logger.debug("DBEngine : getNodeID : Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return node_id;
+    }
+
+
     public String getNodeId(String region, String agent, String plugin) {
         String node_id = null;
         OrientGraph graph = null;
@@ -225,6 +325,103 @@ public class DBBaseFunctions {
         }
         return node_id;
     }
+
+    public List<String> getEdgeHealthIds(String region, String agent, String plugin, boolean getAll) {
+        OrientGraph graph = null;
+        List<String> edgeIdList = null;
+        try
+        {
+            edgeIdList = new ArrayList();
+
+            if((region == null) && (agent == null) && (plugin == null))
+            {
+                //OrientGraphNoTx graph = factory.getNoTx();
+                graph = factory.getTx();
+                Iterable<Vertex> resultIterator = null;
+                resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:isRegionHealth.edgeProp")).execute();
+                Iterator<Vertex> iter = resultIterator.iterator();
+                while(iter.hasNext())
+                {
+                    Vertex v = iter.next();
+                    String node_id = v.getProperty("rid").toString();
+
+                    if(node_id != null)
+                    {
+                        node_id = node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
+                        edgeIdList.add(node_id);
+                    }
+
+                }
+
+            }
+            else if((region != null) && (agent == null) && (plugin == null))
+            {
+                //OrientGraph graph = factory.getTx();
+                //OrientGraphNoTx graph = factory.getNoTx();
+                graph = factory.getTx();
+                Iterable<Vertex> resultIterator = null;
+                if(getAll) {
+                    resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:isAgentHealth.edgeProp")).execute();
+                }
+                else {
+                    resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:isAgentHealth.edgeProp WHERE key = [\"" + region + "\"]")).execute();
+                }
+                Iterator<Vertex> iter = resultIterator.iterator();
+                while(iter.hasNext())
+                {
+                    Vertex v = iter.next();
+                    String node_id = v.getProperty("rid").toString();
+                    if(node_id != null)
+                    {
+                        node_id = node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
+                        edgeIdList.add(node_id);
+
+                    }
+                }
+
+            }
+            else if((region != null) && (agent != null) && (plugin == null))
+            {
+                //OrientGraph graph = factory.getTx();
+                //OrientGraphNoTx graph = factory.getNoTx();
+                graph = factory.getTx();
+                Iterable<Vertex> resultIterator = null;
+
+                if(getAll) {
+                    resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:isPluginHealth.edgeProp")).execute();
+                }
+                else {
+                    resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:isPluginHealth.edgeProp WHERE key = [\"" + region + "\",\"" + agent + "\"]")).execute();
+                }
+
+                Iterator<Vertex> iter = resultIterator.iterator();
+                while(iter.hasNext())
+                {
+                    Vertex v = iter.next();
+                    String node_id = v.getProperty("rid").toString();
+                    if(node_id != null)
+                    {
+                        node_id = node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
+                        edgeIdList.add(node_id);
+                    }
+                }
+            }
+
+        }
+        catch(Exception ex)
+        {
+            logger.debug("DBEngine : getNodeID : Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return edgeIdList;
+    }
+
 
     public List<String> getNodeIds(String region, String agent, String plugin, boolean getAll) {
         OrientGraph graph = null;
@@ -508,32 +705,6 @@ public class DBBaseFunctions {
         return node_param;
     }
 
-    public Map<String,String> IgetNodeParamsNoTx(String node_id) {
-        OrientGraphNoTx graph = null;
-        Map<String,String> params = new HashMap();
-
-        try
-        {
-            graph = factory.getNoTx();
-            Vertex iNode = graph.getVertex(node_id);
-            for(String key : iNode.getPropertyKeys()) {
-                params.put(key,iNode.getProperty(key).toString());
-            }
-        }
-        catch(Exception ex)
-        {
-            logger.debug("IgetNodeParamsNoTX: Error " + ex.toString());
-        }
-        finally
-        {
-            if(graph != null)
-            {
-                graph.shutdown();
-            }
-        }
-        return params;
-    }
-
     public Map<String,String> getNodeParamsNoTx(String node_id) {
         Map<String,String> paramsVal = null;
 
@@ -563,6 +734,89 @@ public class DBBaseFunctions {
         }
 
         return paramsVal;
+    }
+
+    public Map<String,String> IgetNodeParamsNoTx(String node_id) {
+        OrientGraphNoTx graph = null;
+        Map<String,String> params = new HashMap();
+
+        try
+        {
+            graph = factory.getNoTx();
+            Vertex iNode = graph.getVertex(node_id);
+            for(String key : iNode.getPropertyKeys()) {
+                params.put(key,iNode.getProperty(key).toString());
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.debug("IgetNodeParamsNoTX: Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return params;
+    }
+
+    public Map<String,String> getEdgeParamsNoTx(String edgeId) {
+        Map<String,String> paramsVal = null;
+
+        int count = 0;
+        try
+        {
+
+            while((paramsVal == null) && (count != retryCount))
+            {
+                if(count > 0)
+                {
+                    Thread.sleep((long)(Math.random() * 1000)); //random wait to prevent sync error
+                }
+                paramsVal = IgetEdgeParamsNoTx(edgeId);
+                count++;
+
+            }
+
+            if((paramsVal == null) && (count == retryCount))
+            {
+                logger.debug("DBEngine : getEdgeParamsNoTX : Failed in " + count + " retrys");
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.debug("DBEngine : getEdgeParamsNoTX : Error " + ex.toString());
+        }
+
+        return paramsVal;
+    }
+
+    public Map<String,String> IgetEdgeParamsNoTx(String edgeId) {
+        OrientGraphNoTx graph = null;
+        Map<String,String> params = new HashMap();
+
+        try
+        {
+            graph = factory.getNoTx();
+            Edge iEdge = graph.getEdge(edgeId);
+            for(String key : iEdge.getPropertyKeys()) {
+                params.put(key,iEdge.getProperty(key).toString());
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.debug("IgetEdgeParamsNoTX: Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return params;
     }
 
     public Map<String,String> IgetNodeParams(String node_id) {
@@ -659,7 +913,6 @@ public class DBBaseFunctions {
                         //v.setProperty("enable_pending",Boolean.TRUE.toString());
                         setNodeParam(region,null,null, "enable_pending", Boolean.TRUE.toString());
 
-
                     }
                     if(region_id != null)
                     {
@@ -672,6 +925,11 @@ public class DBBaseFunctions {
                         Vertex toV = graph.getVertex(region_id);
 
                         graph.addEdge("class:isAgent", fromV, toV, "isAgent");
+                        Edge he = graph.addEdge("class:isAgentHealth", fromV, toV, "isAgentHealth");
+                        he.setProperty("enable_pending", Boolean.TRUE.toString());
+                        he.setProperty("region", region);
+                        he.setProperty("agent", agent);
+
                         graph.commit();
                         node_id = v.getId().toString();
 						/*
@@ -710,6 +968,13 @@ public class DBBaseFunctions {
                         Vertex toV = graph.getVertex(agent_id);
 
                         graph.addEdge("class:isPlugin", fromV, toV, "isPlugin");
+                        Edge he = graph.addEdge("class:isPluginHealth", fromV, toV, "isPluginHealth");
+                        he.setProperty("region", region);
+                        he.setProperty("agent", agent);
+                        he.setProperty("plugin", plugin);
+
+                        //no need to set this as health is checked on the plugin level
+                        //he.setProperty("enable_pending", Boolean.TRUE.toString());
                         graph.commit();
 					    /*
 					    //add Edge
@@ -1093,8 +1358,82 @@ public class DBBaseFunctions {
         return isUpdated;
     }
 
-    public boolean setNodeParamsNoTx(String region, String agent, String plugin, Map<String,String> paramMap)
-    {
+    public boolean setEdgeParamsNoTx(String edgeId, Map<String,String> paramMap) {
+        boolean isUpdated = false;
+        int count = 0;
+        try
+        {
+
+            while((!isUpdated) && (count != retryCount))
+            {
+                if(count > 0)
+                {
+                    //logger.debug("iNODEUPDATE RETRY : region=" + region + " agent=" + agent + " plugin" + plugin);
+                    Thread.sleep((long)(Math.random() * 1000)); //random wait to prevent sync error
+                }
+                isUpdated = IsetEdgeParamsNoTx(edgeId, paramMap);
+                count++;
+
+            }
+
+            if((!isUpdated) && (count == retryCount))
+            {
+                logger.debug("DBEngine : setEdgeParams : Failed to add node in " + count + " retrys");
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.debug("DBEngine : setEdgeParams : Error " + ex.toString());
+        }
+
+        return isUpdated;
+    }
+
+    public boolean IsetEdgeParamsNoTx(String edgeId, Map<String,String> paramMap) {
+
+        boolean isUpdated = false;
+        OrientGraphNoTx graph = null;
+        try
+        {
+            if(edgeId != null)
+            {
+                graph = factory.getNoTx();
+                Edge iEdge = graph.getEdge(edgeId);
+                Iterator it = paramMap.entrySet().iterator();
+                while (it.hasNext())
+                {
+                    Map.Entry pairs = (Map.Entry)it.next();
+                    iEdge.setProperty( pairs.getKey().toString(), pairs.getValue().toString());
+                }
+                graph.commit();
+                isUpdated = true;
+            }
+        }
+        catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException exc)
+        {
+            //eat exception.. this is not normal and should log somewhere
+        }
+        catch(com.orientechnologies.orient.core.exception.OConcurrentModificationException exc)
+        {
+            //eat exception.. this is normal
+        }
+        catch(Exception ex)
+        {
+            long threadId = Thread.currentThread().getId();
+            logger.debug("setINodeParams: thread_id: " + threadId + " Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return isUpdated;
+    }
+
+
+    public boolean setNodeParamsNoTx(String region, String agent, String plugin, Map<String,String> paramMap) {
         boolean isUpdated = false;
         int count = 0;
         try
@@ -1125,8 +1464,7 @@ public class DBBaseFunctions {
         return isUpdated;
     }
 
-    public boolean IsetNodeParamsNoTx(String region, String agent, String plugin, Map<String,String> paramMap)
-    {
+    public boolean IsetNodeParamsNoTx(String region, String agent, String plugin, Map<String,String> paramMap) {
 
         boolean isUpdated = false;
         OrientGraphNoTx graph = null;
@@ -1170,7 +1508,6 @@ public class DBBaseFunctions {
         }
         return isUpdated;
     }
-
 
     public boolean setNodeParams(String region, String agent, String plugin, Map<String,String> paramMap)
     {
@@ -1416,6 +1753,9 @@ public class DBBaseFunctions {
         try
         {
             //index properties
+            logger.debug("Create Global Vertex Class");
+            String[] gProps = {"region"}; //Property names
+            createVertexClass("gNode", gProps);
 
             logger.debug("Create Region Vertex Class");
             String[] rProps = {"region"}; //Property names
@@ -1427,8 +1767,7 @@ public class DBBaseFunctions {
 
             //indexes for searching
             logger.debug("Create Agent Vertex Class Index's");
-            for(String indexName : aNodeIndexParams)
-            {
+            for(String indexName : aNodeIndexParams) {
                 createVertexIndex("aNode", indexName, false);
             }
 
@@ -1436,15 +1775,46 @@ public class DBBaseFunctions {
             String[] pProps = {"region", "agent", "plugin"}; //Property names
             createVertexClass("pNode", pProps);
 
+
+            logger.debug("Create isGlobal Edge Class");
+            String[] isGlobalProps = {"edge_id"}; //Property names
+            //createEdgeClass("isAgent",isAgentProps);
+            createEdgeClass("isGlobal",null);
+
+            logger.debug("Create isGlobalHealth Edge Class");
+            String[] isGlobalHealthProps = {"region"}; //Property names
+            //createEdgeClass("isAgent",isAgentProps);
+            createEdgeClass("isGlobalHealth",isGlobalHealthProps);
+
+            logger.debug("Create isRegion Edge Class");
+            String[] isRegionProps = {"edge_id"}; //Property names
+            //createEdgeClass("isAgent",isAgentProps);
+            createEdgeClass("isRegion",null);
+
+            logger.debug("Create isRegionHealth Edge Class");
+            String[] isRegionHealthProps = {"region"}; //Property names
+            //createEdgeClass("isAgent",isAgentProps);
+            createEdgeClass("isRegionHealth",isRegionHealthProps);
+
             logger.debug("Create isAgent Edge Class");
             String[] isAgentProps = {"edge_id"}; //Property names
             //createEdgeClass("isAgent",isAgentProps);
             createEdgeClass("isAgent",null);
 
+            logger.debug("Create isAgentHealth Edge Class");
+            String[] isAgentHealthProps = {"region","agent"}; //Property names
+            //createEdgeClass("isAgent",isAgentProps);
+            createEdgeClass("isAgentHealth",isAgentHealthProps);
+
             logger.debug("Create isPlugin Edge Class");
             String[] isPluginProps = {"edge_id"}; //Property names
             //createEdgeClass("isPlugin",isPluginProps);
             createEdgeClass("isPlugin",null);
+
+            logger.debug("Create isPluginHealth Edge Class");
+            String[] isPluginHealthProps = {"region","agent","plugin"}; //Property names
+            //createEdgeClass("isPlugin",isPluginProps);
+            createEdgeClass("isPluginHealth",isPluginHealthProps);
 
             logger.debug("Create isReachable Edge Class");
             String[] isReachableProps = {"src_agent", "dst_agent"}; //Property names

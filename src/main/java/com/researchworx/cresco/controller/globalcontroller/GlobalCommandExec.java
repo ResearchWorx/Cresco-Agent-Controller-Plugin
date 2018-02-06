@@ -1137,14 +1137,12 @@ public class GlobalCommandExec {
 				pluginFiles = new ArrayList<String>();
 				File[] listOfFiles = folder.listFiles();
 
-				for (int i = 0; i < listOfFiles.length; i++) 
-				{
-					if (listOfFiles[i].isFile()) 
-					{
-						pluginFiles.add(listOfFiles[i].getAbsolutePath());
-					} 
-		      
-				}
+                for (File listOfFile : listOfFiles) {
+                    if (listOfFile.isFile()) {
+                        pluginFiles.add(listOfFile.getAbsolutePath());
+                    }
+
+                }
 				if(pluginFiles.isEmpty())
 				{
 					pluginFiles = null;

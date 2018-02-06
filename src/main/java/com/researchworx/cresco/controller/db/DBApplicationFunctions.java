@@ -2726,8 +2726,7 @@ public class DBApplicationFunctions {
         return node_id;
     }
 
-    public String getResourceEdgeId(String resource_id, String inode_id, String region, String agent, String pluginId)
-    {
+    public String getResourceEdgeId(String resource_id, String inode_id, String region, String agent, String pluginId) {
         String edge_id = null;
         OrientGraph graph = null;
         try

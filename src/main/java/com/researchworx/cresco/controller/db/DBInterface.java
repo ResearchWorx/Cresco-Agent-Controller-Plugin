@@ -63,6 +63,7 @@ public class DBInterface {
         Map<String,String> params = null;
         try
         {
+
             params = new HashMap<String,String>();
             String[] pstr = param.split(",");
             for(String str : pstr)
@@ -895,6 +896,67 @@ public class DBInterface {
         return resourceTotal;
     }
 
+    public Map<String,NodeStatusType> getEdgeHealthStatus(String region, String agent, String plugin) {
+
+        Map<String,NodeStatusType> nodeStatusMap = null;
+        try {
+            nodeStatusMap = new HashMap<>();
+            //List<String> queryList = gdb.getNodeIds(region,agent,plugin,false);
+            List<String> queryList = gdb.getEdgeHealthIds(region,agent,plugin,false);
+            //logger.info("getEdgeHealthStatus : Count : " + queryList.size());
+
+            for(String nodeId : queryList) {
+                Map<String,String> params = gdb.getEdgeParamsNoTx(nodeId);
+                long watchdog_rate = 5000L;
+
+                if(params.containsKey("watchdogtimer")) {
+                    watchdog_rate = Long.parseLong(params.get("watchdogtimer"));
+                }
+
+                boolean isPending = false;
+
+                if(params.containsKey("enable_pending")) {
+                    if(Boolean.parseBoolean(params.get("enable_pending"))) {
+                        isPending = true;
+                    }
+                }
+
+                if(isPending) {
+                    nodeStatusMap.put(nodeId, NodeStatusType.PENDING);
+                }
+                else if((params.containsKey("watchdog_ts"))  && (params.containsKey("is_active"))) {
+                    long watchdog_ts = Long.parseLong(params.get("watchdog_ts"));
+                    //long watchdog_rate = Long.parseLong(params.get("watchdogtimer"));
+                    boolean isActive = Boolean.parseBoolean(params.get("is_active"));
+                    if(isActive) {
+                        long watchdog_diff = System.currentTimeMillis() - watchdog_ts;
+                        if (watchdog_diff > (watchdog_rate * 3)) {
+                            //node is stale
+                            nodeStatusMap.put(nodeId, NodeStatusType.STALE);
+                            logger.error(nodeId + " is stale");
+                        } else {
+                            nodeStatusMap.put(nodeId, NodeStatusType.ACTIVE);
+                        }
+                    }
+                    else {
+                        logger.error(nodeId + " is lost");
+                        nodeStatusMap.put(nodeId, NodeStatusType.LOST);
+
+                    }
+                }
+                else {
+                    //Plugins will trigger this problem, need to fix Cresco Library
+                    logger.error(nodeId + " could not find watchdog_ts or watchdog_rate");
+                    nodeStatusMap.put(nodeId,NodeStatusType.ERROR);
+                }
+            }
+        }
+        catch(Exception ex) {
+            logger.error(ex.getMessage());
+        }
+        return nodeStatusMap;
+    }
+
     public Map<String,NodeStatusType> getNodeStatus(String region, String agent, String plugin) {
 
         Map<String,NodeStatusType> nodeStatusMap = null;
@@ -989,22 +1051,11 @@ public class DBInterface {
             String nodeId = gdb.getNodeId(region,agent,plugin);
             if(nodeId == null) {
                 nodeId = gdb.addNode(region, agent,plugin);
-
-                /*
-                logger.info("\nDB Message: Type={}\nSrc={}-{}:{}\nDst={}-{}:{}\nParams={}\n",
-                        de.getMsgType().name(),
-                        de.getParam("src_region"), de.getParam("src_agent"), de.getParam("src_plugin"),
-                        de.getParam("dst_region"), de.getParam("dst_agent"), de.getParam("dst_plugin"),
-                        de.getParams());
-*/
             }
 
             gdb.setNodeParams(region,agent,plugin, de.getParams());
 
                 logger.debug("Adding Node: " + de.getParams().toString());
-                //gdb.setNodeParams(region,agent,plugin, de.getParams());
-                //gdb.setNodeParam(region,agent,plugin, "watchdog_ts", String.valueOf(System.currentTimeMillis()));
-                //gdb.setNodeParam(region,agent,plugin, "watchdog_ts", String.valueOf(System.currentTimeMillis()));
 
                 if((region != null) && (agent != null) && (plugin == null)) {
                     //logger.info("is Agent: Process Plugins");
@@ -1018,25 +1069,11 @@ public class DBInterface {
                             String pluginId = configMap.get("pluginid");
                             gdb.addNode(region, agent, pluginId);
                             gdb.setNodeParams(region, agent, pluginId, configMap);
-
-                            //logger.error("Register Update: region:" + region + " agent:" + agent + " plugin:" + pluginId);
-
-
-                            /*
-                            for (Map.Entry<String, String> entry : configMap.entrySet())
-                            {
-                                System.out.println(entry.getKey() + "/" + entry.getValue());
-                                //gdb.addNode(region, agent,plugin);
-                                //gdb.setNodeParams(region,agent,plugin, de.getParams());
-                            }
-                            */
-
                         }
                     }
-
-
-                wasAdded = true;
             }
+
+            wasAdded = true;
 
         } catch (Exception ex) {
             logger.error("GraphDBUpdater : addNode ERROR : " + ex.toString());
@@ -1075,8 +1112,19 @@ public class DBInterface {
                 updateMap.put("watchdogtimer", interval);
                 updateMap.put("watchdog_ts", String.valueOf(System.currentTimeMillis()));
                 updateMap.put("is_active", Boolean.TRUE.toString());
+                updateMap.put("enable_pending", Boolean.FALSE.toString());
 
-                gdb.setNodeParamsNoTx(region, agent, pluginId, updateMap);
+
+                //We no longer use Nodes to store health status, see edgehealth
+                //gdb.setNodeParamsNoTx(region, agent, pluginId, updateMap);
+
+                String edgeId = gdb.getEdgeHealthId(region, agent, pluginId);
+                if(edgeId != null) {
+
+                    //logger.error("UPDATE EDGE : " + edgeId + " region:" + region + " agent:" + agent + " plugin:" + pluginId);
+                    //logger.error(gdb.getEdgeParamsNoTx(edgeId).toString());
+                    gdb.setEdgeParamsNoTx(edgeId,updateMap);
+                }
 
 
                 if((region != null) && (agent != null) && (pluginId == null)) {
