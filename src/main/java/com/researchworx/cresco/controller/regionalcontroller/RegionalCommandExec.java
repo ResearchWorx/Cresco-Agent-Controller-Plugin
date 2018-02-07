@@ -71,12 +71,6 @@ public class RegionalCommandExec {
                             logger.debug("CONFIG : AGENTDISCOVER REMOVE: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
                             logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
                             plugin.getGDB().removeNode(le);
-                            //TODO Fix Global
-                            logger.error("Implement Global Relay of Region Change");
-                            /*
-                            le.setParam("globalcmd", Boolean.TRUE.toString());
-                            globalSend(le);
-                            */
                             break;
                         case "agent_enable":
                             logger.debug("CONFIG : AGENT ADD: Region:" + le.getParam("src_region") + " Agent:" + le.getParam("src_agent"));
