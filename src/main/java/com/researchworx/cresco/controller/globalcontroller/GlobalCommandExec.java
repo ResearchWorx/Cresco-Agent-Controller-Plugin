@@ -4,9 +4,12 @@ package com.researchworx.cresco.controller.globalcontroller;
 import com.google.gson.Gson;
 import com.researchworx.cresco.controller.app.gPayload;
 import com.researchworx.cresco.controller.core.Launcher;
+import com.researchworx.cresco.controller.db.NodeStatusType;
 import com.researchworx.cresco.controller.globalscheduler.PollRemovePipeline;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
+import com.sun.media.jfxmedia.logging.Logger;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import java.io.*;
 import java.net.URL;
@@ -656,6 +659,14 @@ public class GlobalCommandExec {
         logger.debug("CONFIG : AGENTDISCOVER ADD: Region:" + ce.getParam("src_region") + " Agent:" + ce.getParam("src_agent"));
         logger.trace("Message Body [" + ce.getMsgBody() + "] [" + ce.getParams().toString() + "]");
         plugin.getGDB().addNode(ce);
+
+        //TODO Hack to create region health edge
+            Map<String,String> paramMap = new HashMap<>();
+            paramMap.put("enable_pending", Boolean.TRUE.toString());
+            paramMap.put("region", ce.getParam("src_region"));
+
+            String edgeId = plugin.getGDB().gdb.addEdge(ce.getParam("src_region"),null,null, ce.getParam("dst_region"), null,null,"isRegionHealth",paramMap);
+
         }
         catch(Exception ex) {
             ce.setParam("error", ex.getMessage());

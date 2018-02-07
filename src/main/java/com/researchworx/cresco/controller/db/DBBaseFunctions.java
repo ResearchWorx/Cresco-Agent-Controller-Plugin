@@ -926,6 +926,7 @@ public class DBBaseFunctions {
 
                         graph.addEdge("class:isAgent", fromV, toV, "isAgent");
                         Edge he = graph.addEdge("class:isAgentHealth", fromV, toV, "isAgentHealth");
+
                         he.setProperty("enable_pending", Boolean.TRUE.toString());
                         he.setProperty("region", region);
                         he.setProperty("agent", agent);
@@ -1106,7 +1107,7 @@ public class DBBaseFunctions {
 
     }
 
-    public String addEdge(String src_region, String src_agent, String src_plugin, String dst_region, String dst_agent, String dst_plugin, String className) {
+    public String addEdge(String src_region, String src_agent, String src_plugin, String dst_region, String dst_agent, String dst_plugin, String className, Map<String,String> paramMap) {
         String edge_id = null;
         int count = 0;
         try
@@ -1114,7 +1115,7 @@ public class DBBaseFunctions {
 
             while((edge_id == null) && (count != retryCount))
             {
-                edge_id = IaddEdge(src_region, src_agent, src_plugin, dst_region, dst_agent, dst_plugin, className);
+                edge_id = IaddEdge(src_region, src_agent, src_plugin, dst_region, dst_agent, dst_plugin, className, paramMap);
                 count++;
             }
 
@@ -1131,7 +1132,7 @@ public class DBBaseFunctions {
         return edge_id;
     }
 
-    private String IaddEdge(String src_region, String src_agent, String src_plugin, String dst_region, String dst_agent, String dst_plugin, String className) {
+    private String IaddEdge(String src_region, String src_agent, String src_plugin, String dst_region, String dst_agent, String dst_plugin, String className, Map<String,String> paramMap) {
         String edge_id = null;
         try
         {
@@ -1143,6 +1144,13 @@ public class DBBaseFunctions {
             Vertex toV = graph.getVertex(dst_node_id);
 
             Edge isEdge = graph.addEdge("class:" + className, fromV, toV, className);
+            if(paramMap != null) {
+                Iterator it = paramMap.entrySet().iterator();
+                while (it.hasNext()) {
+                    Map.Entry pairs = (Map.Entry) it.next();
+                    isEdge.setProperty(pairs.getKey().toString(), pairs.getValue().toString());
+                }
+            }
             graph.commit();
             graph.shutdown();
             edge_id = isEdge.getId().toString();

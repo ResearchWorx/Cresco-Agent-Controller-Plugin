@@ -93,7 +93,7 @@ public class GlobalHealthWatcher implements Runnable {
 	}
 
 	private void gNotify() {
-        logger.trace("gNotify End");
+        logger.trace("gNotify Start");
         try {
             //if there is a remote global controller and it is reachable
             if(plugin.cstate.isRegionalController()) {
@@ -243,13 +243,15 @@ public class GlobalHealthWatcher implements Runnable {
                         //No global controller found, starting global services
                         logger.info("No Global Controller Found: Starting Global Services");
                         //start global stuff
-
                         //create globalscheduler queue
                         //plugin.setResourceScheduleQueue(new LinkedBlockingQueue<MsgEvent>());
                         plugin.setAppScheduleQueue(new LinkedBlockingQueue<gPayload>());
                         startGlobalSchedulers();
                         //end global start
                         this.plugin.cstate.setGlobalSuccess("gCheck : Creating Global Host");
+                        logger.info("Global: " + this.plugin.cstate.getRegionalRegion() + " Agent: " + this.plugin.cstate.getRegionalAgent());
+
+                        sendGlobalWatchDogRegister();
                     }
                 }
             }
@@ -347,7 +349,7 @@ public class GlobalHealthWatcher implements Runnable {
     private void sendGlobalWatchDogRegister() {
 
 	    try {
-            if(!plugin.cstate.isGlobalController()) {
+            //if(!plugin.cstate.isGlobalController()) {
                 //is the global controller reachable
                 if(plugin.isReachableAgent(plugin.cstate.getGlobalControllerPath())) {
                     MsgEvent le = new MsgEvent(MsgEvent.Type.CONFIG, plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), "enabled");
@@ -373,7 +375,7 @@ public class GlobalHealthWatcher implements Runnable {
                     le.setParam("source","sendGlobalWatchDogRegister()");
                     plugin.msgIn(le);
                 }
-            }
+            //}
         }
         catch(Exception ex) {
 	        logger.error("sendGlobalWatchDogRegister() " + ex.getMessage());
@@ -482,11 +484,22 @@ public class GlobalHealthWatcher implements Runnable {
                 logger.debug("GlobalNodeStatusWatchDog");
                 //update own database
 
+                /*
+                Map<String, NodeStatusType> edgeHealthListStatus = plugin.getGDB().getNodeStatus(null, null, null);
+                for (Map.Entry<String, NodeStatusType> entry : edgeHealthListStatus.entrySet()) {
+                    logger.info("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());
+                }
 
                 Map<String, NodeStatusType> nodeListStatus = plugin.getGDB().getNodeStatus(null, null, null);
-                for (Map.Entry<String, NodeStatusType> entry : nodeListStatus.entrySet()) {
 
-                    logger.debug("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());
+
+                for (Map.Entry<String, NodeStatusType> entry : nodeListStatus.entrySet()) {
+*/
+                Map<String, NodeStatusType> edgeHealthListStatus = plugin.getGDB().getEdgeHealthStatus(null, null, null);
+
+                for (Map.Entry<String, NodeStatusType> entry : edgeHealthListStatus.entrySet()) {
+
+                logger.debug("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());
 
                     if(entry.getValue() == NodeStatusType.STALE) { //will include more items once nodes update correctly
                         logger.error("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());

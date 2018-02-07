@@ -1094,7 +1094,6 @@ public class DBInterface {
             String agent = de.getParam("agent_name");
             String pluginId = de.getParam("plugin_id");
 
-
             String nodeId = gdb.getNodeId(region,agent,pluginId);
 
             logger.trace("watchdog() region=" + region + " agent=" + agent + " plugin=" + pluginId);
@@ -1118,12 +1117,16 @@ public class DBInterface {
                 //We no longer use Nodes to store health status, see edgehealth
                 //gdb.setNodeParamsNoTx(region, agent, pluginId, updateMap);
 
+
                 String edgeId = gdb.getEdgeHealthId(region, agent, pluginId);
+
                 if(edgeId != null) {
 
                     //logger.error("UPDATE EDGE : " + edgeId + " region:" + region + " agent:" + agent + " plugin:" + pluginId);
                     //logger.error(gdb.getEdgeParamsNoTx(edgeId).toString());
                     gdb.setEdgeParamsNoTx(edgeId,updateMap);
+                } else {
+                    logger.error("Missing Edge Id");
                 }
 
 
