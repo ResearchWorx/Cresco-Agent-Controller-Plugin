@@ -99,7 +99,8 @@ public class TCPDiscoveryEngine implements Runnable {
 
                 ois = new ObjectInputStream(input);
                 String message = (String) ois.readObject();
-                
+
+
                 MsgEvent me = null;
 
                 try {

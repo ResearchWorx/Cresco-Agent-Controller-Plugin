@@ -108,6 +108,9 @@ public class TCPDiscoveryStatic {
 
         } catch (Exception ex) {
             logger.error("TCPDiscoveryStatic discover Error: " + ex.getMessage());
+            StringWriter errors = new StringWriter();
+            ex.printStackTrace(new PrintWriter(errors));
+            logger.error("TCPDiscoveryStatic discover Dump: " + errors);
         }
 
         return discoveredList;

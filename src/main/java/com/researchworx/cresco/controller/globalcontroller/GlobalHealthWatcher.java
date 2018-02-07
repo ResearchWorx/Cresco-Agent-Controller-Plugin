@@ -18,7 +18,7 @@ public class GlobalHealthWatcher implements Runnable {
 	private Map<String,String> global_host_map;
     private Timer regionalUpdateTimer;
     private Long gCheckInterval;
-
+    private String lastDBUpdate;
 
     public Boolean SchedulerActive;
     public Boolean AppSchedulerActive;
@@ -184,6 +184,8 @@ public class GlobalHealthWatcher implements Runnable {
                 if(global_host_map.containsKey(static_global_controller_host)) {
                     if(plugin.isReachableAgent(global_host_map.get(static_global_controller_host))) {
                         logger.trace("Static Global Controller Check " + static_global_controller_host + " Ok.");
+                        //TODO Check if regionalDBexport() is needed
+                        regionalDBexport();
                         return;
                     }
                     else {
@@ -203,9 +205,6 @@ public class GlobalHealthWatcher implements Runnable {
                     global_host_map.put(static_global_controller_host, plugin.cstate.getGlobalControllerPath());
                     //register with global controller
                     sendGlobalWatchDogRegister();
-                    //TODO is this correct?
-                    //Don't bother sending on registration, DB is not yet populated, send on second update check
-                    //regionalDBexport();
                 }
             }
             else if(this.plugin.cstate.isGlobalController()) {
@@ -219,9 +218,13 @@ public class GlobalHealthWatcher implements Runnable {
             else {
                 logger.trace("Starting Dynamic Global Controller Check");
                 //Check if the global controller path exist
-                if(plugin.cstate.isGlobalController()) {
-                    if (plugin.isReachableAgent(this.plugin.cstate.getGlobalControllerPath())) {
+                if(this.plugin.cstate.isGlobalController()) {
+                    //if(this.plugin.cstate.getGlobalControllerPath() != null) {
+
+                        if (plugin.isReachableAgent(this.plugin.cstate.getGlobalControllerPath())) {
                         logger.debug("Dynamic Global Path : " + this.plugin.cstate.getGlobalControllerPath() + " reachable :" + plugin.isReachableAgent(this.plugin.cstate.getGlobalControllerPath()));
+                        //TODO Check if regionalDBexport() is needed
+                        //regionalDBexport();
                         return;
                     }
                 }
@@ -240,8 +243,6 @@ public class GlobalHealthWatcher implements Runnable {
                             plugin.cstate.setRegionalGlobalSuccess(globalController[0],globalController[1], "gCheck : Dyanmic Global Host :" + globalController[0] + "_" + globalController[1] + " connected." );
                             //register with global controller
                             sendGlobalWatchDogRegister();
-                            //TODO is this right to do
-                            regionalDBexport();
                         }
                     }
                     else {
@@ -433,40 +434,55 @@ public class GlobalHealthWatcher implements Runnable {
         return discoveryList;
     }
 
+    private boolean doRegionalUpdate(String dbExport) {
+        boolean doUpdate = false;
+            if(lastDBUpdate == null) {
+                doUpdate = true;
+            } else {
+                if(!(lastDBUpdate.length() == dbExport.length())) {
+                    doUpdate = true;
+                } else {
+                    if(!lastDBUpdate.equals(dbExport)) {
+                        doUpdate = true;
+                    }
+                }
+            }
+        return doUpdate;
+    }
+
     public MsgEvent regionalDBexport() {
-        Thread.dumpStack();
         MsgEvent me = null;
 	    try {
             if(!this.plugin.cstate.isGlobalController()) {
                 //TODO Enable Export
                 String dbexport = plugin.getGDB().gdb.getDBExport();
 
-                logger.error("DBEXPORT SIZE: " + dbexport.length());
+                if (doRegionalUpdate(dbexport)) {
 
-                //logger.trace("EXPORT" + dbexport + "EXPORT");
+                    logger.info("Exporting Region DB to Global Controller");
 
+                    lastDBUpdate = dbexport;
 
-                me = new MsgEvent(MsgEvent.Type.CONFIG, this.plugin.getRegion(), this.plugin.getAgent(), this.plugin.getPluginID(), "regionalimport");
+                    me = new MsgEvent(MsgEvent.Type.CONFIG, this.plugin.getRegion(), this.plugin.getAgent(), this.plugin.getPluginID(), "regionalimport");
                     me.setParam("action", "regionalimport");
                     me.setParam("src_region", this.plugin.getRegion());
                     me.setParam("src_agent", this.plugin.getAgent());
                     me.setParam("src_plugin", this.plugin.cstate.getControllerId());
 
-                    me.setParam("dst_region",plugin.cstate.getGlobalRegion());
-                    me.setParam("dst_agent",plugin.cstate.getGlobalAgent());
-                    me.setParam("dst_plugin",plugin.cstate.getControllerId());
+                    me.setParam("dst_region", plugin.cstate.getGlobalRegion());
+                    me.setParam("dst_agent", plugin.cstate.getGlobalAgent());
+                    me.setParam("dst_plugin", plugin.cstate.getControllerId());
 
                     me.setParam("is_regional", Boolean.TRUE.toString());
                     me.setParam("is_global", Boolean.TRUE.toString());
 
-                    me.setParam("exportdata",dbexport);
+                    me.setParam("exportdata", dbexport);
 
-                    Thread.dumpStack();
                     //logger.error("*" + me.getCompressedParam("exportdata")  + "*");
 
                     this.plugin.msgIn(me);
                 }
-
+            }
 
         }
         catch(Exception ex) {
