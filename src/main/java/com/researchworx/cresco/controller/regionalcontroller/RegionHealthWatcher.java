@@ -92,17 +92,6 @@ public class RegionHealthWatcher {
             if(plugin.cstate.isRegionalController()) { //only run if node is regional controller
                 logger.debug("RegionalNodeStatusWatchDog");
 
-
-                /*
-                Map<String, NodeStatusType> edgeStatus = plugin.getGDB().getEdgeHealthStatus(plugin.getRegion(), null, null);
-                logger.info("RegionalNodeStatusWatchDog");
-                for (Map.Entry<String, NodeStatusType> entry : edgeStatus.entrySet()) {
-                    logger.info("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());
-                }
-                */
-
-                ///Map<String, NodeStatusType> nodeStatus = plugin.getGDB().getNodeStatus(plugin.getRegion(), null, null);
-                //Change to use edge health
                 Map<String, NodeStatusType> edgeStatus = plugin.getGDB().getEdgeHealthStatus(plugin.getRegion(), null, null);
 
                 for (Map.Entry<String, NodeStatusType> entry : edgeStatus.entrySet()) {
@@ -111,15 +100,18 @@ public class RegionHealthWatcher {
                     if(entry.getValue() == NodeStatusType.STALE) { //will include more items once nodes update correctly
                         logger.error("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());
                         //mark node disabled
-                        plugin.getGDB().gdb.setNodeParam(entry.getKey(),"is_active",Boolean.FALSE.toString());
+                        plugin.getGDB().gdb.setEdgeParam(entry.getKey(),"is_active",Boolean.FALSE.toString());
+
                     }
                     else if(entry.getValue() == NodeStatusType.LOST) { //will include more items once nodes update correctly
                         logger.error("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());
                         //remove nodes
-                        Map<String,String> nodeParams = plugin.getGDB().gdb.getNodeParams(entry.getKey());
-                        String region = nodeParams.get("region");
-                        String agent = nodeParams.get("agent");
-                        String pluginId = nodeParams.get("plugin");
+                        Map<String,String> edgeParams = plugin.getGDB().gdb.getEdgeParamsNoTx(entry.getKey());
+                        //String nodeId = plugin.getGDB().gdb.getNodeId(edgeMap.get("region"),null,null);
+                        //Map<String,String> nodeParams = plugin.getGDB().gdb.getNodeParams(entry.getKey());
+                        String region = edgeParams.get("region");
+                        String agent = edgeParams.get("agent");
+                        String pluginId = edgeParams.get("plugin");
                         logger.error("Removing " + region + " " + agent + " " + pluginId);
                         plugin.getGDB().removeNode(region,agent,pluginId);
                     }

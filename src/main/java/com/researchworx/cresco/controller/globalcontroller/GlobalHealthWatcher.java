@@ -504,15 +504,25 @@ public class GlobalHealthWatcher implements Runnable {
                     if(entry.getValue() == NodeStatusType.STALE) { //will include more items once nodes update correctly
                         logger.error("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());
                         //mark node disabled
-                        plugin.getGDB().gdb.setNodeParam(entry.getKey(),"is_active",Boolean.FALSE.toString());
+                        plugin.getGDB().gdb.setEdgeParam(entry.getKey(),"is_active",Boolean.FALSE.toString());
                     }
                     else if(entry.getValue() == NodeStatusType.LOST) { //will include more items once nodes update correctly
+                        /*
                         logger.error("NodeID : " + entry.getKey() + " Status : " + entry.getValue().toString());
                         //remove nodes
                         Map<String,String> nodeParams = plugin.getGDB().gdb.getNodeParams(entry.getKey());
                         String region = nodeParams.get("region");
                         String agent = nodeParams.get("agent");
                         String pluginId = nodeParams.get("plugin");
+                        logger.error("Removing " + region + " " + agent + " " + pluginId);
+                        plugin.getGDB().removeNode(region,agent,pluginId);
+                        */
+                        Map<String,String> edgeParams = plugin.getGDB().gdb.getEdgeParamsNoTx(entry.getKey());
+                        //String nodeId = plugin.getGDB().gdb.getNodeId(edgeMap.get("region"),null,null);
+                        //Map<String,String> nodeParams = plugin.getGDB().gdb.getNodeParams(entry.getKey());
+                        String region = edgeParams.get("region");
+                        String agent = edgeParams.get("agent");
+                        String pluginId = edgeParams.get("plugin");
                         logger.error("Removing " + region + " " + agent + " " + pluginId);
                         plugin.getGDB().removeNode(region,agent,pluginId);
                     }
