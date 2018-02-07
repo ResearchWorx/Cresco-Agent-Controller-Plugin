@@ -439,13 +439,13 @@ public class GlobalHealthWatcher implements Runnable {
             if(lastDBUpdate == null) {
                 doUpdate = true;
             } else {
-                if(!(lastDBUpdate.length() == dbExport.length())) {
-                    doUpdate = true;
-                } else {
+                //if(!(lastDBUpdate.length() == dbExport.length())) {
+                    //doUpdate = true;
+                //} else {
                     if(!lastDBUpdate.equals(dbExport)) {
                         doUpdate = true;
                     }
-                }
+                //}
             }
         return doUpdate;
     }

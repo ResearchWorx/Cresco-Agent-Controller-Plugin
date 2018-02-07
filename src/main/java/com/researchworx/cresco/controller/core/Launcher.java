@@ -348,6 +348,7 @@ public class Launcher extends CPlugin {
         } catch (Exception ex) {
             logger.error("initAgentDiscovery() Error " + ex.getMessage());
         }
+
         return discoveryList;
     }
 
@@ -408,60 +409,78 @@ public class Launcher extends CPlugin {
                 while(!isInit || discoveryList.isEmpty()) {
 
                     //determine least loaded broker
-                //need to use additional metrics to determine best fit broker
-                String cbrokerAddress = null;
-                String cbrokerValidatedAuthenication = null;
+                    //need to use additional metrics to determine best fit broker
+                    String pcbrokerAddress = null;
+                    String pcbrokerValidatedAuthenication = null;
 
-                String cRegion = null;
-                String cAgent = null;
+                    String pcRegion = null;
+                    //String cAgent = null;
 
                     int brokerCount = -1;
-                for (MsgEvent bm : discoveryList) {
+                    for (MsgEvent bm : discoveryList) {
 
-                    int tmpBrokerCount = Integer.parseInt(bm.getParam("agent_count"));
-                    if (brokerCount < tmpBrokerCount) {
-                        logger.trace("commInit {}" + bm.getParams().toString());
-                        cbrokerAddress = bm.getParam("dst_ip");
-                        cbrokerValidatedAuthenication = bm.getParam("validated_authenication");
-                        cRegion = bm.getParam("dst_region");
-                        cAgent = bm.getParam("dst_agent");
+                        int tmpBrokerCount = Integer.parseInt(bm.getParam("agent_count"));
+                        if (brokerCount < tmpBrokerCount) {
+                            logger.trace("commInit {}" + bm.getParams().toString());
+                            pcbrokerAddress = bm.getParam("dst_ip");
+                            pcbrokerValidatedAuthenication = bm.getParam("validated_authenication");
+                            pcRegion = bm.getParam("dst_region");
+                            //cAgent = bm.getParam("dst_agent");
+                        }
+                    }
+
+                    if ((pcbrokerAddress != null) && (pcbrokerValidatedAuthenication != null)) {
+
+                        this.agent = getConfig().getStringParam("agentname", "agent-" + java.util.UUID.randomUUID().toString());
+                        this.region = pcRegion;
+                        this.agentpath = pcRegion + "_" + this.agent;
+                        certificateManager = new CertificateManager(this, agentpath);
+
+                        TCPDiscoveryStatic ds = new TCPDiscoveryStatic(this);
+                        List<MsgEvent> certDiscovery = ds.discover(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_static_agent_timeout", 10000), pcbrokerAddress, true);
+
+                        String cbrokerAddress = certDiscovery.get(0).getParam("dst_ip");
+                        String cbrokerValidatedAuthenication = certDiscovery.get(0).getParam("validated_authenication");
+                        String cRegion = certDiscovery.get(0).getParam("dst_region");
+                        String cAgent = certDiscovery.get(0).getParam("dst_agent");
+
+
+                    if ((cbrokerAddress != null) && (cbrokerValidatedAuthenication != null)) {
+
+
+                        //UDPDiscoveryStatic ds = new UDPDiscoveryStatic(this);
+                        //discoveryList.addAll(ds.discover(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_static_agent_timeout", 10000), getConfig().getStringParam("regional_controller_host")));
+
+                        //List<MsgEvent> certDiscovery =
+
+                        //set agent broker auth
+                        String[] tmpAuth = cbrokerValidatedAuthenication.split(",");
+                        this.brokerUserNameAgent = tmpAuth[0];
+                        this.brokerPasswordAgent = tmpAuth[1];
+
+                        //set broker ip
+                        InetAddress remoteAddress = InetAddress.getByName(cbrokerAddress);
+                        if (remoteAddress instanceof Inet6Address) {
+                            cbrokerAddress = "[" + cbrokerAddress + "]";
+                        }
+                        //if ((this.region.equals("init")) && (this.agent.equals("init"))) {
+                        //RandomString rs = new RandomString(4);
+                        this.agent = getConfig().getStringParam("agentname", "agent-" + java.util.UUID.randomUUID().toString());
+                        //this.agent = "agent-" + java.util.UUID.randomUUID().toString();//rs.nextString();
+                        //logger.warn("Agent region changed from :" + oldRegion + " to " + region);
+                        //}
+
+                        this.brokerAddressAgent = cbrokerAddress;
+
+                        this.region = cRegion;
+
+                        logger.info("Assigned regionid=" + this.region);
+                        this.agentpath = this.region + "_" + this.agent;
+                        logger.debug("AgentPath=" + this.agentpath);
+                        this.cstate.setAgentSuccess(cRegion, cAgent, "initAgent() Dynamic Regional Host: " + cbrokerAddress + " connected.");
+                        isInit = true;
                     }
                 }
-                if ((cbrokerAddress != null) && (cbrokerValidatedAuthenication != null)) {
-
-                    //UDPDiscoveryStatic ds = new UDPDiscoveryStatic(this);
-                    //discoveryList.addAll(ds.discover(DiscoveryType.AGENT, getConfig().getIntegerParam("discovery_static_agent_timeout", 10000), getConfig().getStringParam("regional_controller_host")));
-
-                    //List<MsgEvent> certDiscovery =
-
-                    //set agent broker auth
-                    String[]tmpAuth = cbrokerValidatedAuthenication.split(",");
-                    this.brokerUserNameAgent = tmpAuth[0];
-                    this.brokerPasswordAgent = tmpAuth[1];
-
-                    //set broker ip
-                    InetAddress remoteAddress = InetAddress.getByName(cbrokerAddress);
-                    if (remoteAddress instanceof Inet6Address) {
-                        cbrokerAddress = "[" + cbrokerAddress + "]";
-                    }
-                    //if ((this.region.equals("init")) && (this.agent.equals("init"))) {
-                    //RandomString rs = new RandomString(4);
-                    this.agent = getConfig().getStringParam("agentname", "agent-" + java.util.UUID.randomUUID().toString());
-                    //this.agent = "agent-" + java.util.UUID.randomUUID().toString();//rs.nextString();
-                    //logger.warn("Agent region changed from :" + oldRegion + " to " + region);
-                    //}
-
-                    this.brokerAddressAgent = cbrokerAddress;
-
-                    this.region = cRegion;
-
-                    logger.info("Assigned regionid=" + this.region);
-                    this.agentpath = this.region + "_" + this.agent;
-                    logger.debug("AgentPath=" + this.agentpath);
-                    this.cstate.setAgentSuccess(cRegion,cAgent,"initAgent() Dynamic Regional Host: " + cbrokerAddress + " connected.");
-                    isInit = true;
-                }
-
                 if (this.getConfig().getBooleanParam("enable_clientnetdiscovery", true)) {
                     //discovery engine
                     if (!startNetDiscoveryEngine()) {
@@ -588,10 +607,16 @@ public class Launcher extends CPlugin {
                     consumerAgentConnected = true;
                     logger.debug("Agent ConsumerThread Started..");
                 } catch (JMSException jmx) {
-                    logger.error("Agent ConsumerThread " + jmx.getMessage());
+                    logger.error("Agent ConsumerThread JMX " + jmx.getMessage());
+                    StringWriter errors = new StringWriter();
+                    jmx.printStackTrace(new PrintWriter(errors));
+                    logger.error(errors.toString());
                 }
                 catch (Exception ex) {
                     logger.error("Agent ConsumerThread " + ex.getMessage());
+                    StringWriter errors = new StringWriter();
+                    ex.printStackTrace(new PrintWriter(errors));
+                    logger.error(errors.toString());
                 }
                 consumerAgentConnectCount++;
             }
