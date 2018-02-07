@@ -37,33 +37,35 @@ public class GlobalHealthWatcher implements Runnable {
 
 	public void shutdown() {
 
-        if(plugin.cstate.isRegionalController()) {
-            MsgEvent le = new MsgEvent(MsgEvent.Type.CONFIG, plugin.cstate.getGlobalRegion(), plugin.cstate.getGlobalAgent(), plugin.cstate.getControllerId(), "disabled");
+        if(!plugin.cstate.isGlobalController()) {
+            if (plugin.isReachableAgent(plugin.cstate.getGlobalControllerPath())) {
+                MsgEvent le = new MsgEvent(MsgEvent.Type.CONFIG, plugin.cstate.getGlobalRegion(), plugin.cstate.getGlobalAgent(), plugin.cstate.getControllerId(), "disabled");
 
-            le.setParam("src_region", plugin.getRegion());
-            le.setParam("src_agent", plugin.getAgent());
-            le.setParam("src_plugin", plugin.cstate.getControllerId());
+                le.setParam("src_region", plugin.getRegion());
+                le.setParam("src_agent", plugin.getAgent());
+                le.setParam("src_plugin", plugin.cstate.getControllerId());
 
-            le.setParam("dst_region",plugin.cstate.getGlobalRegion());
-            le.setParam("dst_agent",plugin.cstate.getGlobalAgent());
-            le.setParam("dst_plugin",plugin.cstate.getControllerId());
+                le.setParam("dst_region", plugin.cstate.getGlobalRegion());
+                le.setParam("dst_agent", plugin.cstate.getGlobalAgent());
+                le.setParam("dst_plugin", plugin.cstate.getControllerId());
 
-            le.setParam("is_regional", Boolean.TRUE.toString());
-            le.setParam("is_global", Boolean.TRUE.toString());
+                le.setParam("is_regional", Boolean.TRUE.toString());
+                le.setParam("is_global", Boolean.TRUE.toString());
 
-            le.setParam("region_name",plugin.cstate.getRegionalRegion());
+                le.setParam("region_name", plugin.cstate.getRegionalRegion());
 
 
-            le.setParam("action", "region_disable");
+                le.setParam("action", "region_disable");
 
-            //TODO does this need to be added?
-            //le.setParam("globalcmd", Boolean.TRUE.toString());
+                //TODO does this need to be added?
+                //le.setParam("globalcmd", Boolean.TRUE.toString());
 
-            le.setParam("watchdogtimer", String.valueOf(plugin.getConfig().getLongParam("watchdogtimer",5000L)));
-            //MsgEvent re = new RPCCall().call(le);
-            MsgEvent re = plugin.getRPC().call(le);
-            logger.info("RPC DISABLE: " + re.getMsgBody() + " [" + re.getParams().toString() + "]");
-
+                le.setParam("watchdogtimer", String.valueOf(plugin.getConfig().getLongParam("watchdogtimer", 5000L)));
+                //MsgEvent re = new RPCCall().call(le);
+                //MsgEvent re = plugin.getRPC().call(le);
+                //logger.info("RPC DISABLE: " + re.getMsgBody() + " [" + re.getParams().toString() + "]");
+                plugin.sendMsgEvent(le);
+            }
         }
 	}
 
@@ -86,6 +88,7 @@ public class GlobalHealthWatcher implements Runnable {
                     gCheck();
                     gNotify();
                 }
+                logger.info("Starting Global Shutdown");
                 shutdown();
 
 		} catch(Exception ex) {

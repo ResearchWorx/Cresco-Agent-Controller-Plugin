@@ -686,8 +686,8 @@ public class GlobalCommandExec {
             ce.setParam("error", ex.getMessage());
         }
 
-        //return null;
-        return ce;
+        return null;
+        //return ce;
     }
 
 

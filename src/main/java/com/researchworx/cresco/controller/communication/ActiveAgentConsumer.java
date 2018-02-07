@@ -34,7 +34,6 @@ public class ActiveAgentConsumer implements Runnable {
 		conn.start();
 		sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
 		RXqueue = sess.createQueue(RXQueueName);
-
 	}
 
 	@Override
@@ -64,9 +63,13 @@ public class ActiveAgentConsumer implements Runnable {
 			conn.cleanup();
 			conn.close();
 			logger.debug("Shutdown complete");
-		} catch (JMSException e) {
-			plugin.setConsumerThreadActive(false);
-			logger.error("JMS Error : " + e.getMessage());
+		}
+		catch (JMSException e) {
+			//TODO Fix this dirty hack
+			if(!e.getMessage().equals("java.lang.InterruptedException")) {
+				plugin.setConsumerThreadActive(false);
+				logger.error("JMS Error : " + e.getMessage());
+			}
 		} catch (Exception ex) {
 			logger.error("Run: {}", ex.getMessage());
 			plugin.setConsumerThreadActive(false);

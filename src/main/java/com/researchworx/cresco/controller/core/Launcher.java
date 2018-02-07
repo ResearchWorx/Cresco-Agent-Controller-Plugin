@@ -64,7 +64,6 @@ public class Launcher extends CPlugin {
     //public LinkedBlockingQueue<MsgEvent> resourceScheduleQueue;
 
     private boolean ConsumerThreadActive = false;
-    private boolean ConsumerThreadRegionActive = false;
 
     public boolean isRestartOnShutdown() {
         return restartOnShutdown;
@@ -200,12 +199,8 @@ public class Launcher extends CPlugin {
                 logger.info("Tearing down services");
             else
                 logger.info("Shutting down");
+
             this.DiscoveryActive = false;
-            this.ConsumerThreadRegionActive = false;
-            this.ConsumerThreadActive = false;
-            this.ActiveBrokerManagerActive = false;
-            this.DBManagerActive = false;
-            this.GlobalControllerManagerActive = false;
 
             if (this.perfMonitorNet != null) {
                 this.perfMonitorNet.stop();
@@ -216,40 +211,73 @@ public class Launcher extends CPlugin {
                 logger.error("Failed to stop Network Discovery Engine");
             }
 
+            /*
             if (this.watchDog != null) {
                 this.watchDog.stop();
                 //this might be wrong
                 //this.watchDog = null;
             }
-            if (this.regionHealthWatcher != null) {
-                this.regionHealthWatcher.timer.cancel();
-                this.regionHealthWatcher = null;
-            }
+            */
+
+            this.GlobalControllerManagerActive = false;
             if (this.globalControllerManagerThread!= null) {
-                logger.trace("Region Consumer shutting down");
+                logger.trace("Global HealthWatcher shutting down");
+                this.regionHealthWatcher.communicationsHealthTimer.cancel();
+                this.regionHealthWatcher.regionalUpdateTimer.cancel();
                 this.globalControllerManagerThread.join();
                 this.globalControllerManagerThread = null;
+                logger.info("Global HealthWatcher shutting down");
+
             }
-            if (this.consumerAgentThread != null) {
-                logger.trace("Agent Consumer shutting down");
-                this.consumerAgentThread.join();
-                this.consumerAgentThread = null;
+
+            if (this.regionHealthWatcher != null) {
+                logger.trace("Region HealthWatcher shutting down");
+                //in case its not canceled as part of global
+                this.regionHealthWatcher.communicationsHealthTimer.cancel();
+                this.regionHealthWatcher.regionalUpdateTimer.cancel();
+                this.regionHealthWatcher = null;
+                logger.info("Region HealthWatcher shutting down");
+
             }
+            this.ActiveBrokerManagerActive = false;
+
+            //this.getIncomingCanidateBrokers().offer(null);
             if (this.activeBrokerManagerThread != null) {
                 logger.trace("Active Broker Manager shutting down");
+                this.activeBrokerManagerThread.interrupt();
                 this.activeBrokerManagerThread.join();
                 this.activeBrokerManagerThread = null;
+                logger.info("Active Broker Manager shutting down");
             }
             if (this.ap != null) {
                 logger.trace("Producer shutting down");
                 this.ap.shutdown();
                 this.ap = null;
+                logger.info("Producer shutting down");
             }
+
+            this.ConsumerThreadActive = false;
+            if (this.consumerAgentThread != null) {
+                logger.trace("Agent Consumer shutting down");
+                this.consumerAgentThread.interrupt();
+                this.consumerAgentThread.join();
+                this.consumerAgentThread = null;
+                logger.info("Agent Consumer shutting down");
+            }
+
             if (this.broker != null) {
                 logger.trace("Broker shutting down");
                 this.broker.stopBroker();
                 this.broker = null;
+                logger.info("Broker shutting down");
+
             }
+
+            //disable
+            this.DBManagerActive = false;
+            logger.info("DB shutting down");
+
+
             if (this.restartOnShutdown) {
                 MsgEvent ce = new MsgEvent(MsgEvent.Type.CONFIG, this.region, this.agent, null, "comminit");
                 ce.setParam("action","comminit");
@@ -276,6 +304,9 @@ public class Launcher extends CPlugin {
             ex.printStackTrace(pw);
             logger.error(sw.toString());
         }
+        System.out.println("SHUTDOWN COMPLETE!!!");
+        logger.info("complete comm shutting down");
+
     }
 
     public ControllerConfig getControllerConfig() {
@@ -1146,13 +1177,6 @@ public class Launcher extends CPlugin {
     }
     public void setActiveBrokerManagerActive(boolean activeBrokerManagerActive) {
         ActiveBrokerManagerActive = activeBrokerManagerActive;
-    }
-
-    public boolean isConsumerThreadRegionActive() {
-        return ConsumerThreadRegionActive;
-    }
-    public void setConsumerThreadRegionActive(boolean consumerThreadRegionActive) {
-        ConsumerThreadRegionActive = consumerThreadRegionActive;
     }
 
     public ActiveBroker getBroker() {

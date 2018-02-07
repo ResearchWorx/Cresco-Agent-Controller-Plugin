@@ -50,6 +50,7 @@ public class ActiveBrokerManager implements Runnable  {
 		while(this.plugin.isActiveBrokerManagerActive()) {
 			try {
 				MsgEvent cb = this.plugin.getIncomingCanidateBrokers().take();
+
 				if(cb != null) {
 
 					String agentIP = cb.getParam("dst_ip");
@@ -127,7 +128,10 @@ public class ActiveBrokerManager implements Runnable  {
 					}
 		  			//Thread.sleep(500); //allow HM to catch up
 			  	}
-			} catch (Exception ex) {
+			} catch(java.lang.InterruptedException ex) {
+
+			}
+			catch (Exception ex) {
 				logger.error("Run {}", ex.getMessage());
                 ex.printStackTrace();
 			}

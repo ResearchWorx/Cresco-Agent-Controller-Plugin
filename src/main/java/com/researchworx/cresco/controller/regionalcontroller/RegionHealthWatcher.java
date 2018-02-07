@@ -11,12 +11,12 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class RegionHealthWatcher {
-    public Timer timer;
+    public Timer communicationsHealthTimer;
     private Launcher plugin;
     private CLogger logger;
     private long startTS;
     private int wdTimer;
-    private Timer regionalUpdateTimer;
+    public Timer regionalUpdateTimer;
     public RegionalCommandExec rce;
 
     //private static final Logger logger = LoggerFactory.getLogger(HealthWatcher.class);
@@ -29,8 +29,8 @@ public class RegionHealthWatcher {
         this.plugin = plugin;
         wdTimer = 1000;
         startTS = System.currentTimeMillis();
-        timer = new Timer();
-        timer.scheduleAtFixedRate(new CommunicationHealthWatcherTask(), 1000, wdTimer);
+        communicationsHealthTimer = new Timer();
+        communicationsHealthTimer.scheduleAtFixedRate(new CommunicationHealthWatcherTask(), 1000, wdTimer);
         regionalUpdateTimer = new Timer();
         regionalUpdateTimer.scheduleAtFixedRate(new RegionHealthWatcher.RegionalNodeStatusWatchDog(plugin, logger), 15000, 15000);//remote
         logger.info("Initialized");
@@ -38,7 +38,8 @@ public class RegionHealthWatcher {
     }
 
     public void shutdown() {
-        timer.cancel();
+        communicationsHealthTimer.cancel();
+        regionalUpdateTimer.cancel();
         logger.debug("Shutdown");
     }
 
