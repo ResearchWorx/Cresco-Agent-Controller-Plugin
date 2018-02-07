@@ -77,15 +77,17 @@ public class GlobalHealthWatcher implements Runnable {
 
             logger.trace("Initial gCheck");
 
-            gCheck(); //do initial check
-            this.plugin.setGlobalControllerManagerActive(true);
-            logger.trace("GlobalControllerManager is Active");
+                gCheck(); //do initial check
+                this.plugin.setGlobalControllerManagerActive(true);
+                logger.trace("GlobalControllerManager is Active");
 
-            while (this.plugin.isActiveBrokerManagerActive()) {
-                Thread.sleep(gCheckInterval);
-                gCheck();
-                gNotify();
-			}
+                while (this.plugin.isGlobalControllerManagerActive()) {
+                    Thread.sleep(gCheckInterval);
+                    gCheck();
+                    gNotify();
+                }
+                shutdown();
+
 		} catch(Exception ex) {
 			logger.error("globalwatcher run() " + ex.getMessage());
             logger.error(ex.getStackTrace().toString());
