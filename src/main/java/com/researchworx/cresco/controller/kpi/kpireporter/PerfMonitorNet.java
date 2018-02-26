@@ -1,6 +1,7 @@
-package com.researchworx.cresco.controller.core;
+package com.researchworx.cresco.controller.kpi.kpireporter;
 
 import com.google.gson.Gson;
+import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.controller.netdiscovery.*;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
@@ -10,7 +11,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-class PerfMonitorNet {
+public class PerfMonitorNet {
 
     private Launcher plugin;
 
@@ -25,7 +26,7 @@ class PerfMonitorNet {
     private DiscoveryClientIPv6 ip6dc;
 
 
-    PerfMonitorNet(Launcher plugin) {
+    public PerfMonitorNet(Launcher plugin) {
         this.plugin = plugin;
         this.logger = new CLogger(PerfMonitorNet.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
         gson = new Gson();
@@ -33,7 +34,7 @@ class PerfMonitorNet {
         dnListStatic = new ArrayList<>();
     }
 
-    PerfMonitorNet start() {
+    public PerfMonitorNet start() {
         if (this.running) return this;
         Long interval = plugin.getConfig().getLongParam("perftimer", 10000L);
 
@@ -42,6 +43,11 @@ class PerfMonitorNet {
         initial.setParam("src_agent", plugin.getAgent());
         initial.setParam("src_plugin", plugin.getPluginID());
         initial.setParam("dst_region", plugin.getRegion());
+        initial.setParam("dst_agent", plugin.getAgent());
+        initial.setParam("dst_plugin", plugin.getPluginID());
+        initial.setParam("is_regional",Boolean.TRUE.toString());
+        initial.setParam("is_global",Boolean.TRUE.toString());
+
         plugin.sendMsgEvent(initial);
 
         timer = new Timer();
@@ -49,13 +55,13 @@ class PerfMonitorNet {
         return this;
     }
 
-    PerfMonitorNet restart() {
+    public PerfMonitorNet restart() {
         if (running) timer.cancel();
         running = false;
         return start();
     }
 
-    void stop() {
+    public void stop() {
         timer.cancel();
         running = false;
     }
@@ -136,6 +142,12 @@ class PerfMonitorNet {
                 tick.setParam("src_agent", plugin.getAgent());
                 tick.setParam("src_plugin", plugin.getPluginID());
                 tick.setParam("dst_region", plugin.getRegion());
+                tick.setParam("dst_agent", plugin.getAgent());
+                tick.setParam("dst_plugin", plugin.getPluginID());
+                tick.setParam("is_regional",Boolean.TRUE.toString());
+                tick.setParam("is_global",Boolean.TRUE.toString());
+
+
                 tick.setParam("resource_id", plugin.getConfig().getStringParam("resource_id", "netdiscovery_resource"));
                 tick.setParam("inode_id", plugin.getConfig().getStringParam("inode_id", "netdiscovery_inode"));
 

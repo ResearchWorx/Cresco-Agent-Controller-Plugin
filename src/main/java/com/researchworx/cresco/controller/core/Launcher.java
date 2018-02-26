@@ -4,8 +4,9 @@ import com.google.auto.service.AutoService;
 import com.researchworx.cresco.controller.app.gPayload;
 import com.researchworx.cresco.controller.communication.*;
 import com.researchworx.cresco.controller.db.DBInterface;
-import com.researchworx.cresco.controller.db.DBManager;
 import com.researchworx.cresco.controller.globalcontroller.GlobalHealthWatcher;
+import com.researchworx.cresco.controller.kpi.kpireporter.PerfMonitorNet;
+import com.researchworx.cresco.controller.kpi.kpireporter.PerfSysMonitor;
 import com.researchworx.cresco.controller.netdiscovery.*;
 import com.researchworx.cresco.controller.regionalcontroller.RegionHealthWatcher;
 import com.researchworx.cresco.library.core.WatchDog;
@@ -940,14 +941,16 @@ public class Launcher extends CPlugin {
                 initGlobal();
             }
 
-            //TODO enable on post-start
-            /*
-            //start network performance monitor if create
+
+            PerfSysMonitor perfSysMonitor = new PerfSysMonitor(this);
+            perfSysMonitor.start();
+            logger.info("Performance System monitoring initialized");
+
             if(perfMonitorNet != null) {
-                logger.info("Starting perfMonNet...");
                 perfMonitorNet.start();
+                logger.info("Performance Network monitoring initialized");
             }
-            */
+
 
             /*
             logger.info("Starting Network Discovery Engine...");
@@ -955,6 +958,7 @@ public class Launcher extends CPlugin {
                 logger.error("Start Network Discovery Engine Failed!");
             }
             */
+
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -445,6 +445,25 @@ public class DBInterface {
             for(String edgeID : sysInfoEdgeList) {
                 Map<String, String> edgeParams = dba.getIsAssignedParams(edgeID);
 
+
+                String sysInfoJson= gdb.stringUncompress(edgeParams.get("perf"));
+
+                Type type = new TypeToken<Map<String, List<Map<String, String>>>>() {
+                }.getType();
+
+                Map<String,List<Map<String,String>>> myMap = gson.fromJson(sysInfoJson, type);
+
+                cpu_core_count += Long.parseLong(myMap.get("cpu").get(0).get("cpu-logical-count"));
+
+                memoryAvailable += Long.parseLong(myMap.get("mem").get(0).get("memory-available"));
+                memoryTotal += Long.parseLong(myMap.get("mem").get(0).get("memory-total"));
+
+                for(Map<String,String> fsMap : myMap.get("fs")) {
+                    diskAvailable += Long.parseLong(fsMap.get("available-space"));
+                    diskTotal += Long.parseLong(fsMap.get("total-space"));
+                }
+
+                /*
                 cpu_core_count += Long.parseLong(edgeParams.get("cpu-logical-count"));
                 memoryAvailable += Long.parseLong(edgeParams.get("memory-available"));
                 memoryTotal += Long.parseLong(edgeParams.get("memory-total"));
@@ -453,6 +472,8 @@ public class DBInterface {
                     diskAvailable += Long.parseLong(edgeParams.get("fs-" + fskey[0] + "-available"));
                     diskTotal += Long.parseLong(edgeParams.get("fs-" + fskey[0] + "-total"));
                 }
+                */
+
             }
             Map<String,String> resourceTotal = new HashMap<>();
             resourceTotal.put("cpu_core_count",String.valueOf(cpu_core_count));
@@ -463,7 +484,8 @@ public class DBInterface {
             regionArray.add(resourceTotal);
             queryMap.put("globalresourceinfo",regionArray);
 
-            queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(queryMap))));
+            //queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(queryMap))));
+            queryReturn = gson.toJson(queryMap);
 
 } catch(Exception ex) {
             logger.error("getGlobalResourceInfo() " + ex.toString());
@@ -476,7 +498,6 @@ public class DBInterface {
         return queryReturn;
 
     }
-
     private String getRegionResourceInfo(String actionRegion) {
         String queryReturn = null;
 
@@ -500,6 +521,24 @@ public class DBInterface {
                 Map<String, String> edgeParams = dba.getIsAssignedParams(edgeID);
 
                 if(edgeParams.get("region").toLowerCase().equals(actionRegion.toLowerCase())) {
+
+                    String sysInfoJson= gdb.stringUncompress(edgeParams.get("perf"));
+
+                    Type type = new TypeToken<Map<String, List<Map<String, String>>>>() {
+                    }.getType();
+
+                    Map<String,List<Map<String,String>>> myMap = gson.fromJson(sysInfoJson, type);
+
+                    cpu_core_count += Long.parseLong(myMap.get("cpu").get(0).get("cpu-logical-count"));
+
+                    memoryAvailable += Long.parseLong(myMap.get("mem").get(0).get("memory-available"));
+                    memoryTotal += Long.parseLong(myMap.get("mem").get(0).get("memory-total"));
+
+                    for(Map<String,String> fsMap : myMap.get("fs")) {
+                        diskAvailable += Long.parseLong(fsMap.get("available-space"));
+                        diskTotal += Long.parseLong(fsMap.get("total-space"));
+                    }
+                    /*
                     cpu_core_count += Long.parseLong(edgeParams.get("cpu-logical-count"));
                     memoryAvailable += Long.parseLong(edgeParams.get("memory-available"));
                     memoryTotal += Long.parseLong(edgeParams.get("memory-total"));
@@ -508,6 +547,7 @@ public class DBInterface {
                         diskAvailable += Long.parseLong(edgeParams.get("fs-" + fskey[0] + "-available"));
                         diskTotal += Long.parseLong(edgeParams.get("fs-" + fskey[0] + "-total"));
                     }
+                    */
                 }
             }
             Map<String,String> resourceTotal = new HashMap<>();
@@ -519,7 +559,8 @@ public class DBInterface {
             regionArray.add(resourceTotal);
             queryMap.put("regionresourceinfo",regionArray);
 
-            queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(queryMap))));
+            //queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(queryMap))));
+            queryReturn = gson.toJson(queryMap);
 
         } catch(Exception ex) {
             logger.error("getRegionResourceInfo() " + ex.toString());
@@ -532,7 +573,6 @@ public class DBInterface {
         return queryReturn;
 
     }
-
     private String getAgentResourceInfo(String actionRegion, String actionAgent) {
         String queryReturn = null;
 
@@ -550,6 +590,9 @@ public class DBInterface {
 
                 if((edgeParams.get("region").toLowerCase().equals(actionRegion.toLowerCase())) && (edgeParams.get("agent").toLowerCase().equals(actionAgent.toLowerCase()))) {
 
+                    Map<String,String> resourceTotal = new HashMap<>();
+
+                    /*
                     Map<String,String> resourceTotal = new HashMap<>(edgeParams);
                     resourceTotal.remove("dst_region");
                     resourceTotal.remove("src_plugin");
@@ -561,8 +604,11 @@ public class DBInterface {
                     resourceTotal.remove("inode_id");
                     resourceTotal.remove("resource_id");
                     resourceTotal.remove("routepath");
-
-                    regionArray.add(resourceTotal);
+                    */
+                    if(edgeParams.containsKey("perf")) {
+                        resourceTotal.put("perf", gdb.stringUncompress(edgeParams.get("perf")));
+                        regionArray.add(resourceTotal);
+                    }
 
                 }
             }
@@ -570,6 +616,7 @@ public class DBInterface {
             queryMap.put("agentresourceinfo",regionArray);
 
             queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(queryMap))));
+            //queryReturn = gson.toJson(queryMap);
 
         } catch(Exception ex) {
             logger.error("getAgentResourceInfo() " + ex.toString());

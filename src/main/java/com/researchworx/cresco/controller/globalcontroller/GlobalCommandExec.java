@@ -995,7 +995,6 @@ public class GlobalCommandExec {
 				ce.removeParam("dst_region");
 				ce.removeParam("dst_plugin");
 				*/
-            logger.trace("GLOBAL KPI " + params);
             plugin.getGDB().dba.updateKPI(region, agent, pluginid, resource_id, inode_id, params);
 
         }

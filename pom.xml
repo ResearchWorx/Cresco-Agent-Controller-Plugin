@@ -34,6 +34,8 @@
 		<maven.compiler.version>3.5.1</maven.compiler.version>
 		<orientdb.version>2.2.31</orientdb.version>
 		<activemq.version>5.15.2</activemq.version>
+		<dblock.oshi.version>3.4.0</dblock.oshi.version>
+		<scimark.version>2.0</scimark.version>
 	</properties>
 
 	<dependencies>
@@ -71,6 +73,18 @@
             <artifactId>activemq-jaas</artifactId>
             <version>${activemq.version}</version>
         </dependency>
+
+		<!-- KPI -->
+		<dependency>
+			<groupId>gov.nist.math</groupId>
+			<artifactId>scimark</artifactId>
+			<version>${scimark.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.dblock</groupId>
+			<artifactId>oshi-core</artifactId>
+			<version>${dblock.oshi.version}</version>
+		</dependency>
 
 
         <!-- OrientDB -->
