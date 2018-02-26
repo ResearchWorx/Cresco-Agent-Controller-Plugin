@@ -484,8 +484,8 @@ public class DBInterface {
             regionArray.add(resourceTotal);
             queryMap.put("globalresourceinfo",regionArray);
 
-            //queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(queryMap))));
-            queryReturn = gson.toJson(queryMap);
+            queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(queryMap))));
+            //queryReturn = gson.toJson(queryMap);
 
 } catch(Exception ex) {
             logger.error("getGlobalResourceInfo() " + ex.toString());
@@ -559,8 +559,8 @@ public class DBInterface {
             regionArray.add(resourceTotal);
             queryMap.put("regionresourceinfo",regionArray);
 
-            //queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(queryMap))));
-            queryReturn = gson.toJson(queryMap);
+            queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(queryMap))));
+            //queryReturn = gson.toJson(queryMap);
 
         } catch(Exception ex) {
             logger.error("getRegionResourceInfo() " + ex.toString());
