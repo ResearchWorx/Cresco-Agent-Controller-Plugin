@@ -1479,7 +1479,6 @@ public class DBApplicationFunctions {
             HashMap<String,String> iNodeHm = new HashMap<>();
             HashMap<String,String> vNodeHm = new HashMap<>();
 
-            List<gEdge> edges = gpay.edges;
             for(gNode node : gpay.nodes)
             {
                 try
