@@ -163,7 +163,10 @@ public class ActiveBroker {
 
 
 			} else {
-				logger.trace("Constructor : portAvailable(32010) == false");
+				//todo Figure out some way to run more than one agent per instance if needed
+				logger.error("Constructor : portAvailable(32010) == false");
+				logger.error("Shutting down!");
+				System.exit(0);
 			}
 		} catch(Exception ex) {
 			//ex.printStackTrace();
