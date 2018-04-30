@@ -45,7 +45,10 @@ public class ActiveBroker {
 		logger.info("Initialized");
 		this.plugin = plugin;
 		try {
-			if(portAvailable(32010)) {
+
+			int discoveryPort = plugin.getConfig().getIntegerParam("discovery_port",32010);
+
+			if(portAvailable(discoveryPort)) {
 
 
 				/*
@@ -134,15 +137,10 @@ public class ActiveBroker {
 
 				connector = new TransportConnector();
 				if (plugin.isIPv6())
-					//connector.setUri(new URI("tcp://[::]:32010"));
-				    //connector.setUri(new URI("ssl://[::]:32010?needClientAuth=true"));
-					connector.setUri(new URI("ssl://[::]:32010"));
+					connector.setUri(new URI("ssl://[::]:"+ discoveryPort));
 
-				//connector.setUri(new URI("ssl://[::]:32010"));
 				else
-					//connector.setUri(new URI("tcp://0.0.0.0:32010"));
-					//connector.setUri(new URI("ssl://0.0.0.0:32010?needClientAuth=true"));
-					connector.setUri(new URI("ssl://0.0.0.0:32010"));
+					connector.setUri(new URI("ssl://0.0.0.0:"+ discoveryPort));
 
                 /*
                 connector.setUpdateClusterClients(true);
@@ -164,7 +162,7 @@ public class ActiveBroker {
 
 			} else {
 				//todo Figure out some way to run more than one agent per instance if needed
-				logger.error("Constructor : portAvailable(32010) == false");
+				logger.error("Constructor : portAvailable("+ discoveryPort +") == false");
 				logger.error("Shutting down!");
 				System.exit(0);
 			}
@@ -279,15 +277,10 @@ public class ActiveBroker {
 	public NetworkConnector AddNetworkConnector(String URI, String brokerUserName, String brokerPassword, String agentPath) {
 		NetworkConnector bridge = null;
 		try {
-			logger.info("Added Network Connector to Broker URI: static:ssl://" + URI + ":32010");
-			logger.trace("URI: static:ssl://" + URI + ":32010" + " brokerUserName: " + brokerUserName + " brokerPassword: " + brokerPassword);
-			//bridge = broker.addNetworkConnector(new URI("static:tcp://" + URI + ":32010?useKeepAlive=true&keepAlive=true"));
-			//logger.info("URI: static:ssl://" + URI + ":32010" + " brokerUserName: " + brokerUserName + " brokerPassword: " + brokerPassword);
-			//bridge = broker.addNetworkConnector(new URI("static:ssl://" + URI + ":32010?useKeepAlive=true&keepAlive=true"));
-			bridge = broker.addNetworkConnector(new URI("static:ssl://" + URI + ":32010"));
-			//bridge = broker.addSslConnector(URI,plugin.getCertificateManager().getKeyManagers(),plugin.getCertificateManager().getTrustManagers(), new SecureRandom());
-			//String bindAddress, KeyManager[] km, TrustManager[] tm, SecureRandom random
-			//sslContext.init(plugin.getCertificateManager().getKeyManagers(), plugin.getCertificateManager().getTrustManagers(), new SecureRandom());
+			int discoveryPort = plugin.getConfig().getIntegerParam("discovery_port",32010);
+			logger.info("Added Network Connector to Broker URI: static:ssl://" + URI + ":" + discoveryPort);
+			logger.trace("URI: static:ssl://" + URI + ":" + discoveryPort + " brokerUserName: " + brokerUserName + " brokerPassword: " + brokerPassword);
+			bridge = broker.addNetworkConnector(new URI("static:ssl://" + URI + ":"+ discoveryPort));
 
 			bridge.setUserName(brokerUserName);
             bridge.setPassword(brokerPassword);
