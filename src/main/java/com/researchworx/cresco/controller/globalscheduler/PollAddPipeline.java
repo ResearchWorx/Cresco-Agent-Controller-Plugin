@@ -79,10 +79,13 @@ public class PollAddPipeline implements Runnable {
 
                     for(gNode gnode : checkList) {
                         int statusCode = Integer.parseInt(plugin.getGDB().dba.getINodeParam(gnode.node_id, "status_code"));
+                        logger.debug("PipelineId " + pipelineId + " Status " + statusCode);
                         if (statusCode != 4) {
                             //logger.debug("PollAddPipeline thread " + Thread.currentThread().getId() + " : " + gnode.node_id + " status_code :" + plugin.getGDB().dba.getINodeParam(gnode.node_id, "status_code"));
                             pipelineNodes.remove(gnode);
-                            if(statusCode == 40) {
+                            if(statusCode != 10) {
+                                String statusDesc = plugin.getGDB().dba.getINodeParam(gnode.node_id, "status_desc");
+                                logger.error("PipelineId " + pipelineId + " Status Code " + statusCode + " Status Desc " + statusDesc);
                                 errorList.add(gnode);
                             }
                         }

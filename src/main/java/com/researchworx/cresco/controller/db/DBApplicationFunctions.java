@@ -1556,6 +1556,11 @@ public class DBApplicationFunctions {
         catch(Exception ex)
         {
             logger.debug("createPipelineNodes: " + ex.toString());
+            //todo remove this
+            StringWriter errors = new StringWriter();
+            ex.printStackTrace(new PrintWriter(errors));
+
+            logger.error(errors.toString());
         }
         gpay.status_code = "1";
         gpay.status_desc = "Failed to create Pipeline.";
