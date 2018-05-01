@@ -1,9 +1,7 @@
 package com.researchworx.cresco.controller.core;
 
-import com.researchworx.cresco.library.core.WatchDog;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
-import com.sun.jna.platform.win32.WinUser;
 
 public class MsgRoute implements Runnable {
     private MsgEvent rm;
@@ -460,9 +458,7 @@ public class MsgRoute implements Runnable {
                         //logger.error("Global command sent, but controller is not global");
                         //return null;
                         //send to exec to determine where it should go
-                        //todo return exec if needed
-                        plugin.execute(rm);
-                        return null;
+                        return plugin.execute(rm);
                     }
                 } else if((rm.getParam("is_regional") != null) &&(rm.getParam("is_global") == null)) {
                     //this is a regional command

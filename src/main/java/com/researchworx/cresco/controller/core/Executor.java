@@ -68,21 +68,7 @@ class Executor extends CExecutor {
     @Override
     public MsgEvent processKPI(MsgEvent ce) {
         logger.trace("Processing KPI message");
-        return forwardToRegion(ce);
-        /*
-        switch (ce.getParam("action")) {
-            case "comminit":
-                return commInit(ce);
-            case "agent_enable":
-                return forwardToRegion(ce);
-            case "agent_disable":
-                return forwardToRegion(ce);
-
-            default:
-                logger.error("Unknown configtype found {} for {}:", ce.getParam("action"), ce.getMsgType().toString());
-        }
-        */
-        //return null;
+        return forwardToGlobal(ce);
     }
 
     private MsgEvent pingReply(MsgEvent msg) {
@@ -137,6 +123,19 @@ class Executor extends CExecutor {
         msg.setParam("type", "agent_controller");
         logger.debug("Returning communication details to Cresco agent");
         return msg;
+
+    }
+
+    private MsgEvent forwardToGlobal(MsgEvent le) {
+
+        le.setParam("dst_region", mainPlugin.cstate.getRegionalRegion());
+        le.setParam("dst_agent", mainPlugin.cstate.getRegionalAgent());
+        le.setParam("dst_plugin",mainPlugin.cstate.getControllerId());
+        le.setParam("is_global", Boolean.TRUE.toString());
+
+        plugin.sendMsgEvent(le);
+        //set it and forget it!
+        return null;
 
     }
 
