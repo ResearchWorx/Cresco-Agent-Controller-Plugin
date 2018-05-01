@@ -65,6 +65,26 @@ class Executor extends CExecutor {
         return null;
     }
 
+    @Override
+    public MsgEvent processKPI(MsgEvent ce) {
+        logger.trace("Processing KPI message");
+        return forwardToRegion(ce);
+        /*
+        switch (ce.getParam("action")) {
+            case "comminit":
+                return commInit(ce);
+            case "agent_enable":
+                return forwardToRegion(ce);
+            case "agent_disable":
+                return forwardToRegion(ce);
+
+            default:
+                logger.error("Unknown configtype found {} for {}:", ce.getParam("action"), ce.getMsgType().toString());
+        }
+        */
+        //return null;
+    }
+
     private MsgEvent pingReply(MsgEvent msg) {
 
 

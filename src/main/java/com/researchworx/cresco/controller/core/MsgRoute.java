@@ -130,6 +130,11 @@ public class MsgRoute implements Runnable {
                     logger.trace(rm.getParams().toString());
                     re = getCommandExec();
                     break;
+                case 63:  //System.out.println("CONTROLLER ROUTE TO COMMANDEXEC : 62 "  + rm.getParams());
+                    logger.debug("CONTROLLER SENDING MESSAGE TO SELF 63");
+                    logger.trace(rm.getParams().toString());
+                    re = getCommandExec();
+                    break;
                 case 64:  //System.out.println("CONTROLLER ROUTE CASE 64");
                     if (rm.getParam("configtype") != null) {
                         if (rm.getParam("configtype").equals("comminit")) {
@@ -450,7 +455,13 @@ public class MsgRoute implements Runnable {
                     if(plugin.cstate.isGlobalController()) {
                         return plugin.getRegionHealthWatcher().rce.gce.execute(rm);
                     } else {
-                        logger.error("Global command sent, but controller is not global");
+                        //todo Make sure this is correct
+                        //set regional controller as dest
+                        //logger.error("Global command sent, but controller is not global");
+                        //return null;
+                        //send to exec to determine where it should go
+                        //todo return exec if needed
+                        plugin.execute(rm);
                         return null;
                     }
                 } else if((rm.getParam("is_regional") != null) &&(rm.getParam("is_global") == null)) {
