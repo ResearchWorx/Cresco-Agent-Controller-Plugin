@@ -21,7 +21,7 @@ class SysInfoBuilder {
     private OperatingSystem os;
     private Gson gson;
 
-    public String getSysInfoMap() {
+    public String getSysInfoFullMap() {
         String jsonInfo = null;
         try {
             systemInfo = new SystemInfo();
@@ -47,6 +47,33 @@ class SysInfoBuilder {
         }
         return jsonInfo;
     }
+
+    public String getSysInfoMap() {
+        String jsonInfo = null;
+        try {
+            systemInfo = new SystemInfo();
+            hardwareAbstractionLayer = systemInfo.getHardware();
+            os = systemInfo.getOperatingSystem();
+
+            Map<String,List<Map<String,String>>> info = new HashMap<>();
+            info.put("os",getOSInfo());
+            info.put("cpu",getCPUInfo());
+            info.put("mem",getMemoryInfo());
+            info.put("disk",getDiskInfo());
+            info.put("fs",getFSInfo());
+            info.put("part",getPartitionInfo());
+            info.put("net",getNetworkInfo());
+
+            //getSensorInfo();
+            jsonInfo = gson.toJson(info);
+
+        } catch (Exception e) {
+            System.out.println("SysInfoBuilder : getSysInfoMap : Error : " + e.getMessage());
+            e.printStackTrace();
+        }
+        return jsonInfo;
+    }
+
 
     public SysInfoBuilder() {
         gson = new Gson();
@@ -268,10 +295,10 @@ class SysInfoBuilder {
                 info.put("cpu-ident", "unknown");
             }
             try {
-                info.put("cpu-sn-ident",hardwareAbstractionLayer.getProcessor().getIdentifier());
+                info.put("cpu-id",hardwareAbstractionLayer.getProcessor().getProcessorID());
             }
             catch(Exception ex) {
-                info.put("cpu-sn-ident","unknown");
+                info.put("cpu-id","unknown");
             }
 
             //performance

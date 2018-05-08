@@ -47,7 +47,7 @@ public class PerfSysMonitor {
         plugin.sendMsgEvent(initial);
 
         timer = new Timer();
-        timer.scheduleAtFixedRate(new PerfMonitorTask(plugin), 500, interval);
+        timer.scheduleAtFixedRate(new PerfMonitorTask(plugin), 5000, interval);
         return this;
 
     }
