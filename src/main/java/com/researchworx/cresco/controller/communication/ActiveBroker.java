@@ -42,7 +42,6 @@ public class ActiveBroker {
 
 	public ActiveBroker(Launcher plugin, String brokerName, String brokerUserNameAgent, String brokerPasswordAgent) {
 		this.logger = new CLogger(ActiveBroker.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
-		logger.info("Initialized");
 		this.plugin = plugin;
 		try {
 
@@ -107,6 +106,7 @@ public class ActiveBroker {
 				//SSLContext sslContext = SSLContext.getInstance("Default");
 				sslContext.init(plugin.getCertificateManager().getKeyManagers(), plugin.getCertificateManager().getTrustManagers(), new SecureRandom());
 				sslContextBroker.setSSLContext(sslContext);
+				logger.info("Initialized SSL Context");
 
 
 				PolicyMap map = new PolicyMap();
@@ -152,8 +152,10 @@ public class ActiveBroker {
 
                 broker.start();
 
+				logger.info("Initialized Broker");
 
-                while(!broker.isStarted()) {
+
+				while(!broker.isStarted()) {
 			    	Thread.sleep(1000);
                 }
 				//addUser(brokerUserNameAgent,brokerPasswordAgent,"agent");

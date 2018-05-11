@@ -38,7 +38,7 @@ public class PerfMonitorNet {
         if (this.running) return this;
         Long interval = plugin.getConfig().getLongParam("perftimer", 10000L);
 
-        MsgEvent initial = new MsgEvent(MsgEvent.Type.KPI, plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), "Performance Monitoring timer set to " + interval + " milliseconds.");
+        MsgEvent initial = new MsgEvent(MsgEvent.Type.INFO, plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), "Performance Monitoring timer set to " + interval + " milliseconds.");
         initial.setParam("src_region", plugin.getRegion());
         initial.setParam("src_agent", plugin.getAgent());
         initial.setParam("src_plugin", plugin.getPluginID());
@@ -47,11 +47,11 @@ public class PerfMonitorNet {
         initial.setParam("dst_plugin", plugin.getPluginID());
         initial.setParam("is_regional",Boolean.TRUE.toString());
         initial.setParam("is_global",Boolean.TRUE.toString());
-
         plugin.sendMsgEvent(initial);
 
+
         timer = new Timer();
-        timer.scheduleAtFixedRate(new PerfMonitorTask(plugin), 5000, interval);
+        timer.scheduleAtFixedRate(new PerfMonitorTask(plugin), 500L, interval);
         return this;
     }
 
@@ -137,17 +137,16 @@ public class PerfMonitorNet {
         public void run() {
 
             if(!polling) {
+
                 MsgEvent tick = new MsgEvent(MsgEvent.Type.KPI, plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), "Performance Monitoring tick.");
                 tick.setParam("src_region", plugin.getRegion());
                 tick.setParam("src_agent", plugin.getAgent());
                 tick.setParam("src_plugin", plugin.getPluginID());
                 tick.setParam("dst_region", plugin.getRegion());
                 tick.setParam("dst_agent", plugin.getAgent());
-                tick.setParam("dst_plugin", plugin.getPluginID());
+                tick.setParam("dst_plugin", "plugin/0");
                 tick.setParam("is_regional",Boolean.TRUE.toString());
                 tick.setParam("is_global",Boolean.TRUE.toString());
-
-
                 tick.setParam("resource_id", plugin.getConfig().getStringParam("resource_id", "netdiscovery_resource"));
                 tick.setParam("inode_id", plugin.getConfig().getStringParam("inode_id", "netdiscovery_inode"));
 

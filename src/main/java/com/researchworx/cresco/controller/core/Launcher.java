@@ -942,11 +942,13 @@ public class Launcher extends CPlugin {
             perfSysMonitor.start();
             logger.info("Performance System monitoring initialized");
 
-            if(perfMonitorNet != null) {
-                perfMonitorNet.start();
-                logger.info("Performance Network monitoring initialized");
+
+            if(perfMonitorNet == null) {
+              perfMonitorNet = new PerfMonitorNet(this);
             }
 
+            perfMonitorNet.start();
+            logger.info("Performance Network monitoring initialized");
 
             /*
             logger.info("Starting Network Discovery Engine...");
