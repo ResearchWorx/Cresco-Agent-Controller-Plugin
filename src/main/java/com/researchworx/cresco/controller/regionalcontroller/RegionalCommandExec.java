@@ -123,13 +123,7 @@ public class RegionalCommandExec {
                 logger.trace("Message Body [" + le.getMsgBody() + "] [" + le.getParams().toString() + "]");
 
             plugin.getGDB().watchDogUpdate(le);
-                //regionalDiscovery.discover(le);
-                //TODO Agent Watchdog messages should not make their way to external GC.
-                /*
-                if((le.getParam("pluginconfigs") != null) && (!plugin.cstate.isGlobalController())) {
-                    globalSend(le);
-                }
-                */
+
 
         } catch (Exception ex) {
             ex.printStackTrace();
