@@ -40,6 +40,10 @@ public class ResourceSchedulerEngine implements Runnable {
     public Cache<String, String> jarStringCache;
     public Cache<String, String> jarHashCache;
     public Cache<String, String> jarTimeCache;
+
+    public Cache<String, List<pNode>> repoCache;
+
+
     private Gson gson;
 
     public ResourceSchedulerEngine(Launcher plugin, GlobalHealthWatcher ghw) {
@@ -66,8 +70,16 @@ public class ResourceSchedulerEngine implements Runnable {
                 .maximumSize(100)
                 .expireAfterWrite(15, TimeUnit.MINUTES)
                 .build();
+
+        repoCache = CacheBuilder.newBuilder()
+                .concurrencyLevel(4)
+                .softValues()
+                .maximumSize(1000)
+                .expireAfterWrite(5, TimeUnit.SECONDS)
+                .build();
     }
-		
+
+
 	public void run() {
 		try
 		{
@@ -87,72 +99,33 @@ public class ResourceSchedulerEngine implements Runnable {
 							//do something to activate a plugin
 							logger.debug("starting precheck...");
 							//String pluginJar = verifyPlugin(ce);
-							String pluginFile = verifyPlugin(ce);
-                            if(pluginFile == null)
+							pNode pluginNode = verifyPlugin(ce);
+                            if(pluginNode == null)
 							{
 								if((plugin.getGDB().dba.setINodeParam(ce.getParam("inode_id"),"status_code","1")) &&
 										(plugin.getGDB().dba.setINodeParam(ce.getParam("inode_id"),"status_desc","iNode Failed Activation : Plugin not found!")))
 								{
-									logger.debug("Provisioning Failed: No matching controller plugins found!");
+									logger.debug("Provisioning Failed: No matching plugins found!");
 								}
 							}
 							else
 							{
-								//adding in jar name information
-								//ce.setParam("configparams",ce.getParam("configparams") + ",jarfile=" + pluginJar);
 
 								//Here is where scheduling is taking place
 								logger.debug("plugin precheck = OK");
-								//String agentPath = getLowAgent();
-
-                                //String[] agentPath_s = agentPath.split(",");
 									String region = ce.getParam("location_region");
 									String agent = ce.getParam("location_agent");
 									String resource_id = ce.getParam("resource_id");
 									String inode_id = ce.getParam("inode_id");
 
-									//have agent download plugin
-									//String pluginurl = "http://127.0.0.1:32003/";
-									//downloadPlugin(region,agent,pluginJar,pluginurl, false);
-									//logger.debug("Downloading plugin on region=" + region + " agent=" + agent);
-                                    //include jar
-
-                                    /*
-                                    String jarString = jarStringCache.getIfPresent(pluginFile);
-
-									if(jarString == null) {
-                                        jarString = getJarString(pluginFile);
-                                        jarStringCache.put(pluginFile,jarString);
-                                    }
-                                    */
-									//logger.error(getJarString(pluginFile));
-
 									//schedule plugin
 									logger.debug("Scheduling plugin on region=" + region + " agent=" + agent);
 									MsgEvent me = addPlugin(region,agent,ce.getParam("configparams"));
-                                    me.setParam("http_host",getNetworkAddresses());
-                                    me.setParam("jarmd5",jarHashCache.getIfPresent(pluginFile));
-									//me.setParam("jarstring",jarString);
+                                    me.setCompressedParam("pnode",gson.toJson(pluginNode));
 									logger.debug("pluginadd message: " + me.getParams().toString());
-									
-									//ControllerEngine.commandExec.cmdExec(me);
-                                    //logger.error("before send");
-                                    //MsgEvent re = plugin.getRPC().call(me);
-                                    //logger.error("after send");
-                                    //will send in thread
-                                    //plugin.msgIn(me);
 
 									new Thread(new PollAddPlugin(plugin,resource_id, inode_id,region,agent, me)).start();
 
-								
-								/*
-								if((ControllerEngine.gdb.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_code","10")) &&
-										(ControllerEngine.gdb.setINodeParam(ce.getParam("resource_id"),ce.getParam("inode_id"),"status_desc","iNode Active.")))
-								{
-										//recorded plugin activations
-									
-								}
-								*/
 							}
 						}
 						else if(ce.getParam("globalcmd").equals("removeplugin"))
@@ -219,7 +192,49 @@ public class ResourceSchedulerEngine implements Runnable {
         return jarString;
     }
 
-	private String verifyPlugin(MsgEvent ce) {
+    private pNode verifyPlugin(MsgEvent ce) {
+        pNode node = null;
+
+        Type type = new TypeToken<Map<String, String>>(){}.getType();
+        Map<String, String> params = gson.fromJson(ce.getCompressedParam("configparams"), type);
+
+        logger.debug("config params: " + params.toString());
+
+        String requestedPlugin = params.get("pluginname");
+
+        //make sure cache is populated
+        if(repoCache.size() == 0) {
+            repoCache.putAll(plugin.getGDB().getPluginListRepoSet());
+        }
+
+        List<pNode> nodeList = repoCache.getIfPresent(requestedPlugin);
+
+
+        if(nodeList != null) {
+            boolean isMatch = true;
+            for(pNode tmpNode : nodeList) {
+                if(params.containsKey("version")) {
+                    if(!params.get("version").equals(tmpNode.version)) {
+                        isMatch = false;
+                    }
+                }
+                if(isMatch) {
+                   if(node == null) {
+                       node = tmpNode;
+                   } else {
+                       if(node.getBuildTime().getTime() < tmpNode.getBuildTime().getTime()) {
+                           node = tmpNode;
+                       }
+                   }
+                }
+            }
+
+        }
+
+        return node;
+    }
+
+	private String verifyPluginOld(MsgEvent ce) {
 	    String returnPluginfile = null;
 	    //boolean isVerified = false;
 		//pre-schedule check

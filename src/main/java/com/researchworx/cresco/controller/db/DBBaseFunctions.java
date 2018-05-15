@@ -1,5 +1,7 @@
 package com.researchworx.cresco.controller.db;
 
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
 import com.orientechnologies.orient.core.command.OCommandOutputListener;
 import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
 import com.orientechnologies.orient.core.db.OPartitionedDatabasePool;
@@ -22,6 +24,7 @@ import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.*;
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.zip.GZIPInputStream;
@@ -35,11 +38,15 @@ public class DBBaseFunctions {
     private OrientGraphFactory factory;
     private ODatabaseDocumentTx db;
     private int retryCount;
+
+    private Gson gson;
     //private DBEngine dbe;
     public OPartitionedDatabasePool pool;
     private Boolean regionalImportActive = false;
 
     public String[] aNodeIndexParams = {"platform","environment","location"};
+    public String[] pNodeIndexParams = {"pluginname","jarfile"};
+
 
     private OrientGraphFactory getFactory() {
         OrientGraphFactory getFactory = null;
@@ -77,6 +84,7 @@ public class DBBaseFunctions {
         this.pool = dbe.pool;
         this.retryCount = plugin.getConfig().getIntegerParam("db_retry_count",50);
 
+        this.gson = new Gson();
         //ODatabaseDocumentTx db = ODatabaseDocumentPool.global().acquire("memory:MyDb", "admin", "admin");
 
         //create basic cresco constructs
@@ -89,6 +97,7 @@ public class DBBaseFunctions {
     public List<String> getANodeFromIndex(String indexName, String indexValue) {
         List<String> nodeList = null;
         OrientGraph graph = null;
+
         try
         {
             nodeList = new ArrayList<String>();
@@ -128,6 +137,48 @@ public class DBBaseFunctions {
         }
         return nodeList;
     }
+
+    public List<String> getPNodeFromIndex(String indexName, String indexValue) {
+        List<String> nodeList = null;
+        OrientGraph graph = null;
+
+        try
+        {
+            nodeList = new ArrayList<String>();
+            graph = factory.getTx();
+            Iterable<Vertex> resultIterator = null;
+
+            resultIterator = graph.command(new OCommandSQL("SELECT rid FROM INDEX:pNode." + indexName + " WHERE key = '" + indexValue + "'")).execute();
+
+            Iterator<Vertex> iter = resultIterator.iterator();
+            while(iter.hasNext())
+            //if(iter.hasNext())
+            {
+                Vertex v = iter.next();
+                String node_id = v.getProperty("rid").toString();
+                if(node_id != null)
+                {
+                    node_id = node_id.substring(node_id.indexOf("[") + 1, node_id.indexOf("]"));
+                    nodeList.add(node_id);
+                }
+            }
+
+        }
+        catch(Exception ex)
+        {
+            logger.debug("DBEngine : getPNodeFromIndex : Error " + ex.toString());
+            nodeList = null;
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return nodeList;
+    }
+
 
     public String getEdgeHealthId(String region, String agent, String plugin) {
         String node_id = null;
@@ -965,6 +1016,7 @@ public class DBBaseFunctions {
                         v.setProperty("agent", agent);
                         v.setProperty("plugin", plugin);
 
+
                         Vertex fromV = graph.getVertex(v.getId().toString());
                         Vertex toV = graph.getVertex(agent_id);
 
@@ -1567,10 +1619,27 @@ public class DBBaseFunctions {
                 {
                     Map.Entry pairs = (Map.Entry)it.next();
                     iNode.setProperty( pairs.getKey().toString(), pairs.getValue().toString());
+
+                    //to make sure indexing of plugin type works
+                    if((paramMap.containsKey("configparams") && (region != null) && (agent != null) && (plugin != null))) {
+
+                        Type type = new TypeToken<Map<String, String>>(){}.getType();
+
+                        Map<String, String> configparams = gson.fromJson(paramMap.get("configparams"), type);
+
+                        for(String indexParam : pNodeIndexParams)
+                        {
+                            if(configparams.containsKey(indexParam)) {
+                                iNode.setProperty(indexParam, configparams.get(indexParam));
+                            }
+                        }
+
+                    }
                 }
                 graph.commit();
                 isUpdated = true;
             }
+
         }
         catch(com.orientechnologies.orient.core.storage.ORecordDuplicatedException exc)
         {
@@ -1781,8 +1850,7 @@ public class DBBaseFunctions {
                 graph = factory.getTx();
                 Vertex iNode = graph.getVertex(node_id);
                 //set envparams if aNode
-                if((paramKey.equals("configparams")) && (region != null) && (agent != null) && (plugin == null))
-                {
+                if((paramKey.equals("configparams")) && (region != null) && (agent != null) && (plugin == null)) {
                     String[] configParams = paramValue.split(",");
                     for(String cParam : configParams)
                     {
@@ -1796,6 +1864,7 @@ public class DBBaseFunctions {
                         }
                     }
                 }
+
                 iNode.setProperty( paramKey, paramValue);
                 graph.commit();
                 isUpdated = true;
@@ -1851,6 +1920,9 @@ public class DBBaseFunctions {
             String[] pProps = {"region", "agent", "plugin"}; //Property names
             createVertexClass("pNode", pProps);
 
+            for(String indexName : pNodeIndexParams) {
+                createVertexIndex("pNode", indexName, false);
+            }
 
             logger.debug("Create isGlobal Edge Class");
             String[] isGlobalProps = {"edge_id"}; //Property names
@@ -2000,6 +2072,7 @@ public class DBBaseFunctions {
         txGraph.shutdown();
         return wasCreated;
     }
+
 
     boolean createEdgeClass(String className, String[] props) {
         boolean wasCreated = false;

@@ -5,6 +5,7 @@ import com.google.gson.reflect.TypeToken;
 import com.researchworx.cresco.controller.app.gPayload;
 import com.researchworx.cresco.controller.communication.ActiveBrokerManager;
 import com.researchworx.cresco.controller.core.Launcher;
+import com.researchworx.cresco.controller.globalscheduler.pNode;
 import com.researchworx.cresco.controller.netdiscovery.DiscoveryNode;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
@@ -29,6 +30,8 @@ public class DBInterface {
     public DBApplicationFunctions dba;
 
     private Gson gson;
+    private Type type;
+
     private Thread DBManagerThread;
     private BlockingQueue<String> importQueue;
 
@@ -41,6 +44,8 @@ public class DBInterface {
         this.gdb = new DBBaseFunctions(plugin,gde);
         this.dba = new DBApplicationFunctions(plugin,gde);
         this.gson = new Gson();
+        this.type = new com.google.common.reflect.TypeToken<Map<String, List<Map<String, String>>>>() {
+        }.getType();
 
         //DB manager
         logger.debug("Starting DB Manager");
@@ -270,6 +275,215 @@ public class DBInterface {
 
         return queryReturn;
     }
+
+    public String getPluginListRepo() {
+        String returnString = null;
+        try
+        {
+            Map<String,List<Map<String,String>>> myRepoMapReturn = new HashMap<>();
+            List<Map<String,String>> pluginsList = new ArrayList<>();
+            List<String> repoList = getPluginListRepoInventory();
+
+            for(String repoJSON : repoList) {
+                Map<String,List<Map<String,String>>> myRepoMap = gson.fromJson(repoJSON, type);
+                List<Map<String,String>> tmpPluginsList = myRepoMap.get("plugins");
+                pluginsList.addAll(tmpPluginsList);
+            }
+
+            //Test
+            /*
+            Map<String,List<pNode>> testMap = getPluginListRepoSet();
+            for (Map.Entry<String, List<pNode>> entry : testMap.entrySet()) {
+                String key = entry.getKey();
+                List<pNode> value = entry.getValue();
+                logger.error("name: " + key);
+                for(pNode node : value) {
+                    logger.error("\t jarfile: " + node.jarfile);
+                    logger.error("\t md5 hash: " + node.md5);
+                    logger.error("\t version: " +node.version);
+                    logger.error("\t date: " +node.getBuildTime().toString());
+                    for(Map<String,String> server : node.repoServers) {
+                        logger.error("\t\t protocol: " + server.get("protocol"));
+                        logger.error("\t\t ip: " + server.get("ip"));
+                        logger.error("\t\t port: " + server.get("port"));
+                    }
+                }
+
+            }
+            */
+
+            myRepoMapReturn.put("plugins",pluginsList);
+            returnString = gson.toJson(myRepoMapReturn);
+        }
+        catch(Exception ex)
+        {
+            logger.error("getPluginListByType() " + ex.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString()); //
+        }
+
+        return returnString;
+    }
+
+    public Map<String,List<pNode>> getPluginListRepoSet() {
+
+        Map<String,List<pNode>> pluginRepoMap = null;
+        try
+        {
+            List<String> repoList = getPluginListRepoInventory();
+
+            pluginRepoMap = new HashMap<>();
+
+            for(String repoJSON : repoList) {
+                Map<String,List<Map<String,String>>> myRepoMap = gson.fromJson(repoJSON, type);
+                List<Map<String,String>> tmpPluginsList = myRepoMap.get("plugins");
+                List<Map<String,String>> tmpServerList = myRepoMap.get("server");
+
+                for(Map<String,String> plugin : tmpPluginsList) {
+                    String name = plugin.get("pluginname");
+                    String jarfile = plugin.get("jarfile");
+                    String md5 = plugin.get("md5");
+                    String version = plugin.get("version");
+
+                    if(!pluginRepoMap.containsKey(name)) {
+                        List<pNode> nodeList = new ArrayList<>();
+                        pNode node = new pNode(name,jarfile,md5,version, tmpServerList);
+                        nodeList.add(node);
+                        pluginRepoMap.put(name,nodeList);
+                    } else {
+                        List<pNode> nodeList = pluginRepoMap.get(name);
+                        for(pNode node : nodeList) {
+                            if(node.isEqual(name,jarfile,md5,version)) {
+                                nodeList.get(nodeList.indexOf(node)).addRepos(tmpServerList);
+                            } else {
+                                pNode newnode = new pNode(name,jarfile,md5,version, tmpServerList);
+                                nodeList.add(newnode);
+                            }
+                        }
+                        pluginRepoMap.put(name,nodeList);
+                    }
+                }
+
+
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.error("getPluginListByType() " + ex.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString()); //
+        }
+
+        return pluginRepoMap;
+    }
+
+    public List<String> getPluginListRepoInventory() {
+        List<String> repoList = null;
+        try
+        {
+            repoList = new ArrayList<>();
+            String repoPluginsJSON = getPluginListByType("pluginname","cresco-agent-dashboard-plugin");
+            Map<String,List<Map<String,String>>> myMap = gson.fromJson(repoPluginsJSON, type);
+
+            for(Map<String,String> perfMap : myMap.get("plugins")) {
+
+                String region = perfMap.get("region");
+                String agent = perfMap.get("agent");
+
+                MsgEvent request = new MsgEvent(MsgEvent.Type.EXEC, plugin.getRegion(), plugin.getAgent(),
+                        plugin.getPluginID(), "Plugin List by Repo");
+                request.setParam("src_region", plugin.getRegion());
+                request.setParam("src_agent", plugin.getAgent());
+                request.setParam("src_plugin", plugin.getPluginID());
+                request.setParam("dst_region", region);
+                request.setParam("dst_agent", agent);
+                request.setParam("dst_plugin", perfMap.get("plugin"));
+                request.setParam("action", "repolist");
+                MsgEvent response = plugin.sendRPC(request);
+
+                repoList.add(response.getCompressedParam("repolist"));
+                /*
+                Map<String,List<Map<String,String>>> myRepoMap = gson.fromJson(response.getCompressedParam("repolist"), type);
+
+                for(Map<String,String> contactMap : myRepoMap.get("server")) {
+                    logger.error(contactMap.get("ip"));
+                    logger.error(contactMap.get("protocol"));
+                    logger.error(contactMap.get("port"));
+                }
+                */
+                //String resource_node_id = plugin.getGDB().dba.getResourceNodeId("sysinfo_resource");
+                //String inode_node_id = plugin.getGDB().dba.getINodeNodeId("sysinfo_inode");
+                //String plugin_node_id = plugin.getGDB().gdb.getNodeId(region,agent,"plugin/0");
+                //String edge_id = plugin.getGDB().dba.getResourceEdgeId("sysinfo_resource", "sysinfo_inode", region, agent, "plugin/0");
+
+            }
+
+            //queryMap.put("plugins", pluginArray);
+
+            //queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(queryMap))));
+            //queryReturn = gson.toJson(queryMap);
+
+        }
+        catch(Exception ex)
+        {
+            logger.error("getPluginListByType() " + ex.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString()); //
+        }
+
+        return repoList;
+    }
+
+    public String getPluginListByType(String actionPluginTypeId, String actionPluginTypeValue) {
+        String queryReturn = null;
+
+        Map<String,List<Map<String,String>>> queryMap;
+
+        try
+        {
+            queryMap = new HashMap<>();
+            List<Map<String,String>> pluginArray = new ArrayList<>();
+
+            List<String> pluginList;
+            if((actionPluginTypeId == null) || (actionPluginTypeValue == null)) {
+                pluginList = new ArrayList<>();
+                pluginList.add(actionPluginTypeId);
+            } else {
+                pluginList = gdb.getPNodeFromIndex(actionPluginTypeId,actionPluginTypeValue);
+            }
+            for(String nodeId : pluginList) {
+
+                Map<String,String> pluginConfig = gdb.getNodeParamsNoTx(nodeId);
+
+                if(pluginConfig != null) {
+                    pluginArray.add(pluginConfig);
+                }
+            }
+
+            queryMap.put("plugins", pluginArray);
+
+            //queryReturn = DatatypeConverter.printBase64Binary(gdb.stringCompress((gson.toJson(queryMap))));
+            queryReturn = gson.toJson(queryMap);
+
+        }
+        catch(Exception ex)
+        {
+            logger.error("getPluginListByType() " + ex.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString()); //
+        }
+
+        return queryReturn;
+    }
+
 
     public String getPluginList(String actionRegion, String actionAgent) {
         String queryReturn = null;

@@ -1,6 +1,7 @@
 package com.researchworx.cresco.controller.globalcontroller;
 
 
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.researchworx.cresco.controller.app.gPayload;
 import com.researchworx.cresco.controller.core.Launcher;
@@ -12,6 +13,7 @@ import com.sun.media.jfxmedia.logging.Logger;
 import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import java.io.*;
+import java.lang.reflect.Type;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
@@ -29,11 +31,13 @@ public class GlobalCommandExec {
 	private CLogger logger;
 	private ExecutorService removePipelineExecutor;
 
+
 	public GlobalCommandExec(Launcher plugin)
 	{
 		this.logger = new CLogger(GlobalCommandExec.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
 		this.plugin = plugin;
 		removePipelineExecutor = Executors.newFixedThreadPool(100);
+
     }
 
 
@@ -103,6 +107,12 @@ public class GlobalCommandExec {
 
                     case "listplugins":
                         return listPlugins(ce);
+
+                    case "listpluginsbytype":
+                        return listPluginsByType(ce);
+
+                    case "listpluginsrepo":
+                        return listPluginsRepo(ce);
 
                     case "plugininfo":
                         return pluginInfo(ce);
@@ -282,6 +292,39 @@ public class GlobalCommandExec {
             //ce.setParam("pluginslist",plugin.getGDB().getPluginList(actionRegionPlugins, actionAgentPlugins));
             ce.setCompressedParam("pluginslist",plugin.getGDB().getPluginList(actionRegionPlugins, actionAgentPlugins));
             logger.trace("list plugins return : " + ce.getParams().toString());
+        }
+        catch(Exception ex) {
+            ce.setParam("error", ex.getMessage());
+        }
+
+        return ce;
+    }
+
+    private MsgEvent listPluginsByType(MsgEvent ce) {
+        try {
+            String actionPluginTypeId = null;
+            String actionpluginTypeValue = null;
+
+            if((ce.getParam("action_plugintype_id") != null) && (ce.getParam("action_plugintype_value") != null)) {
+                actionPluginTypeId = ce.getParam("action_plugintype_id");
+                actionpluginTypeValue = ce.getParam("action_plugintype_value");
+            }
+
+            ce.setCompressedParam("pluginsbytypelist",plugin.getGDB().getPluginListByType(actionPluginTypeId,actionpluginTypeValue));
+            logger.trace("list plugins by type return : " + ce.getParams().toString());
+        }
+        catch(Exception ex) {
+            ce.setParam("error", ex.getMessage());
+        }
+
+        return ce;
+    }
+
+    private MsgEvent listPluginsRepo(MsgEvent ce) {
+        try {
+
+            ce.setCompressedParam("listpluginsrepo",plugin.getGDB().getPluginListRepo());
+            logger.trace("list plugins in repos : " + ce.getParams().toString());
         }
         catch(Exception ex) {
             ce.setParam("error", ex.getMessage());
