@@ -25,7 +25,7 @@ public class KPIBroker {
 
 	public BrokerService broker;
 
-	public KPIBroker(Launcher plugin, String brokerName, String brokerUserNameAgent, String brokerPasswordAgent) {
+	public KPIBroker(Launcher plugin, String kpiProtocol, String kpiPort, String brokerName, String brokerUserNameAgent, String brokerPasswordAgent) {
 		this.logger = new CLogger(ActiveBroker.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
 		logger.info("Initialized");
 		try {
@@ -58,9 +58,9 @@ public class KPIBroker {
 
 				connector = new TransportConnector();
 				if (plugin.isIPv6())
-					connector.setUri(new URI("tcp://[::]:32011"));
+					connector.setUri(new URI(kpiProtocol + "://[::]:" + kpiPort));
 				else
-					connector.setUri(new URI("tcp://0.0.0.0:32011"));
+					connector.setUri(new URI(kpiProtocol + "://0.0.0.0:" + kpiPort));
 
                 /*
                 connector.setUpdateClusterClients(true);

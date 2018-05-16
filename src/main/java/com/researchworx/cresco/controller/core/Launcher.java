@@ -703,10 +703,13 @@ public class Launcher extends CPlugin {
         //don't discover anything
         boolean isInit = false;
         try {
+
+            String kpiPort = config.getStringParam("kpiport","32011");
+            String kpiProtocol = config.getStringParam("kpiprotocol","tcp");
             //init KPIBroker
-            this.kpiBroker = new KPIBroker(this, this.agentpath + "_KPI",brokerUserNameAgent,brokerPasswordAgent);
+            this.kpiBroker = new KPIBroker(this, kpiProtocol, kpiPort,this.agentpath + "_KPI",brokerUserNameAgent,brokerPasswordAgent);
             //init KPIProducer
-            this.kpip = new KPIProducer(this, "KPI", "tcp://" + this.brokerAddressAgent + ":32011", "bname", "bpass");
+            this.kpip = new KPIProducer(this, "KPI", kpiProtocol + "://" + this.brokerAddressAgent + ":" + kpiPort, "bname", "bpass");
 
             if(cstate.isRegionalController()) {
 
