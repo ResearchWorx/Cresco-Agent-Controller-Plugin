@@ -1,18 +1,26 @@
 package com.researchworx.cresco.controller.core;
 
+import com.google.gson.Gson;
 import com.researchworx.cresco.controller.regionalcontroller.RegionHealthWatcher;
 import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.plugin.core.CExecutor;
 import com.researchworx.cresco.library.utilities.CLogger;
 
+import java.io.IOException;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 class Executor extends CExecutor {
     private Launcher mainPlugin;
     private CLogger logger;
     public RegionHealthWatcher regionHealthWatcher;
-
+    private Gson gson;
 
     private long messageCount = 0;
 
@@ -20,6 +28,7 @@ class Executor extends CExecutor {
         super(plugin);
         this.mainPlugin = plugin;
         this.logger = new CLogger(Executor.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+        this.gson = new Gson();
     }
 
     @Override
@@ -28,6 +37,8 @@ class Executor extends CExecutor {
 
             switch (ce.getParam("action")) {
 
+                case "getfreeports":
+                    return getFreePort(ce);
                 case "ping":
                     return pingReply(ce);
                 case "noop":
@@ -256,5 +267,74 @@ class Executor extends CExecutor {
         logger.debug("Returning communication details to Cresco agent");
 
         return msg;
+    }
+
+    MsgEvent getFreePort(MsgEvent msg) {
+
+        try {
+
+            String portCount = msg.getParam("action_portcount");
+
+            InetAddress addr = InetAddress.getLocalHost();
+            String ip = addr.getHostAddress();
+            Map<String, List<Map<String, String>>> portMap = new HashMap<>();
+            List<Map<String, String>> portList = new ArrayList<>();
+
+            for (int i = 0; i < Integer.parseInt(portCount); i++) {
+                int port = getPort();
+                if (port != -1) {
+                    Map<String, String> tmpP = new HashMap<>();
+                    tmpP.put("ip", ip);
+                    tmpP.put("port", String.valueOf(port));
+                    portList.add(tmpP);
+                }
+            }
+
+            portMap.put("ports", portList);
+
+            String freeports = gson.toJson(portMap);
+            msg.setCompressedParam("freeports",freeports);
+
+        } catch (Exception ex) {
+            logger.error(ex.getMessage());
+        }
+
+        return msg;
+    }
+
+    public int getPort() {
+
+        int freePort = -1;
+
+        boolean isFree = false;
+
+        while (!isFree) {
+            int port = ThreadLocalRandom.current().nextInt(10000, 30000 + 1);
+            ServerSocket ss = null;
+            DatagramSocket ds = null;
+            try {
+                ss = new ServerSocket(port);
+                ss.setReuseAddress(true);
+                ds = new DatagramSocket(port);
+                ds.setReuseAddress(true);
+                isFree = true;
+                freePort = port;
+
+            } catch (IOException e) {
+            } finally {
+                if (ds != null) {
+                    ds.close();
+                }
+
+                if (ss != null) {
+                    try {
+                        ss.close();
+                    } catch (IOException e) {
+                        /* should not be thrown */
+                    }
+                }
+            }
+        }
+        return freePort;
     }
 }

@@ -203,11 +203,13 @@ public class ResourceSchedulerEngine implements Runnable {
         String requestedPlugin = params.get("pluginname");
 
         //make sure cache is populated
+        repoCache.cleanUp();
         if(repoCache.size() == 0) {
             repoCache.putAll(plugin.getGDB().getPluginListRepoSet());
         }
 
         List<pNode> nodeList = repoCache.getIfPresent(requestedPlugin);
+
 
 
         if(nodeList != null) {
@@ -229,7 +231,10 @@ public class ResourceSchedulerEngine implements Runnable {
                 }
             }
 
+        } else {
+            logger.error("requested plugin not found!");
         }
+
 
         return node;
     }
@@ -498,6 +503,7 @@ public class ResourceSchedulerEngine implements Runnable {
               if(jarCreateTime == fileTime) {
                 calcHash = false;
               } else {
+
                   jarStringCache.invalidate(jarFile);
                   jarHashCache.invalidate(jarFile);
               }
