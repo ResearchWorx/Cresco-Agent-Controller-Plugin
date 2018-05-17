@@ -27,6 +27,7 @@ public class CertificateManager {
     private X509Certificate[] chain;
     private CLogger logger;
 
+    private int keySize = 2048;
 
     public CertificateManager(Launcher plugin, String agentPath) {
 
@@ -34,6 +35,7 @@ public class CertificateManager {
 
             this.logger = new CLogger(ActiveProducer.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
 
+            keySize = plugin.getConfig().getIntegerParam("messagekeysize",2048);
 
             this.keyStoreAlias = agentPath;
             
@@ -133,7 +135,7 @@ public class CertificateManager {
         try {
             //Generate leaf certificate
             CertAndKeyGen keyGen2=new CertAndKeyGen("RSA","SHA256WithRSA",null);
-            keyGen2.generate(2048);
+            keyGen2.generate(keySize);
             PrivateKey topPrivateKey=keyGen2.getPrivateKey();
             X509Certificate topCertificate = keyGen2.getSelfCertificate(new X500Name("CN=TOP"), (long) (365 * 24 * 60 * 60) * YEARS_VALID);
             Certificate cert = createSignedCertificate(topCertificate,signingCertificate,signingKey);
@@ -161,7 +163,7 @@ public class CertificateManager {
 
             //Generate ROOT certificate
             CertAndKeyGen keyGen=new CertAndKeyGen("RSA","SHA256WithRSA",null);
-            keyGen.generate(2048);
+            keyGen.generate(keySize);
             PrivateKey rootPrivateKey=keyGen.getPrivateKey();
 
             X509Certificate rootCertificate = keyGen.getSelfCertificate(new X500Name("CN=ROOT-" + keyStoreAlias), (long) (365 * 24 * 60 * 60) * YEARS_VALID);
@@ -196,7 +198,7 @@ public class CertificateManager {
 
             //Generate ROOT certificate
             CertAndKeyGen keyGen=new CertAndKeyGen("RSA","SHA256WithRSA",null);
-            keyGen.generate(2048);
+            keyGen.generate(keySize);
             PrivateKey rootPrivateKey=keyGen.getPrivateKey();
 
             //X509Certificate rootCertificate = keyGen.getSelfCertificate(new X500Name("CN=ROOT"), (long) (365 * 24 * 60 * 60) * YEARS_VALID);
@@ -204,14 +206,14 @@ public class CertificateManager {
 
             //Generate intermediate certificate
             CertAndKeyGen keyGen1=new CertAndKeyGen("RSA","SHA256WithRSA",null);
-            keyGen1.generate(2048);
+            keyGen1.generate(keySize);
             PrivateKey middlePrivateKey=keyGen1.getPrivateKey();
 
             X509Certificate middleCertificate = keyGen1.getSelfCertificate(new X500Name("CN=MIDDLE, OU=myTeam, O=MyOrg, L=Lexington, ST=KY, C=US"), (long) (365 * 24 * 60 * 60) * YEARS_VALID);
 
             //Generate leaf certificate
             CertAndKeyGen keyGen2=new CertAndKeyGen("RSA","SHA256WithRSA",null);
-            keyGen2.generate(2048);
+            keyGen2.generate(keySize);
             PrivateKey topPrivateKey=keyGen2.getPrivateKey();
 
             X509Certificate topCertificate = keyGen2.getSelfCertificate(new X500Name("CN=TOP, OU=myTeam, O=MyOrg, L=Lexington, ST=KY, C=US"), (long) (365 * 24 * 60 * 60) * YEARS_VALID);
