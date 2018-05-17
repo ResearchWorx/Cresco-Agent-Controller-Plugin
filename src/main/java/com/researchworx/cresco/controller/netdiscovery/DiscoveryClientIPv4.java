@@ -39,7 +39,7 @@ public class DiscoveryClientIPv4 {
 
 
         } catch (Exception ex) {
-            System.out.println("IPv4 getDiscoveryMap " + ex.getMessage());
+            //System.out.println("IPv4 getDiscoveryMap " + ex.getMessage());
             logger.error("getDiscoveryMap {}", ex.getMessage());
 
         }

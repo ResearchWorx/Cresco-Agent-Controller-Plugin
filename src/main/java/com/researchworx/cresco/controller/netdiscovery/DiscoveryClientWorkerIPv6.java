@@ -6,6 +6,8 @@ import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.*;
 import java.util.*;
 
@@ -67,6 +69,43 @@ public class DiscoveryClientWorkerIPv6 {
 
     private synchronized void processIncoming(DatagramPacket packet) {
         synchronized (packet) {
+            String json = new String(packet.getData()).trim();
+            try {
+                MsgEvent me = gson.fromJson(json, MsgEvent.class);
+                if (me != null) {
+
+                    me.setParam("broadcast_latency", String.valueOf(System.currentTimeMillis()-Long.parseLong(me.getParam("broadcast_ts"))));
+
+                    String remoteAddress = packet.getAddress().getHostAddress();
+                    if (remoteAddress.contains("%")) {
+                        String[] remoteScope = remoteAddress.split("%");
+                        remoteAddress = remoteScope[0];
+                    }
+                    logger.trace("Processing packet for {} {}_{}", remoteAddress, me.getParam("src_region"), me.getParam("src_agent"));
+                    me.setParam("src_ip", me.getParam("dst_ip"));
+                    me.setParam("src_port", me.getParam("dst_port"));
+                    me.setParam("dst_ip", remoteAddress);
+                    me.setParam("dst_port", String.valueOf(packet.getPort()));
+                    me.setParam("dst_region", me.getParam("src_region"));
+                    me.setParam("dst_agent", me.getParam("src_agent"));
+                    me.setParam("src_region", plugin.getRegion());
+                    me.setParam("src_agent", plugin.getAgent());
+                    if (disType == DiscoveryType.AGENT || disType == DiscoveryType.REGION || disType == DiscoveryType.GLOBAL) {
+                        me.setParam("validated_authenication", ValidatedAuthenication(me));
+                    }
+
+                    discoveredList.add(me);
+
+
+                }
+            } catch (Exception ex) {
+                logger.error("DiscoveryClientWorker in loop {}", ex.getMessage());
+            }
+        }
+    }
+    /*
+    private synchronized void processIncoming(DatagramPacket packet) {
+        synchronized (packet) {
             //byte[] data = makeResponse(); // code not shown
 
             //We have a response
@@ -102,7 +141,21 @@ public class DiscoveryClientWorkerIPv6 {
             }
         }
     }
+*/
+    private class StopListenerTask extends TimerTask {
+        public void run() {
+            try {
+                logger.trace("Closing Listener... Timeout: " + discoveryTimeout + " SysTime: " + System.currentTimeMillis());
 
+                //user timer to close socket
+                c.close();
+                timer.cancel();
+                timerActive = false;
+            } catch (Exception ex) {
+                logger.error("StopListenerTask {}", ex.getMessage());
+            }
+        }
+    }
 
     List<MsgEvent> discover() {
         // Find the server using UDP broadcast
@@ -159,6 +212,55 @@ public class DiscoveryClientWorkerIPv6 {
 
                                 //set crypto message for discovery
 
+                                if (disType == DiscoveryType.AGENT || disType == DiscoveryType.REGION || disType == DiscoveryType.GLOBAL) {
+                                    logger.trace("Discovery Type = {}", disType.name());
+                                    sme.setParam("discovery_type", disType.name());
+                                    //set crypto message for discovery
+                                    sme.setParam("discovery_validator",generateValidateMessage(sme));
+                                } else if(disType == DiscoveryType.NETWORK) {
+                                    sme.setParam("discovery_type", disType.name());
+                                    logger.trace("Discovery Type = {}", disType.name());
+                                } else {
+                                    logger.trace("Discovery type unknown");
+                                    sme = null;
+                                }
+
+                                if (sme != null) {
+                                    logger.trace("Building sendPacket for {}", inAddr.toString());
+                                    String sendJson = gson.toJson(sme);
+                                    byte[] sendData = sendJson.getBytes();
+                                    //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet4Address.getByName(broadCastNetwork), discoveryPort);
+                                    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName(multiCastNetwork), discoveryPort);
+
+                                    synchronized (c) {
+                                        c.send(sendPacket);
+                                        logger.trace("Sent sendPacket via {}", inAddr.toString());
+                                    }
+                                    while (!c.isClosed()) {
+                                        logger.trace("Listening " +  inAddr.toString() + " Timeout: " + discoveryTimeout + " SysTime: " + System.currentTimeMillis());
+                                        try {
+                                            byte[] recvBuf = new byte[15000];
+                                            DatagramPacket receivePacket = new DatagramPacket(recvBuf, recvBuf.length);
+                                            synchronized (c) {
+                                                c.receive(receivePacket);
+                                                logger.trace("Received packet");
+                                                if (timerActive) {
+                                                    logger.trace("Restarting listening timer");
+                                                    timer.schedule(new StopListenerTask(), discoveryTimeout);
+                                                }
+                                            }
+                                            synchronized (receivePacket) {
+                                                processIncoming(receivePacket);
+                                            }
+                                        } catch (SocketException se) {
+                                            // Eat the message, this is normal
+                                        } catch (Exception e) {
+                                            logger.error("discovery {}", e.getMessage());
+                                        }
+                                    }
+                                }
+
+                                /*
                                 if (disType == DiscoveryType.AGENT) {
                                     sme.setParam("discovery_type", DiscoveryType.AGENT.name());
                                 } else if (disType == DiscoveryType.REGION) {
@@ -168,14 +270,16 @@ public class DiscoveryClientWorkerIPv6 {
                                 } else {
                                     sme = null;
                                 }
+                                */
 
-
-                                sme.setParam("discovery_validator",generateValidateMessage(sme));
+                                //sme.setParam("discovery_validator",generateValidateMessage(sme));
 
                                 //me.setParam("clientip", packet.getAddress().getHostAddress());
 
                                 //convert java object to JSON format,
                                 // and returned as JSON formatted string
+
+                                /*
                                 if (sme != null) {
                                     String sendJson = gson.toJson(sme);
 
@@ -185,7 +289,6 @@ public class DiscoveryClientWorkerIPv6 {
                                     synchronized (c) {
                                         c.send(sendPacket);
                                     }
-                                    //System.out.println(getClass().getName() + ">>> Request packet sent to: " + multiCastNetwork +  ": from : " + interfaceAddress.getAddress().getHostAddress());
 
                                     while (!c.isClosed()) {
                                         try {
@@ -201,23 +304,25 @@ public class DiscoveryClientWorkerIPv6 {
                                             synchronized (receivePacket) {
                                                 processIncoming(receivePacket);
                                             }
-                                            //new Thread(new IPv6Responder(c,receivePacket,hostAddress)).start();
                                         } catch (SocketException ex) {
-                                            //eat message.. this should happen
-                                            //System.out.println(ex.getMessage());
                                         } catch (Exception ex) {
                                             logger.error("discovery {}", ex.getMessage());
                                         }
                                     }
-                                    //Close the port!
                                 }
+                                */
+
+
 
                             }
                         } catch (IOException ie) {
                             //eat exception we are closing port
                             //System.out.println("DiscoveryClientWorkerIPv6 : getDiscoveryMap IO Error : " + ie.getMessage());
                         } catch (Exception e) {
+                            StringWriter errors = new StringWriter();
+                            e.printStackTrace(new PrintWriter(errors));
                             logger.error("getDiscoveryMap {}", e.getMessage());
+                            logger.error("getDiscoveryMap {}", errors.toString());
                         }
                     }
                 }
@@ -283,4 +388,57 @@ public class DiscoveryClientWorkerIPv6 {
 
         return encryptedString;
     }
+/*
+    private String ValidatedAuthenication(MsgEvent rme) {
+        String decryptedString = null;
+        try {
+
+            String discoverySecret = null;
+            if (rme.getParam("discovery_type").equals(DiscoveryType.AGENT.name())) {
+                discoverySecret = plugin.getConfig().getStringParam("discovery_secret_agent");
+            } else if (rme.getParam("discovery_type").equals(DiscoveryType.REGION.name())) {
+                discoverySecret = plugin.getConfig().getStringParam("discovery_secret_region");
+            } else if (rme.getParam("discovery_type").equals(DiscoveryType.GLOBAL.name())) {
+                discoverySecret = plugin.getConfig().getStringParam("discovery_secret_global");
+            }
+            if(rme.getParam("validated_authenication") != null) {
+                decryptedString = discoveryCrypto.decrypt(rme.getParam("validated_authenication"), discoverySecret);
+            }
+            else {
+                logger.error("[validated_authenication] record not found!");
+                logger.error(rme.getParams().toString());
+            }
+
+        }
+        catch(Exception ex) {
+            logger.error(ex.getMessage());
+        }
+
+        return decryptedString;
+    }
+
+    private String generateValidateMessage(MsgEvent sme) {
+        String encryptedString = null;
+        try {
+
+            String discoverySecret = null;
+            if (sme.getParam("discovery_type").equals(DiscoveryType.AGENT.name())) {
+                discoverySecret = plugin.getConfig().getStringParam("discovery_secret_agent");
+            } else if (sme.getParam("discovery_type").equals(DiscoveryType.REGION.name())) {
+                discoverySecret = plugin.getConfig().getStringParam("discovery_secret_region");
+            } else if (sme.getParam("discovery_type").equals(DiscoveryType.GLOBAL.name())) {
+                discoverySecret = plugin.getConfig().getStringParam("discovery_secret_global");
+            }
+
+            String verifyMessage = "DISCOVERY_MESSAGE_VERIFIED";
+            encryptedString = discoveryCrypto.encrypt(verifyMessage,discoverySecret);
+
+        }
+        catch(Exception ex) {
+            logger.error(ex.getMessage());
+        }
+
+        return encryptedString;
+    }
+    */
 }

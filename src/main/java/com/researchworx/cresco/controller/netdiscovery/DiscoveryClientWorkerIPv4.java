@@ -6,6 +6,8 @@ import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.utilities.CLogger;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.*;
 import java.security.cert.Certificate;
 import java.util.*;
@@ -198,7 +200,11 @@ class DiscoveryClientWorkerIPv4 {
                     } catch (IOException ie) {
                         // Eat the exception, closing the port
                     } catch (Exception e) {
+                        StringWriter errors = new StringWriter();
+                        e.printStackTrace(new PrintWriter(errors));
                         logger.error("getDiscoveryMap {}", e.getMessage());
+                        logger.error("getDiscoveryMap {}", errors.toString());
+                        //return errors.toString();
                     }
                 }
             }
