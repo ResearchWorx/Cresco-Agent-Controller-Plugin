@@ -5,6 +5,8 @@ import com.researchworx.cresco.controller.app.gPayload;
 import com.researchworx.cresco.controller.communication.*;
 import com.researchworx.cresco.controller.db.DBInterface;
 import com.researchworx.cresco.controller.globalcontroller.GlobalHealthWatcher;
+import com.researchworx.cresco.controller.kpi.kpireporter.MeasurementEngine;
+import com.researchworx.cresco.controller.kpi.kpireporter.PerfControllerMonitor;
 import com.researchworx.cresco.controller.kpi.kpireporter.PerfMonitorNet;
 import com.researchworx.cresco.controller.kpi.kpireporter.PerfSysMonitor;
 import com.researchworx.cresco.controller.netdiscovery.*;
@@ -14,6 +16,10 @@ import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.messaging.RPC;
 import com.researchworx.cresco.library.plugin.core.CPlugin;
 import com.researchworx.cresco.library.utilities.CLogger;
+import io.micrometer.core.instrument.Clock;
+import io.micrometer.core.instrument.Timer;
+import io.micrometer.jmx.JmxConfig;
+import io.micrometer.jmx.JmxMeterRegistry;
 import org.apache.activemq.command.ActiveMQDestination;
 
 import javax.jms.JMSException;
@@ -61,8 +67,9 @@ public class Launcher extends CPlugin {
     private boolean ActiveBrokerManagerActive = false;
     private boolean ActiveDestManagerActive = false;
 
+    //for monitoring
+    private MeasurementEngine measurementEngine;
 
-    //public LinkedBlockingQueue<MsgEvent> resourceScheduleQueue;
 
     private boolean ConsumerThreadActive = false;
 
@@ -165,6 +172,8 @@ public class Launcher extends CPlugin {
         //this.msgInProcessQueue = Executors.newFixedThreadPool(4);
         this.msgInProcessQueue = Executors.newCachedThreadPool();
         //this.msgInProcessQueue = Executors.newSingleThreadExecutor();
+        this.measurementEngine = new MeasurementEngine(this);
+
     }
 
     @Override
@@ -940,6 +949,11 @@ public class Launcher extends CPlugin {
                 initGlobal();
             }
 
+            /*
+            PerfControllerMonitor perfControllerMonitor = new PerfControllerMonitor(this);
+            perfControllerMonitor.start();
+            logger.info("Performance Controller monitoring initialized");
+            */
 
             PerfSysMonitor perfSysMonitor = new PerfSysMonitor(this);
             perfSysMonitor.start();
@@ -1274,6 +1288,8 @@ public class Launcher extends CPlugin {
         }
         return hasAP;
     }
+
+    public MeasurementEngine getMeasurementEngine() {return this.measurementEngine;}
 
     public RegionHealthWatcher getRegionHealthWatcher() {return this.regionHealthWatcher;}
 

@@ -1523,18 +1523,18 @@ public class DBApplicationFunctions {
                     //vEdge
                     if((edge.node_from != null) && (edge.node_to != null)) {
                         if ((vNodeHm.containsKey(edge.node_from)) && (vNodeHm.containsKey(edge.node_to))) {
-                            logger.debug("From vID : " + edge.node_from + " TO vID: " + edge.node_to);
 
+                            //create edge between vnodes
+                            logger.debug("From vID : " + edge.node_from + " TO vID: " + edge.node_to);
                             String edge_id = createVEdge(vNodeHm.get(edge.node_from), vNodeHm.get(edge.node_to));
                             edge.edge_id = edge_id;
-
                             logger.debug("vedgeid: " + edge_id + " from: " + iNodeHm.get(edge.node_from) + " to:" + vNodeHm.get(edge.node_to));
 
+                            //create edge between inodes
                             String iedge_id = createIEdge(iNodeHm.get(edge.node_from), iNodeHm.get(edge.node_to));
                             //assign vEdge ID
                             edge.node_from = vNodeHm.get(edge.node_from);
                             edge.node_to = vNodeHm.get(edge.node_to);
-
                             logger.debug("iedgeid: " + iedge_id + " from: " + iNodeHm.get(edge.node_from) + " to:" + vNodeHm.get(edge.node_to));
 
                         }
@@ -2367,7 +2367,7 @@ public class DBApplicationFunctions {
             createVertexClass("resourceNode", resourceProps);
 
             //create plugin anchor resource and inodes
-            String[]  pluginAnchors= {"sysinfo","netdiscovery","container"}; //Property names
+            String[]  pluginAnchors= {"sysinfo","netdiscovery","container,controllerinfo"}; //Property names
             for(String pAnchor : pluginAnchors)
             {
                 String resource_id = pAnchor + "_resource";

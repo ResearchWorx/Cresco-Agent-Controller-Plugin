@@ -7,12 +7,20 @@ public class MsgRoute implements Runnable {
     private MsgEvent rm;
     private Launcher plugin;
     private CLogger logger;
+    private long messageTimeStamp;
 
     public MsgRoute(Launcher plugin, MsgEvent rm) {
         this.plugin = plugin;
         this.logger = new CLogger(MsgRoute.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
         this.rm = rm;
+        this.messageTimeStamp = System.nanoTime();
+
     }
+
+    public void exit() {
+
+    }
+
     public void run() {
         try {
             if (!getTTL()) { //check ttl
@@ -336,7 +344,9 @@ public class MsgRoute implements Runnable {
                 }
                 */
 
+
                 plugin.sendMsgEvent(re);
+
 
                 //PluginEngine.msgIn(re);
             }
@@ -347,6 +357,10 @@ public class MsgRoute implements Runnable {
             ex.printStackTrace();
             System.out.println("Controller : MsgRoute : Route Failed " + ex.toString() + " " + rm.getParams().toString());
 
+        }
+        finally
+        {
+            plugin.getMeasurementEngine().updateMsgRouteTimer(messageTimeStamp);
         }
 
     }

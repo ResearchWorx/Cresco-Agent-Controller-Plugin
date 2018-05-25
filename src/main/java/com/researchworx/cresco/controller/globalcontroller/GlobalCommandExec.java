@@ -447,7 +447,7 @@ public class GlobalCommandExec {
                 String actionPipelineId = ce.getParam("action_pipelineid");
                 String returnGetGpipeline = plugin.getGDB().getGPipeline(actionPipelineId);
                 if(returnGetGpipeline != null) {
-                    ce.setParam("gpipeline", returnGetGpipeline);
+                    ce.setCompressedParam("gpipeline", returnGetGpipeline);
                     ce.setParam("success", Boolean.TRUE.toString());
 
                 } else {
@@ -886,10 +886,10 @@ public class GlobalCommandExec {
         try
         {
             if((ce.getParam("action_gpipeline") != null) && (ce.getParam("action_tenantid") != null)) {
-                String pipelineJSON = ce.getParam("action_gpipeline");
+                String pipelineJSON = ce.getCompressedParam("action_gpipeline");
                 String tenantID = ce.getParam("action_tenantid");
 
-                pipelineJSON = plugin.getGDB().gdb.stringUncompress(pipelineJSON);
+                //pipelineJSON = plugin.getGDB().gdb.stringUncompress(pipelineJSON);
 
                 /*
                 if(ce.getParam("gpipeline_compressed") != null) {

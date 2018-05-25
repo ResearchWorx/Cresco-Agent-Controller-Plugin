@@ -1,5 +1,6 @@
 package com.researchworx.cresco.controller.globalscheduler;
 
+import com.researchworx.cresco.controller.app.gEdge;
 import com.researchworx.cresco.controller.app.gNode;
 import com.researchworx.cresco.controller.app.gPayload;
 import com.researchworx.cresco.controller.core.Launcher;
@@ -24,7 +25,7 @@ public class AppSchedulerEngine implements Runnable {
     private ExecutorService addPipelineExecutor;
 
     public AppSchedulerEngine(Launcher plugin, GlobalHealthWatcher ghw) {
-		this.logger = new CLogger(AppSchedulerEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
+		this.logger = new CLogger(AppSchedulerEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Debug);
 		this.plugin = plugin;
 		this.ghw = ghw;
         addPipelineExecutor = Executors.newFixedThreadPool(100);
@@ -41,8 +42,7 @@ public class AppSchedulerEngine implements Runnable {
                 {
                     gPayload gpay = plugin.getAppScheduleQueue().poll();
 
-                    if(gpay != null)
-                    {
+                    if(gpay != null) {
                         logger.debug("gPayload.added");
 
                         gPayload createdPipeline = plugin.getGDB().dba.createPipelineNodes(gpay);
@@ -55,11 +55,15 @@ public class AppSchedulerEngine implements Runnable {
 
                             switch (pipelineStatus) {
                                 //all metrics
-                                case 1: plugin.getGDB().dba.setPipelineStatus(gpay.pipeline_id,"40","Failed to schedule pipeline resources.");
+                                case 1: plugin.getGDB().dba.setPipelineStatus(gpay.pipeline_id,"40","Failed to schedule pipeline resources exception.");
                                     break;
-                                case 2: logger.error("Learn to schedule resources!");
-                                case 4: //plugin.getGDB().dba.setPipelineStatus(gpay.pipeline_id,"4","Pipeline resources scheduled.");
+                                case 4: //all is good!
+                                    break;
+                                        //plugin.getGDB().dba.setPipelineStatus(gpay.pipeline_id,"4","Pipeline resources scheduled.");
                                         //moved into schedulePipeline to prevent race condition
+                                case 60: plugin.getGDB().dba.setPipelineStatus(gpay.pipeline_id,"60","Failed to schedule pipeline node resources.");
+                                    break;
+                                case 61: plugin.getGDB().dba.setPipelineStatus(gpay.pipeline_id,"61","Failed to schedule pipeline edge resources.");
                                     break;
 
                                 default:
@@ -109,76 +113,57 @@ public class AppSchedulerEngine implements Runnable {
             List<String> badINodes = new ArrayList<String>();
             logger.debug("Checking Pipeline_id:" + gpay.pipeline_id + " Pipeline_name:" + gpay.pipeline_name);
             for (gNode node : gpay.nodes) {
-                //String vNode_id = node.node_id;
-                //logger.info("Checking vNode_id:" + vNode_id);
-                //String iNode_id = plugin.getGDB().dba.getINodefromVNode(vNode_id);
                 String iNode_id = node.node_id;
 
                 logger.debug("Checking iNode_id:" + iNode_id);
                 plugin.getGDB().dba.addINodeResource(gpay.pipeline_id, iNode_id);
-                /*
-                if (iNode_id != null) {
-                    plugin.getGDB().gdb.addINodeResource(gpay.pipeline_id, iNode_id);
-                } else {
-                    logger.error("iNode is null for vNode " + vNode_id);
-                    return 1;
-                }
-                */
 
             }
 
-
+            //Assign location to specific nodes
             Map<String, List<gNode>> schedulemaps = buildNodeMaps(gpay.nodes);
-            printScheduleStats(schedulemaps);
+            //printScheduleStats(schedulemaps);
 
             if (schedulemaps.get("error").size() != 0) {
-                System.out.println("Error Node assignments... dead dead deadsky!");
-            } else if (schedulemaps.get("unassigned").size() != 0) {
-                System.out.println("Unassigned Node assignments... dead dead deadsky!");
+                logger.error("Error Node assignments = " + schedulemaps.get("error").size());
+            }
+
+            if (schedulemaps.get("unassigned").size() != 0) {
+                logger.error("Unassigned Node assignments = " + schedulemaps.get("unassigned").size());
+            }
+
+            if (schedulemaps.get("noresource").size() != 0) {
+                logger.error("Not Enough Resources to Schedule Node assignments = " + schedulemaps.get("noresource").size());
             }
 
             if ((schedulemaps.get("assigned").size() != 0) && (schedulemaps.get("unassigned").size() == 0) && (schedulemaps.get("error").size() == 0) && (schedulemaps.get("noresource").size() == 0)) {
-                logger.debug("Scheduling is ready!");
+                logger.debug("Node Scheduling is ready!");
+                //nodes are scheduled now work on edges
 
-                logger.debug("Submitting Resource Pipeline for Scheduling " + gpay.pipeline_id);
-                //set DB as scheduled
-                plugin.getGDB().dba.setPipelineStatus(gpay.pipeline_id,"4","Pipeline resources scheduled.");
-                addPipelineExecutor.execute(new PollAddPipeline(plugin,schedulemaps.get("assigned"), gpay.pipeline_id));
-                logger.debug("Submitted Resource Pipeline for Scheduling");
+                List<gNode> assignedNodeList = null;
 
-                /*
-                for(gNode gnode : schedulemaps.get("assigned")) {
-                    logger.debug("gnode_id : " + gnode.node_id + " params : " + gnode.params);
-                    MsgEvent me = new MsgEvent(MsgEvent.Type.CONFIG, null, null, null, "add application node");
-                    me.setParam("globalcmd", "addplugin");
-                    me.setParam("inode_id", gnode.node_id);
-                    me.setParam("resource_id", gpay.pipeline_id);
-                    me.setParam("location_region",gnode.params.get("location_region"));
-                    me.setParam("location_agent",gnode.params.get("location_agent"));
-                    gnode.params.remove("location_region");
-                    gnode.params.remove("location_agent");
-
-                    StringBuilder configparms = new StringBuilder();
-                    for (Map.Entry<String, String> entry : gnode.params.entrySet())
-                    {
-                        configparms.append(entry.getKey() + "=" + entry.getValue() + ",");
-                        //System.out.println(entry.getKey() + "/" + entry.getValue());
-                    }
-                    if(configparms.length() > 0) {
-                        configparms.deleteCharAt(configparms.length() -1);
-                    }
-                    me.setParam("configparams", configparms.toString());
-                    logger.debug("Message [" + me.getParams().toString() + "]");
-                    plugin.getResourceScheduleQueue().add(me);
+                if(gpay.edges.size() > 0) {
+                    assignedNodeList =  buildEdgeMaps(gpay.edges, schedulemaps.get("assigned"));
+                } else {
+                    assignedNodeList = schedulemaps.get("assigned");
                 }
-                */
-                return 4;
+
+                if(assignedNodeList.size() == schedulemaps.get("assigned").size()) {
+                    //set DB as scheduled
+                    logger.debug("Submitting Resource Pipeline for Scheduling " + gpay.pipeline_id);
+                    plugin.getGDB().dba.setPipelineStatus(gpay.pipeline_id, "4", "Pipeline resources scheduled.");
+                    addPipelineExecutor.execute(new PollAddPipeline(plugin, schedulemaps.get("assigned"), gpay.pipeline_id));
+                    logger.debug("Submitted Resource Pipeline for Scheduling");
+                    scheduleStatus = 4;
+                } else {
+                    scheduleStatus = 61;
+                }
             } else {
-                logger.error("SOMETHING IS BAD WRONG WITH SCHEDULING!");
+                scheduleStatus = 60;
             }
         }
         catch (Exception ex) {
-            logger.error("schedulePipeline " + ex.getMessage());
+            logger.error("schedulePipeline Error " + ex.getMessage());
         }
         return scheduleStatus;
     }
@@ -214,6 +199,40 @@ public class AppSchedulerEngine implements Runnable {
         logger.info("Unassigned Nodes : " + schedulemaps.get("unassigned").size());
         logger.info("Noresource Nodes : " + schedulemaps.get("noresource").size());
         logger.info("Error Nodes : " + schedulemaps.get("error").size());
+    }
+
+    private List<gNode> buildEdgeMaps(List<gEdge> edges, List<gNode> nodes) {
+
+        try {
+
+            Map<String,gNode> nodeMap = new HashMap<>();
+            for(gNode node : nodes) {
+                nodeMap.put(node.node_id,node);
+            }
+
+            //verify predicates
+            for (gEdge edge : edges) {
+
+                logger.trace("edge_id=" + edge.edge_id + " node_from=" + edge.node_from + " node_to=" + edge.node_to);
+
+                if ((nodeMap.containsKey(edge.node_to)) && (nodeMap.containsKey(edge.node_from))) {
+                    //modify nodes
+
+                } else {
+                    if ((!nodeMap.containsKey(edge.node_to)) && (nodeMap.containsKey(edge.node_to))) {
+                        logger.error("Error Edge assignments = " + edge.edge_id + " missing node_to = " + edge.node_to);
+                    } else if ((nodeMap.containsKey(edge.node_to)) && (!nodeMap.containsKey(edge.node_to))) {
+                        logger.error("Error Edge assignments = " + edge.edge_id + " missing node_from = " + edge.node_from);
+                    } else {
+                        logger.error("Error Edge assignments = " + edge.edge_id + " missing node_from = " + edge.node_from + " and missing node_to = " + edge.node_to);
+                    }
+                }
+            }
+        }
+        catch(Exception ex) {
+            ex.printStackTrace();
+        }
+        return nodes;
     }
 
     private Map<String,List<gNode>> buildNodeMaps(List<gNode> nodes) {

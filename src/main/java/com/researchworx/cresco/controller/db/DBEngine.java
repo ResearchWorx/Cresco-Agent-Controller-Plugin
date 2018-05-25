@@ -1,6 +1,7 @@
 package com.researchworx.cresco.controller.db;
 
 import com.orientechnologies.orient.client.remote.OServerAdmin;
+import com.orientechnologies.orient.core.config.OGlobalConfiguration;
 import com.orientechnologies.orient.core.db.OPartitionedDatabasePool;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.hook.ORecordHook;
@@ -8,6 +9,7 @@ import com.orientechnologies.orient.core.record.ORecord;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.researchworx.cresco.controller.core.Launcher;
 import com.researchworx.cresco.library.utilities.CLogger;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
 
 
@@ -71,6 +73,7 @@ public class DBEngine {
                 //factory = new OrientGraphFactory(iURI, username, password, true);
 
                 db = new ODatabaseDocumentTx("memory:internalDb").create();
+                //OGlobalConfiguration.dumpConfiguration(System.out);
 
                 factory = new OrientGraphFactory("memory:internalDb");
 
@@ -146,6 +149,10 @@ public class DBEngine {
         logger = new CLogger(DBEngine.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
         this.retryCount = plugin.getConfig().getIntegerParam("db_retry_count",50);
         //this.factory = getFactory();
+
+        //set config values
+        //OGlobalConfiguration.PROFILER_ENABLED.setValue(Boolean.TRUE);
+
         setPool();
         /*
         String host = plugin.getConfig().getStringParam("gdb_host");

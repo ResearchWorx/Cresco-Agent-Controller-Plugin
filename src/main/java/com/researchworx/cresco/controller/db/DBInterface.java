@@ -923,9 +923,19 @@ public class DBInterface {
                     gpay.nodes.get(i).params.put("inode_id", inode_id);
                     gpay.nodes.get(i).params.put("resource_id", resource_id);
                 }
-                String returnGetGpipeline = gson.toJson(gpay);
+
+                /*
+                int edgeSize = gpay.edges.size();
+                for (int i = 0; i < nodeSize; i++) {
+                    dba.getIsAssignedParams("df");
+                }
+                */
+                //gdb.getEdgeParamsNoTx()
+
+                //String returnGetGpipeline = gson.toJson(gpay);
                 //String returnGetGpipeline = plugin.getGDB().dba.getPipeline(actionPipelineId);
-                queryReturn = DatatypeConverter.printBase64Binary(plugin.getGDB().gdb.stringCompress(returnGetGpipeline));
+                //queryReturn = DatatypeConverter.printBase64Binary(plugin.getGDB().gdb.stringCompress(returnGetGpipeline));
+                queryReturn = gson.toJson(gpay);
             }
 
         } catch(Exception ex) {
