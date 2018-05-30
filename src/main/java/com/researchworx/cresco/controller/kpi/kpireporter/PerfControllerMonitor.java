@@ -77,7 +77,7 @@ public class PerfControllerMonitor {
             tick.setParam("inode_id",plugin.getConfig().getStringParam("inode_id","controllerinfo_inode"));
 
             tick.setCompressedParam("perf",builder.getControllerInfoMap());
-            //plugin.sendMsgEvent(tick);
+            plugin.sendMsgEvent(tick);
 
         }
     }

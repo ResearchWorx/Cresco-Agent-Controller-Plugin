@@ -361,11 +361,8 @@ public class MsgRoute implements Runnable {
         }
         finally
         {
-
             if(plugin.cstate.isActive()) {
-                plugin.getMeasurementEngine().updateMsgRouteTimer(messageTimeStamp);
-            } else {
-              //  logger.error("NOT ACTIVE : " + plugin.cstate.getControllerState());
+                plugin.getMeasurementEngine().updateTimer("message.transaction.time", messageTimeStamp);
             }
         }
 
