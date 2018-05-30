@@ -22,6 +22,14 @@ public class ControllerState {
 		this.logger = new CLogger(ControllerState.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID());
 	}
 
+	public boolean isActive() {
+		if((currentMode == Mode.AGENT) || (currentMode == Mode.GLOBAL) || (currentMode == Mode.REGION_GLOBAL)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	public String getControllerState() {
 		return currentMode.toString();
 	}
