@@ -123,7 +123,6 @@ public class ActiveBroker {
 				broker.setPopulateJMSXUserID(true);
 				broker.setUseAuthenticatedPrincipalForJMSXUserID(true);
 
-
 				/*
 				broker.setUseJmx(true);
 				broker.getManagementContext().setConnectorPort(2099);
@@ -136,11 +135,13 @@ public class ActiveBroker {
 				//<amq:transportConnector uri="ssl://localhost:61616" />
 
 				connector = new TransportConnector();
+
 				if (plugin.isIPv6())
 					connector.setUri(new URI("ssl://[::]:"+ discoveryPort));
 
 				else
 					connector.setUri(new URI("ssl://0.0.0.0:"+ discoveryPort));
+
 
                 /*
                 connector.setUpdateClusterClients(true);
@@ -150,10 +151,9 @@ public class ActiveBroker {
 
 				broker.addConnector(connector);
 
-                broker.start();
+				logger.info("Starting Broker");
 
-				logger.info("Initialized Broker");
-
+				broker.start();
 
 				while(!broker.isStarted()) {
 			    	Thread.sleep(1000);

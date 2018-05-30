@@ -16,10 +16,6 @@ import com.researchworx.cresco.library.messaging.MsgEvent;
 import com.researchworx.cresco.library.messaging.RPC;
 import com.researchworx.cresco.library.plugin.core.CPlugin;
 import com.researchworx.cresco.library.utilities.CLogger;
-import io.micrometer.core.instrument.Clock;
-import io.micrometer.core.instrument.Timer;
-import io.micrometer.jmx.JmxConfig;
-import io.micrometer.jmx.JmxMeterRegistry;
 import org.apache.activemq.command.ActiveMQDestination;
 
 import javax.jms.JMSException;
@@ -172,8 +168,6 @@ public class Launcher extends CPlugin {
         //this.msgInProcessQueue = Executors.newFixedThreadPool(4);
         this.msgInProcessQueue = Executors.newCachedThreadPool();
         //this.msgInProcessQueue = Executors.newSingleThreadExecutor();
-        this.measurementEngine = new MeasurementEngine(this);
-
     }
 
     @Override
@@ -183,6 +177,8 @@ public class Launcher extends CPlugin {
 
     public void start() {
         this.config = new ControllerConfig(config.getConfig());
+        this.measurementEngine = new MeasurementEngine(this);
+
         System.setProperty("log.console.level", "SEVERE");
 
         this.setWatchDog(null);
@@ -949,11 +945,11 @@ public class Launcher extends CPlugin {
                 initGlobal();
             }
 
-            /*
+
             PerfControllerMonitor perfControllerMonitor = new PerfControllerMonitor(this);
             perfControllerMonitor.start();
             logger.info("Performance Controller monitoring initialized");
-            */
+
 
             PerfSysMonitor perfSysMonitor = new PerfSysMonitor(this);
             perfSysMonitor.start();

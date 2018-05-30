@@ -1,36 +1,50 @@
 package com.researchworx.cresco.controller.kpi.kpireporter;
 
 import com.google.gson.Gson;
-import oshi.SystemInfo;
-import oshi.hardware.HWDiskStore;
-import oshi.hardware.HWPartition;
-import oshi.hardware.HardwareAbstractionLayer;
-import oshi.hardware.NetworkIF;
-import oshi.software.os.OSFileStore;
-import oshi.software.os.OSProcess;
-import oshi.software.os.OperatingSystem;
+import com.researchworx.cresco.controller.core.Launcher;
+import com.researchworx.cresco.library.utilities.CLogger;
 
 import javax.management.*;
 import java.lang.management.ManagementFactory;
-import java.net.InetAddress;
-import java.net.InterfaceAddress;
-import java.net.NetworkInterface;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 class ControllerInfoBuilder {
     private Gson gson;
 
     private MBeanServer server;
 
+    private Launcher plugin;
+    private CLogger logger;
 
-    public ControllerInfoBuilder() {
+    public ControllerInfoBuilder(Launcher plugin) {
+        this.plugin = plugin;
+        this.logger = new CLogger(ControllerInfoBuilder.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(),CLogger.Level.Info);
+
         gson = new Gson();
         server = ManagementFactory.getPlatformMBeanServer();
     }
 
-
-
     public String getControllerInfoMap() {
+
+        String returnStr = null;
+        try {
+            StringBuilder sb = new StringBuilder();
+
+            sb.append("whut");
+            String whut = String.valueOf(plugin.getMeasurementEngine().crescoMeterRegistry.get("cresco_message.transaction.time").timer().mean(TimeUnit.MILLISECONDS));
+            logger.error(whut);
+            returnStr = sb.toString();
+
+        } catch(Exception ex) {
+
+        }
+        return returnStr;
+    }
+
+
+
+    public String getControllerInfoMapOld() {
 
         String returnStr = null;
         try {

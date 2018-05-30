@@ -209,7 +209,8 @@ public class MsgRoute implements Runnable {
                     logger.debug("CONTROLLER AGENT SENDING MESSAGE TO ITS CONTROLLER 116");
                     logger.trace(rm.getParams().toString());
                     //regionalSend();
-                    re = getRegionalCommandExec();
+                    //re = getRegionalCommandExec();
+                    re = getCommandExec();
                     //plugin.sendMsgEvent(rm);
                     //externalSend();
                     break;
@@ -412,12 +413,22 @@ public class MsgRoute implements Runnable {
     }
 
     private MsgEvent getRegionalCommandExec() {
+        //todo remove this at some point
+        logger.error("should not call getRegionalCommandExec() : " + rm.getParams());
+        logger.error("should not call getRegionalCommandExec() Route Case : " + getRoutePath());
+
         System.out.println("should not call getRegionalCommandExec() : " + rm.getParams());
+        try {
+            Thread.sleep(5000);
+        } catch(Exception ex) {
+
+        }
         Thread.dumpStack();
         System.exit(0);
         return null;
     }
-        private MsgEvent getRegionalCommandExec2() {
+
+    private MsgEvent getRegionalCommandExec2() {
         //TODO route should send directly there, local in commandexec will figure it out.
         try {
             String callId = "callId-" + /*PluginEngine.region*/plugin.getRegion() + "-" + /*PluginEngine.agent*/plugin.getAgent() + "-" + /*PluginEngine.plugin*/plugin.getPluginID(); //calculate callID
@@ -447,8 +458,6 @@ public class MsgRoute implements Runnable {
         }
         return null;
     }
-
-
 
     private MsgEvent getCommandExec() {
         try {
