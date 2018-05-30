@@ -55,12 +55,13 @@
 
 		<!-- https://mvnrepository.com/artifact/io.micrometer/micrometer-registry-jmx -->
 
+		<!--
                 <dependency>
                     <groupId>io.micrometer</groupId>
                     <artifactId>micrometer-registry-jmx</artifactId>
                     <version>1.0.4</version>
                 </dependency>
-
+		-->
 
                 <!-- Cresco -->
 
