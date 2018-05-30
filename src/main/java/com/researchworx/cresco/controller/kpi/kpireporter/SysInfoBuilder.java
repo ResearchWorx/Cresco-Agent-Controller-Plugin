@@ -63,6 +63,8 @@ class SysInfoBuilder {
             info.put("fs",getFSInfo());
             info.put("part",getPartitionInfo());
             info.put("net",getNetworkInfo());
+            //info.put("proc",getProcessInfo());
+
 
             //getSensorInfo();
             jsonInfo = gson.toJson(info);
