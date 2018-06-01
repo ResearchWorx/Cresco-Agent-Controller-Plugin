@@ -11,6 +11,8 @@ import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
 import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics;
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import io.micrometer.jmx.JmxConfig;
+import io.micrometer.jmx.JmxMeterRegistry;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
@@ -63,6 +65,9 @@ public class MeasurementEngine {
         */
         //this.msgRouteTimer = this.jmxMeterRegistry.timer("cresco_message.transaction.time");
         //this.msgRouteTimer = this.crescoMeterRegistry.timer("cresco_message.transaction.time");
+
+        //JmxMeterRegistry jmxMeterRegistry = new JmxMeterRegistry(JmxConfig.DEFAULT, Clock.SYSTEM);
+
 
         new ClassLoaderMetrics().bindTo(crescoMeterRegistry);
         new JvmMemoryMetrics().bindTo(crescoMeterRegistry);
@@ -132,6 +137,9 @@ public class MeasurementEngine {
                 metricValueMap.put("totaltime",String.valueOf(crescoMeterRegistry.get(metric.name).timer().totalTime(timeUnit)));
                 metricValueMap.put("count",String.valueOf(crescoMeterRegistry.get(metric.name).timer().count()));
 
+                //crescoMeterRegistry.get(metric.name)
+
+
             } else  if (Meter.Type.valueOf(metric.className) == Meter.Type.COUNTER) {
                 metricValueMap.put("name",metric.name);
                 metricValueMap.put("class",metric.className);
@@ -191,7 +199,31 @@ public class MeasurementEngine {
         Meter m = crescoMeterRegistry.get(name).meter();
 
         if(m != null) {
+
             metricMap.put(name,new CMetric(name,m.getId().getDescription(),group,m.getId().getType().name()));
+            //metricMap.put(name,new CMetric(name,m.getId().getDescription(),group,m.getClass().getSimpleName()));
+
+            /*
+            if (m instanceof TimeGauge) {
+                //return writeGauge((TimeGauge) m, wallTime);
+            } else if (m instanceof Gauge) {
+                //return writeGauge((Gauge) m, wallTime);
+            } else if (m instanceof Counter) {
+                //return writeCounter((Counter) m, wallTime);
+            } else if (m instanceof FunctionCounter) {
+                //return writeCounter((FunctionCounter) m, wallTime);
+            } else if (m instanceof Timer) {
+                //return writeTimer((Timer) m, wallTime);
+            } else if (m instanceof FunctionTimer) {
+                //return writeTimer((FunctionTimer) m, wallTime);
+            } else if (m instanceof DistributionSummary) {
+                //return writeSummary((DistributionSummary) m, wallTime);
+            } else if (m instanceof LongTaskTimer) {
+                //return writeLongTaskTimer((LongTaskTimer) m, wallTime);
+            }
+            */
+
+
         }
 
     }
