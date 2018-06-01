@@ -37,7 +37,6 @@ public class GlobalCommandExec {
 		this.logger = new CLogger(GlobalCommandExec.class, plugin.getMsgOutQueue(), plugin.getRegion(), plugin.getAgent(), plugin.getPluginID(), CLogger.Level.Info);
 		this.plugin = plugin;
 		removePipelineExecutor = Executors.newFixedThreadPool(100);
-
     }
 
 
@@ -116,6 +115,9 @@ public class GlobalCommandExec {
 
                     case "plugininfo":
                         return pluginInfo(ce);
+
+                    case "pluginkpi":
+                        return pluginKPI(ce);
 
                     case "resourceinfo":
                         return resourceInfo(ce);
@@ -344,6 +346,18 @@ public class GlobalCommandExec {
         try {
             ce.setCompressedParam("plugininfo", plugin.getGDB().getPluginInfo(ce.getParam("action_region"), ce.getParam("action_agent"), ce.getParam("action_plugin")));
             logger.trace("plugins info return : " + ce.getParams().toString());
+        }
+        catch(Exception ex) {
+            ce.setParam("error", ex.getMessage());
+        }
+
+        return ce;
+    }
+
+    private MsgEvent pluginKPI(MsgEvent ce) {
+        try {
+            ce.setCompressedParam("pluginkpi", plugin.getGDB().getIsAttachedMetrics(ce.getParam("action_region"), ce.getParam("action_agent"), ce.getParam("action_plugin")));
+            logger.trace("plugins KPI return : " + ce.getParams().toString());
         }
         catch(Exception ex) {
             ce.setParam("error", ex.getMessage());

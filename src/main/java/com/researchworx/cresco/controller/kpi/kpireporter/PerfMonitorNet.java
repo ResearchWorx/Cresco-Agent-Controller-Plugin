@@ -161,7 +161,7 @@ public class PerfMonitorNet {
 
                     String discoveryListString = gson.toJson(dnList);
 
-                    tick.setCompressedParam("network_map", discoveryListString);
+                    tick.setCompressedParam("perf", discoveryListString);
 
                     plugin.msgIn(tick);
 

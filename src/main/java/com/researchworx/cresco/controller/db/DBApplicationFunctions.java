@@ -2367,7 +2367,7 @@ public class DBApplicationFunctions {
             createVertexClass("resourceNode", resourceProps);
 
             //create plugin anchor resource and inodes
-            String[]  pluginAnchors= {"sysinfo","netdiscovery","container,controllerinfo"}; //Property names
+            String[]  pluginAnchors= {"sysinfo","netdiscovery","container","controllerinfo"}; //Property names
             for(String pAnchor : pluginAnchors)
             {
                 String resource_id = pAnchor + "_resource";
@@ -2728,6 +2728,45 @@ public class DBApplicationFunctions {
             }
         }
         return node_id;
+    }
+
+    public List<String> getIsAttachedEdgeId(String region, String agent, String pluginId) {
+        List<String> edgeList = null;
+        OrientGraphNoTx graph = null;
+        try
+        {
+            edgeList = new ArrayList<>();
+            if((region != null) && (agent != null) && (pluginId != null))
+            {
+                String nodeId = plugin.getGDB().gdb.getNodeId(region,agent,pluginId);
+                if(nodeId != null) {
+                    graph = factory.getNoTx();
+                    String queryString = "SELECT * from isAssigned where out = \"" + nodeId + "\"";
+                    logger.debug(queryString);
+                    Iterable<Edge> resultIterator = graph.command(new OCommandSQL(queryString)).execute();
+                    Iterator<Edge> iter = resultIterator.iterator();
+                    while (iter.hasNext()) {
+                        Edge e = iter.next();
+                        edgeList.add(e.getId().toString());
+                    }
+                    logger.debug("getIsAttachedEdgeId region " + region + " agent " + agent + " pluginId " + pluginId + " edgeListCount " + edgeList.size());
+                }
+
+            }
+
+        }
+        catch(Exception ex)
+        {
+            logger.debug("DBEngine : getIsAttachedEdgeId : Error " + ex.toString());
+        }
+        finally
+        {
+            if(graph != null)
+            {
+                graph.shutdown();
+            }
+        }
+        return edgeList;
     }
 
     public String getResourceEdgeId(String resource_id, String inode_id, String region, String agent, String pluginId) {

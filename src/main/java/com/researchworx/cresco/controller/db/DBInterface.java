@@ -844,6 +844,44 @@ public class DBInterface {
 
     }
 
+    public String getIsAttachedMetrics(String actionRegion, String actionAgent, String actionPluginId) {
+        String returnString = null;
+
+        try{
+
+            List<Map<String,String>> metricList = new ArrayList<>();
+            if((actionRegion != null) && (actionAgent != null) && (actionPluginId != null)) {
+                List<String> edgeList = plugin.getGDB().dba.getIsAttachedEdgeId(actionRegion,actionAgent,actionPluginId);
+                if(edgeList != null) {
+                    for(String edgeId : edgeList) {
+                        Map<String, String> edgeParams = dba.getIsAssignedParams(edgeId);
+                        if(edgeParams != null) {
+                            //String resource_id = edgeParams.get("resource_id");
+                            String inode_id = edgeParams.get("inode_id");
+
+                            if(!inode_id.equals("sysinfo_inode") && !inode_id.equals("netdiscovery_inode")) {
+                                if(edgeParams.containsKey("perf")) {
+                                    Map<String,String> perfMap = new HashMap<>();
+                                    perfMap.put("name",inode_id);
+                                    perfMap.put("metrics", gdb.stringUncompress(edgeParams.get("perf")));
+                                    metricList.add(perfMap);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            returnString = gson.toJson(metricList);
+        } catch(Exception ex) {
+            logger.error("getIsAttachedMetrics() " + ex.toString());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString()); //
+        }
+        return returnString;
+    }
+
     public String getNetResourceInfo() {
         String queryReturn = null;
         try
