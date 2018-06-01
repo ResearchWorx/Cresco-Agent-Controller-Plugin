@@ -6,28 +6,25 @@ import com.researchworx.cresco.library.utilities.CLogger;
 import io.micrometer.core.instrument.*;
 import io.micrometer.core.instrument.Timer;
 import io.micrometer.core.instrument.binder.jvm.ClassLoaderMetrics;
-import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics;
 import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
 import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics;
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import io.micrometer.jmx.JmxConfig;
 import io.micrometer.jmx.JmxMeterRegistry;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.ThreadMXBean;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.function.ToDoubleFunction;
 
 public class MeasurementEngine {
 
 
     private Launcher plugin;
     private CLogger logger;
-    //public CrescoMeterRegistry crescoMeterRegistry;
-    private SimpleMeterRegistry crescoMeterRegistry;
+    public CrescoMeterRegistry crescoMeterRegistry;
+    //private SimpleMeterRegistry crescoMeterRegistry;
+    //private CompositeMeterRegistry crescoMeterRegistry;
+    //private MeterRegistry crescoMeterRegistry;
     //private Timer msgRouteTimer;
 
     private Gson gson;
@@ -41,8 +38,12 @@ public class MeasurementEngine {
 
         gson = new Gson();
 
-        crescoMeterRegistry = new SimpleMeterRegistry();
+        //crescoMeterRegistry = new SimpleMeterRegistry();
+        //crescoMeterRegistry = new CompositeMeterRegistry();
+        crescoMeterRegistry = new CrescoMeterRegistry(plugin.getPluginID());
+
         metricInit();
+
 
         //logger.error("STARTED M ENGINE");
        // MetricRegistry metricRegistry = new MetricRegistry();
@@ -54,6 +55,8 @@ public class MeasurementEngine {
         //jmxMeterRegistry = new JmxMeterRegistry(JmxConfig.DEFAULT, Clock.SYSTEM, HierarchicalNameMapper.DEFAULT, metricRegistry, jmxReporter);
 
         //crescoMeterRegistry = new CrescoMeterRegistry(plugin,CrescoConfig.DEFAULT, Clock.SYSTEM);
+
+        JmxMeterRegistry jmxMeterRegistry = new JmxMeterRegistry(JmxConfig.DEFAULT, Clock.SYSTEM);
 
         /*
         JmxMeterRegistry jmxMeterRegistry = new JmxMeterRegistry(JmxConfig.DEFAULT, Clock.SYSTEM);
@@ -127,6 +130,8 @@ public class MeasurementEngine {
                 metricValueMap.put("type",metric.type.toString());
                 metricValueMap.put("value",String.valueOf(crescoMeterRegistry.get(metric.name).gauge().value()));
 
+
+
             } else if (Meter.Type.valueOf(metric.className) == Meter.Type.TIMER) {
                 TimeUnit timeUnit = crescoMeterRegistry.get(metric.name).timer().baseTimeUnit();
                 metricValueMap.put("name",metric.name);
@@ -136,8 +141,6 @@ public class MeasurementEngine {
                 metricValueMap.put("max",String.valueOf(crescoMeterRegistry.get(metric.name).timer().max(timeUnit)));
                 metricValueMap.put("totaltime",String.valueOf(crescoMeterRegistry.get(metric.name).timer().totalTime(timeUnit)));
                 metricValueMap.put("count",String.valueOf(crescoMeterRegistry.get(metric.name).timer().count()));
-
-                //crescoMeterRegistry.get(metric.name)
 
 
             } else  if (Meter.Type.valueOf(metric.className) == Meter.Type.COUNTER) {
@@ -165,24 +168,20 @@ public class MeasurementEngine {
         Map<String,String> internalMap = new HashMap<>();
 
         internalMap.put("jvm.memory.max", "controller");
-        internalMap.put("system.load.average.1m", "controller");
         internalMap.put("jvm.memory.used", "controller");
         internalMap.put("jvm.memory.committed", "controller");
         internalMap.put("jvm.buffer.memory.used", "controller");
-        internalMap.put("system.cpu.count", "controller");
         internalMap.put("jvm.threads.daemon", "controller");
-        internalMap.put("system.cpu.usage", "controller");
         internalMap.put("jvm.threads.live", "controller");
         internalMap.put("jvm.threads.peak", "controller");
-        internalMap.put("process.cpu.usage", "controller");
         internalMap.put("jvm.classes.loaded", "controller");
-        internalMap.put("jvm.memory.committed", "controller");
         internalMap.put("jvm.classes.unloaded", "controller");
-        internalMap.put("jvm.buffer.count", "controller");
-
         internalMap.put("jvm.buffer.total.capacity", "controller");
         internalMap.put("jvm.buffer.count", "controller");
-        internalMap.put("jvm.memory.committed", "controller");
+        internalMap.put("system.load.average.1m", "controller");
+        internalMap.put("system.cpu.count", "controller");
+        internalMap.put("system.cpu.usage", "controller");
+        internalMap.put("process.cpu.usage", "controller");
 
         for (Map.Entry<String, String> entry : internalMap.entrySet()) {
             String name = entry.getKey();
@@ -233,8 +232,12 @@ public class MeasurementEngine {
         if(metricMap.containsKey(name)) {
             return false;
         } else {
+            //this.crescoMeterRegistry.timer()
+
             Timer timer = Timer.builder(name).description(description).register(crescoMeterRegistry);
+            //this.crescoMeterRegistry.
             //Timer timer = this.crescoMeterRegistry.timer(plugin.getPluginID() + "_" + name);
+            //timer.takeSnapshot().
             metricMap.put(name,new CMetric(name,description,group,"TIMER"));
             return true;
         }
