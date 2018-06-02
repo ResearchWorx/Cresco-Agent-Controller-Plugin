@@ -727,6 +727,7 @@ public class Launcher extends CPlugin {
                     logger.trace("Wait loop for Global Controller");
                 }
                 isInit = true;
+                measurementEngine.initGlobalMetrics();
             } else {
                 logger.error("initGlobal Error : Must be Regional Controller First!");
             }
@@ -815,6 +816,7 @@ public class Launcher extends CPlugin {
 
             cstate.setRegionGlobalInit("initRegion() : Success");
             isInit = true;
+            measurementEngine.initRegionalMetrics();
 
         } catch (Exception ex) {
             logger.error("initRegion() Error " + ex.getMessage());
@@ -945,6 +947,8 @@ public class Launcher extends CPlugin {
                 initGlobal();
             }
 
+            //populate controller-specific metrics
+            measurementEngine.initControllerMetrics();
 
             PerfControllerMonitor perfControllerMonitor = new PerfControllerMonitor(this);
             perfControllerMonitor.start();

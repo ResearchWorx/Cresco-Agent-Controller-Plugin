@@ -13,6 +13,7 @@ import io.micrometer.jmx.JmxConfig;
 import io.micrometer.jmx.JmxMeterRegistry;
 
 import java.util.*;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -43,7 +44,6 @@ public class MeasurementEngine {
         crescoMeterRegistry = new CrescoMeterRegistry(plugin.getPluginID());
 
         metricInit();
-
 
         //logger.error("STARTED M ENGINE");
        // MetricRegistry metricRegistry = new MetricRegistry();
@@ -79,6 +79,9 @@ public class MeasurementEngine {
         new JvmThreadMetrics().bindTo(crescoMeterRegistry);
 
         initInternal();
+
+
+        //Queue<String> receivedMessages = crescoMeterRegistry.gauge("unprocessed.messages", new ConcurrentLinkedQueue<>(), ConcurrentLinkedQueue::size);
 
         /*
         for (Map.Entry<String, CMetric> entry : metricMap.entrySet()) {
@@ -274,6 +277,40 @@ public class MeasurementEngine {
 
     }
 
+    public void initRegionalMetrics() {
+
+        if(plugin.getBrokeredAgents() != null) {
+
+            Gauge.builder("brokered.agent.count", plugin.getBrokeredAgents(), ConcurrentHashMap::size)
+                    .description("The number of currently brokered agents.")
+                    .register(crescoMeterRegistry);
+        }
+    }
+
+    public void initGlobalMetrics() {
+        if(plugin.getResourceScheduleQueue() != null) {
+            Gauge.builder("incoming.resource.queue", plugin.getResourceScheduleQueue(), BlockingQueue::size)
+                    .description("The number of queued incoming resources to be scheduled.")
+                    .register(crescoMeterRegistry);
+        }
+
+        if(plugin.getAppScheduleQueue() != null) {
+            Gauge.builder("incoming.application.queue", plugin.getAppScheduleQueue(), BlockingQueue::size)
+                    .description("The number of queued incoming applications to be scheduled.")
+                    .register(crescoMeterRegistry);
+        }
+    }
+
+    public void initControllerMetrics() {
+
+        if(plugin.getMsgOutQueue() != null) {
+            Gauge.builder("outgoing.message.queue", plugin.getMsgOutQueue(), BlockingQueue::size)
+                    .description("The number of queued outgoing messages.")
+                    .register(crescoMeterRegistry);
+        }
+
+
+    }
 
 
 }

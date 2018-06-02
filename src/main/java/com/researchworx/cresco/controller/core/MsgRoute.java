@@ -28,8 +28,10 @@ public class MsgRoute implements Runnable {
             }
 
             int routePath = getRoutePath();
+            //todo change back
+            //rm.setParam("routepath",String.valueOf(routePath));
+            rm.setParam("routepath-" + plugin.getAgent(),String.valueOf(routePath));
 
-            rm.setParam("routepath",String.valueOf(routePath));
             MsgEvent re = null;
             switch (routePath) {
 
@@ -209,8 +211,9 @@ public class MsgRoute implements Runnable {
                     logger.debug("CONTROLLER AGENT SENDING MESSAGE TO ITS CONTROLLER 116");
                     logger.trace(rm.getParams().toString());
                     //regionalSend();
-                    //re = getRegionalCommandExec();
-                    re = getCommandExec();
+                    //todo there must be a better way to do this
+                    re = getRegionalCommandExec();
+                    //re = getCommandExec();
                     //plugin.sendMsgEvent(rm);
                     //externalSend();
                     break;
@@ -415,19 +418,13 @@ public class MsgRoute implements Runnable {
     }
 
     private MsgEvent getRegionalCommandExec() {
-        //todo remove this at some point
-        logger.error("should not call getRegionalCommandExec() : " + rm.getParams());
-        logger.error("should not call getRegionalCommandExec() Route Case : " + getRoutePath());
 
-        System.out.println("should not call getRegionalCommandExec() : " + rm.getParams());
-        try {
-            Thread.sleep(5000);
-        } catch(Exception ex) {
-
+        if((rm.getParam("dst_region").equals(plugin.getRegion())) && (rm.getParam("dst_agent").equals(plugin.getAgent())) && (rm.getParam("dst_plugin").equals(plugin.getPluginID()))) {
+            return getCommandExec();
+        } else {
+            externalSend();
+            return null;
         }
-        Thread.dumpStack();
-        System.exit(0);
-        return null;
     }
 
     private MsgEvent getRegionalCommandExec2() {
