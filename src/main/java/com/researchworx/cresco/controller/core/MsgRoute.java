@@ -522,6 +522,7 @@ public class MsgRoute implements Runnable {
                 //System.out.println("SENT NOT CONTROLLER MESSAGE / REMOTE=: " + targetAgent + " " + " region=" + ce.getParam("dst_region") + " agent=" + ce.getParam("dst_agent") + " "  + ce.getParams());
             } else {
                 logger.error("Unreachable External Agent : " + targetAgent);
+                logger.error(rm.getParams().toString());
             }
         } catch (Exception ex) {
             logger.error("External Send Error : " + targetAgent);
