@@ -842,7 +842,10 @@ public class Launcher extends CPlugin {
 
         try {
 
+
+            //Queue<Message> receivedMessages = registry.gauge(“unprocessed.messages”, new ConcurrentLinkedQueue<>(), ConcurrentLinkedQueue::size);
             this.brokeredAgents = new ConcurrentHashMap<>();
+            //this.brokeredAgents = getMeasurementEngine().\
             this.incomingCanidateBrokers = new LinkedBlockingQueue<>();
             this.outgoingMessages = new LinkedBlockingQueue<>();
             this.brokerAddressAgent = null;

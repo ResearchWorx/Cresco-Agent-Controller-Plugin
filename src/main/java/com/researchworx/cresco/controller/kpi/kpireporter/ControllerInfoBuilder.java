@@ -50,7 +50,6 @@ class ControllerInfoBuilder {
 
             Set<ObjectInstance> instances = server.queryMBeans(null, null);
 
-
             Iterator<ObjectInstance> iterator = instances.iterator();
             while (iterator.hasNext()) {
                 ObjectInstance instance = iterator.next();

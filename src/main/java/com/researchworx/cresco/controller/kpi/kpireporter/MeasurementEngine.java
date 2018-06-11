@@ -108,10 +108,10 @@ public class MeasurementEngine {
             returnList = new ArrayList<>();
 
             for (Map.Entry<String, CMetric> entry : metricMap.entrySet()) {
-                //String name = entry.getKey();
                 CMetric metric = entry.getValue();
-                //logger.error(metric.name + " " + metric.group + " " + metric.className + " " + metric.type.name());
-                returnList.add(writeMetricMap(metric));
+                if(metric.group.equals(group)) {
+                    returnList.add(writeMetricMap(metric));
+                }
             }
         } catch(Exception ex) {
             logger.error(ex.getMessage());
@@ -144,9 +144,19 @@ public class MeasurementEngine {
                 metricValueMap.put("max",String.valueOf(crescoMeterRegistry.get(metric.name).timer().max(timeUnit)));
                 metricValueMap.put("totaltime",String.valueOf(crescoMeterRegistry.get(metric.name).timer().totalTime(timeUnit)));
                 metricValueMap.put("count",String.valueOf(crescoMeterRegistry.get(metric.name).timer().count()));
+                }
 
+            else if (Meter.Type.valueOf(metric.className) == Meter.Type.DISTRIBUTION_SUMMARY) {
+                metricValueMap.put("name",metric.name);
+                metricValueMap.put("class",metric.className);
+                metricValueMap.put("type",metric.type.toString());
+                metricValueMap.put("mean",String.valueOf(crescoMeterRegistry.get(metric.name).summary().mean()));
+                metricValueMap.put("max",String.valueOf(crescoMeterRegistry.get(metric.name).summary().max()));
+                metricValueMap.put("totaltime",String.valueOf(crescoMeterRegistry.get(metric.name).summary().totalAmount()));
+                metricValueMap.put("count",String.valueOf(crescoMeterRegistry.get(metric.name).summary().count()));
+            }
 
-            } else  if (Meter.Type.valueOf(metric.className) == Meter.Type.COUNTER) {
+            else  if (Meter.Type.valueOf(metric.className) == Meter.Type.COUNTER) {
                 metricValueMap.put("name",metric.name);
                 metricValueMap.put("class",metric.className);
                 metricValueMap.put("type",metric.type.toString());
