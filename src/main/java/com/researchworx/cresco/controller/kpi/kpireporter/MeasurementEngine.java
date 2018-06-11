@@ -199,7 +199,11 @@ public class MeasurementEngine {
         for (Map.Entry<String, String> entry : internalMap.entrySet()) {
             String name = entry.getKey();
             String group = entry.getValue();
-            setExisting(name,group);
+            try {
+                setExisting(name, group);
+            } catch(Exception ex) {
+                logger.error(ex.getMessage());
+            }
         }
 
 
