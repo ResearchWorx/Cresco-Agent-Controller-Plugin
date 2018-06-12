@@ -142,6 +142,7 @@ public class MsgRoute implements Runnable {
                     logger.debug("CONTROLLER SENDING MESSAGE TO SELF 63");
                     logger.trace(rm.getParams().toString());
                     re = getCommandExec();
+
                     break;
                 case 64:  //System.out.println("CONTROLLER ROUTE CASE 64");
                     if (rm.getParam("configtype") != null) {
@@ -255,6 +256,7 @@ public class MsgRoute implements Runnable {
                     logger.debug("CONTROLLER AGENT SENDING MESSAGE TO ITS CONTROLLER PLUGIN 126");
                     logger.trace(rm.getParams().toString());
                     re = getCommandExec();
+
                     //re = getRegionalCommandExec();
                     break;
                 case 127:

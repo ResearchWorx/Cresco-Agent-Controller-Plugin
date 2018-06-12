@@ -354,12 +354,18 @@ public class DBInterface {
                         pluginRepoMap.put(name,nodeList);
                     } else {
                         List<pNode> nodeList = pluginRepoMap.get(name);
+                        List<pNode> returnNodeList = new ArrayList();
+                        //todo find better way to do this
+                        for(pNode node : nodeList) {
+                            returnNodeList.add(node);
+                        }
+
                         for(pNode node : nodeList) {
                             if(node.isEqual(name,jarfile,md5,version)) {
-                                nodeList.get(nodeList.indexOf(node)).addRepos(tmpServerList);
+                                returnNodeList.get(nodeList.indexOf(node)).addRepos(tmpServerList);
                             } else {
                                 pNode newnode = new pNode(name,jarfile,md5,version, tmpServerList);
-                                nodeList.add(newnode);
+                                returnNodeList.add(newnode);
                             }
                         }
                         pluginRepoMap.put(name,nodeList);
