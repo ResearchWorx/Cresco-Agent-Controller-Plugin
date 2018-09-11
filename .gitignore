@@ -7,7 +7,9 @@
 .idea
 /DEPRECATED
 out
-gen### Maven template
+gen
+*.iml
+### Maven template
 target/
 pom.xml.tag
 pom.xml.releaseBackup

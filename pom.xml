@@ -163,12 +163,13 @@
 					</execution>
 				</executions>
 				<configuration>
-					<doCheck>false</doCheck>
+                    <doCheck>false</doCheck>
 					<doUpdate>false</doUpdate>
 					<shortRevisionLength>5</shortRevisionLength>
 				</configuration>
 			</plugin>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<version>3.0.0</version>
 				<configuration>

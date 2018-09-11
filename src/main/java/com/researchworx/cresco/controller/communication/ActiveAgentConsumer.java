@@ -57,8 +57,8 @@ public class ActiveAgentConsumer implements Runnable {
 						//me = gson.fromJson(msg.getText(), MsgEvent.class);
 						//me = new Gson().fromJson(msg.getText(), MsgEvent.class);
 						if(me != null) {
-							plugin.msgIn(me);
 							logger.debug("Message: {}", me.getParams().toString());
+							plugin.msgIn(me);
 						} else {
 							logger.error("non-MsgEvent message found!");
 						}

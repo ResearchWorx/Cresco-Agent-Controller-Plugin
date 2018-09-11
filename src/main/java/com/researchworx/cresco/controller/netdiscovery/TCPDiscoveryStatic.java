@@ -106,6 +106,8 @@ public class TCPDiscoveryStatic {
             oos.close();
             socket.close();
 
+        } catch (ConnectException e) {
+            logger.error("Server [{}] is down or cannot be connected to", hostAddress);
         } catch (Exception ex) {
             logger.error("TCPDiscoveryStatic discover Error: " + ex.getMessage());
             StringWriter errors = new StringWriter();
